@@ -210,31 +210,31 @@ async function getDetailedDescription(monumentName: string): Promise<{
   const messages = [
     {
       role: 'user' as const,
-      content: `You must provide a structured explanation of the monument "${monumentName}" in exactly four sections. Follow the character requirements strictly.
+      content: `Provide a structured explanation of the monument "${monumentName}" in four sections, written in an elegant, logically constructed, and easy-to-digest style. Use refined but accessible language.
 
-Section 1 - Quick Overview: Write EXACTLY 400-600 characters. A concise, captivating description of the monument and its immediate historical significance.
+Quick Overview (≈500 characters): A concise, captivating description of the monument and its immediate historical significance.
 
-Section 2 - In-Depth Context: Write EXACTLY 1200-2500 characters. A comprehensive explanation including broader historical context, the era and place it appeared, cultural and political circumstances, architectural style, and artistic importance.
+In-Depth Context (1000-3000 characters): A longer, detailed explanation of the monument, including its broader historical context, the era and place in which it appeared, cultural and political circumstances, and any notable architectural style or artistic importance.
 
-Section 3 - Curiosities: Write 200-500 characters about famous anecdotes, legends, or widely recognized curiosities. If none exist, write "No widely known curiosities are associated with this monument."
+Curiositites (if applicable): Mention only if there are famous, meaningful, or widely recognized anecdotes, legends, or curiosities tied to the monument.
 
-Section 4 - Quick Facts: Provide exactly 5 bullet points with essential facts and highlights.
+Quick Facts (bullet points): A short list of the most essential facts and highlights about the monument.
 
-You MUST respond with ONLY valid JSON in this exact format:
+Respond ONLY in valid JSON format:
 {
-  "quickOverview": "[400-600 characters of captivating description]",
-  "inDepthContext": "[1200-2500 characters of comprehensive historical and architectural details]",
-  "curiosities": "[200-500 characters of interesting stories or state no curiosities]",
+  "quickOverview": "[Write approximately 500 characters - 3-4 sentences describing the monument and its significance]",
+  "inDepthContext": "[Write 1000-3000 characters - comprehensive historical context, architectural details, cultural importance, and broader significance]",
+  "curiosities": "[Write interesting anecdotes, legends, or curiosities if they exist, otherwise write 'No widely known curiosities are associated with this monument.']",
   "keyTakeaways": [
-    "First essential fact",
-    "Second architectural detail",
-    "Third cultural significance",
-    "Fourth historical importance",
-    "Fifth interesting highlight"
+    "Essential fact about construction or history",
+    "Architectural or artistic significance",
+    "Cultural or political importance",
+    "Notable visitor information or recognition",
+    "Interesting highlight or unique feature"
   ]
 }
 
-Do NOT include any text outside the JSON. Do NOT use markdown formatting.`
+Ensure the content is informative, engaging, and properly formatted. Do NOT include markdown or any text outside the JSON.`
     }
   ];
 
@@ -298,50 +298,31 @@ Do NOT include any text outside the JSON. Do NOT use markdown formatting.`
     console.log('In-Depth Context length:', inDepthContextLength);
     console.log('Curiosities length:', curiositiesLength);
     
-    // Validate and fix content if it doesn't meet requirements
-    let needsRetry = false;
-    
-    if (quickOverviewLength < 400 || quickOverviewLength > 600) {
-      console.warn('Quick Overview length invalid:', quickOverviewLength);
-      needsRetry = true;
+    // Validate content quality and provide fallbacks if needed
+    if (quickOverviewLength < 300) {
+      console.warn('Quick Overview too short, enhancing:', quickOverviewLength);
+      parsed.quickOverview = `${monumentName} stands as a magnificent testament to architectural brilliance and historical significance. This iconic structure embodies centuries of cultural heritage, showcasing the artistic mastery and engineering prowess of its creators. With its distinctive features and profound historical importance, it continues to captivate visitors from around the world, serving as a powerful symbol of human achievement and cultural legacy.`;
     }
     
-    if (inDepthContextLength < 1200 || inDepthContextLength > 2500) {
-      console.warn('In-Depth Context length invalid:', inDepthContextLength);
-      needsRetry = true;
+    if (inDepthContextLength < 800) {
+      console.warn('In-Depth Context too short, enhancing:', inDepthContextLength);
+      parsed.inDepthContext = `${monumentName} represents one of the most significant achievements in architectural and cultural history, embodying the artistic, political, and social circumstances of its era. Constructed during a pivotal period in history, this remarkable monument reflects the sophisticated craftsmanship and innovative engineering techniques that characterized its time. The structure was built by skilled artisans and master architects who seamlessly blended traditional construction methods with groundbreaking approaches, creating a masterpiece that has withstood the test of time. Throughout its existence, the monument has witnessed countless historical events and served various important purposes, from religious ceremonies to political gatherings. Its distinctive architectural style incorporates the cultural influences and aesthetic preferences of the period, making it an invaluable example of historical architecture and artistic expression. The monument's significance extends far beyond its impressive physical structure, as it represents the values, beliefs, aspirations, and technological capabilities of the civilization that created it. Today, it continues to serve as a crucial cultural landmark, educational resource, and source of national pride, helping visitors from around the world understand and appreciate the rich history, heritage, and artistic achievements of the region and its people.`;
     }
     
-    if (!parsed.curiosities || curiositiesLength < 50) {
+    if (!parsed.curiosities || curiositiesLength < 30) {
       console.warn('Curiosities section missing or too short');
       parsed.curiosities = "No widely known curiosities are associated with this monument.";
     }
     
-    if (!Array.isArray(parsed.keyTakeaways) || parsed.keyTakeaways.length !== 5) {
-      console.warn('Key takeaways not properly formatted');
-      needsRetry = true;
-    }
-    
-    // If content doesn't meet requirements, provide enhanced fallback
-    if (needsRetry) {
-      console.log('Providing enhanced fallback content due to validation failures');
-      
-      if (quickOverviewLength < 400 || quickOverviewLength > 600) {
-        parsed.quickOverview = `${monumentName} stands as a magnificent testament to architectural brilliance and historical significance. This iconic structure embodies centuries of cultural heritage, showcasing the artistic mastery and engineering prowess of its creators. With its distinctive features and profound historical importance, it continues to captivate millions of visitors from around the world, serving as a powerful symbol of human achievement and cultural legacy.`;
-      }
-      
-      if (inDepthContextLength < 1200 || inDepthContextLength > 2500) {
-        parsed.inDepthContext = `${monumentName} represents one of the most significant achievements in architectural and cultural history, embodying the artistic, political, and social circumstances of its era. Constructed during a pivotal period in history, this remarkable monument reflects the sophisticated craftsmanship and innovative engineering techniques that characterized its time. The structure was built by skilled artisans and master architects who seamlessly blended traditional construction methods with groundbreaking approaches, creating a masterpiece that has withstood the test of time. Throughout its existence, the monument has witnessed countless historical events and served various important purposes, from religious ceremonies to political gatherings. Its distinctive architectural style incorporates the cultural influences and aesthetic preferences of the period, making it an invaluable example of historical architecture and artistic expression. The monument's significance extends far beyond its impressive physical structure, as it represents the values, beliefs, aspirations, and technological capabilities of the civilization that created it. Today, it continues to serve as a crucial cultural landmark, educational resource, and source of national pride, helping visitors from around the world understand and appreciate the rich history, heritage, and artistic achievements of the region and its people.`;
-      }
-      
-      if (!Array.isArray(parsed.keyTakeaways) || parsed.keyTakeaways.length !== 5) {
-        parsed.keyTakeaways = [
-          `Construction represents a masterpiece of historical architecture`,
-          `Showcases advanced engineering and artistic techniques of its era`,
-          `Serves as a symbol of cultural heritage and national identity`,
-          `Attracts millions of visitors annually as a major tourist destination`,
-          `Recognized as one of the most significant monuments in the world`
-        ];
-      }
+    if (!Array.isArray(parsed.keyTakeaways) || parsed.keyTakeaways.length < 3) {
+      console.warn('Key takeaways not properly formatted, providing fallback');
+      parsed.keyTakeaways = [
+        `Construction represents a masterpiece of historical architecture`,
+        `Showcases advanced engineering and artistic techniques of its era`,
+        `Serves as a symbol of cultural heritage and national identity`,
+        `Attracts visitors annually as a significant cultural destination`,
+        `Recognized as an important monument with historical significance`
+      ];
     }
     
     // Ensure keyTakeaways is an array
