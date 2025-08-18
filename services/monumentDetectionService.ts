@@ -212,17 +212,19 @@ async function getDetailedDescription(monumentName: string): Promise<{
       role: 'user' as const,
       content: `Provide a structured explanation of the monument "${monumentName}" in four sections, written in an elegant, logically constructed, and easy-to-digest style. Use refined but accessible language.
 
-Quick Overview (≈500 characters): A concise, captivating description of the monument and its immediate historical significance.
+Quick Overview (≈500 characters): A concise, captivating description of the monument and its immediate historical significance. This should be approximately 500 characters (about 3-4 sentences).
 
-In-Depth Context (1000-3000 characters): A longer, detailed explanation of the monument, including its broader historical context, the era and place in which it appeared, cultural and political circumstances, and any notable architectural style or artistic importance.
+In-Depth Context (1000-3000 characters): A longer, detailed explanation of the monument, including its broader historical context, the era and place in which it appeared, cultural and political circumstances, and any notable architectural style or artistic importance. This must be between 1000-3000 characters.
 
-Curiositites (if applicable): Mention only if there are famous, meaningful, or widely recognized anecdotes, legends, or curiosities tied to the monument.
+Curiosities (if applicable): Mention only if there are famous, meaningful, or widely recognized anecdotes, legends, or curiosities tied to the monument. If none exist, write "No widely known curiosities are associated with this monument."
 
-Quick Facts (bullet points): A short list of the most essential facts and highlights about the monument.
+Quick Facts (bullet points): A short list of the most essential facts and highlights about the monument. Provide 4-5 bullet points.
+
+IMPORTANT: Follow the character count requirements strictly. The Quick Overview should be around 500 characters, and the In-Depth Context should be 1000-3000 characters.
 
 Respond ONLY in valid JSON format:
 {
-  "quickOverview": "[Write approximately 500 characters - 3-4 sentences describing the monument and its significance]",
+  "quickOverview": "[Write exactly around 500 characters - 3-4 sentences describing the monument and its significance]",
   "inDepthContext": "[Write 1000-3000 characters - comprehensive historical context, architectural details, cultural importance, and broader significance]",
   "curiosities": "[Write interesting anecdotes, legends, or curiosities if they exist, otherwise write 'No widely known curiosities are associated with this monument.']",
   "keyTakeaways": [
@@ -298,15 +300,15 @@ Ensure the content is informative, engaging, and properly formatted. Do NOT incl
     console.log('In-Depth Context length:', inDepthContextLength);
     console.log('Curiosities length:', curiositiesLength);
     
-    // Validate content quality and provide fallbacks if needed
-    if (quickOverviewLength < 300) {
-      console.warn('Quick Overview too short, enhancing:', quickOverviewLength);
-      parsed.quickOverview = `${monumentName} stands as a magnificent testament to architectural brilliance and historical significance. This iconic structure embodies centuries of cultural heritage, showcasing the artistic mastery and engineering prowess of its creators. With its distinctive features and profound historical importance, it continues to captivate visitors from around the world, serving as a powerful symbol of human achievement and cultural legacy.`;
+    // Validate content quality - if AI didn't follow requirements, request again
+    if (quickOverviewLength < 400 || quickOverviewLength > 600) {
+      console.warn('Quick Overview length not within requirements (400-600 chars):', quickOverviewLength);
+      // Don't use fallback, let the original response show the issue
     }
     
-    if (inDepthContextLength < 800) {
-      console.warn('In-Depth Context too short, enhancing:', inDepthContextLength);
-      parsed.inDepthContext = `${monumentName} represents one of the most significant achievements in architectural and cultural history, embodying the artistic, political, and social circumstances of its era. Constructed during a pivotal period in history, this remarkable monument reflects the sophisticated craftsmanship and innovative engineering techniques that characterized its time. The structure was built by skilled artisans and master architects who seamlessly blended traditional construction methods with groundbreaking approaches, creating a masterpiece that has withstood the test of time. Throughout its existence, the monument has witnessed countless historical events and served various important purposes, from religious ceremonies to political gatherings. Its distinctive architectural style incorporates the cultural influences and aesthetic preferences of the period, making it an invaluable example of historical architecture and artistic expression. The monument's significance extends far beyond its impressive physical structure, as it represents the values, beliefs, aspirations, and technological capabilities of the civilization that created it. Today, it continues to serve as a crucial cultural landmark, educational resource, and source of national pride, helping visitors from around the world understand and appreciate the rich history, heritage, and artistic achievements of the region and its people.`;
+    if (inDepthContextLength < 1000 || inDepthContextLength > 3000) {
+      console.warn('In-Depth Context length not within requirements (1000-3000 chars):', inDepthContextLength);
+      // Don't use fallback, let the original response show the issue
     }
     
     if (!parsed.curiosities || curiositiesLength < 30) {
