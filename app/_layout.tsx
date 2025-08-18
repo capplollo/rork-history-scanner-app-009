@@ -5,6 +5,7 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { HistoryProvider } from "@/providers/HistoryProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { ChatProvider } from "@/providers/ChatProvider";
 import { trpc, trpcClient } from "@/lib/trpc";
 
 SplashScreen.preventAutoHideAsync();
@@ -41,6 +42,13 @@ function RootLayoutNav() {
           headerShown: false 
         }} 
       />
+      <Stack.Screen 
+        name="chat-modal" 
+        options={{ 
+          presentation: "modal",
+          headerShown: false 
+        }} 
+      />
     </Stack>
   );
 }
@@ -56,7 +64,9 @@ export default function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }}>
           <AuthProvider>
             <HistoryProvider>
-              <RootLayoutNav />
+              <ChatProvider>
+                <RootLayoutNav />
+              </ChatProvider>
             </HistoryProvider>
           </AuthProvider>
         </GestureHandlerRootView>
