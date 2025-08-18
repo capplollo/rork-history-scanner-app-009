@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Dimensions,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle } from "lucide-react-native";
@@ -185,14 +186,21 @@ export default function ScanResultScreen() {
           <TouchableOpacity 
             style={styles.chatButton}
             onPress={() => {
-              // Navigate to chat modal with monument context
-              router.push({
-                pathname: "/chat-modal" as any,
-                params: { 
-                  monumentId: monument.id,
-                  monumentName: monument.name
-                }
-              });
+              try {
+                // Navigate to chat modal with monument context
+                // Use minimal params to avoid URL size limits
+                router.push({
+                  pathname: "/chat-modal" as any,
+                  params: { 
+                    monumentId: monument.id,
+                    monumentName: monument.name.substring(0, 100) // Limit name length
+                  }
+                });
+              } catch (error) {
+                console.error('Navigation error:', error);
+                // Fallback navigation without params
+                router.push("/chat-modal" as any);
+              }
             }}
           >
             <LinearGradient

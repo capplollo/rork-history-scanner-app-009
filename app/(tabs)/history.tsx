@@ -12,6 +12,7 @@ import { useHistory } from "@/providers/HistoryProvider";
 import { Clock, MapPin, Calendar, Search, Filter } from "lucide-react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
+import { scanResultStore } from "@/services/scanResultStore";
 
 export default function HistoryScreen() {
   const { history } = useHistory();
@@ -93,10 +94,14 @@ export default function HistoryScreen() {
             <TouchableOpacity
               key={`${item.id}-${index}`}
               style={styles.historyCard}
-              onPress={() => router.push({
-                pathname: "/(tabs)/scan-result" as any,
-                params: { monumentId: item.id },
-              })}
+              onPress={() => {
+                // Store the item and navigate with just the ID to avoid URL size limits
+                const resultId = scanResultStore.store(item);
+                router.push({
+                  pathname: "/(tabs)/scan-result" as any,
+                  params: { resultId: resultId },
+                });
+              }}
             >
               <Image source={{ uri: item.scannedImage }} style={styles.thumbnail} />
               <View style={styles.cardContent}>

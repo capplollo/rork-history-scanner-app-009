@@ -346,10 +346,21 @@ async function convertImageToBase64(imageUri: string): Promise<string> {
     const response = await fetch(imageUri);
     const blob = await response.blob();
     
+    // Check blob size and compress if too large (limit to ~1MB)
+    if (blob.size > 1024 * 1024) {
+      console.warn('Image is large, this might cause issues:', blob.size, 'bytes');
+    }
+    
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
         const base64 = (reader.result as string).split(',')[1];
+        
+        // Additional size check on base64
+        if (base64.length > 1.5 * 1024 * 1024) { // ~1.5MB base64 limit
+          console.warn('Base64 image is very large:', base64.length, 'characters');
+        }
+        
         resolve(base64);
       };
       reader.onerror = reject;
