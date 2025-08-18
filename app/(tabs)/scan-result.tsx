@@ -14,16 +14,27 @@ import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCir
 import { LinearGradient } from "expo-linear-gradient";
 import { mockMonuments } from "@/data/mockMonuments";
 import { HistoryItem } from "@/providers/HistoryProvider";
+import { scanResultStore } from "@/services/scanResultStore";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 export default function ScanResultScreen() {
-  const { monumentId, scanData } = useLocalSearchParams();
+  const { monumentId, scanData, resultId } = useLocalSearchParams();
   
   let monument: HistoryItem | undefined;
   
-  // Try to get data from scanData first (AI result), then fallback to monumentId
-  if (scanData && typeof scanData === 'string') {
+  // Try to get data from resultId first (new method), then scanData (legacy), then monumentId
+  if (resultId && typeof resultId === 'string') {
+    const retrievedMonument = scanResultStore.retrieve(resultId);
+    if (retrievedMonument) {
+      monument = retrievedMonument;
+      // Clean up the stored result after retrieval to prevent memory leaks
+      scanResultStore.clear(resultId);
+    }
+  }
+  
+  // Legacy support for scanData (in case some old navigation still uses it)
+  if (!monument && scanData && typeof scanData === 'string') {
     try {
       monument = JSON.parse(scanData) as HistoryItem;
     } catch (error) {

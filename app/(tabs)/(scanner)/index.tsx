@@ -19,6 +19,7 @@ import { router } from "expo-router";
 import { useHistory } from "@/providers/HistoryProvider";
 import { mockMonuments } from "@/data/mockMonuments";
 import { detectMonument, DetectionResult } from "@/services/monumentDetectionService";
+import { scanResultStore } from "@/services/scanResultStore";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -95,6 +96,7 @@ export default function ScannerScreen() {
         scannedAt: new Date().toISOString(),
         confidence: detectionResult.confidence,
         isRecognized: detectionResult.isRecognized,
+        detailedDescription: detectionResult.detailedDescription,
       };
       
       await addToHistory(scanResult);
@@ -102,11 +104,12 @@ export default function ScannerScreen() {
       setAnalysisStatus("");
       setSelectedImage(null);
       
-      // Navigate to results with the scan result data
+      // Store the result and navigate with just the ID
+      const resultId = scanResultStore.store(scanResult);
       router.push({
         pathname: "/(tabs)/scan-result" as any,
         params: { 
-          scanData: JSON.stringify(scanResult)
+          resultId: resultId
         },
       });
       
@@ -129,10 +132,12 @@ export default function ScannerScreen() {
       setAnalysisStatus("");
       setSelectedImage(null);
       
+      // Store the result and navigate with just the ID
+      const resultId = scanResultStore.store(scanResult);
       router.push({
         pathname: "/(tabs)/scan-result" as any,
         params: { 
-          scanData: JSON.stringify(scanResult)
+          resultId: resultId
         },
       });
     }
