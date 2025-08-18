@@ -10,7 +10,7 @@ import {
   Dimensions,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle } from "lucide-react-native";
+import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { mockMonuments } from "@/data/mockMonuments";
 import { HistoryItem } from "@/providers/HistoryProvider";
@@ -170,6 +170,28 @@ export default function ScanResultScreen() {
           )}
 
 
+
+          <TouchableOpacity 
+            style={styles.chatButton}
+            onPress={() => {
+              // Navigate to chat modal with monument context
+              router.push({
+                pathname: "/chat-modal" as any,
+                params: { 
+                  monumentId: monument.id,
+                  monumentName: monument.name
+                }
+              });
+            }}
+          >
+            <LinearGradient
+              colors={["#4f46e5", "#6366f1"]}
+              style={styles.chatGradient}
+            >
+              <MessageCircle size={24} color="#ffffff" />
+              <Text style={styles.chatButtonText}>Ask AI About This Monument</Text>
+            </LinearGradient>
+          </TouchableOpacity>
 
           <TouchableOpacity style={styles.shareButton}>
             <LinearGradient
@@ -340,6 +362,23 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 20,
   },
+  chatButton: {
+    borderRadius: 15,
+    overflow: "hidden",
+    marginBottom: 16,
+  },
+  chatGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 18,
+    gap: 12,
+  },
+  chatButtonText: {
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "600",
+  },
   shareButton: {
     borderRadius: 15,
     overflow: "hidden",
@@ -354,7 +393,7 @@ const styles = StyleSheet.create({
   },
   shareButtonText: {
     color: "#ffffff",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
   },
   confidenceContainer: {
