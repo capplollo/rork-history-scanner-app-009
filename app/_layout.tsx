@@ -7,6 +7,7 @@ import { HistoryProvider } from "@/providers/HistoryProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { ChatProvider } from "@/providers/ChatProvider";
 import { trpc, trpcClient } from "@/lib/trpc";
+import { cleanupLocalStorage } from "@/lib/supabase";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -55,7 +56,19 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   useEffect(() => {
-    SplashScreen.hideAsync();
+    const initializeApp = async () => {
+      try {
+        // Clean up storage on app start to prevent quota issues
+        await cleanupLocalStorage();
+        console.log('Storage cleanup completed');
+      } catch (error) {
+        console.error('Storage cleanup failed:', error);
+      } finally {
+        SplashScreen.hideAsync();
+      }
+    };
+    
+    initializeApp();
   }, []);
 
   return (

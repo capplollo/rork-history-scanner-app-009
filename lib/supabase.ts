@@ -30,6 +30,55 @@ const supabaseConfig = {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, supabaseConfig);
 
+// Storage cleanup utility to prevent quota issues
+export const cleanupLocalStorage = async () => {
+  try {
+    if (Platform.OS === 'web') {
+      // For web, check localStorage usage
+      const usage = JSON.stringify(localStorage).length;
+      console.log('LocalStorage usage:', usage, 'bytes');
+      
+      // If usage is high, clear non-essential data
+      if (usage > 5000000) { // 5MB threshold
+        console.warn('LocalStorage usage high, clearing non-essential data');
+        // Keep only essential keys
+        const essentialKeys = ['supabase.auth.token', '@monument_scanner_history'];
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && !essentialKeys.some(essential => key.includes(essential))) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach((key: string) => localStorage.removeItem(key));
+      }
+    } else {
+      // For mobile, use AsyncStorage
+      // AsyncStorage is already imported at the top
+      const keys = await AsyncStorage.getAllKeys();
+      console.log('AsyncStorage keys:', keys.length);
+      
+      // Remove old or large items
+      const essentialKeys = ['supabase.auth.token', '@monument_scanner_history', '@monument_scanner_history_backup'];
+      const keysToCheck = keys.filter(key => !essentialKeys.some(essential => key.includes(essential)));
+      
+      for (const key of keysToCheck) {
+        try {
+          const value = await AsyncStorage.getItem(key);
+          if (value && value.length > 100000) { // Remove items larger than 100KB
+            console.log('Removing large storage item:', key, value.length, 'bytes');
+            await AsyncStorage.removeItem(key);
+          }
+        } catch (error) {
+          console.warn('Error checking storage item:', key, error);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error during storage cleanup:', error);
+  }
+};
+
 export type Database = {
   public: {
     Tables: {

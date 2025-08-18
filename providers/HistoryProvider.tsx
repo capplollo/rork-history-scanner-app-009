@@ -26,8 +26,9 @@ export interface HistoryItem {
 }
 
 const HISTORY_STORAGE_KEY = "@monument_scanner_history";
-const MAX_HISTORY_ITEMS = 50; // Increased since we're using Supabase
-const FALLBACK_LIMIT = 5; // Fallback limit for local storage
+const MAX_HISTORY_ITEMS = 100; // Supabase can handle more
+const LOCAL_STORAGE_LIMIT = 3; // Very small limit for local storage to prevent quota issues
+const EMERGENCY_LIMIT = 1; // Emergency fallback
 
 export const [HistoryProvider, useHistory] = createContextHook(() => {
   const { user } = useAuth();
@@ -90,7 +91,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
       if (stored) {
         const parsed = JSON.parse(stored);
         // Limit local storage to prevent quota issues
-        setHistory(parsed.slice(0, FALLBACK_LIMIT));
+        setHistory(parsed.slice(0, LOCAL_STORAGE_LIMIT));
       }
     } catch (error) {
       console.error("Error loading from local storage:", error);
@@ -137,26 +138,55 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
 
   const saveToLocalStorage = useCallback(async (newHistory: HistoryItem[]) => {
     try {
-      // Only keep a few items in local storage to prevent quota issues
-      const limitedHistory = newHistory.slice(0, FALLBACK_LIMIT);
-      await AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(limitedHistory));
-      return limitedHistory;
+      // Create a minimal version of history items to save space
+      const minimalHistory = newHistory.slice(0, LOCAL_STORAGE_LIMIT).map(item => ({
+        id: item.id,
+        name: item.name,
+        location: item.location,
+        scannedAt: item.scannedAt,
+        // Only store essential data locally
+        image: item.image?.length > 1000 ? '' : item.image, // Skip large images
+        scannedImage: '', // Don't store scanned images locally
+      }));
+      
+      const dataString = JSON.stringify(minimalHistory);
+      
+      // Check if data is too large (rough estimate)
+      if (dataString.length > 50000) { // 50KB limit
+        console.warn('Data too large for local storage, using emergency limit');
+        const emergencyHistory = minimalHistory.slice(0, EMERGENCY_LIMIT);
+        await AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(emergencyHistory));
+        return emergencyHistory;
+      }
+      
+      await AsyncStorage.setItem(HISTORY_STORAGE_KEY, dataString);
+      return minimalHistory;
     } catch (error: any) {
-      if (error?.name === 'QuotaExceededError' || error?.message?.includes('quota')) {
-        console.warn('Local storage quota exceeded, clearing and keeping only 1 item');
+      if (error?.name === 'QuotaExceededError' || error?.message?.includes('quota') || error?.message?.includes('storage')) {
+        console.warn('Storage quota exceeded, attempting emergency save');
         try {
-          await AsyncStorage.removeItem(HISTORY_STORAGE_KEY);
+          // Clear all storage first
+          await AsyncStorage.clear();
+          
           if (newHistory.length > 0) {
-            const singleItem = [newHistory[0]];
-            await AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(singleItem));
-            return singleItem;
+            // Save only the most recent item with minimal data
+            const emergencyItem = {
+              id: newHistory[0].id,
+              name: newHistory[0].name,
+              scannedAt: newHistory[0].scannedAt,
+            };
+            await AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify([emergencyItem]));
+            console.log('Emergency save successful');
+            return [emergencyItem as any];
           }
-        } catch (clearError) {
-          console.error('Failed to clear and save to local storage:', clearError);
+        } catch (emergencyError) {
+          console.error('Emergency save failed:', emergencyError);
+          // If even emergency save fails, just return empty array
+          return [];
         }
       }
       console.error("Error saving to local storage:", error);
-      return newHistory.slice(0, FALLBACK_LIMIT);
+      return [];
     }
   }, []);
 
@@ -170,11 +200,23 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
         // Try to save to Supabase first
         const supabaseSuccess = await saveToSupabase(item);
         if (!supabaseSuccess) {
-          // Fallback to local storage
+          console.warn('Supabase save failed, using local storage fallback');
           await saveToLocalStorage(newHistory);
+        } else {
+          // If Supabase save successful, only save minimal data locally as backup
+          const minimalBackup = [{
+            id: item.id,
+            name: item.name,
+            scannedAt: item.scannedAt,
+          }];
+          try {
+            await AsyncStorage.setItem(HISTORY_STORAGE_KEY + '_backup', JSON.stringify(minimalBackup));
+          } catch (backupError) {
+            console.warn('Backup save failed, but Supabase save was successful:', backupError);
+          }
         }
       } else {
-        // Save to local storage if not authenticated
+        // Save to local storage if not authenticated (with size limits)
         await saveToLocalStorage(newHistory);
       }
     } catch (error) {
