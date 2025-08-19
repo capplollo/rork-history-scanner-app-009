@@ -30,12 +30,7 @@ export interface VoiceProvider {
 // ElevenLabs configuration - using environment variables
 const ELEVENLABS_API_KEY = process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICES = [
-  { id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel (ElevenLabs)', language: 'en-US', gender: 'female', quality: 'premium' },
-  { id: 'AZnzlk1XvdvUeBnXmlld', name: 'Domi (ElevenLabs)', language: 'en-US', gender: 'female', quality: 'premium' },
-  { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Bella (ElevenLabs)', language: 'en-US', gender: 'female', quality: 'premium' },
-  { id: 'VR6AewLTigWG4xSOukaG', name: 'Arnold (ElevenLabs)', language: 'en-US', gender: 'male', quality: 'premium' },
-  { id: 'pNInz6obpgDQGcFmaJgB', name: 'Adam (ElevenLabs)', language: 'en-US', gender: 'male', quality: 'premium' },
-  { id: 'yoZ06aMxZJJ28mfd3POQ', name: 'Sam (ElevenLabs)', language: 'en-US', gender: 'male', quality: 'premium' },
+  { id: 'IKne3meq5aSn9XLyUdCD', name: 'Charles - Mature narrator', language: 'en-US', gender: 'male', quality: 'premium' },
 ];
 
 export class VoiceService {
@@ -70,11 +65,12 @@ export class VoiceService {
       // Get built-in voices
       const builtInVoices = await this.getBuiltInVoices();
       
-      // Combine all voices
-      this.availableVoices = [
-        ...this.elevenLabsVoices,
-        ...builtInVoices.filter(voice => voice.provider === 'expo-speech')
-      ];
+      // Use only ElevenLabs Charles voice if configured, otherwise use built-in voices
+      if (this.isElevenLabsConfigured && this.elevenLabsVoices.length > 0) {
+        this.availableVoices = [...this.elevenLabsVoices];
+      } else {
+        this.availableVoices = builtInVoices.filter(voice => voice.provider === 'expo-speech');
+      }
 
       this.isInitialized = true;
       console.log(`✅ Voice service initialized with ${this.availableVoices.length} voices`);
@@ -116,14 +112,14 @@ export class VoiceService {
   }
 
   getBestVoice(): VoiceOption | null {
-    // Prioritize ElevenLabs voices if available and configured
+    // Always prioritize Charles - Mature narrator if available and configured
     if (this.isElevenLabsConfigured && this.elevenLabsVoices.length > 0) {
-      const elevenLabsVoice = this.elevenLabsVoices.find(voice => 
-        voice.language.startsWith('en') && voice.gender === 'female'
+      const charlesVoice = this.elevenLabsVoices.find(voice => 
+        voice.name.includes('Charles')
       );
       
-      if (elevenLabsVoice) {
-        return elevenLabsVoice;
+      if (charlesVoice) {
+        return charlesVoice;
       }
     }
     

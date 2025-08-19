@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ScrollView, View, Text, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
-import { Settings, Volume2, Check, ChevronRight, Star } from 'lucide-react-native';
+import { Modal, ScrollView, View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { Volume2, Check, Star } from 'lucide-react-native';
 import { voiceService, VoiceOption } from '@/services/voiceService';
 
 interface VoiceSettingsProps {
@@ -61,7 +61,7 @@ export default function VoiceSettings({ isVisible, onClose, onVoiceChange, curre
           Alert.alert('Voice Test Error', `Failed to test voice: ${error}`);
         }
       });
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to test voice');
     }
   };
@@ -119,7 +119,7 @@ export default function VoiceSettings({ isVisible, onClose, onVoiceChange, curre
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Available Voices</Text>
                 <Text style={styles.sectionSubtitle}>
-                  Choose your preferred narrator voice for monument descriptions
+                  Using Charles - Mature narrator for the best storytelling experience
                 </Text>
               </View>
 
@@ -205,10 +205,11 @@ export default function VoiceSettings({ isVisible, onClose, onVoiceChange, curre
               </View>
 
               <View style={styles.infoSection}>
-                <Text style={styles.infoTitle}>About ElevenLabs</Text>
+                <Text style={styles.infoTitle}>About Charles - Mature narrator</Text>
                 <Text style={styles.infoText}>
-                  ElevenLabs provides AI-powered voices that sound incredibly natural and human-like. 
-                  These voices are free to use within monthly limits and offer superior quality compared to built-in device voices.
+                  Charles is a premium AI voice from ElevenLabs, specifically chosen for his mature, 
+                  authoritative tone that&apos;s perfect for historical storytelling. His voice brings 
+                  monument descriptions to life with natural inflection and engaging delivery.
                 </Text>
               </View>
             </>
