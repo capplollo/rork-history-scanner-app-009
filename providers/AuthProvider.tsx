@@ -60,60 +60,7 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
 
       if (data.user) {
         console.log('User created successfully, ID:', data.user.id);
-        
-        // Try to create profile in database (this might fail if table doesn't exist)
-        try {
-          console.log('Attempting to create profile for user:', data.user.id);
-          console.log('Profile data:', {
-            id: data.user.id,
-            email: data.user.email,
-            full_name: fullName
-          });
-          
-          const { data: profileData, error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-              id: data.user.id,
-              email: data.user.email!,
-              full_name: fullName || null,
-            })
-            .select()
-            .single();
-
-          if (profileError) {
-            // Better error logging to avoid [object Object]
-            const errorDetails = {
-              message: profileError.message || 'Unknown error',
-              details: profileError.details || 'No details',
-              hint: profileError.hint || 'No hint',
-              code: profileError.code || 'No code',
-              fullError: JSON.stringify(profileError, null, 2)
-            };
-            
-            console.error('Error creating profile:', errorDetails);
-            console.error('Profile error message:', profileError.message);
-            console.error('Profile error code:', profileError.code);
-            console.error('Profile error details:', profileError.details);
-            
-            // Check if it's a table not found error
-            if (profileError.code === 'PGRST116' || 
-                (profileError.message && profileError.message.includes('relation "profiles" does not exist'))) {
-              console.warn('Profiles table does not exist, continuing without profile creation');
-              // Continue without creating profile - user account is still created
-              return { error: null };
-            }
-            
-            // For other profile creation issues, log but don't fail signup
-            console.warn('Profile creation failed but user account was created. Error:', profileError.message || 'Unknown profile error');
-            return { error: null };
-          }
-          
-          console.log('✅ Profile created successfully:', profileData);
-        } catch (profileError) {
-          console.warn('Profile creation failed but user account was created. Error:', 
-            profileError instanceof Error ? profileError.message : String(profileError));
-          return { error: null };
-        }
+        console.log('Profile will be created automatically by database trigger');
       }
 
       return { error: null };

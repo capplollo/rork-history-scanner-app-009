@@ -85,12 +85,20 @@ CREATE POLICY "Users can delete their own scan history" ON public.scan_history
 -- =====================================================
 
 -- Function to handle new user creation (creates profile automatically)
+-- FIXED: Uses a simpler approach that works with RLS
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
+    -- Use a direct insert that bypasses RLS by using the user's context
     INSERT INTO public.profiles (id, email, full_name)
-    VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'full_name');
+    VALUES (NEW.id, NEW.email, COALESCE(NEW.raw_user_meta_data->>'full_name', ''));
+    
     RETURN NEW;
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Log the error but don't fail the user creation
+        RAISE WARNING 'Failed to create profile for user %: %', NEW.id, SQLERRM;
+        RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

@@ -65,16 +65,10 @@ export default function SignUpScreen() {
             errorMessage = 'Please enter a valid email address.';
           } else if (error.message.includes('Password should be at least')) {
             errorMessage = 'Password must be at least 6 characters long.';
-          } else if (error.message.includes('Profile creation failed')) {
-            errorMessage = 'Account created successfully! Profile setup had an issue, but you can still sign in.';
           } else if (error.message.includes('Unable to validate email address')) {
             errorMessage = 'Please enter a valid email address.';
           } else if (error.message.includes('Signup is disabled')) {
             errorMessage = 'Signup is currently disabled. Please contact support.';
-          } else if (error.message.includes('relation "profiles" does not exist')) {
-            errorMessage = 'Account created successfully! The database is being set up. You can sign in now.';
-          } else if (error.message.includes('PGRST116')) {
-            errorMessage = 'Account created successfully! Database setup in progress. You can sign in now.';
           } else {
             errorMessage = error.message;
           }
