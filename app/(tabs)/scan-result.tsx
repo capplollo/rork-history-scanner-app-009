@@ -67,7 +67,10 @@ export default function ScanResultScreen() {
   }
 
   const getFullText = () => {
-    if (!monument) return '';
+    if (!monument) {
+      console.log('No monument data available for voice narration');
+      return '';
+    }
     
     let fullText = `${monument.name}. `;
     
@@ -77,13 +80,20 @@ export default function ScanResultScreen() {
       if (monument.detailedDescription.curiosities) {
         fullText += `Curiosities: ${monument.detailedDescription.curiosities} `;
       }
-      fullText += `Key takeaways: ${monument.detailedDescription.keyTakeaways.join('. ')}`;
-    } else {
+      if (monument.detailedDescription.keyTakeaways && monument.detailedDescription.keyTakeaways.length > 0) {
+        fullText += `Key takeaways: ${monument.detailedDescription.keyTakeaways.join('. ')}`;
+      }
+    } else if (monument.description) {
       fullText += `${monument.description} `;
-      fullText += `Historical significance: ${monument.significance} `;
-      fullText += `Quick facts: ${monument.facts.join('. ')}`;
+      if (monument.significance) {
+        fullText += `Historical significance: ${monument.significance} `;
+      }
+      if (monument.facts && monument.facts.length > 0) {
+        fullText += `Quick facts: ${monument.facts.join('. ')}`;
+      }
     }
     
+    console.log('Generated text for narration:', fullText.substring(0, 100) + '...');
     return fullText;
   };
 
@@ -102,39 +112,46 @@ export default function ScanResultScreen() {
       } else {
         // Start speaking
         const fullText = getFullText();
-        if (fullText) {
-          setIsPlaying(true);
-          setIsPaused(false);
-          
-          await Speech.speak(fullText, {
-            language: 'en-US',
-            pitch: 1.0,
-            rate: 0.8,
-            onStart: () => {
-              console.log('Speech started');
-            },
-            onDone: () => {
-              setIsPlaying(false);
-              setIsPaused(false);
-              console.log('Speech finished');
-            },
-            onStopped: () => {
-              setIsPlaying(false);
-              setIsPaused(false);
-              console.log('Speech stopped');
-            },
-            onError: (error) => {
-              console.error('Speech error:', error);
-              setIsPlaying(false);
-              setIsPaused(false);
-              Alert.alert('Error', 'Unable to play audio. Please try again.');
-            }
-          });
+        console.log('Attempting to speak text:', fullText ? 'Text available' : 'No text available');
+        
+        if (!fullText || fullText.trim().length === 0) {
+          Alert.alert('No Content', 'No text content available to read aloud.');
+          return;
         }
+        
+        setIsPlaying(true);
+        setIsPaused(false);
+        
+        await Speech.speak(fullText, {
+          language: 'en-US',
+          pitch: 1.0,
+          rate: 0.8,
+          onStart: () => {
+            console.log('Speech started successfully');
+          },
+          onDone: () => {
+            setIsPlaying(false);
+            setIsPaused(false);
+            console.log('Speech finished');
+          },
+          onStopped: () => {
+            setIsPlaying(false);
+            setIsPaused(false);
+            console.log('Speech stopped');
+          },
+          onError: (error) => {
+            console.error('Speech error:', error);
+            setIsPlaying(false);
+            setIsPaused(false);
+            Alert.alert('Speech Error', 'Unable to play audio. Please check your device settings and try again.');
+          }
+        });
       }
     } catch (error) {
       console.error('Speech control error:', error);
-      Alert.alert('Error', 'Unable to control audio playback.');
+      setIsPlaying(false);
+      setIsPaused(false);
+      Alert.alert('Error', 'Unable to control audio playback. Please try again.');
     }
   };
 
