@@ -70,12 +70,14 @@ export default function ChatModalScreen() {
     setInputText("");
 
     try {
-      if (!currentSession) {
-        // Create new session if none exists
-        await createNewSession(undefined, selectedMonument);
+      let sessionId = currentSession?.id;
+      
+      if (!sessionId) {
+        // Create new session if none exists and wait for it
+        sessionId = await createNewSession(undefined, selectedMonument || undefined);
       }
 
-      await sendMessage(message, currentSession?.id, selectedMonument);
+      await sendMessage(message, sessionId, selectedMonument || undefined);
       
       // Scroll to bottom after sending
       setTimeout(() => {
