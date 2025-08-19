@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   Dimensions,
   Platform,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle } from "lucide-react-native";
@@ -26,11 +27,18 @@ export default function ScanResultScreen() {
   
   // Try to get data from resultId first (new method), then scanData (legacy), then monumentId
   if (resultId && typeof resultId === 'string') {
-    const retrievedMonument = scanResultStore.retrieve(resultId);
-    if (retrievedMonument) {
-      monument = retrievedMonument;
-      // Clean up the stored result after retrieval to prevent memory leaks
-      scanResultStore.clear(resultId);
+    try {
+      const retrievedMonument = scanResultStore.retrieve(resultId);
+      if (retrievedMonument) {
+        monument = retrievedMonument;
+        console.log('Retrieved monument from store:', monument.name);
+        // Clean up the stored result after retrieval to prevent memory leaks
+        scanResultStore.clear(resultId);
+      } else {
+        console.warn('No monument found for resultId:', resultId);
+      }
+    } catch (error) {
+      console.error('Error retrieving monument from store:', error);
     }
   }
   
@@ -193,13 +201,18 @@ export default function ScanResultScreen() {
                   pathname: "/chat-modal" as any,
                   params: { 
                     monumentId: monument.id,
-                    monumentName: monument.name.substring(0, 100) // Limit name length
+                    monumentName: monument.name.substring(0, 50) // Further limit name length
                   }
                 });
               } catch (error) {
-                console.error('Navigation error:', error);
+                console.error('Chat navigation error:', error);
                 // Fallback navigation without params
-                router.push("/chat-modal" as any);
+                try {
+                  router.push("/chat-modal" as any);
+                } catch (fallbackError) {
+                  console.error('Fallback navigation also failed:', fallbackError);
+                  Alert.alert('Navigation Error', 'Unable to open chat. Please try again.');
+                }
               }
             }}
           >

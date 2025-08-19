@@ -105,13 +105,22 @@ export default function ScannerScreen() {
       setSelectedImage(null);
       
       // Store the result and navigate with just the ID
-      const resultId = scanResultStore.store(scanResult);
-      router.push({
-        pathname: "/(tabs)/scan-result" as any,
-        params: { 
-          resultId: resultId
-        },
-      });
+      try {
+        const resultId = scanResultStore.store(scanResult);
+        console.log('Stored scan result with ID:', resultId);
+        
+        // Use replace instead of push to avoid history stack issues
+        router.replace({
+          pathname: "/(tabs)/scan-result" as any,
+          params: { 
+            resultId: resultId
+          },
+        });
+      } catch (navError) {
+        console.error('Navigation error:', navError);
+        // Fallback: try to navigate without params
+        router.replace("/(tabs)/scan-result" as any);
+      }
       
     } catch (error) {
       console.error('Error analyzing image:', error);
@@ -133,13 +142,22 @@ export default function ScannerScreen() {
       setSelectedImage(null);
       
       // Store the result and navigate with just the ID
-      const resultId = scanResultStore.store(scanResult);
-      router.push({
-        pathname: "/(tabs)/scan-result" as any,
-        params: { 
-          resultId: resultId
-        },
-      });
+      try {
+        const resultId = scanResultStore.store(scanResult);
+        console.log('Stored scan result with ID:', resultId);
+        
+        // Use replace instead of push to avoid history stack issues
+        router.replace({
+          pathname: "/(tabs)/scan-result" as any,
+          params: { 
+            resultId: resultId
+          },
+        });
+      } catch (navError) {
+        console.error('Navigation error:', navError);
+        // Fallback: try to navigate without params
+        router.replace("/(tabs)/scan-result" as any);
+      }
     }
   };
 
