@@ -165,12 +165,18 @@ export class VoiceService {
       console.log('🎤 Using ElevenLabs TTS...');
       callbacks?.onStart?.();
       
+      if (!ELEVENLABS_API_KEY) {
+        throw new Error('ElevenLabs API key not configured');
+      }
+
+      const apiKey: string = ELEVENLABS_API_KEY;
+
       const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice.identifier}`, {
         method: 'POST',
         headers: {
           'Accept': 'audio/mpeg',
           'Content-Type': 'application/json',
-          'xi-api-key': ELEVENLABS_API_KEY,
+          'xi-api-key': apiKey,
         },
         body: JSON.stringify({
           text: text,
