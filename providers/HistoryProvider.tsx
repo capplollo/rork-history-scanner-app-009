@@ -40,28 +40,33 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
       if (user) {
         // Load from Supabase if user is authenticated
         const { data, error } = await supabase
-          .from('history')
+          .from('scan_history')
           .select('*')
           .eq('user_id', user.id)
           .order('scanned_at', { ascending: false })
           .limit(MAX_HISTORY_ITEMS);
         
         if (error) {
-          console.error('Error loading history from Supabase:', error);
+          console.error('Error loading history from Supabase:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint,
+          });
           // Fallback to local storage
           await loadFromLocalStorage();
         } else {
           // Map Supabase data to HistoryItem format
           const mappedData = (data || []).map(item => ({
             id: item.id,
-            name: item.name,
-            location: item.location,
-            period: item.period,
-            description: item.description,
-            significance: item.significance,
-            facts: item.facts,
-            image: item.image,
-            scannedImage: item.scanned_image,
+            name: item.monument_name,
+            location: item.location || '',
+            period: item.period || '',
+            description: item.description || '',
+            significance: item.significance || '',
+            facts: item.facts || [],
+            image: item.image_url || '',
+            scannedImage: item.scanned_image_url || '',
             scannedAt: item.scanned_at,
             confidence: item.confidence,
             isRecognized: item.is_recognized,
@@ -74,7 +79,10 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
         await loadFromLocalStorage();
       }
     } catch (error) {
-      console.error("Error loading history:", error);
+      console.error("Error loading history:", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       await loadFromLocalStorage();
     } finally {
       setIsLoading(false);
@@ -106,18 +114,18 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
     
     try {
       const { error } = await supabase
-        .from('history')
+        .from('scan_history')
         .insert({
           id: item.id,
           user_id: user.id,
-          name: item.name,
+          monument_name: item.name,
           location: item.location,
           period: item.period,
           description: item.description,
           significance: item.significance,
           facts: item.facts,
-          image: item.image,
-          scanned_image: item.scannedImage,
+          image_url: item.image,
+          scanned_image_url: item.scannedImage,
           scanned_at: item.scannedAt,
           confidence: item.confidence || null,
           is_recognized: item.isRecognized || null,
@@ -126,12 +134,20 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
         });
       
       if (error) {
-        console.error('Error saving to Supabase:', error);
+        console.error('Error saving to Supabase:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
         return false;
       }
       return true;
     } catch (error) {
-      console.error('Error saving to Supabase:', error);
+      console.error('Error saving to Supabase:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return false;
     }
   }, [user]);
@@ -231,12 +247,17 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
       if (user) {
         // Clear from Supabase
         const { error } = await supabase
-          .from('history')
+          .from('scan_history')
           .delete()
           .eq('user_id', user.id);
         
         if (error) {
-          console.error('Error clearing Supabase history:', error);
+          console.error('Error clearing Supabase history:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint,
+          });
         }
       }
       
