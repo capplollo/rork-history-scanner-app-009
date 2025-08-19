@@ -188,21 +188,15 @@ export default function ScannerScreen() {
     setAdditionalInfo(prev => ({ ...prev, [field]: value }));
   };
 
-  const featuredMonuments = [
-    {
-      id: "1",
-      name: "Colosseum",
-      location: "Rome, Italy",
-      image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400",
-      period: "72-80 AD",
-    },
-    {
-      id: "2", 
-      name: "Machu Picchu",
-      location: "Peru",
-      image: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=400",
-      period: "1450 AD",
-    },
+  const collageImages = [
+    "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=300&h=300&fit=crop", // Colosseum
+    "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=300&h=300&fit=crop", // Machu Picchu
+    "https://images.unsplash.com/photo-1549144511-f099e773c147?w=300&h=300&fit=crop", // Eiffel Tower
+    "https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=300&h=300&fit=crop", // Statue of Liberty
+    "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=300&h=300&fit=crop", // Big Ben
+    "https://images.unsplash.com/photo-1471919743851-c4df8b6ee133?w=300&h=300&fit=crop", // Taj Mahal
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop", // Parthenon
+    "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=300&h=300&fit=crop", // Christ the Redeemer
   ];
 
   return (
@@ -305,82 +299,70 @@ export default function ScannerScreen() {
           </TouchableOpacity>
         </View>
       ) : (
-        <>
-          <ImageBackground
-            source={{ uri: "https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=800" }}
-            style={styles.heroSection}
-          >
-            <LinearGradient
-              colors={["rgba(51,65,85,0.3)", "rgba(30,41,59,0.8)"]}
-              style={styles.heroOverlay}
-            >
-              <View style={styles.heroContent}>
-                <Text style={styles.heroTitle}>DISCOVER{"\n"}THE WORLD</Text>
-                <Text style={styles.heroSubtitle}>
-                  Let Monument Scanner guide you through history
-                </Text>
-                <TouchableOpacity style={styles.heroButton} onPress={takePhoto}>
-                  <Text style={styles.heroButtonText}>Start Scanning</Text>
-                </TouchableOpacity>
-              </View>
-            </LinearGradient>
-          </ImageBackground>
-
-          <View style={styles.quickActionsContainer}>
-            <TouchableOpacity style={styles.quickActionCard} onPress={takePhoto}>
-              <View style={styles.quickActionIcon}>
-                <CameraIcon size={28} color="#4f46e5" />
-              </View>
-              <Text style={styles.quickActionTitle}>Take Photo</Text>
-              <Text style={styles.quickActionDesc}>Capture a monument</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.quickActionCard} onPress={pickImageFromGallery}>
-              <View style={styles.quickActionIcon}>
-                <ImageIcon size={28} color="#059669" />
-              </View>
-              <Text style={styles.quickActionTitle}>From Gallery</Text>
-              <Text style={styles.quickActionDesc}>Choose existing photo</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.featuredSection}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Featured Monuments</Text>
-              <TouchableOpacity>
-                <Text style={styles.seeAllText}>See all</Text>
-              </TouchableOpacity>
+        <View style={styles.mainContainer}>
+          {/* Collage Background */}
+          <View style={styles.collageContainer}>
+            <View style={styles.collageGrid}>
+              {collageImages.map((imageUri, index) => (
+                <View key={index} style={[
+                  styles.collageItem,
+                  index % 2 === 0 ? styles.collageItemEven : styles.collageItemOdd
+                ]}>
+                  <Image 
+                    source={{ uri: imageUri }} 
+                    style={styles.collageImage}
+                  />
+                  <View style={[
+                    styles.collageOverlay,
+                    index % 2 === 0 ? styles.overlayBlue : styles.overlayWhite
+                  ]} />
+                </View>
+              ))}
             </View>
             
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.featuredScroll}
-            >
-              {featuredMonuments.map((monument) => (
-                <TouchableOpacity key={monument.id} style={styles.featuredCard}>
-                  <Image source={{ uri: monument.image }} style={styles.featuredImage} />
-                  <LinearGradient
-                    colors={["transparent", "rgba(0,0,0,0.8)"]}
-                    style={styles.featuredOverlay}
-                  >
-                    <View style={styles.featuredContent}>
-                      <Text style={styles.featuredName}>{monument.name}</Text>
-                      <View style={styles.featuredInfo}>
-                        <MapPin size={12} color="#ffffff" />
-                        <Text style={styles.featuredLocation}>{monument.location}</Text>
-                      </View>
-                      <View style={styles.featuredInfo}>
-                        <Clock size={12} color="#ffffff" />
-                        <Text style={styles.featuredPeriod}>{monument.period}</Text>
-                      </View>
-                    </View>
-                  </LinearGradient>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            {/* Main overlay with gradient */}
+            <LinearGradient
+              colors={[
+                "rgba(51, 65, 85, 0.4)",
+                "rgba(51, 65, 85, 0.7)",
+                "rgba(51, 65, 85, 0.9)"
+              ]}
+              style={styles.mainOverlay}
+            />
           </View>
-        </>
+          
+          {/* Content over collage */}
+          <View style={styles.contentOverlay}>
+            <View style={styles.titleSection}>
+              <Text style={styles.mainTitle}>Explore History</Text>
+              <Text style={styles.mainSubtitle}>
+                Discover the stories behind the world's greatest monuments
+              </Text>
+            </View>
+            
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={[styles.scanButton, styles.photoButton]} 
+                onPress={takePhoto}
+              >
+                <View style={styles.buttonIconContainer}>
+                  <CameraIcon size={32} color="#ffffff" />
+                </View>
+                <Text style={styles.buttonText}>Scan from Photo</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.scanButton, styles.galleryButton]} 
+                onPress={pickImageFromGallery}
+              >
+                <View style={styles.buttonIconContainer}>
+                  <ImageIcon size={32} color="#334155" />
+                </View>
+                <Text style={[styles.buttonText, styles.galleryButtonText]}>Scan from Gallery</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
       )}
     </ScrollView>
   );
@@ -389,151 +371,130 @@ export default function ScannerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#334155",
   },
   contentContainer: {
     paddingBottom: 30,
   },
-  heroSection: {
-    height: screenHeight * 0.6,
-    justifyContent: "flex-end",
-  },
-  heroOverlay: {
+  mainContainer: {
     flex: 1,
-    justifyContent: "flex-end",
-    paddingHorizontal: 24,
-    paddingBottom: 60,
+    position: "relative",
   },
-  heroContent: {
-    alignItems: "flex-start",
-  },
-  heroTitle: {
-    fontSize: 42,
-    fontWeight: "900",
-    color: "#ffffff",
-    lineHeight: 48,
-    marginBottom: 12,
-    letterSpacing: 1,
-  },
-  heroSubtitle: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.9)",
-    marginBottom: 32,
-    lineHeight: 22,
-  },
-  heroButton: {
-    backgroundColor: "#4f46e5",
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 30,
-  },
-  heroButtonText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  quickActionsContainer: {
-    flexDirection: "row",
-    paddingHorizontal: 20,
-    paddingTop: 30,
-    gap: 15,
-  },
-  quickActionCard: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-    padding: 20,
-    borderRadius: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  quickActionIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#f1f5f9",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  quickActionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1e293b",
-    marginBottom: 4,
-  },
-  quickActionDesc: {
-    fontSize: 12,
-    color: "#64748b",
-    textAlign: "center",
-  },
-  featuredSection: {
-    marginTop: 40,
-    paddingHorizontal: 20,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#1e293b",
-  },
-  seeAllText: {
-    fontSize: 14,
-    color: "#4f46e5",
-    fontWeight: "500",
-  },
-  featuredScroll: {
-    paddingRight: 20,
-  },
-  featuredCard: {
-    width: 280,
-    height: 200,
-    marginRight: 16,
-    borderRadius: 20,
-    overflow: "hidden",
-  },
-  featuredImage: {
-    width: "100%",
-    height: "100%",
-  },
-  featuredOverlay: {
+  collageContainer: {
     position: "absolute",
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
-    height: "60%",
-    justifyContent: "flex-end",
-    padding: 20,
+    bottom: 0,
   },
-  featuredContent: {
-    gap: 4,
+  collageGrid: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
-  featuredName: {
-    fontSize: 20,
-    fontWeight: "700",
+  collageItem: {
+    width: "25%",
+    height: screenHeight / 6,
+    position: "relative",
+  },
+  collageItemEven: {
+    backgroundColor: "#334155",
+  },
+  collageItemOdd: {
+    backgroundColor: "#ffffff",
+  },
+  collageImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  collageOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  overlayBlue: {
+    backgroundColor: "rgba(51, 65, 85, 0.6)",
+  },
+  overlayWhite: {
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
+  },
+  mainOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  contentOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 30,
+    zIndex: 10,
+  },
+  titleSection: {
+    alignItems: "center",
+    marginBottom: 60,
+  },
+  mainTitle: {
+    fontSize: 48,
+    fontWeight: "900",
     color: "#ffffff",
-    marginBottom: 8,
+    textAlign: "center",
+    marginBottom: 16,
+    letterSpacing: 1,
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
-  featuredInfo: {
+  mainSubtitle: {
+    fontSize: 18,
+    color: "rgba(255, 255, 255, 0.9)",
+    textAlign: "center",
+    lineHeight: 26,
+    maxWidth: 300,
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  buttonContainer: {
+    width: "100%",
+    gap: 20,
+  },
+  scanButton: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    justifyContent: "center",
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  featuredLocation: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.9)",
+  photoButton: {
+    backgroundColor: "#334155",
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
-  featuredPeriod: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.8)",
+  galleryButton: {
+    backgroundColor: "#ffffff",
+  },
+  buttonIconContainer: {
+    marginRight: 15,
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#ffffff",
+  },
+  galleryButtonText: {
+    color: "#334155",
   },
   imagePreviewContainer: {
     margin: 20,
