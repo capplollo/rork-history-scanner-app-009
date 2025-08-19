@@ -86,13 +86,15 @@ export class VoiceService {
   private async getBuiltInVoices(): Promise<VoiceOption[]> {
     try {
       const voices = await Speech.getAvailableVoicesAsync();
-      return voices.map(voice => ({
-        identifier: voice.identifier,
-        name: `${voice.name} (Built-in)`,
-        language: voice.language,
-        quality: 'basic',
-        provider: 'expo-speech' as const
-      }));
+      return voices
+        .filter(voice => voice.identifier && voice.identifier.trim() !== '') // Filter out voices with empty identifiers
+        .map((voice, index) => ({
+          identifier: voice.identifier || `builtin-voice-${index}`,
+          name: `${voice.name || 'Unknown Voice'} (Built-in)`,
+          language: voice.language || 'en-US',
+          quality: 'basic',
+          provider: 'expo-speech' as const
+        }));
     } catch (error) {
       console.error('Failed to get available voices:', error);
       return [];

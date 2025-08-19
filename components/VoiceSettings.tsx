@@ -123,15 +123,17 @@ export default function VoiceSettings({ isVisible, onClose, onVoiceChange, curre
                 </Text>
               </View>
 
-              {availableVoices.map((voice) => (
-                <TouchableOpacity
-                  key={voice.identifier}
-                  style={[
-                    styles.voiceItem,
-                    selectedVoice?.identifier === voice.identifier && styles.selectedVoiceItem
-                  ]}
-                  onPress={() => handleVoiceSelect(voice)}
-                >
+              {availableVoices.map((voice, index) => {
+                const uniqueKey = voice.identifier || `voice-${index}-${voice.name}`;
+                return (
+                  <TouchableOpacity
+                    key={uniqueKey}
+                    style={[
+                      styles.voiceItem,
+                      selectedVoice?.identifier === voice.identifier && styles.selectedVoiceItem
+                    ]}
+                    onPress={() => handleVoiceSelect(voice)}
+                  >
                   <View style={styles.voiceInfo}>
                     <View style={styles.voiceHeader}>
                       <Text style={styles.voiceName}>{voice.name}</Text>
@@ -170,8 +172,9 @@ export default function VoiceSettings({ isVisible, onClose, onVoiceChange, curre
                       <Text style={styles.testButtonText}>Test</Text>
                     </TouchableOpacity>
                   </View>
-                </TouchableOpacity>
-              ))}
+                  </TouchableOpacity>
+                );
+              })}
 
               <View style={styles.infoSection}>
                 <Text style={styles.infoTitle}>Voice Quality</Text>
