@@ -27,7 +27,7 @@ export interface VoiceProvider {
 }
 
 // ElevenLabs configuration - using environment variables
-const ELEVENLABS_API_KEY = process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY || 'sk_22cbad0171315d01474f3a02c222d9d04f67c9a5d8b3eae9';
+const ELEVENLABS_API_KEY = process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICES = [
   { id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel (ElevenLabs)', language: 'en-US', gender: 'female', quality: 'premium' },
   { id: 'AZnzlk1XvdvUeBnXmlld', name: 'Domi (ElevenLabs)', language: 'en-US', gender: 'female', quality: 'premium' },
