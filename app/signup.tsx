@@ -79,11 +79,8 @@ export default function SignUpScreen() {
         Alert.alert('Sign Up Failed', errorMessage);
       } else {
         console.log('Signup successful');
-        Alert.alert(
-          'Success',
-          'Account created successfully! Please check your email to verify your account.',
-          [{ text: 'OK', onPress: () => router.replace('/login') }]
-        );
+        // Redirect to email confirmation page instead of showing alert
+        router.replace('/email-confirmation');
       }
     } catch (error) {
       console.error('Unexpected signup error:', {

@@ -11,6 +11,7 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<{ error: AuthError | null }>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  refreshSession: () => Promise<void>;
 }
 
 export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
@@ -108,6 +109,19 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
     }
   }, []);
 
+  const refreshSession = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      setUser(session?.user ?? null);
+    } catch (error) {
+      console.error('Error refreshing session:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return useMemo(() => ({
     user,
     session,
@@ -116,5 +130,6 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
     signIn,
     signOut,
     resetPassword,
-  }), [user, session, loading, signUp, signIn, signOut, resetPassword]);
+    refreshSession,
+  }), [user, session, loading, signUp, signIn, signOut, resetPassword, refreshSession]);
 });
