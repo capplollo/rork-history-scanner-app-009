@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,8 +12,9 @@ import {
   Alert,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle } from "lucide-react-native";
+import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle, Volume2, VolumeX, Pause } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Speech from 'expo-speech';
 import { mockMonuments } from "@/data/mockMonuments";
 import { HistoryItem } from "@/providers/HistoryProvider";
 import { scanResultStore } from "@/services/scanResultStore";
@@ -22,6 +23,8 @@ const { width: screenWidth } = Dimensions.get("window");
 
 export default function ScanResultScreen() {
   const { monumentId, scanData, resultId } = useLocalSearchParams();
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
   
   let monument: HistoryItem | undefined;
   
@@ -62,6 +65,88 @@ export default function ScanResultScreen() {
       };
     }
   }
+
+  const getFullText = () => {
+    if (!monument) return '';
+    
+    let fullText = `${monument.name}. `;
+    
+    if (monument.detailedDescription) {
+      fullText += `${monument.detailedDescription.quickOverview} `;
+      fullText += `${monument.detailedDescription.inDepthContext} `;
+      if (monument.detailedDescription.curiosities) {
+        fullText += `Curiosities: ${monument.detailedDescription.curiosities} `;
+      }
+      fullText += `Key takeaways: ${monument.detailedDescription.keyTakeaways.join('. ')}`;
+    } else {
+      fullText += `${monument.description} `;
+      fullText += `Historical significance: ${monument.significance} `;
+      fullText += `Quick facts: ${monument.facts.join('. ')}`;
+    }
+    
+    return fullText;
+  };
+
+  const handlePlayPause = async () => {
+    try {
+      if (isPlaying) {
+        if (isPaused) {
+          // Resume
+          await Speech.resume();
+          setIsPaused(false);
+        } else {
+          // Pause
+          await Speech.pause();
+          setIsPaused(true);
+        }
+      } else {
+        // Start speaking
+        const fullText = getFullText();
+        if (fullText) {
+          setIsPlaying(true);
+          setIsPaused(false);
+          
+          await Speech.speak(fullText, {
+            language: 'en-US',
+            pitch: 1.0,
+            rate: 0.8,
+            onStart: () => {
+              console.log('Speech started');
+            },
+            onDone: () => {
+              setIsPlaying(false);
+              setIsPaused(false);
+              console.log('Speech finished');
+            },
+            onStopped: () => {
+              setIsPlaying(false);
+              setIsPaused(false);
+              console.log('Speech stopped');
+            },
+            onError: (error) => {
+              console.error('Speech error:', error);
+              setIsPlaying(false);
+              setIsPaused(false);
+              Alert.alert('Error', 'Unable to play audio. Please try again.');
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Speech control error:', error);
+      Alert.alert('Error', 'Unable to control audio playback.');
+    }
+  };
+
+  const handleStop = async () => {
+    try {
+      await Speech.stop();
+      setIsPlaying(false);
+      setIsPaused(false);
+    } catch (error) {
+      console.error('Speech stop error:', error);
+    }
+  };
 
   if (!monument) {
     return (
@@ -129,6 +214,44 @@ export default function ScanResultScreen() {
               </Text>
             </View>
           )}
+
+          <View style={styles.narratorSection}>
+            <Text style={styles.narratorTitle}>Voice Narrator</Text>
+            <View style={styles.narratorControls}>
+              <TouchableOpacity 
+                style={[styles.narratorButton, isPlaying && styles.narratorButtonActive]} 
+                onPress={handlePlayPause}
+              >
+                {isPlaying ? (
+                  isPaused ? (
+                    <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
+                  ) : (
+                    <Pause size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
+                  )
+                ) : (
+                  <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
+                )}
+                <Text style={[styles.narratorButtonText, isPlaying && styles.narratorButtonTextActive]}>
+                  {isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Listen'}
+                </Text>
+              </TouchableOpacity>
+              
+              {isPlaying && (
+                <TouchableOpacity 
+                  style={styles.stopButton} 
+                  onPress={handleStop}
+                >
+                  <VolumeX size={18} color="#6b7280" />
+                  <Text style={styles.stopButtonText}>Stop</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            {isPlaying && (
+              <Text style={styles.playingIndicator}>
+                {isPaused ? 'Paused' : 'Playing audio narration...'}
+              </Text>
+            )}
+          </View>
 
           {monument.detailedDescription ? (
             <>
@@ -451,5 +574,71 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#4f46e5",
     fontWeight: "500",
+  },
+  narratorSection: {
+    backgroundColor: "#ffffff",
+    padding: 20,
+    borderRadius: 15,
+    marginBottom: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  narratorTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1f2937",
+    marginBottom: 15,
+  },
+  narratorControls: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  narratorButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f3f4f6",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+    gap: 8,
+    borderWidth: 2,
+    borderColor: "#4f46e5",
+  },
+  narratorButtonActive: {
+    backgroundColor: "#4f46e5",
+  },
+  narratorButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#4f46e5",
+  },
+  narratorButtonTextActive: {
+    color: "#ffffff",
+  },
+  stopButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f9fafb",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  stopButtonText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#6b7280",
+  },
+  playingIndicator: {
+    fontSize: 14,
+    color: "#4f46e5",
+    fontStyle: "italic",
+    marginTop: 10,
   },
 });
