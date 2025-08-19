@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { HistoryProvider } from "@/providers/HistoryProvider";
 import { AuthProvider, useAuth } from "@/providers/AuthProvider";
@@ -18,31 +18,48 @@ function AuthGuard() {
   const { user, session, loading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+  const lastRedirectRef = useRef<string | null>(null);
 
-  const currentPath = useMemo(() => segments.join('/'), [segments]);
+  const currentPath = useMemo(() => {
+    return segments.join('/');
+  }, [segments]);
 
   useEffect(() => {
     if (loading) return; // Don't redirect while loading
 
-    // Prevent infinite loops by checking current path before redirecting
+    console.log('AuthGuard check:', { 
+      user: !!user, 
+      session: !!session, 
+      currentPath, 
+      emailConfirmed: user?.email_confirmed_at,
+      lastRedirect: lastRedirectRef.current 
+    });
+
+    let targetPath: string | null = null;
+
+    // Determine target path based on auth state
     if (!user && !session) {
       // User is not authenticated, redirect to login
       if (currentPath !== 'login' && currentPath !== 'signup' && currentPath !== 'forgot-password') {
-        console.log('Redirecting to login - no user/session');
-        router.replace('/login');
+        targetPath = '/login';
       }
     } else if (user && !user.email_confirmed_at) {
       // User is authenticated but email not confirmed, redirect to email confirmation
       if (currentPath !== 'email-confirmation') {
-        console.log('Redirecting to email confirmation - email not confirmed');
-        router.replace('/email-confirmation');
+        targetPath = '/email-confirmation';
       }
     } else if (user && user.email_confirmed_at) {
       // User is authenticated and email confirmed
       if (currentPath === 'login' || currentPath === 'signup' || currentPath === 'email-confirmation' || currentPath === 'forgot-password') {
-        console.log('Redirecting to main app - user authenticated');
-        router.replace('/(tabs)');
+        targetPath = '/(tabs)';
       }
+    }
+
+    // Only redirect if we have a target and it's different from last redirect
+    if (targetPath && targetPath !== lastRedirectRef.current) {
+      console.log('Redirecting to:', targetPath);
+      lastRedirectRef.current = targetPath;
+      router.replace(targetPath);
     }
   }, [user, session, loading, currentPath, router]);
 
