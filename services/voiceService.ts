@@ -1,6 +1,7 @@
 import * as Speech from 'expo-speech';
 import { Platform } from 'react-native';
 import { Audio } from 'expo-av';
+import { Alert } from 'react-native';
 
 export interface VoiceOption {
   identifier: string;
@@ -38,11 +39,15 @@ export class VoiceService {
   private isInitialized: boolean = false;
   private elevenLabsVoices: VoiceOption[] = [];
   private isElevenLabsConfigured: boolean = false;
+  private audioPermissionsGranted: boolean = false;
 
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
     try {
+      // Request audio permissions first
+      await this.requestAudioPermissions();
+      
       // Check if ElevenLabs is properly configured
       this.isElevenLabsConfigured = !!ELEVENLABS_API_KEY && ELEVENLABS_API_KEY !== 'your-api-key-here';
       
@@ -65,20 +70,93 @@ export class VoiceService {
       // Get built-in voices
       const builtInVoices = await this.getBuiltInVoices();
       
-      // Use only ElevenLabs Charles voice if configured, otherwise use built-in voices
+      // Always include both ElevenLabs and built-in voices for fallback
+      this.availableVoices = [];
+      
       if (this.isElevenLabsConfigured && this.elevenLabsVoices.length > 0) {
-        this.availableVoices = [...this.elevenLabsVoices];
-        console.log('✅ Using Charles - Mature narrator as the only voice');
-      } else {
-        this.availableVoices = builtInVoices.filter(voice => voice.provider === 'expo-speech');
-        console.log('⚠️ ElevenLabs not configured, using built-in voices');
+        this.availableVoices.push(...this.elevenLabsVoices);
+        console.log('✅ ElevenLabs voices added');
       }
+      
+      // Always add built-in voices as fallback
+      const builtInFiltered = builtInVoices.filter(voice => voice.provider === 'expo-speech');
+      this.availableVoices.push(...builtInFiltered);
+      
+      console.log(`✅ Total voices available: ${this.availableVoices.length} (ElevenLabs: ${this.elevenLabsVoices.length}, Built-in: ${builtInFiltered.length})`);
 
       this.isInitialized = true;
       console.log(`✅ Voice service initialized with ${this.availableVoices.length} voices`);
       console.log(`📊 ElevenLabs voices: ${this.elevenLabsVoices.length}, Built-in voices: ${builtInVoices.length}`);
     } catch (error) {
       console.error('❌ Failed to initialize voice service:', error);
+    }
+  }
+
+  private async requestAudioPermissions(): Promise<void> {
+    try {
+      // Request audio permissions for expo-av
+      const { status } = await Audio.requestPermissionsAsync();
+      this.audioPermissionsGranted = status === 'granted';
+      
+      if (this.audioPermissionsGranted) {
+        console.log('✅ Audio permissions granted');
+        
+        // Set up audio mode for playback
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          staysActiveInBackground: false,
+          playsInSilentModeIOS: true,
+          shouldDuckAndroid: true,
+          playThroughEarpieceAndroid: false,
+          interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+          interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+        });
+      } else {
+        console.log('⚠️ Audio permissions denied, ElevenLabs playback will fallback to built-in TTS');
+      }
+    } catch (error) {
+      console.error('❌ Failed to request audio permissions:', error);
+      this.audioPermissionsGranted = false;
+    }
+  }
+
+  // Public method to request permissions with user feedback
+  async requestPermissionsWithUserPrompt(): Promise<boolean> {
+    if (this.audioPermissionsGranted) {
+      return true;
+    }
+
+    try {
+      const { status } = await Audio.requestPermissionsAsync();
+      
+      if (status === 'granted') {
+        this.audioPermissionsGranted = true;
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          staysActiveInBackground: false,
+          playsInSilentModeIOS: true,
+          shouldDuckAndroid: true,
+          playThroughEarpieceAndroid: false,
+          interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+          interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+        });
+        return true;
+      } else {
+        Alert.alert(
+          'Audio Permission Required',
+          'To use high-quality ElevenLabs voices, please allow audio permissions in your device settings. The app will use built-in voices instead.',
+          [{ text: 'OK' }]
+        );
+        return false;
+      }
+    } catch (error) {
+      console.error('Failed to request permissions:', error);
+      Alert.alert(
+        'Permission Error', 
+        'Unable to request audio permissions. Using built-in voices instead.',
+        [{ text: 'OK' }]
+      );
+      return false;
     }
   }
 
@@ -165,16 +243,53 @@ export class VoiceService {
     }
 
     try {
-      if (voice.provider === 'elevenlabs' && this.isElevenLabsConfigured) {
+      // Check if we should use ElevenLabs
+      if (voice.provider === 'elevenlabs' && this.isElevenLabsConfigured && this.audioPermissionsGranted) {
         await this.speakWithElevenLabs(text, voice, options, callbacks);
       } else {
-        await this.speakWithExpoSpeech(text, voice, options, callbacks);
+        // Fall back to built-in TTS if ElevenLabs is not available or permissions denied
+        if (voice.provider === 'elevenlabs' && (!this.audioPermissionsGranted || !this.isElevenLabsConfigured)) {
+          console.log('🔄 Falling back to built-in TTS (permissions or config issue)');
+          const fallbackVoice = this.getBuiltInFallbackVoice();
+          if (fallbackVoice) {
+            await this.speakWithExpoSpeech(text, fallbackVoice, options, callbacks);
+          } else {
+            callbacks?.onError?.('No fallback voice available');
+          }
+        } else {
+          await this.speakWithExpoSpeech(text, voice, options, callbacks);
+        }
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error('Speech error:', errorMessage);
+      console.error('❌ Speech error:', errorMessage);
+      
+      // Try fallback to built-in TTS if we haven't already
+      if (voice.provider === 'elevenlabs') {
+        console.log('🔄 Error with ElevenLabs, trying built-in TTS fallback...');
+        try {
+          const fallbackVoice = this.getBuiltInFallbackVoice();
+          if (fallbackVoice) {
+            await this.speakWithExpoSpeech(text, fallbackVoice, options, callbacks);
+            return;
+          }
+        } catch (fallbackError) {
+          console.error('❌ Fallback TTS also failed:', fallbackError);
+        }
+      }
+      
       callbacks?.onError?.(errorMessage);
     }
+  }
+
+  private getBuiltInFallbackVoice(): VoiceOption | null {
+    // Get all built-in voices (not just the ones in availableVoices)
+    const builtInVoices = this.availableVoices.filter(voice => voice.provider === 'expo-speech');
+    
+    // Return the best built-in voice or any available one
+    return builtInVoices.find(voice => 
+      voice.language.startsWith('en')
+    ) || builtInVoices[0] || null;
   }
 
   private async speakWithElevenLabs(
@@ -234,37 +349,39 @@ export class VoiceService {
 
       console.log('✅ ElevenLabs audio generated successfully');
       
+      // Check permissions before attempting playback
+      if (!this.audioPermissionsGranted) {
+        throw new Error('Audio permissions not granted for ElevenLabs playback');
+      }
+      
       // Play the audio using expo-av
       const audioArrayBuffer = await response.arrayBuffer();
       const audioBase64 = this.arrayBufferToBase64(audioArrayBuffer);
       const audioUri = `data:audio/mpeg;base64,${audioBase64}`;
       
-      // Configure audio mode for playback
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        staysActiveInBackground: false,
-        playsInSilentModeIOS: true,
-        shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: false,
-      });
-      
       callbacks?.onStart?.();
       
-      // Create and play the sound
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: audioUri },
-        { shouldPlay: true, volume: options.volume || 1.0 }
-      );
-      
-      // Set up playback status listener
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded) {
-          if (status.didJustFinish) {
-            sound.unloadAsync();
-            callbacks?.onDone?.();
+      // Create and play the sound with error handling
+      try {
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: audioUri },
+          { shouldPlay: true, volume: options.volume || 1.0 }
+        );
+        
+        // Set up playback status listener
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded) {
+            if (status.didJustFinish) {
+              sound.unloadAsync();
+              callbacks?.onDone?.();
+            }
           }
-        }
-      });
+        });
+        
+      } catch (audioError) {
+        console.error('❌ Audio playback error:', audioError);
+        throw new Error(`Audio playback failed: ${audioError instanceof Error ? audioError.message : 'Unknown audio error'}`);
+      }
       
     } catch (error) {
       console.error('ElevenLabs TTS error:', error);

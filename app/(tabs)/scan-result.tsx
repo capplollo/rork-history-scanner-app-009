@@ -299,12 +299,20 @@ export default function ScanResultScreen() {
           console.log('No existing speech to stop');
         }
         
+        // Check and request permissions if needed for ElevenLabs
+        if (selectedVoice?.provider === 'elevenlabs') {
+          const hasPermissions = await voiceService.requestPermissionsWithUserPrompt();
+          if (!hasPermissions) {
+            console.log('🔄 Audio permissions denied, will fallback to built-in voice');
+          }
+        }
+        
         setIsPlaying(true);
         setIsPaused(false);
         
         // Use the new voice service with selected voice
         await voiceService.speak(fullText, {
-          voice: selectedVoice?.id,
+          voice: selectedVoice?.identifier,
           language: 'en-US',
         }, {
           onStart: () => {
@@ -317,29 +325,26 @@ export default function ScanResultScreen() {
             setIsPlaying(false);
             setIsPaused(false);
           },
-          onStopped: () => {
-            console.log('✅ Speech stopped');
-            setIsPlaying(false);
-            setIsPaused(false);
-          },
-          onError: (error: any) => {
+          onError: (error: string) => {
             console.error('❌ Speech error:', error);
             setIsPlaying(false);
             setIsPaused(false);
             
             // Show user-friendly error message
             let errorMessage = 'Voice narration encountered an issue.';
-            if (error && error.message) {
-              if (error.message.includes('network')) {
-                errorMessage = 'Network issue detected. Please check your connection and try again.';
-              } else if (error.message.includes('permission')) {
-                errorMessage = 'Audio permission required. Please allow audio access and try again.';
-              } else if (error.message.includes('not supported')) {
-                errorMessage = 'Voice narration is not supported on this device.';
-              }
+            if (error.includes('network') || error.includes('fetch')) {
+              errorMessage = 'Network issue detected. Please check your connection and try again.';
+            } else if (error.includes('permission') || error.includes('not allowed')) {
+              errorMessage = 'Audio permission required. The app will use built-in voice instead.';
+            } else if (error.includes('not supported')) {
+              errorMessage = 'Voice narration is not supported on this device.';
+            } else if (error.includes('ElevenLabs')) {
+              errorMessage = 'ElevenLabs voice service is temporarily unavailable. Using built-in voice instead.';
             }
             
-            Alert.alert('Voice Narration Error', errorMessage);
+            Alert.alert('Voice Narration Notice', errorMessage, [
+              { text: 'OK', style: 'default' }
+            ]);
           }
         });
       }
