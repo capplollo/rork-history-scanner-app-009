@@ -43,37 +43,50 @@ export default function SignUpScreen() {
     }
 
     setIsLoading(true);
-    const { error } = await signUp(email, password, fullName);
-    setIsLoading(false);
-
-    if (error) {
-      console.error('Sign up error:', error);
-      let errorMessage = 'An unexpected error occurred during sign up';
+    console.log('Attempting signup for:', email);
+    
+    try {
+      const { error } = await signUp(email, password, fullName);
       
-      // Handle specific error types
-      if (error.message) {
-        if (error.message.includes('User already registered')) {
-          errorMessage = 'An account with this email already exists. Please try signing in instead.';
-        } else if (error.message.includes('Invalid email')) {
-          errorMessage = 'Please enter a valid email address.';
-        } else if (error.message.includes('Password should be at least')) {
-          errorMessage = 'Password must be at least 6 characters long.';
-        } else if (error.message.includes('Profile creation failed')) {
-          errorMessage = 'Account created but profile setup failed. You can still sign in.';
-        } else {
-          errorMessage = error.message;
+      if (error) {
+        console.error('Sign up error:', error);
+        let errorMessage = 'An unexpected error occurred during sign up';
+        
+        // Handle specific error types
+        if (error.message) {
+          if (error.message.includes('User already registered') || error.message.includes('already been registered')) {
+            errorMessage = 'An account with this email already exists. Please try signing in instead.';
+          } else if (error.message.includes('Invalid email')) {
+            errorMessage = 'Please enter a valid email address.';
+          } else if (error.message.includes('Password should be at least')) {
+            errorMessage = 'Password must be at least 6 characters long.';
+          } else if (error.message.includes('Profile creation failed')) {
+            errorMessage = 'Account created but profile setup failed. You can still sign in.';
+          } else if (error.message.includes('Unable to validate email address')) {
+            errorMessage = 'Please enter a valid email address.';
+          } else if (error.message.includes('Signup is disabled')) {
+            errorMessage = 'Signup is currently disabled. Please contact support.';
+          } else {
+            errorMessage = error.message;
+          }
+        } else if (typeof error === 'object' && error !== null) {
+          errorMessage = 'Please check your internet connection and try again.';
         }
-      } else if (typeof error === 'object' && error !== null) {
-        errorMessage = 'Please check your internet connection and try again.';
+        
+        Alert.alert('Sign Up Failed', errorMessage);
+      } else {
+        console.log('Signup successful');
+        Alert.alert(
+          'Success',
+          'Account created successfully! Please check your email to verify your account.',
+          [{ text: 'OK', onPress: () => router.replace('/login') }]
+        );
       }
-      
-      Alert.alert('Sign Up Failed', errorMessage);
-    } else {
-      Alert.alert(
-        'Success',
-        'Account created successfully! Please check your email to verify your account.',
-        [{ text: 'OK', onPress: () => router.replace('/login') }]
-      );
+    } catch (error) {
+      console.error('Unexpected signup error:', error);
+      Alert.alert('Sign Up Failed', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -41,6 +41,8 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
   const signUp = useCallback(async (email: string, password: string, fullName?: string) => {
     try {
       setLoading(true);
+      console.log('Starting signup process for:', email);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -51,44 +53,52 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
         },
       });
 
-      if (!error && data.user) {
-        // Create profile in database
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            email: data.user.email!,
-            full_name: fullName || null,
-          });
+      if (error) {
+        console.error('Auth signup error:', error);
+        return { error };
+      }
 
-        if (profileError) {
-          console.error('Error creating profile:', {
-            message: profileError.message,
-            details: profileError.details,
-            hint: profileError.hint,
-            code: profileError.code,
-            fullError: profileError
-          });
-          
-          // Check if it's a table not found error
-          if (profileError.code === 'PGRST116' || profileError.message?.includes('relation "profiles" does not exist')) {
-            console.warn('Profiles table does not exist, continuing without profile creation');
-            // Continue without creating profile - user account is still created
+      if (data.user) {
+        console.log('User created successfully, ID:', data.user.id);
+        
+        // Try to create profile in database (this might fail if table doesn't exist)
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              email: data.user.email!,
+              full_name: fullName || null,
+            });
+
+          if (profileError) {
+            console.error('Error creating profile:', {
+              message: profileError.message,
+              details: profileError.details,
+              hint: profileError.hint,
+              code: profileError.code,
+            });
+            
+            // Check if it's a table not found error
+            if (profileError.code === 'PGRST116' || profileError.message?.includes('relation "profiles" does not exist')) {
+              console.warn('Profiles table does not exist, continuing without profile creation');
+              // Continue without creating profile - user account is still created
+              return { error: null };
+            }
+            
+            // For other profile creation issues, log but don't fail signup
+            console.warn('Profile creation failed but user account was created:', profileError.message);
             return { error: null };
           }
           
-          // Return a more specific error for other profile creation issues
-          return { 
-            error: {
-              message: `Profile creation failed: ${profileError.message || 'Unknown database error'}`,
-              name: 'ProfileCreationError',
-              status: profileError.code || 500
-            } as AuthError 
-          };
+          console.log('Profile created successfully');
+        } catch (profileError) {
+          console.warn('Profile creation failed but user account was created:', profileError);
+          return { error: null };
         }
       }
 
-      return { error };
+      return { error: null };
     } catch (error) {
       console.error('Signup error:', error);
       return { error: error as AuthError };
