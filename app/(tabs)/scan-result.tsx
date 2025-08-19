@@ -12,12 +12,14 @@ import {
   Alert,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle, Volume2, VolumeX, Pause } from "lucide-react-native";
+import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle, Volume2, VolumeX, Pause, Settings } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Speech from 'expo-speech';
 import { mockMonuments } from "@/data/mockMonuments";
 import { HistoryItem } from "@/providers/HistoryProvider";
 import { scanResultStore } from "@/services/scanResultStore";
+import { voiceService, VoiceOption } from "@/services/voiceService";
+import VoiceSettings from "@/components/VoiceSettings";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -26,18 +28,35 @@ export default function ScanResultScreen() {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showVoiceSettings, setShowVoiceSettings] = useState<boolean>(false);
+  const [selectedVoice, setSelectedVoice] = useState<VoiceOption | null>(null);
   
   // Cleanup speech when component unmounts or when navigating away
   useEffect(() => {
     return () => {
       // Stop speech when component unmounts
-      Speech.stop();
+      voiceService.stop();
       // Clean up stored result when component unmounts
       if (resultId && typeof resultId === 'string') {
         scanResultStore.clear(resultId);
       }
     };
   }, [resultId]);
+
+  // Initialize voice service and set default voice
+  useEffect(() => {
+    const initializeVoice = async () => {
+      try {
+        await voiceService.initialize();
+        const bestVoice = voiceService.getBestVoice();
+        setSelectedVoice(bestVoice);
+      } catch (error) {
+        console.error('Error initializing voice service:', error);
+      }
+    };
+    
+    initializeVoice();
+  }, []);
   
   const [monument, setMonument] = useState<HistoryItem | undefined>(undefined);
   
@@ -242,19 +261,12 @@ export default function ScanResultScreen() {
         if (isPaused) {
           // Resume
           console.log('Resuming speech...');
-          if (Platform.OS !== 'web') {
-            await Speech.resume();
-          }
+          await voiceService.resume();
           setIsPaused(false);
         } else {
           // Pause
           console.log('Pausing speech...');
-          if (Platform.OS !== 'web') {
-            await Speech.pause();
-          } else {
-            await Speech.stop();
-            setIsPlaying(false);
-          }
+          await voiceService.pause();
           setIsPaused(true);
         }
       } else {
@@ -275,17 +287,14 @@ export default function ScanResultScreen() {
         }
         
         // Check if speech is available
-        if (Platform.OS === 'web') {
-          const speechSynthesis = window.speechSynthesis;
-          if (!speechSynthesis) {
-            Alert.alert('Speech Not Available', 'Speech synthesis is not supported in this browser. Please try using a different browser or device.');
-            return;
-          }
+        if (!voiceService.isSupported()) {
+          Alert.alert('Speech Not Available', 'Speech synthesis is not supported on this device. Please try using a different device.');
+          return;
         }
         
         // Stop any existing speech first
         try {
-          await Speech.stop();
+          await voiceService.stop();
         } catch (stopError) {
           console.log('No existing speech to stop');
         }
@@ -293,21 +302,11 @@ export default function ScanResultScreen() {
         setIsPlaying(true);
         setIsPaused(false);
         
-        // Enhanced speech settings for more natural, realistic voice
-        const speechOptions: any = {
+        // Use the new voice service with selected voice
+        await voiceService.speak(fullText, {
+          voice: selectedVoice?.id,
           language: 'en-US',
-          pitch: Platform.select({
-            ios: 0.95,
-            android: 1.0,
-            web: 1.0,
-            default: 1.0
-          }),
-          rate: Platform.select({
-            ios: 0.65,
-            android: 0.7,
-            web: 0.8,
-            default: 0.7
-          }),
+        }, {
           onStart: () => {
             console.log('✅ Speech started successfully');
             setIsPlaying(true);
@@ -342,16 +341,7 @@ export default function ScanResultScreen() {
             
             Alert.alert('Voice Narration Error', errorMessage);
           }
-        };
-        
-        // Add iOS-specific options only on iOS
-        if (Platform.OS === 'ios') {
-          speechOptions.quality = 'enhanced';
-          speechOptions.voice = 'com.apple.ttsbundle.Samantha-compact';
-        }
-        
-        console.log('Starting speech with options:', speechOptions);
-        await Speech.speak(fullText, speechOptions);
+        });
       }
     } catch (error) {
       console.error('❌ Speech control error:', error);
@@ -368,7 +358,7 @@ export default function ScanResultScreen() {
 
   const handleStop = async () => {
     try {
-      await Speech.stop();
+      await voiceService.stop();
       setIsPlaying(false);
       setIsPaused(false);
     } catch (error) {
@@ -503,9 +493,22 @@ export default function ScanResultScreen() {
           {/* Voice Narrator - Only show when monument is identified and has content */}
           {monument && monument.name && (
             <View style={styles.narratorSection}>
-              <Text style={styles.narratorTitle}>🎧 AI Voice Narrator</Text>
+              <View style={styles.narratorHeader}>
+                <Text style={styles.narratorTitle}>🎧 AI Voice Narrator</Text>
+                <TouchableOpacity 
+                  style={styles.voiceSettingsButton}
+                  onPress={() => setShowVoiceSettings(true)}
+                >
+                  <Settings size={16} color="#6b7280" />
+                </TouchableOpacity>
+              </View>
               <Text style={styles.narratorDescription}>
                 Experience an immersive audio journey through the history and stories of this monument with our enhanced AI narrator
+                {selectedVoice && (
+                  <Text style={styles.currentVoiceText}>
+                    {'\n'}Current voice: {selectedVoice.name}
+                  </Text>
+                )}
               </Text>
               <View style={styles.narratorControls}>
                 <TouchableOpacity 
@@ -653,6 +656,17 @@ export default function ScanResultScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      
+      {/* Voice Settings Modal */}
+      <VoiceSettings
+        isVisible={showVoiceSettings}
+        onClose={() => setShowVoiceSettings(false)}
+        onVoiceChange={(voice) => {
+          setSelectedVoice(voice);
+          console.log('Voice changed to:', voice.name);
+        }}
+        currentVoice={selectedVoice}
+      />
     </SafeAreaView>
   );
 }
@@ -1010,6 +1024,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  narratorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  voiceSettingsButton: {
+    padding: 8,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 8,
+  },
   narratorTitle: {
     fontSize: 17,
     fontFamily: Platform.select({
@@ -1079,6 +1104,12 @@ const styles = StyleSheet.create({
     color: "#6b7280",
     marginBottom: 15,
     lineHeight: 20,
+  },
+  currentVoiceText: {
+    fontSize: 12,
+    color: "#8B4513",
+    fontStyle: "italic",
+    fontWeight: "500",
   },
   playingIndicatorContainer: {
     flexDirection: "row",
