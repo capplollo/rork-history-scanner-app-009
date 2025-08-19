@@ -63,23 +63,37 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
         
         // Try to create profile in database (this might fail if table doesn't exist)
         try {
-          const { error: profileError } = await supabase
+          console.log('Attempting to create profile for user:', data.user.id);
+          console.log('Profile data:', {
+            id: data.user.id,
+            email: data.user.email,
+            full_name: fullName
+          });
+          
+          const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .insert({
               id: data.user.id,
               email: data.user.email!,
               full_name: fullName || null,
-            });
+            })
+            .select()
+            .single();
 
           if (profileError) {
             // Better error logging to avoid [object Object]
-            console.error('Error creating profile:', {
+            const errorDetails = {
               message: profileError.message || 'Unknown error',
               details: profileError.details || 'No details',
               hint: profileError.hint || 'No hint',
               code: profileError.code || 'No code',
               fullError: JSON.stringify(profileError, null, 2)
-            });
+            };
+            
+            console.error('Error creating profile:', errorDetails);
+            console.error('Profile error message:', profileError.message);
+            console.error('Profile error code:', profileError.code);
+            console.error('Profile error details:', profileError.details);
             
             // Check if it's a table not found error
             if (profileError.code === 'PGRST116' || 
@@ -94,7 +108,7 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
             return { error: null };
           }
           
-          console.log('Profile created successfully');
+          console.log('✅ Profile created successfully:', profileData);
         } catch (profileError) {
           console.warn('Profile creation failed but user account was created. Error:', 
             profileError instanceof Error ? profileError.message : String(profileError));
