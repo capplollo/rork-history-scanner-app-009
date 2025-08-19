@@ -300,6 +300,23 @@ export default function ScannerScreen() {
         </View>
       ) : (
         <View style={styles.mainContainer}>
+          {/* Logo Section */}
+          <View style={styles.logoContainer}>
+            <View style={styles.logoIconContainer}>
+              <View style={styles.logoIcon}>
+                <View style={styles.logoRoof} />
+                <View style={styles.logoColumns}>
+                  <View style={styles.logoColumn} />
+                  <View style={styles.logoColumn} />
+                  <View style={styles.logoColumn} />
+                  <View style={styles.logoColumn} />
+                </View>
+                <View style={styles.logoBase} />
+              </View>
+            </View>
+            <Text style={styles.logoText}>Heritage Scan</Text>
+          </View>
+          
           {/* Collage Background */}
           <View style={styles.collageContainer}>
             <View style={styles.collageGrid}>
@@ -380,12 +397,65 @@ const styles = StyleSheet.create({
     flex: 1,
     position: "relative",
   },
+  logoContainer: {
+    alignItems: "center",
+    paddingTop: 60,
+    paddingBottom: 30,
+    backgroundColor: "#2C3E50",
+    zIndex: 20,
+  },
+  logoIconContainer: {
+    marginBottom: 12,
+  },
+  logoIcon: {
+    width: 60,
+    height: 50,
+    alignItems: "center",
+  },
+  logoRoof: {
+    width: 50,
+    height: 0,
+    borderLeftWidth: 25,
+    borderRightWidth: 25,
+    borderBottomWidth: 8,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: "#ffffff",
+    marginBottom: 2,
+  },
+  logoColumns: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: 50,
+    height: 28,
+    marginBottom: 2,
+  },
+  logoColumn: {
+    width: 6,
+    height: 28,
+    backgroundColor: "#ffffff",
+    borderRadius: 1,
+  },
+  logoBase: {
+    width: 56,
+    height: 6,
+    backgroundColor: "#ffffff",
+    borderRadius: 1,
+  },
+  logoText: {
+    fontSize: 24,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "400",
+    color: "#ffffff",
+    letterSpacing: 0.5,
+  },
   collageContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    flex: 1,
+    minHeight: screenHeight - 200,
   },
   collageGrid: {
     flex: 1,
@@ -429,7 +499,11 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   contentOverlay: {
-    flex: 1,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 30,
