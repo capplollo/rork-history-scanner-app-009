@@ -62,7 +62,14 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
           });
 
         if (profileError) {
-          console.error('Error creating profile:', profileError);
+          console.error('Error creating profile:', {
+            message: profileError.message,
+            details: profileError.details,
+            hint: profileError.hint,
+            code: profileError.code
+          });
+          // Don't fail the signup if profile creation fails
+          // The user can still use the app, profile can be created later
         }
       }
 
