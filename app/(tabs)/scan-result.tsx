@@ -147,11 +147,18 @@ export default function ScanResultScreen() {
       if (isPlaying) {
         if (isPaused) {
           // Resume
-          await Speech.resume();
+          if (Platform.OS !== 'web') {
+            await Speech.resume();
+          }
           setIsPaused(false);
         } else {
           // Pause
-          await Speech.pause();
+          if (Platform.OS !== 'web') {
+            await Speech.pause();
+          } else {
+            await Speech.stop();
+            setIsPlaying(false);
+          }
           setIsPaused(true);
         }
       } else {
@@ -163,33 +170,32 @@ export default function ScanResultScreen() {
           return;
         }
         
+        // Check if speech is available
+        if (Platform.OS === 'web') {
+          const speechSynthesis = window.speechSynthesis;
+          if (!speechSynthesis) {
+            Alert.alert('Speech Not Available', 'Speech synthesis is not supported in this browser.');
+            return;
+          }
+        }
+        
         setIsPlaying(true);
         setIsPaused(false);
         
         // Enhanced speech settings for more natural, realistic voice
-        const speechOptions = {
-          language: Platform.select({
-            ios: 'en-US', // iOS has better voice quality
-            android: 'en-US',
-            default: 'en-US'
-          }),
+        const speechOptions: any = {
+          language: 'en-US',
           pitch: Platform.select({
-            ios: 0.95, // Slightly lower pitch for more natural sound on iOS
+            ios: 0.95,
             android: 1.0,
+            web: 1.0,
             default: 1.0
           }),
           rate: Platform.select({
-            ios: 0.65, // Slower rate for better comprehension and more natural delivery
+            ios: 0.65,
             android: 0.7,
+            web: 0.8,
             default: 0.7
-          }),
-          quality: Platform.select({
-            ios: 'enhanced' as any, // Use enhanced quality on iOS if available
-            default: 'default' as any
-          }),
-          voice: Platform.select({
-            ios: 'com.apple.ttsbundle.Samantha-compact', // Try to use a more natural voice on iOS
-            default: undefined
           }),
           onStart: () => {
             console.log('Speech started');
@@ -210,16 +216,25 @@ export default function ScanResultScreen() {
             console.error('Speech error:', error);
             setIsPlaying(false);
             setIsPaused(false);
-            Alert.alert('Speech Error', 'Unable to play audio. Please check your device settings and try again.');
+            // Don't show alert for minor errors, just log them
+            console.warn('Speech playback encountered an issue');
           }
         };
+        
+        // Add iOS-specific options only on iOS
+        if (Platform.OS === 'ios') {
+          speechOptions.quality = 'enhanced';
+          speechOptions.voice = 'com.apple.ttsbundle.Samantha-compact';
+        }
         
         await Speech.speak(fullText, speechOptions);
       }
     } catch (error) {
+      console.error('Speech control error:', error);
       setIsPlaying(false);
       setIsPaused(false);
-      Alert.alert('Error', 'Unable to control audio playback. Please try again.');
+      // Don't show alert for every error, just reset state
+      console.warn('Speech control encountered an issue, resetting state');
     }
   };
 
