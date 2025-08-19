@@ -95,6 +95,8 @@ Respond ONLY in valid JSON format:
     ];
 
     console.log('Sending request to AI API...');
+    console.log('Request payload:', JSON.stringify({ messages: messages }, null, 2));
+    
     const response = await fetch('https://toolkit.rork.com/text/llm/', {
       method: 'POST',
       headers: {
@@ -105,10 +107,26 @@ Respond ONLY in valid JSON format:
       })
     });
 
+    console.log('AI API response status:', response.status);
+    console.log('AI API response headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI API error:', response.status, response.statusText, errorText);
-      throw new Error(`AI API error: ${response.status} ${response.statusText}`);
+      console.error('AI API error details:');
+      console.error('Status:', response.status, response.statusText);
+      console.error('Response body:', errorText);
+      console.error('Request was:', JSON.stringify({ messages: messages }, null, 2));
+      
+      // Provide more specific error messages
+      if (response.status === 500) {
+        throw new Error('AI service is temporarily unavailable. Please try again in a few moments.');
+      } else if (response.status === 429) {
+        throw new Error('Too many requests. Please wait a moment and try again.');
+      } else if (response.status === 413) {
+        throw new Error('Image is too large. Please try with a smaller image.');
+      } else {
+        throw new Error(`AI API error: ${response.status} ${response.statusText}`);
+      }
     }
 
     const data = await response.json();
@@ -268,6 +286,9 @@ Ensure the content is informative, engaging, and properly formatted. Do NOT incl
     }
   ];
 
+  console.log('Sending detailed description request to AI API...');
+  console.log('Detailed description request payload:', JSON.stringify({ messages: messages }, null, 2));
+  
   const response = await fetch('https://toolkit.rork.com/text/llm/', {
     method: 'POST',
     headers: {
@@ -278,8 +299,21 @@ Ensure the content is informative, engaging, and properly formatted. Do NOT incl
     })
   });
 
+  console.log('Detailed description API response status:', response.status);
+
   if (!response.ok) {
-    throw new Error(`AI API error: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    console.error('Detailed description AI API error details:');
+    console.error('Status:', response.status, response.statusText);
+    console.error('Response body:', errorText);
+    
+    if (response.status === 500) {
+      throw new Error('AI service is temporarily unavailable for detailed descriptions.');
+    } else if (response.status === 429) {
+      throw new Error('Too many requests for detailed descriptions. Please wait a moment.');
+    } else {
+      throw new Error(`AI API error: ${response.status} ${response.statusText}`);
+    }
   }
 
   const data = await response.json();
