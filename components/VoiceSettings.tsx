@@ -124,7 +124,7 @@ export default function VoiceSettings({ isVisible, onClose, onVoiceChange, curre
               </View>
 
               {availableVoices.map((voice, index) => {
-                const uniqueKey = voice.identifier || `voice-${index}-${voice.name}`;
+                const uniqueKey = `${voice.provider}-${voice.identifier || index}-${voice.name.replace(/\s+/g, '-')}`;
                 return (
                   <TouchableOpacity
                     key={uniqueKey}
@@ -192,6 +192,16 @@ export default function VoiceSettings({ isVisible, onClose, onVoiceChange, curre
                     <Text style={styles.qualityItemText}>Basic - Standard device voices</Text>
                   </View>
                 </View>
+              </View>
+
+              <View style={styles.infoSection}>
+                <Text style={styles.infoTitle}>Voice Quality Tips</Text>
+                <Text style={styles.infoText}>
+                  • Premium voices (ElevenLabs) offer the most natural sound but require internet connection{"\n"}
+                  • Built-in voices work offline and are reliable for all content{"\n"}
+                  • If ElevenLabs quota is exceeded, the app automatically falls back to built-in voices{"\n"}
+                  • For best quality, ensure good internet connection when using premium voices
+                </Text>
               </View>
 
               <View style={styles.infoSection}>

@@ -1,5 +1,6 @@
 import * as Speech from 'expo-speech';
 import { Platform } from 'react-native';
+import { Audio } from 'expo-av';
 
 export interface VoiceOption {
   identifier: string;
@@ -86,15 +87,24 @@ export class VoiceService {
   private async getBuiltInVoices(): Promise<VoiceOption[]> {
     try {
       const voices = await Speech.getAvailableVoicesAsync();
-      return voices
-        .filter(voice => voice.identifier && voice.identifier.trim() !== '') // Filter out voices with empty identifiers
-        .map((voice, index) => ({
-          identifier: voice.identifier || `builtin-voice-${index}`,
-          name: `${voice.name || 'Unknown Voice'} (Built-in)`,
-          language: voice.language || 'en-US',
-          quality: 'basic',
-          provider: 'expo-speech' as const
-        }));
+      const uniqueVoices = new Map<string, VoiceOption>();
+      
+      voices
+        .filter(voice => voice.identifier && voice.identifier.trim() !== '')
+        .forEach((voice, index) => {
+          const identifier = voice.identifier || `builtin-voice-${index}`;
+          if (!uniqueVoices.has(identifier)) {
+            uniqueVoices.set(identifier, {
+              identifier,
+              name: `${voice.name || 'Unknown Voice'} (Built-in)`,
+              language: voice.language || 'en-US',
+              quality: 'basic',
+              provider: 'expo-speech' as const
+            });
+          }
+        });
+      
+      return Array.from(uniqueVoices.values());
     } catch (error) {
       console.error('Failed to get available voices:', error);
       return [];
@@ -106,8 +116,8 @@ export class VoiceService {
   }
 
   getBestVoice(): VoiceOption | null {
-    // Prioritize ElevenLabs voices for better quality
-    if (this.isElevenLabsConfigured) {
+    // Prioritize ElevenLabs voices if available and configured
+    if (this.isElevenLabsConfigured && this.elevenLabsVoices.length > 0) {
       const elevenLabsVoice = this.elevenLabsVoices.find(voice => 
         voice.language.startsWith('en') && voice.gender === 'female'
       );
@@ -116,11 +126,33 @@ export class VoiceService {
         return elevenLabsVoice;
       }
     }
-
-    // Fallback to built-in voices
-    return this.availableVoices.find(voice => 
-      voice.provider === 'expo-speech' && voice.language.startsWith('en')
-    ) || null;
+    
+    // Find the best built-in voice as fallback
+    const builtInVoices = this.availableVoices.filter(voice => voice.provider === 'expo-speech');
+    
+    // Look for high-quality English voices
+    const preferredVoice = builtInVoices.find(voice => {
+      const name = voice.name.toLowerCase();
+      const lang = voice.language.toLowerCase();
+      return lang.startsWith('en') && (
+        name.includes('enhanced') || 
+        name.includes('premium') || 
+        name.includes('neural') ||
+        name.includes('samantha') ||
+        name.includes('alex') ||
+        name.includes('karen') ||
+        name.includes('daniel')
+      );
+    });
+    
+    if (preferredVoice) {
+      return preferredVoice;
+    }
+    
+    // Fallback to any English voice
+    return builtInVoices.find(voice => 
+      voice.language.startsWith('en')
+    ) || builtInVoices[0] || null;
   }
 
   async speak(text: string, options: VoiceOptions = {}, callbacks?: {
@@ -165,7 +197,6 @@ export class VoiceService {
   ): Promise<void> {
     try {
       console.log('🎤 Using ElevenLabs TTS...');
-      callbacks?.onStart?.();
       
       if (!ELEVENLABS_API_KEY) {
         throw new Error('ElevenLabs API key not configured');
@@ -184,8 +215,10 @@ export class VoiceService {
           text: text,
           model_id: 'eleven_monolingual_v1',
           voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.5,
+            stability: 0.6,
+            similarity_boost: 0.8,
+            style: 0.2,
+            use_speaker_boost: true
           },
         }),
       });
@@ -193,34 +226,65 @@ export class VoiceService {
       if (!response.ok) {
         const error = await response.text();
         console.error('ElevenLabs API error:', error);
+        
+        // If quota exceeded, fall back to built-in TTS
+        if (error.includes('quota_exceeded')) {
+          console.log('🔄 ElevenLabs quota exceeded, falling back to built-in TTS...');
+          const fallbackVoice = this.getBestVoice();
+          if (fallbackVoice && fallbackVoice.provider === 'expo-speech') {
+            await this.speakWithExpoSpeech(text, fallbackVoice, options, callbacks);
+            return;
+          }
+        }
+        
         throw new Error(`ElevenLabs API error: ${error}`);
       }
 
       console.log('✅ ElevenLabs audio generated successfully');
       
-      // For React Native, we need to convert the audio to base64 and play it
+      // Play the audio using expo-av
       const audioArrayBuffer = await response.arrayBuffer();
       const audioBase64 = this.arrayBufferToBase64(audioArrayBuffer);
+      const audioUri = `data:audio/mpeg;base64,${audioBase64}`;
       
-      // Note: Audio data generated but not used in fallback
-      console.log('Audio data generated, length:', audioBase64.length);
+      // Configure audio mode for playback
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: false,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+      });
       
-      // For now, we'll fall back to built-in TTS since expo-av isn't installed
-      // In a full implementation, you'd use expo-av to play the audio
-      console.log('⚠️ ElevenLabs audio generated but expo-av not available for playback');
-      console.log('🔄 Falling back to built-in TTS...');
+      callbacks?.onStart?.();
       
-      // Fallback to built-in TTS
-      const fallbackVoice = this.availableVoices.find(v => v.provider === 'expo-speech');
-      if (fallbackVoice) {
-        await this.speakWithExpoSpeech(text, fallbackVoice, options, callbacks);
-      } else {
-        callbacks?.onDone?.();
-      }
+      // Create and play the sound
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: audioUri },
+        { shouldPlay: true, volume: options.volume || 1.0 }
+      );
+      
+      // Set up playback status listener
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded) {
+          if (status.didJustFinish) {
+            sound.unloadAsync();
+            callbacks?.onDone?.();
+          }
+        }
+      });
       
     } catch (error) {
       console.error('ElevenLabs TTS error:', error);
-      callbacks?.onError?.(error instanceof Error ? error.message : 'ElevenLabs error');
+      
+      // Always fall back to built-in TTS on error
+      console.log('🔄 Falling back to built-in TTS due to error...');
+      const fallbackVoice = this.getBestVoice();
+      if (fallbackVoice && fallbackVoice.provider === 'expo-speech') {
+        await this.speakWithExpoSpeech(text, fallbackVoice, options, callbacks);
+      } else {
+        callbacks?.onError?.(error instanceof Error ? error.message : 'ElevenLabs error');
+      }
     }
   }
 
@@ -271,11 +335,11 @@ export class VoiceService {
   }
 
   private getOptimalPitch(): number {
-    return Platform.OS === 'ios' ? 1.0 : 1.0;
+    return Platform.OS === 'ios' ? 1.1 : 1.0;
   }
 
   private getOptimalRate(): number {
-    return Platform.OS === 'ios' ? 0.5 : 0.8;
+    return Platform.OS === 'ios' ? 0.6 : 0.7;
   }
 
   async stop(): Promise<void> {
