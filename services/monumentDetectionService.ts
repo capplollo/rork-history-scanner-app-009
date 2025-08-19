@@ -17,7 +17,14 @@ export interface DetectionResult {
   };
 }
 
-export async function detectMonument(imageUri: string): Promise<DetectionResult> {
+export interface AdditionalInfo {
+  name: string;
+  location: string;
+  building: string;
+  notes: string;
+}
+
+export async function detectMonument(imageUri: string, additionalInfo?: AdditionalInfo): Promise<DetectionResult> {
   try {
     console.log('Starting monument detection for image:', imageUri);
     
@@ -25,15 +32,28 @@ export async function detectMonument(imageUri: string): Promise<DetectionResult>
     const base64Image = await convertImageToBase64(imageUri);
     console.log('Image converted to base64, length:', base64Image.length);
     
-    const messages = [
-      {
-        role: 'user' as const,
-        content: [
-          {
-            type: 'text' as const,
-            text: `Analyze this image carefully and identify if it contains a famous historical monument, landmark, or significant architectural structure. Look at architectural details, distinctive features, and any visible text or signs.
-
-If you recognize a specific monument, provide:
+    // Build the analysis prompt with optional additional context
+    let analysisPrompt = `Analyze this image carefully and identify if it contains a famous historical monument, landmark, or significant architectural structure. Look at architectural details, distinctive features, and any visible text or signs.`;
+    
+    // Add additional context if provided
+    if (additionalInfo && (additionalInfo.name || additionalInfo.location || additionalInfo.building || additionalInfo.notes)) {
+      analysisPrompt += `\n\nAdditional context provided by the user:`;
+      if (additionalInfo.name) {
+        analysisPrompt += `\n- Monument/Art Name: ${additionalInfo.name}`;
+      }
+      if (additionalInfo.location) {
+        analysisPrompt += `\n- Location: ${additionalInfo.location}`;
+      }
+      if (additionalInfo.building) {
+        analysisPrompt += `\n- Building/Museum: ${additionalInfo.building}`;
+      }
+      if (additionalInfo.notes) {
+        analysisPrompt += `\n- Additional Notes: ${additionalInfo.notes}`;
+      }
+      analysisPrompt += `\n\nUse this context to help with your analysis, but still verify what you see in the image. If the provided information matches what you observe, increase your confidence. If there's a mismatch, trust what you see in the image.`;
+    }
+    
+    analysisPrompt += `\n\nIf you recognize a specific monument, provide:
 1. The exact name of the monument
 2. Its location (city, country)
 3. Historical period or construction dates
@@ -56,7 +76,15 @@ Respond ONLY in valid JSON format:
   "significance": "Historical or cultural significance",
   "facts": ["fact1", "fact2", "fact3"],
   "isRecognized": true/false
-}`
+}`;
+
+    const messages = [
+      {
+        role: 'user' as const,
+        content: [
+          {
+            type: 'text' as const,
+            text: analysisPrompt
           },
           {
             type: 'image' as const,

@@ -11,9 +11,10 @@ import {
   Platform,
   Dimensions,
   ImageBackground,
+  TextInput,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, MapPin, Clock } from "lucide-react-native";
+import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, MapPin, Clock, ChevronDown, ChevronUp, Info } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useHistory } from "@/providers/HistoryProvider";
@@ -27,6 +28,13 @@ export default function ScannerScreen() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<string>("");
+  const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
+  const [additionalInfo, setAdditionalInfo] = useState({
+    name: "",
+    location: "",
+    building: "",
+    notes: "",
+  });
   const { addToHistory } = useHistory();
 
   const pickImageFromGallery = async () => {
@@ -76,7 +84,7 @@ export default function ScannerScreen() {
     
     try {
       setAnalysisStatus("Analyzing with AI...");
-      const detectionResult: DetectionResult = await detectMonument(selectedImage);
+      const detectionResult: DetectionResult = await detectMonument(selectedImage, additionalInfo);
       
       console.log('Detection result:', detectionResult);
       
@@ -163,6 +171,21 @@ export default function ScannerScreen() {
 
   const clearImage = () => {
     setSelectedImage(null);
+    setShowAdditionalInfo(false);
+    setAdditionalInfo({
+      name: "",
+      location: "",
+      building: "",
+      notes: "",
+    });
+  };
+
+  const toggleAdditionalInfo = () => {
+    setShowAdditionalInfo(!showAdditionalInfo);
+  };
+
+  const updateAdditionalInfo = (field: keyof typeof additionalInfo, value: string) => {
+    setAdditionalInfo(prev => ({ ...prev, [field]: value }));
   };
 
   const featuredMonuments = [
@@ -190,6 +213,76 @@ export default function ScannerScreen() {
           <TouchableOpacity style={styles.clearButton} onPress={clearImage}>
             <X size={20} color="#ffffff" />
           </TouchableOpacity>
+          
+          {/* Additional Info Section */}
+          <View style={styles.additionalInfoSection}>
+            <TouchableOpacity 
+              style={styles.additionalInfoToggle} 
+              onPress={toggleAdditionalInfo}
+            >
+              <View style={styles.additionalInfoHeader}>
+                <Info size={16} color="#4f46e5" />
+                <Text style={styles.additionalInfoTitle}>
+                  Add context for better accuracy
+                </Text>
+              </View>
+              {showAdditionalInfo ? (
+                <ChevronUp size={20} color="#64748b" />
+              ) : (
+                <ChevronDown size={20} color="#64748b" />
+              )}
+            </TouchableOpacity>
+            
+            {showAdditionalInfo && (
+              <View style={styles.additionalInfoForm}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Monument/Art Name</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="e.g., Statue of Liberty, Eiffel Tower"
+                    value={additionalInfo.name}
+                    onChangeText={(text) => updateAdditionalInfo('name', text)}
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+                
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Location</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="e.g., Paris, France or Central Park, NYC"
+                    value={additionalInfo.location}
+                    onChangeText={(text) => updateAdditionalInfo('location', text)}
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+                
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Building/Museum</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="e.g., Louvre Museum, St. Peter's Basilica"
+                    value={additionalInfo.building}
+                    onChangeText={(text) => updateAdditionalInfo('building', text)}
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+                
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Additional Notes</Text>
+                  <TextInput
+                    style={[styles.textInput, styles.textInputMultiline]}
+                    placeholder="Any other details that might help..."
+                    value={additionalInfo.notes}
+                    onChangeText={(text) => updateAdditionalInfo('notes', text)}
+                    placeholderTextColor="#94a3b8"
+                    multiline
+                    numberOfLines={3}
+                  />
+                </View>
+              </View>
+            )}
+          </View>
           
           <TouchableOpacity
             style={[styles.analyzeButton, isAnalyzing && styles.analyzeButtonDisabled]}
@@ -481,5 +574,54 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  additionalInfoSection: {
+    backgroundColor: "#f8fafc",
+    borderTopWidth: 1,
+    borderTopColor: "#e2e8f0",
+  },
+  additionalInfoToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  additionalInfoHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  additionalInfoTitle: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#475569",
+  },
+  additionalInfoForm: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    gap: 16,
+  },
+  inputGroup: {
+    gap: 6,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#374151",
+  },
+  textInput: {
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: "#1f2937",
+  },
+  textInputMultiline: {
+    height: 70,
+    textAlignVertical: "top",
   },
 });
