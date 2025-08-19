@@ -190,13 +190,17 @@ export default function ScannerScreen() {
 
   const collageImages = [
     "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=300&h=300&fit=crop", // Colosseum
-    "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=300&h=300&fit=crop", // Machu Picchu
+    "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=300&h=300&fit=crop", // Mona Lisa at Louvre
     "https://images.unsplash.com/photo-1549144511-f099e773c147?w=300&h=300&fit=crop", // Eiffel Tower
-    "https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=300&h=300&fit=crop", // Statue of Liberty
+    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=300&fit=crop", // Classical sculpture
     "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=300&h=300&fit=crop", // Big Ben
-    "https://images.unsplash.com/photo-1471919743851-c4df8b6ee133?w=300&h=300&fit=crop", // Taj Mahal
+    "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=300&h=300&fit=crop", // Renaissance painting
     "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop", // Parthenon
-    "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=300&h=300&fit=crop", // Christ the Redeemer
+    "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=300&h=300&fit=crop", // Modern art sculpture
+    "https://images.unsplash.com/photo-1471919743851-c4df8b6ee133?w=300&h=300&fit=crop", // Taj Mahal
+    "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=300&h=300&fit=crop", // Ancient Greek art
+    "https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=300&h=300&fit=crop", // Statue of Liberty
+    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=300&fit=crop", // Classical art piece
   ];
 
   return (
