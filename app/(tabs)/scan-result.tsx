@@ -31,48 +31,60 @@ export default function ScanResultScreen() {
     return () => {
       // Stop speech when component unmounts
       Speech.stop();
-    };
-  }, []);
-  
-  let monument: HistoryItem | undefined;
-  
-  // Try to get data from resultId first (new method), then scanData (legacy), then monumentId
-  if (resultId && typeof resultId === 'string') {
-    try {
-      const retrievedMonument = scanResultStore.retrieve(resultId);
-      if (retrievedMonument) {
-        monument = retrievedMonument;
-        console.log('Retrieved monument from store:', monument.name);
-        // Clean up the stored result after retrieval to prevent memory leaks
+      // Clean up stored result when component unmounts
+      if (resultId && typeof resultId === 'string') {
         scanResultStore.clear(resultId);
-      } else {
-        console.warn('No monument found for resultId:', resultId);
       }
-    } catch (error) {
-      console.error('Error retrieving monument from store:', error);
-    }
-  }
+    };
+  }, [resultId]);
   
-  // Legacy support for scanData (in case some old navigation still uses it)
-  if (!monument && scanData && typeof scanData === 'string') {
-    try {
-      monument = JSON.parse(scanData) as HistoryItem;
-    } catch (error) {
-      console.error('Error parsing scan data:', error);
-    }
-  }
+  const [monument, setMonument] = useState<HistoryItem | undefined>(undefined);
   
-  // Fallback to mock data if no scan data
-  if (!monument && monumentId) {
-    const mockMonument = mockMonuments.find(m => m.id === monumentId);
-    if (mockMonument) {
-      monument = {
-        ...mockMonument,
-        scannedImage: mockMonument.image,
-        scannedAt: new Date().toISOString(),
-      };
+  // Load monument data on component mount
+  useEffect(() => {
+    let loadedMonument: HistoryItem | undefined;
+    
+    // Try to get data from resultId first (new method), then scanData (legacy), then monumentId
+    if (resultId && typeof resultId === 'string') {
+      try {
+        const retrievedMonument = scanResultStore.retrieve(resultId);
+        if (retrievedMonument) {
+          loadedMonument = retrievedMonument;
+          console.log('Retrieved monument from store:', loadedMonument.name);
+          // Don't clear immediately - keep it for the session
+        } else {
+          console.warn('No monument found for resultId:', resultId);
+        }
+      } catch (error) {
+        console.error('Error retrieving monument from store:', error);
+      }
     }
-  }
+    
+    // Legacy support for scanData (in case some old navigation still uses it)
+    if (!loadedMonument && scanData && typeof scanData === 'string') {
+      try {
+        loadedMonument = JSON.parse(scanData) as HistoryItem;
+      } catch (error) {
+        console.error('Error parsing scan data:', error);
+      }
+    }
+    
+    // Fallback to mock data if no scan data
+    if (!loadedMonument && monumentId) {
+      const mockMonument = mockMonuments.find(m => m.id === monumentId);
+      if (mockMonument) {
+        loadedMonument = {
+          ...mockMonument,
+          scannedImage: mockMonument.image,
+          scannedAt: new Date().toISOString(),
+        };
+      }
+    }
+    
+    setMonument(loadedMonument);
+  }, [resultId, scanData, monumentId]);
+  
+
 
   const getFullText = () => {
     if (!monument) {
