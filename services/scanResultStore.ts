@@ -8,31 +8,75 @@ class ScanResultStore {
     const id = `scan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     try {
+      console.log('Storing scan result with ID:', id);
+      console.log('Original result name:', result.name);
+      
+      // Validate the result before storing
+      if (!result || !result.name || result.name.trim().length === 0) {
+        console.error('Invalid scan result: missing or empty name');
+        throw new Error('Invalid scan result data');
+      }
+      
       // Create a copy with size-optimized data for storage
       const optimizedResult = this.optimizeForStorage(result);
       
+      // Validate optimized result
+      if (!optimizedResult.name || optimizedResult.name.trim().length === 0) {
+        console.error('Optimized result is invalid: missing name');
+        throw new Error('Optimization failed');
+      }
+      
       // Check total size before storing
       const serialized = JSON.stringify(optimizedResult);
+      console.log('Serialized result size:', serialized.length, 'bytes');
+      
       if (serialized.length > 50000) { // 50KB limit per item
         console.warn('Scan result too large, applying emergency optimization');
         const emergencyResult = this.createEmergencyResult(result);
         this.results.set(id, emergencyResult);
+        console.log('Stored emergency result');
       } else {
         this.results.set(id, optimizedResult);
+        console.log('Stored optimized result successfully');
       }
       
-      // Clean up old results more aggressively (keep only last 3)
-      if (this.results.size > 3) {
+      // Clean up old results more aggressively (keep only last 5 instead of 3)
+      if (this.results.size > 5) {
         const keys = Array.from(this.results.keys());
-        const oldestKey = keys[0];
-        this.results.delete(oldestKey);
+        const keysToRemove = keys.slice(0, keys.length - 5);
+        keysToRemove.forEach(key => {
+          this.results.delete(key);
+          console.log('Cleaned up old result:', key);
+        });
       }
       
+      console.log('Current store size:', this.results.size, 'items');
       return id;
     } catch (error) {
       console.error('Error storing scan result:', error);
-      // Return a simple ID even if storage fails
-      return id;
+      // Try to store a minimal version as fallback
+      try {
+        const minimalResult = {
+          id: result.id || 'unknown',
+          name: result.name || 'Unknown Monument',
+          location: result.location || 'Unknown Location',
+          period: result.period || 'Unknown Period',
+          description: 'Monument information available',
+          significance: 'Historical significance',
+          facts: ['This monument has historical importance'],
+          image: '',
+          scannedImage: '',
+          scannedAt: result.scannedAt || new Date().toISOString(),
+          confidence: result.confidence || 50,
+          isRecognized: result.isRecognized || false,
+        };
+        this.results.set(id, minimalResult);
+        console.log('Stored minimal fallback result');
+        return id;
+      } catch (fallbackError) {
+        console.error('Failed to store even minimal result:', fallbackError);
+        return id;
+      }
     }
   }
   
@@ -93,7 +137,24 @@ class ScanResultStore {
   }
   
   retrieve(id: string): HistoryItem | null {
-    return this.results.get(id) || null;
+    try {
+      console.log('Retrieving scan result with ID:', id);
+      console.log('Available IDs in store:', Array.from(this.results.keys()));
+      
+      const result = this.results.get(id);
+      
+      if (result) {
+        console.log('✅ Successfully retrieved result:', result.name);
+        return result;
+      } else {
+        console.warn('❌ No result found for ID:', id);
+        console.log('Current store contents:', this.results.size, 'items');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error retrieving scan result:', error);
+      return null;
+    }
   }
   
   clear(id: string): void {

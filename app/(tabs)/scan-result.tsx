@@ -25,6 +25,7 @@ export default function ScanResultScreen() {
   const { monumentId, scanData, resultId } = useLocalSearchParams();
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   
   // Cleanup speech when component unmounts or when navigating away
   useEffect(() => {
@@ -40,131 +41,214 @@ export default function ScanResultScreen() {
   
   const [monument, setMonument] = useState<HistoryItem | undefined>(undefined);
   
-  // Load monument data on component mount
+  // Load monument data on component mount with better error handling and retry logic
   useEffect(() => {
-    let loadedMonument: HistoryItem | undefined;
-    
-    // Try to get data from resultId first (new method), then scanData (legacy), then monumentId
-    if (resultId && typeof resultId === 'string') {
-      try {
-        const retrievedMonument = scanResultStore.retrieve(resultId);
-        if (retrievedMonument) {
-          loadedMonument = retrievedMonument;
-          console.log('Retrieved monument from store:', loadedMonument.name);
-          // Don't clear immediately - keep it for the session
-        } else {
-          console.warn('No monument found for resultId:', resultId);
+    const loadMonumentData = async () => {
+      let loadedMonument: HistoryItem | undefined;
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      while (!loadedMonument && retryCount < maxRetries) {
+        console.log(`Attempting to load monument data (attempt ${retryCount + 1}/${maxRetries})`);
+        
+        // Try to get data from resultId first (new method)
+        if (resultId && typeof resultId === 'string') {
+          try {
+            const retrievedMonument = scanResultStore.retrieve(resultId);
+            if (retrievedMonument && retrievedMonument.name) {
+              loadedMonument = retrievedMonument;
+              console.log('✅ Retrieved monument from store:', loadedMonument.name);
+              break;
+            } else {
+              console.warn(`No valid monument found for resultId: ${resultId} (attempt ${retryCount + 1})`);
+            }
+          } catch (error) {
+            console.error('Error retrieving monument from store:', error);
+          }
         }
-      } catch (error) {
-        console.error('Error retrieving monument from store:', error);
+        
+        // Legacy support for scanData (in case some old navigation still uses it)
+        if (!loadedMonument && scanData && typeof scanData === 'string') {
+          try {
+            const parsedData = JSON.parse(scanData) as HistoryItem;
+            if (parsedData && parsedData.name) {
+              loadedMonument = parsedData;
+              console.log('✅ Retrieved monument from scanData:', loadedMonument.name);
+              break;
+            }
+          } catch (error) {
+            console.error('Error parsing scan data:', error);
+          }
+        }
+        
+        // Fallback to mock data if no scan data
+        if (!loadedMonument && monumentId) {
+          const mockMonument = mockMonuments.find(m => m.id === monumentId);
+          if (mockMonument) {
+            loadedMonument = {
+              ...mockMonument,
+              scannedImage: mockMonument.image,
+              scannedAt: new Date().toISOString(),
+            };
+            console.log('✅ Retrieved monument from mock data:', loadedMonument.name);
+            break;
+          }
+        }
+        
+        // If no data found, wait a bit and retry (helps with race conditions)
+        if (!loadedMonument && retryCount < maxRetries - 1) {
+          console.log(`No monument data found, retrying in 500ms...`);
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        retryCount++;
       }
-    }
-    
-    // Legacy support for scanData (in case some old navigation still uses it)
-    if (!loadedMonument && scanData && typeof scanData === 'string') {
-      try {
-        loadedMonument = JSON.parse(scanData) as HistoryItem;
-      } catch (error) {
-        console.error('Error parsing scan data:', error);
+      
+      if (!loadedMonument) {
+        console.error('❌ Failed to load monument data after all retries');
+        // Try to get the most recent scan from history as a last resort
+        try {
+          // This would require accessing the history provider, but for now we'll show the error
+          console.log('Attempting to get most recent scan from history...');
+        } catch (error) {
+          console.error('Failed to get recent scan from history:', error);
+        }
       }
-    }
+      
+      setMonument(loadedMonument);
+      setIsLoading(false);
+    };
     
-    // Fallback to mock data if no scan data
-    if (!loadedMonument && monumentId) {
-      const mockMonument = mockMonuments.find(m => m.id === monumentId);
-      if (mockMonument) {
-        loadedMonument = {
-          ...mockMonument,
-          scannedImage: mockMonument.image,
-          scannedAt: new Date().toISOString(),
-        };
-      }
-    }
-    
-    setMonument(loadedMonument);
+    loadMonumentData();
   }, [resultId, scanData, monumentId]);
   
 
 
   const getFullText = () => {
     if (!monument) {
+      console.warn('No monument data available for voice narration');
       return '';
     }
     
-    // Create a more natural, narrator-style introduction
-    let fullText = `Welcome to the story of ${monument.name}. `;
-    
-    // Add location and period information with natural transitions
-    if (monument.location && monument.period) {
-      fullText += `This magnificent ${monument.period} monument stands proudly in ${monument.location}. `;
-    } else if (monument.location) {
-      fullText += `Located in the beautiful ${monument.location}. `;
-    } else if (monument.period) {
-      fullText += `This remarkable structure dates back to the ${monument.period}. `;
+    try {
+      // Validate monument data before creating text
+      if (!monument.name || monument.name.trim().length === 0) {
+        console.warn('Monument name is missing or empty');
+        return '';
+      }
+      
+      // Create a more natural, narrator-style introduction
+      let fullText = `Welcome to the story of ${monument.name}. `;
+      
+      // Add location and period information with natural transitions
+      if (monument.location && monument.period) {
+        fullText += `This magnificent ${monument.period} monument stands proudly in ${monument.location}. `;
+      } else if (monument.location) {
+        fullText += `Located in the beautiful ${monument.location}. `;
+      } else if (monument.period) {
+        fullText += `This remarkable structure dates back to the ${monument.period}. `;
+      }
+      
+      // Add a brief pause for dramatic effect
+      fullText += `Let me tell you its fascinating story. `;
+      
+      // Check if we have detailed description or fallback to basic info
+      let hasContent = false;
+      
+      if (monument.detailedDescription) {
+        if (monument.detailedDescription.quickOverview) {
+          fullText += `${monument.detailedDescription.quickOverview} `;
+          fullText += `Now, let's dive deeper into its history. `;
+          hasContent = true;
+        }
+        if (monument.detailedDescription.inDepthContext) {
+          fullText += `${monument.detailedDescription.inDepthContext} `;
+          hasContent = true;
+        }
+        if (monument.detailedDescription.curiosities) {
+          fullText += `Here's something truly fascinating about this place: ${monument.detailedDescription.curiosities} `;
+          hasContent = true;
+        }
+        if (monument.detailedDescription.keyTakeaways && monument.detailedDescription.keyTakeaways.length > 0) {
+          fullText += `To wrap up, here are the key things to remember: ${monument.detailedDescription.keyTakeaways.join('. ')}.`;
+          hasContent = true;
+        }
+      } else {
+        if (monument.description) {
+          fullText += `${monument.description} `;
+          hasContent = true;
+        }
+        if (monument.significance) {
+          fullText += `What makes this place truly special is its historical significance: ${monument.significance} `;
+          hasContent = true;
+        }
+        if (monument.facts && monument.facts.length > 0) {
+          fullText += `Here are some remarkable facts that will amaze you: ${monument.facts.join('. ')}.`;
+          hasContent = true;
+        }
+      }
+      
+      // If no content was found, create a basic description
+      if (!hasContent) {
+        fullText += `This is ${monument.name}, a remarkable historical site that has stood the test of time. `;
+        if (monument.location) {
+          fullText += `It's located in ${monument.location}. `;
+        }
+        if (monument.period) {
+          fullText += `This structure dates back to the ${monument.period}. `;
+        }
+        fullText += `While we don't have detailed information about this specific monument, it represents an important part of our shared cultural heritage. `;
+      }
+      
+      // Add a natural conclusion
+      fullText += ` Thank you for exploring the rich history of ${monument.name} with me. I hope you enjoyed this journey through time.`;
+      
+      // Enhanced text processing for better speech synthesis
+      fullText = fullText
+        .replace(/\n/g, ' ') // Replace newlines with spaces
+        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+        .replace(/([.!?])\s*([A-Z])/g, '$1 $2') // Ensure proper spacing after punctuation
+        .replace(/\b(\d{4})\b/g, '$1') // Keep years as numbers for better pronunciation
+        .replace(/\b(BC|AD)\b/g, ' $1 ') // Add spaces around BC/AD for better pronunciation
+        .replace(/\b(St\.|Saint)\s/g, 'Saint ') // Expand abbreviations
+        .replace(/\b(Dr\.|Doctor)\s/g, 'Doctor ') // Expand doctor abbreviation
+        .replace(/\b(Mr\.|Mister)\s/g, 'Mister ') // Expand mister abbreviation
+        .replace(/\b(Mrs\.|Missus)\s/g, 'Missus ') // Expand missus abbreviation
+        .replace(/\b&\b/g, 'and') // Replace & with 'and'
+        .replace(/\b@\b/g, 'at') // Replace @ with 'at'
+        .replace(/([.!?])([A-Z])/g, '$1 $2') // Add space after punctuation if missing
+        .trim();
+      
+      // Final validation
+      if (fullText.length < 50) {
+        console.warn('Generated text is too short, may not provide good narration');
+        return '';
+      }
+      
+      console.log('Generated voice narration text, length:', fullText.length);
+      return fullText;
+      
+    } catch (error) {
+      console.error('Error generating voice narration text:', error);
+      return '';
     }
-    
-    // Add a brief pause for dramatic effect
-    fullText += `Let me tell you its fascinating story. `;
-    
-    if (monument.detailedDescription) {
-      if (monument.detailedDescription.quickOverview) {
-        fullText += `${monument.detailedDescription.quickOverview} `;
-        fullText += `Now, let's dive deeper into its history. `;
-      }
-      if (monument.detailedDescription.inDepthContext) {
-        fullText += `${monument.detailedDescription.inDepthContext} `;
-      }
-      if (monument.detailedDescription.curiosities) {
-        fullText += `Here's something truly fascinating about this place: ${monument.detailedDescription.curiosities} `;
-      }
-      if (monument.detailedDescription.keyTakeaways && monument.detailedDescription.keyTakeaways.length > 0) {
-        fullText += `To wrap up, here are the key things to remember: ${monument.detailedDescription.keyTakeaways.join('. ')}.`;
-      }
-    } else {
-      if (monument.description) {
-        fullText += `${monument.description} `;
-      }
-      if (monument.significance) {
-        fullText += `What makes this place truly special is its historical significance: ${monument.significance} `;
-      }
-      if (monument.facts && monument.facts.length > 0) {
-        fullText += `Here are some remarkable facts that will amaze you: ${monument.facts.join('. ')}.`;
-      }
-    }
-    
-    // Add a natural conclusion
-    fullText += ` Thank you for exploring the rich history of ${monument.name} with me. I hope you enjoyed this journey through time.`;
-    
-    // Enhanced text processing for better speech synthesis
-    fullText = fullText
-      .replace(/\n/g, ' ') // Replace newlines with spaces
-      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-      .replace(/([.!?])\s*([A-Z])/g, '$1 $2') // Ensure proper spacing after punctuation
-      .replace(/\b(\d{4})\b/g, '$1') // Keep years as numbers for better pronunciation
-      .replace(/\b(BC|AD)\b/g, ' $1 ') // Add spaces around BC/AD for better pronunciation
-      .replace(/\b(St\.|Saint)\s/g, 'Saint ') // Expand abbreviations
-      .replace(/\b(Dr\.|Doctor)\s/g, 'Doctor ') // Expand doctor abbreviation
-      .replace(/\b(Mr\.|Mister)\s/g, 'Mister ') // Expand mister abbreviation
-      .replace(/\b(Mrs\.|Missus)\s/g, 'Missus ') // Expand missus abbreviation
-      .replace(/\b&\b/g, 'and') // Replace & with 'and'
-      .replace(/\b@\b/g, 'at') // Replace @ with 'at'
-      .replace(/([.!?])([A-Z])/g, '$1 $2') // Add space after punctuation if missing
-      .trim();
-    
-    return fullText;
   };
 
   const handlePlayPause = async () => {
     try {
+      console.log('Voice control triggered, current state:', { isPlaying, isPaused });
+      
       if (isPlaying) {
         if (isPaused) {
           // Resume
+          console.log('Resuming speech...');
           if (Platform.OS !== 'web') {
             await Speech.resume();
           }
           setIsPaused(false);
         } else {
           // Pause
+          console.log('Pausing speech...');
           if (Platform.OS !== 'web') {
             await Speech.pause();
           } else {
@@ -175,10 +259,18 @@ export default function ScanResultScreen() {
         }
       } else {
         // Start speaking
+        console.log('Starting voice narration...');
+        
+        // Validate monument data first
+        if (!monument) {
+          Alert.alert('No Data', 'Monument information is not available. Please try scanning again.');
+          return;
+        }
+        
         const fullText = getFullText();
         
         if (!fullText || fullText.trim().length === 0) {
-          Alert.alert('No Content', 'No text content available to read aloud.');
+          Alert.alert('No Content', 'No text content available to read aloud. Please try scanning again or check your internet connection.');
           return;
         }
         
@@ -186,9 +278,16 @@ export default function ScanResultScreen() {
         if (Platform.OS === 'web') {
           const speechSynthesis = window.speechSynthesis;
           if (!speechSynthesis) {
-            Alert.alert('Speech Not Available', 'Speech synthesis is not supported in this browser.');
+            Alert.alert('Speech Not Available', 'Speech synthesis is not supported in this browser. Please try using a different browser or device.');
             return;
           }
+        }
+        
+        // Stop any existing speech first
+        try {
+          await Speech.stop();
+        } catch (stopError) {
+          console.log('No existing speech to stop');
         }
         
         setIsPlaying(true);
@@ -210,26 +309,38 @@ export default function ScanResultScreen() {
             default: 0.7
           }),
           onStart: () => {
-            console.log('Speech started');
+            console.log('✅ Speech started successfully');
             setIsPlaying(true);
             setIsPaused(false);
           },
           onDone: () => {
-            console.log('Speech completed');
+            console.log('✅ Speech completed successfully');
             setIsPlaying(false);
             setIsPaused(false);
           },
           onStopped: () => {
-            console.log('Speech stopped');
+            console.log('✅ Speech stopped');
             setIsPlaying(false);
             setIsPaused(false);
           },
           onError: (error: any) => {
-            console.error('Speech error:', error);
+            console.error('❌ Speech error:', error);
             setIsPlaying(false);
             setIsPaused(false);
-            // Don't show alert for minor errors, just log them
-            console.warn('Speech playback encountered an issue');
+            
+            // Show user-friendly error message
+            let errorMessage = 'Voice narration encountered an issue.';
+            if (error && error.message) {
+              if (error.message.includes('network')) {
+                errorMessage = 'Network issue detected. Please check your connection and try again.';
+              } else if (error.message.includes('permission')) {
+                errorMessage = 'Audio permission required. Please allow audio access and try again.';
+              } else if (error.message.includes('not supported')) {
+                errorMessage = 'Voice narration is not supported on this device.';
+              }
+            }
+            
+            Alert.alert('Voice Narration Error', errorMessage);
           }
         };
         
@@ -239,14 +350,19 @@ export default function ScanResultScreen() {
           speechOptions.voice = 'com.apple.ttsbundle.Samantha-compact';
         }
         
+        console.log('Starting speech with options:', speechOptions);
         await Speech.speak(fullText, speechOptions);
       }
     } catch (error) {
-      console.error('Speech control error:', error);
+      console.error('❌ Speech control error:', error);
       setIsPlaying(false);
       setIsPaused(false);
-      // Don't show alert for every error, just reset state
-      console.warn('Speech control encountered an issue, resetting state');
+      
+      // Show user-friendly error message
+      Alert.alert(
+        'Voice Narration Error', 
+        'Unable to start voice narration. Please try again or check your device settings.'
+      );
     }
   };
 
@@ -260,14 +376,71 @@ export default function ScanResultScreen() {
     }
   };
 
+  // Show loading state while data is being loaded
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingTitle}>Loading Monument Information</Text>
+          <Text style={styles.loadingText}>Please wait while we prepare your scan results...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Show error state if no monument data is available
   if (!monument) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Monument not found</Text>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text style={styles.backButton}>Go Back</Text>
-          </TouchableOpacity>
+          <Text style={styles.errorTitle}>Monument Information Not Available</Text>
+          <Text style={styles.errorText}>
+            We couldn't load the monument details. This might be due to:
+          </Text>
+          <View style={styles.errorList}>
+            <Text style={styles.errorListItem}>• The scan data is still processing</Text>
+            <Text style={styles.errorListItem}>• Network connectivity issues</Text>
+            <Text style={styles.errorListItem}>• The scan session has expired</Text>
+          </View>
+          <View style={styles.errorActions}>
+            <TouchableOpacity 
+              style={styles.retryButton}
+              onPress={() => {
+                // Force reload the component
+                setIsLoading(true);
+                setMonument(undefined);
+                setTimeout(() => {
+                  const loadMonumentData = async () => {
+                    let loadedMonument: HistoryItem | undefined;
+                    
+                    if (resultId && typeof resultId === 'string') {
+                      try {
+                        const retrievedMonument = scanResultStore.retrieve(resultId);
+                        if (retrievedMonument && retrievedMonument.name) {
+                          loadedMonument = retrievedMonument;
+                          console.log('✅ Retrieved monument on retry:', loadedMonument.name);
+                        }
+                      } catch (error) {
+                        console.error('Error retrieving monument on retry:', error);
+                      }
+                    }
+                    
+                    setMonument(loadedMonument);
+                    setIsLoading(false);
+                  };
+                  loadMonumentData();
+                }, 100);
+              }}
+            >
+              <Text style={styles.retryButtonText}>Retry Loading</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.backButtonContainer}
+              onPress={() => router.back()}
+            >
+              <Text style={styles.backButtonText}>Go Back</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </SafeAreaView>
     );
@@ -489,20 +662,92 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FEFEFE",
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  loadingTitle: {
+    fontSize: 22,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "#6b7280",
+    textAlign: "center",
+    lineHeight: 22,
+  },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
+  },
+  errorTitle: {
+    fontSize: 22,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
+    marginBottom: 15,
+    textAlign: "center",
   },
   errorText: {
-    fontSize: 18,
-    color: "#6b7280",
-    marginBottom: 20,
-  },
-  backButton: {
     fontSize: 16,
-    color: "#1e3a8a",
-    fontWeight: "600",
+    color: "#6b7280",
+    marginBottom: 15,
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  errorList: {
+    marginBottom: 25,
+    paddingHorizontal: 20,
+  },
+  errorListItem: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginBottom: 8,
+    lineHeight: 20,
+  },
+  errorActions: {
+    flexDirection: "row",
+    gap: 15,
+  },
+  retryButton: {
+    backgroundColor: "#8B4513",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  backButtonContainer: {
+    backgroundColor: "#f3f4f6",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: "#374151",
+    fontWeight: "500",
   },
   imageContainer: {
     position: "relative",
