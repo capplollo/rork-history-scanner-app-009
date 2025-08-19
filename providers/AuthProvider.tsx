@@ -75,6 +75,7 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
 
       return { error };
     } catch (error) {
+      console.error('Signup error:', error);
       return { error: error as AuthError };
     } finally {
       setLoading(false);

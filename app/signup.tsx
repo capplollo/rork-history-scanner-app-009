@@ -47,7 +47,9 @@ export default function SignUpScreen() {
     setIsLoading(false);
 
     if (error) {
-      Alert.alert('Sign Up Failed', error.message);
+      console.error('Sign up error:', error);
+      const errorMessage = error.message || 'An unexpected error occurred during sign up';
+      Alert.alert('Sign Up Failed', errorMessage);
     } else {
       Alert.alert(
         'Success',
