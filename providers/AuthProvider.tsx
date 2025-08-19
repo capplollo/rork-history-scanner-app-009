@@ -66,13 +66,21 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
             message: profileError.message,
             details: profileError.details,
             hint: profileError.hint,
-            code: profileError.code
+            code: profileError.code,
+            fullError: profileError
           });
           
-          // Return a more specific error for profile creation issues
+          // Check if it's a table not found error
+          if (profileError.code === 'PGRST116' || profileError.message?.includes('relation "profiles" does not exist')) {
+            console.warn('Profiles table does not exist, continuing without profile creation');
+            // Continue without creating profile - user account is still created
+            return { error: null };
+          }
+          
+          // Return a more specific error for other profile creation issues
           return { 
             error: {
-              message: `Profile creation failed: ${profileError.message}`,
+              message: `Profile creation failed: ${profileError.message || 'Unknown database error'}`,
               name: 'ProfileCreationError',
               status: profileError.code || 500
             } as AuthError 

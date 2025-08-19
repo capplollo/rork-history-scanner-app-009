@@ -50,10 +50,21 @@ export default function SignUpScreen() {
       console.error('Sign up error:', error);
       let errorMessage = 'An unexpected error occurred during sign up';
       
+      // Handle specific error types
       if (error.message) {
-        errorMessage = error.message;
+        if (error.message.includes('User already registered')) {
+          errorMessage = 'An account with this email already exists. Please try signing in instead.';
+        } else if (error.message.includes('Invalid email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else if (error.message.includes('Password should be at least')) {
+          errorMessage = 'Password must be at least 6 characters long.';
+        } else if (error.message.includes('Profile creation failed')) {
+          errorMessage = 'Account created but profile setup failed. You can still sign in.';
+        } else {
+          errorMessage = error.message;
+        }
       } else if (typeof error === 'object' && error !== null) {
-        errorMessage = JSON.stringify(error);
+        errorMessage = 'Please check your internet connection and try again.';
       }
       
       Alert.alert('Sign Up Failed', errorMessage);
