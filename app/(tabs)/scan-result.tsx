@@ -74,26 +74,47 @@ export default function ScanResultScreen() {
     
     let fullText = `${monument.name}. `;
     
+    // Add location and period information
+    if (monument.location) {
+      fullText += `Located in ${monument.location}. `;
+    }
+    if (monument.period) {
+      fullText += `From the ${monument.period}. `;
+    }
+    
     if (monument.detailedDescription) {
-      fullText += `${monument.detailedDescription.quickOverview} `;
-      fullText += `${monument.detailedDescription.inDepthContext} `;
+      if (monument.detailedDescription.quickOverview) {
+        fullText += `${monument.detailedDescription.quickOverview} `;
+      }
+      if (monument.detailedDescription.inDepthContext) {
+        fullText += `${monument.detailedDescription.inDepthContext} `;
+      }
       if (monument.detailedDescription.curiosities) {
-        fullText += `Curiosities: ${monument.detailedDescription.curiosities} `;
+        fullText += `Here are some interesting curiosities: ${monument.detailedDescription.curiosities} `;
       }
       if (monument.detailedDescription.keyTakeaways && monument.detailedDescription.keyTakeaways.length > 0) {
-        fullText += `Key takeaways: ${monument.detailedDescription.keyTakeaways.join('. ')}`;
+        fullText += `Key takeaways: ${monument.detailedDescription.keyTakeaways.join('. ')}.`;
       }
-    } else if (monument.description) {
-      fullText += `${monument.description} `;
+    } else {
+      if (monument.description) {
+        fullText += `${monument.description} `;
+      }
       if (monument.significance) {
         fullText += `Historical significance: ${monument.significance} `;
       }
       if (monument.facts && monument.facts.length > 0) {
-        fullText += `Quick facts: ${monument.facts.join('. ')}`;
+        fullText += `Here are some quick facts: ${monument.facts.join('. ')}.`;
       }
     }
     
-    console.log('Generated text for narration:', fullText.substring(0, 100) + '...');
+    // Clean up the text for better speech synthesis
+    fullText = fullText
+      .replace(/\n/g, ' ') // Replace newlines with spaces
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .replace(/([.!?])\s*([A-Z])/g, '$1 $2') // Ensure proper spacing after punctuation
+      .trim();
+    
+    console.log('Generated text for narration (length:', fullText.length, '):', fullText.substring(0, 100) + '...');
     return fullText;
   };
 
@@ -125,19 +146,21 @@ export default function ScanResultScreen() {
         await Speech.speak(fullText, {
           language: 'en-US',
           pitch: 1.0,
-          rate: 0.8,
+          rate: 0.75, // Slightly slower for better comprehension
           onStart: () => {
             console.log('Speech started successfully');
+            setIsPlaying(true);
+            setIsPaused(false);
           },
           onDone: () => {
+            console.log('Speech finished');
             setIsPlaying(false);
             setIsPaused(false);
-            console.log('Speech finished');
           },
           onStopped: () => {
+            console.log('Speech stopped');
             setIsPlaying(false);
             setIsPaused(false);
-            console.log('Speech stopped');
           },
           onError: (error) => {
             console.error('Speech error:', error);
@@ -232,43 +255,52 @@ export default function ScanResultScreen() {
             </View>
           )}
 
-          <View style={styles.narratorSection}>
-            <Text style={styles.narratorTitle}>Voice Narrator</Text>
-            <View style={styles.narratorControls}>
-              <TouchableOpacity 
-                style={[styles.narratorButton, isPlaying && styles.narratorButtonActive]} 
-                onPress={handlePlayPause}
-              >
-                {isPlaying ? (
-                  isPaused ? (
-                    <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
-                  ) : (
-                    <Pause size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
-                  )
-                ) : (
-                  <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
-                )}
-                <Text style={[styles.narratorButtonText, isPlaying && styles.narratorButtonTextActive]}>
-                  {isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Listen'}
-                </Text>
-              </TouchableOpacity>
-              
-              {isPlaying && (
+          {/* Voice Narrator - Only show when monument is identified */}
+          {monument && (
+            <View style={styles.narratorSection}>
+              <Text style={styles.narratorTitle}>🎧 Voice Narrator</Text>
+              <Text style={styles.narratorDescription}>
+                Listen to the complete information about this monument
+              </Text>
+              <View style={styles.narratorControls}>
                 <TouchableOpacity 
-                  style={styles.stopButton} 
-                  onPress={handleStop}
+                  style={[styles.narratorButton, isPlaying && styles.narratorButtonActive]} 
+                  onPress={handlePlayPause}
                 >
-                  <VolumeX size={18} color="#6b7280" />
-                  <Text style={styles.stopButtonText}>Stop</Text>
+                  {isPlaying ? (
+                    isPaused ? (
+                      <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
+                    ) : (
+                      <Pause size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
+                    )
+                  ) : (
+                    <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
+                  )}
+                  <Text style={[styles.narratorButtonText, isPlaying && styles.narratorButtonTextActive]}>
+                    {isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Listen to Story'}
+                  </Text>
                 </TouchableOpacity>
+                
+                {isPlaying && (
+                  <TouchableOpacity 
+                    style={styles.stopButton} 
+                    onPress={handleStop}
+                  >
+                    <VolumeX size={18} color="#6b7280" />
+                    <Text style={styles.stopButtonText}>Stop</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              {isPlaying && (
+                <View style={styles.playingIndicatorContainer}>
+                  <View style={styles.playingDot} />
+                  <Text style={styles.playingIndicator}>
+                    {isPaused ? 'Audio paused' : 'Playing complete story...'}
+                  </Text>
+                </View>
               )}
             </View>
-            {isPlaying && (
-              <Text style={styles.playingIndicator}>
-                {isPaused ? 'Paused' : 'Playing audio narration...'}
-              </Text>
-            )}
-          </View>
+          )}
 
           {monument.detailedDescription ? (
             <>
@@ -652,10 +684,27 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#6b7280",
   },
+  narratorDescription: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginBottom: 15,
+    lineHeight: 20,
+  },
+  playingIndicatorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+    gap: 8,
+  },
+  playingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#4f46e5",
+  },
   playingIndicator: {
     fontSize: 14,
     color: "#4f46e5",
     fontStyle: "italic",
-    marginTop: 10,
   },
 });
