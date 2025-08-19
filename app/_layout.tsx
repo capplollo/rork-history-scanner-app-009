@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { HistoryProvider } from "@/providers/HistoryProvider";
 import { AuthProvider, useAuth } from "@/providers/AuthProvider";
@@ -19,27 +19,32 @@ function AuthGuard() {
   const segments = useSegments();
   const router = useRouter();
 
+  const currentPath = useMemo(() => segments.join('/'), [segments]);
+
   useEffect(() => {
     if (loading) return; // Don't redirect while loading
 
-    const inAuthGroup = segments[0] === '(auth)';
-    const inTabsGroup = segments[0] === '(tabs)';
-
+    // Prevent infinite loops by checking current path before redirecting
     if (!user && !session) {
       // User is not authenticated, redirect to login
-      if (!inAuthGroup) {
+      if (currentPath !== 'login' && currentPath !== 'signup' && currentPath !== 'forgot-password') {
+        console.log('Redirecting to login - no user/session');
         router.replace('/login');
       }
     } else if (user && !user.email_confirmed_at) {
       // User is authenticated but email not confirmed, redirect to email confirmation
-      if (!inAuthGroup) {
+      if (currentPath !== 'email-confirmation') {
+        console.log('Redirecting to email confirmation - email not confirmed');
         router.replace('/email-confirmation');
       }
-    } else if (user && user.email_confirmed_at && inAuthGroup) {
-      // User is authenticated and email confirmed, redirect to main app
-      router.replace('/(tabs)');
+    } else if (user && user.email_confirmed_at) {
+      // User is authenticated and email confirmed
+      if (currentPath === 'login' || currentPath === 'signup' || currentPath === 'email-confirmation' || currentPath === 'forgot-password') {
+        console.log('Redirecting to main app - user authenticated');
+        router.replace('/(tabs)');
+      }
     }
-  }, [user, session, loading, segments]);
+  }, [user, session, loading, currentPath, router]);
 
   return null;
 }
