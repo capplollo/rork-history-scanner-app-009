@@ -52,26 +52,34 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             code: error.code,
             details: error.details,
             hint: error.hint,
+            fullError: JSON.stringify(error, null, 2),
           });
           // Fallback to local storage
           await loadFromLocalStorage();
         } else {
           // Map Supabase data to HistoryItem format
-          const mappedData = (data || []).map(item => ({
-            id: item.id,
-            name: item.monument_name,
-            location: item.location || '',
-            period: item.period || '',
-            description: item.description || '',
-            significance: item.significance || '',
-            facts: item.facts || [],
-            image: item.image_url || '',
-            scannedImage: item.scanned_image_url || '',
-            scannedAt: item.scanned_at,
-            confidence: item.confidence,
-            isRecognized: item.is_recognized,
-            detailedDescription: item.detailed_description,
-          }));
+          const mappedData = (data || []).map(item => {
+            try {
+              return {
+                id: item.id || '',
+                name: item.monument_name || '',
+                location: item.location || '',
+                period: item.period || '',
+                description: item.description || '',
+                significance: item.significance || '',
+                facts: Array.isArray(item.facts) ? item.facts : [],
+                image: item.image_url || '',
+                scannedImage: item.scanned_image_url || '',
+                scannedAt: item.scanned_at ? new Date(item.scanned_at).toISOString() : new Date().toISOString(),
+                confidence: typeof item.confidence === 'number' ? item.confidence : undefined,
+                isRecognized: typeof item.is_recognized === 'boolean' ? item.is_recognized : undefined,
+                detailedDescription: item.detailed_description || undefined,
+              };
+            } catch (mappingError) {
+              console.error('Error mapping history item:', mappingError, item);
+              return null;
+            }
+          }).filter(Boolean) as HistoryItem[];
           setHistory(mappedData);
         }
       } else {
@@ -82,6 +90,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
       console.error("Error loading history:", {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
+        fullError: JSON.stringify(error, null, 2),
       });
       await loadFromLocalStorage();
     } finally {
@@ -126,7 +135,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           facts: item.facts,
           image_url: item.image,
           scanned_image_url: item.scannedImage,
-          scanned_at: item.scannedAt,
+          scanned_at: new Date(item.scannedAt).toISOString(),
           confidence: item.confidence || null,
           is_recognized: item.isRecognized || null,
           detailed_description: item.detailedDescription || null,
@@ -139,6 +148,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           code: error.code,
           details: error.details,
           hint: error.hint,
+          fullError: JSON.stringify(error, null, 2),
         });
         return false;
       }
@@ -147,6 +157,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
       console.error('Error saving to Supabase:', {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
+        fullError: JSON.stringify(error, null, 2),
       });
       return false;
     }
@@ -257,6 +268,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             code: error.code,
             details: error.details,
             hint: error.hint,
+            fullError: JSON.stringify(error, null, 2),
           });
         }
       }
