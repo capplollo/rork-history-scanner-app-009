@@ -30,7 +30,7 @@ export interface VoiceProvider {
 // ElevenLabs configuration - using environment variables
 const ELEVENLABS_API_KEY = process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICES = [
-  { id: 'IKne3meq5aSn9XLyUdCD', name: 'Charles - Mature narrator', language: 'en-US', gender: 'male', quality: 'premium' },
+  { id: 'zNsotODqUhvbJ5wMG7Ei', name: 'Charles - Mature narrator', language: 'en-US', gender: 'male', quality: 'premium' },
 ];
 
 export class VoiceService {
@@ -68,8 +68,10 @@ export class VoiceService {
       // Use only ElevenLabs Charles voice if configured, otherwise use built-in voices
       if (this.isElevenLabsConfigured && this.elevenLabsVoices.length > 0) {
         this.availableVoices = [...this.elevenLabsVoices];
+        console.log('✅ Using Charles - Mature narrator as the only voice');
       } else {
         this.availableVoices = builtInVoices.filter(voice => voice.provider === 'expo-speech');
+        console.log('⚠️ ElevenLabs not configured, using built-in voices');
       }
 
       this.isInitialized = true;
@@ -112,15 +114,9 @@ export class VoiceService {
   }
 
   getBestVoice(): VoiceOption | null {
-    // Always prioritize Charles - Mature narrator if available and configured
+    // Always use Charles - Mature narrator if ElevenLabs is configured
     if (this.isElevenLabsConfigured && this.elevenLabsVoices.length > 0) {
-      const charlesVoice = this.elevenLabsVoices.find(voice => 
-        voice.name.includes('Charles')
-      );
-      
-      if (charlesVoice) {
-        return charlesVoice;
-      }
+      return this.elevenLabsVoices[0]; // Charles is the only voice
     }
     
     // Find the best built-in voice as fallback
