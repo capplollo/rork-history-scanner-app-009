@@ -334,9 +334,9 @@ export default function ScannerScreen() {
           {/* Content over collage */}
           <View style={styles.contentOverlay}>
             <View style={styles.titleSection}>
-              <Text style={styles.mainTitle}>Explore History</Text>
+              <Text style={styles.mainTitle}>Snap into history</Text>
               <Text style={styles.mainSubtitle}>
-                Discover the stories behind the world's greatest monuments
+                step into the living stories of art and monuments
               </Text>
             </View>
             
@@ -346,7 +346,7 @@ export default function ScannerScreen() {
                 onPress={takePhoto}
               >
                 <View style={styles.buttonIconContainer}>
-                  <CameraIcon size={32} color="#ffffff" />
+                  <CameraIcon size={28} color="#ffffff" />
                 </View>
                 <Text style={styles.buttonText}>Scan from Photo</Text>
               </TouchableOpacity>
@@ -356,7 +356,7 @@ export default function ScannerScreen() {
                 onPress={pickImageFromGallery}
               >
                 <View style={styles.buttonIconContainer}>
-                  <ImageIcon size={32} color="#334155" />
+                  <ImageIcon size={28} color="#334155" />
                 </View>
                 <Text style={[styles.buttonText, styles.galleryButtonText]}>Scan from Gallery</Text>
               </TouchableOpacity>
@@ -468,33 +468,38 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 20,
-    paddingHorizontal: 30,
-    borderRadius: 25,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 20,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 6,
+    minHeight: 56,
   },
   photoButton: {
-    backgroundColor: "#334155",
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(79, 70, 229, 0.95)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   galleryButton: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    borderWidth: 1,
+    borderColor: "rgba(51, 65, 85, 0.1)",
   },
   buttonIconContainer: {
-    marginRight: 15,
+    marginRight: 12,
   },
   buttonText: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 16,
+    fontWeight: "600",
     color: "#ffffff",
+    letterSpacing: 0.5,
   },
   galleryButtonText: {
     color: "#334155",
+    fontWeight: "600",
   },
   imagePreviewContainer: {
     margin: 20,
