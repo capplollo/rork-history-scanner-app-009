@@ -21,13 +21,10 @@ import { router, useLocalSearchParams } from "expo-router";
 
 export default function ChatModalScreen() {
   const { 
-    sessions, 
     currentSession, 
     isLoading, 
     isSending, 
-    createNewSession, 
-    sendMessage, 
-    setCurrentSessionId 
+    sendMessage
   } = useChat();
   
   const { history } = useHistory();
@@ -70,14 +67,8 @@ export default function ChatModalScreen() {
     setInputText("");
 
     try {
-      let sessionId = currentSession?.id;
-      
-      if (!sessionId) {
-        // Create new session if none exists and wait for it
-        sessionId = await createNewSession(undefined, selectedMonument || undefined);
-      }
-
-      await sendMessage(message, sessionId, selectedMonument || undefined);
+      // The sendMessage function will handle session creation if needed
+      await sendMessage(message, currentSession?.id, selectedMonument || undefined);
       
       // Scroll to bottom after sending
       setTimeout(() => {

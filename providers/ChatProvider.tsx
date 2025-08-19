@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import createContextHook from "@nkzw/create-context-hook";
-import { ChatSession, ChatMessage, MonumentContext } from "@/services/aiChatService";
-import { sendChatMessage, generateChatTitle } from "@/services/aiChatService";
+import { ChatSession, ChatMessage, MonumentContext, sendChatMessage, generateChatTitle } from "@/services/aiChatService";
 import { supabase } from "@/lib/supabase";
 
 const MAX_CHAT_SESSIONS = 20; // Increased since we're using Supabase
@@ -123,21 +122,39 @@ export const [ChatProvider, useChat] = createContextHook(() => {
     sessionId?: string,
     monumentContext?: MonumentContext
   ): Promise<void> => {
-    const targetSessionId = sessionId || currentSessionId;
-    if (!targetSessionId) {
-      throw new Error("No active chat session");
-    }
-
+    let targetSessionId = sessionId || currentSessionId;
+    
     setIsSending(true);
     
     try {
-      // Find the current session
-      const sessionIndex = sessions.findIndex(s => s.id === targetSessionId);
-      if (sessionIndex === -1) {
-        throw new Error("Session not found");
+      // Find the current session or create one if it doesn't exist
+      let sessionIndex = sessions.findIndex(s => s.id === targetSessionId);
+      
+      if (sessionIndex === -1 || !targetSessionId) {
+        // Create a new session if none exists
+        console.log('Creating new session for message');
+        targetSessionId = await createNewSession(undefined, monumentContext);
+        // Refresh sessions to get the new one
+        const newSessions = [{
+          id: targetSessionId,
+          title: "New Chat",
+          messages: [],
+          createdAt: new Date(),
+          lastUpdated: new Date(),
+          monumentId: monumentContext?.id
+        }, ...sessions];
+        setSessions(newSessions);
+        sessionIndex = 0;
       }
 
-      const session = sessions[sessionIndex];
+      const session = sessions[sessionIndex] || {
+        id: targetSessionId!,
+        title: "New Chat",
+        messages: [],
+        createdAt: new Date(),
+        lastUpdated: new Date(),
+        monumentId: monumentContext?.id
+      };
       
       // Create user message
       const userMessage: ChatMessage = {
@@ -215,7 +232,7 @@ export const [ChatProvider, useChat] = createContextHook(() => {
     } finally {
       setIsSending(false);
     }
-  }, [sessions, currentSessionId, saveChatSessions]);
+  }, [sessions, currentSessionId, saveChatSessions, createNewSession]);
 
   const deleteSession = useCallback(async (sessionId: string) => {
     try {
