@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -25,6 +25,14 @@ export default function ScanResultScreen() {
   const { monumentId, scanData, resultId } = useLocalSearchParams();
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
+  
+  // Cleanup speech when component unmounts or when navigating away
+  useEffect(() => {
+    return () => {
+      // Stop speech when component unmounts
+      Speech.stop();
+    };
+  }, []);
   
   let monument: HistoryItem | undefined;
   
@@ -68,7 +76,6 @@ export default function ScanResultScreen() {
 
   const getFullText = () => {
     if (!monument) {
-      console.log('No monument data available for voice narration');
       return '';
     }
     
@@ -114,7 +121,6 @@ export default function ScanResultScreen() {
       .replace(/([.!?])\s*([A-Z])/g, '$1 $2') // Ensure proper spacing after punctuation
       .trim();
     
-    console.log('Generated text for narration (length:', fullText.length, '):', fullText.substring(0, 100) + '...');
     return fullText;
   };
 
@@ -133,7 +139,6 @@ export default function ScanResultScreen() {
       } else {
         // Start speaking
         const fullText = getFullText();
-        console.log('Attempting to speak text:', fullText ? 'Text available' : 'No text available');
         
         if (!fullText || fullText.trim().length === 0) {
           Alert.alert('No Content', 'No text content available to read aloud.');
@@ -148,22 +153,18 @@ export default function ScanResultScreen() {
           pitch: 1.0,
           rate: 0.75, // Slightly slower for better comprehension
           onStart: () => {
-            console.log('Speech started successfully');
             setIsPlaying(true);
             setIsPaused(false);
           },
           onDone: () => {
-            console.log('Speech finished');
             setIsPlaying(false);
             setIsPaused(false);
           },
           onStopped: () => {
-            console.log('Speech stopped');
             setIsPlaying(false);
             setIsPaused(false);
           },
           onError: (error) => {
-            console.error('Speech error:', error);
             setIsPlaying(false);
             setIsPaused(false);
             Alert.alert('Speech Error', 'Unable to play audio. Please check your device settings and try again.');
@@ -171,7 +172,6 @@ export default function ScanResultScreen() {
         });
       }
     } catch (error) {
-      console.error('Speech control error:', error);
       setIsPlaying(false);
       setIsPaused(false);
       Alert.alert('Error', 'Unable to control audio playback. Please try again.');
@@ -184,7 +184,7 @@ export default function ScanResultScreen() {
       setIsPlaying(false);
       setIsPaused(false);
     } catch (error) {
-      console.error('Speech stop error:', error);
+      // Silently handle stop errors
     }
   };
 
@@ -255,8 +255,8 @@ export default function ScanResultScreen() {
             </View>
           )}
 
-          {/* Voice Narrator - Only show when monument is identified */}
-          {monument && (
+          {/* Voice Narrator - Only show when monument is identified and has content */}
+          {monument && monument.name && (
             <View style={styles.narratorSection}>
               <Text style={styles.narratorTitle}>🎧 Voice Narrator</Text>
               <Text style={styles.narratorDescription}>
