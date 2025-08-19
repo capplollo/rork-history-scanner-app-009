@@ -49,7 +49,12 @@ export default function SignUpScreen() {
       const { error } = await signUp(email, password, fullName);
       
       if (error) {
-        console.error('Sign up error:', error);
+        console.error('Sign up error:', {
+          message: error.message || 'No message',
+          name: error.name || 'No name',
+          stack: error.stack || 'No stack',
+          fullError: JSON.stringify(error, null, 2)
+        });
         let errorMessage = 'An unexpected error occurred during sign up';
         
         // Handle specific error types
@@ -61,11 +66,15 @@ export default function SignUpScreen() {
           } else if (error.message.includes('Password should be at least')) {
             errorMessage = 'Password must be at least 6 characters long.';
           } else if (error.message.includes('Profile creation failed')) {
-            errorMessage = 'Account created but profile setup failed. You can still sign in.';
+            errorMessage = 'Account created successfully! Profile setup had an issue, but you can still sign in.';
           } else if (error.message.includes('Unable to validate email address')) {
             errorMessage = 'Please enter a valid email address.';
           } else if (error.message.includes('Signup is disabled')) {
             errorMessage = 'Signup is currently disabled. Please contact support.';
+          } else if (error.message.includes('relation "profiles" does not exist')) {
+            errorMessage = 'Account created successfully! The database is being set up. You can sign in now.';
+          } else if (error.message.includes('PGRST116')) {
+            errorMessage = 'Account created successfully! Database setup in progress. You can sign in now.';
           } else {
             errorMessage = error.message;
           }
@@ -83,7 +92,11 @@ export default function SignUpScreen() {
         );
       }
     } catch (error) {
-      console.error('Unexpected signup error:', error);
+      console.error('Unexpected signup error:', {
+        message: error instanceof Error ? error.message : String(error),
+        type: typeof error,
+        fullError: JSON.stringify(error, null, 2)
+      });
       Alert.alert('Sign Up Failed', 'An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);

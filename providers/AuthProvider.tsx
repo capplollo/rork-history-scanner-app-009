@@ -72,35 +72,39 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
             });
 
           if (profileError) {
+            // Better error logging to avoid [object Object]
             console.error('Error creating profile:', {
-              message: profileError.message,
-              details: profileError.details,
-              hint: profileError.hint,
-              code: profileError.code,
+              message: profileError.message || 'Unknown error',
+              details: profileError.details || 'No details',
+              hint: profileError.hint || 'No hint',
+              code: profileError.code || 'No code',
+              fullError: JSON.stringify(profileError, null, 2)
             });
             
             // Check if it's a table not found error
-            if (profileError.code === 'PGRST116' || profileError.message?.includes('relation "profiles" does not exist')) {
+            if (profileError.code === 'PGRST116' || 
+                (profileError.message && profileError.message.includes('relation "profiles" does not exist'))) {
               console.warn('Profiles table does not exist, continuing without profile creation');
               // Continue without creating profile - user account is still created
               return { error: null };
             }
             
             // For other profile creation issues, log but don't fail signup
-            console.warn('Profile creation failed but user account was created:', profileError.message);
+            console.warn('Profile creation failed but user account was created. Error:', profileError.message || 'Unknown profile error');
             return { error: null };
           }
           
           console.log('Profile created successfully');
         } catch (profileError) {
-          console.warn('Profile creation failed but user account was created:', profileError);
+          console.warn('Profile creation failed but user account was created. Error:', 
+            profileError instanceof Error ? profileError.message : String(profileError));
           return { error: null };
         }
       }
 
       return { error: null };
     } catch (error) {
-      console.error('Signup error:', error);
+      console.error('Signup error:', error instanceof Error ? error.message : String(error));
       return { error: error as AuthError };
     } finally {
       setLoading(false);
