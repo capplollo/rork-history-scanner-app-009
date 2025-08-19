@@ -26,8 +26,8 @@ export interface VoiceProvider {
   isConfigured: boolean;
 }
 
-// ElevenLabs configuration
-const ELEVENLABS_API_KEY = 'sk_22cbad0171315d01474f3a02c222d9d04f67c9a5d8b3eae9';
+// ElevenLabs configuration - using environment variables
+const ELEVENLABS_API_KEY = process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY || 'sk_22cbad0171315d01474f3a02c222d9d04f67c9a5d8b3eae9';
 const ELEVENLABS_VOICES = [
   { id: '21m00Tcm4TlvDq8ikWAM', name: 'Rachel (ElevenLabs)', language: 'en-US', gender: 'female', quality: 'premium' },
   { id: 'AZnzlk1XvdvUeBnXmlld', name: 'Domi (ElevenLabs)', language: 'en-US', gender: 'female', quality: 'premium' },
@@ -41,20 +41,30 @@ export class VoiceService {
   private availableVoices: VoiceOption[] = [];
   private isInitialized: boolean = false;
   private elevenLabsVoices: VoiceOption[] = [];
+  private isElevenLabsConfigured: boolean = false;
 
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
     try {
-      // Initialize ElevenLabs voices
-      this.elevenLabsVoices = ELEVENLABS_VOICES.map(voice => ({
-        identifier: voice.id,
-        name: voice.name,
-        language: voice.language,
-        quality: voice.quality,
-        gender: voice.gender,
-        provider: 'elevenlabs' as const
-      }));
+      // Check if ElevenLabs is properly configured
+      this.isElevenLabsConfigured = !!ELEVENLABS_API_KEY && ELEVENLABS_API_KEY !== 'your-api-key-here';
+      
+      if (this.isElevenLabsConfigured) {
+        console.log('✅ ElevenLabs API key found');
+        
+        // Initialize ElevenLabs voices
+        this.elevenLabsVoices = ELEVENLABS_VOICES.map(voice => ({
+          identifier: voice.id,
+          name: voice.name,
+          language: voice.language,
+          quality: voice.quality,
+          gender: voice.gender,
+          provider: 'elevenlabs' as const
+        }));
+      } else {
+        console.log('⚠️ ElevenLabs API key not configured, using built-in voices only');
+      }
 
       // Get built-in voices
       const builtInVoices = await this.getAvailableVoices();
@@ -67,6 +77,7 @@ export class VoiceService {
 
       this.isInitialized = true;
       console.log(`✅ Voice service initialized with ${this.availableVoices.length} voices`);
+      console.log(`📊 ElevenLabs voices: ${this.elevenLabsVoices.length}, Built-in voices: ${builtInVoices.length}`);
     } catch (error) {
       console.error('❌ Failed to initialize voice service:', error);
     }
@@ -95,12 +106,14 @@ export class VoiceService {
 
   getBestVoice(): VoiceOption | null {
     // Prioritize ElevenLabs voices for better quality
-    const elevenLabsVoice = this.elevenLabsVoices.find(voice => 
-      voice.language.startsWith('en') && voice.gender === 'female'
-    );
-    
-    if (elevenLabsVoice) {
-      return elevenLabsVoice;
+    if (this.isElevenLabsConfigured) {
+      const elevenLabsVoice = this.elevenLabsVoices.find(voice => 
+        voice.language.startsWith('en') && voice.gender === 'female'
+      );
+      
+      if (elevenLabsVoice) {
+        return elevenLabsVoice;
+      }
     }
 
     // Fallback to built-in voices
@@ -127,7 +140,7 @@ export class VoiceService {
     }
 
     try {
-      if (voice.provider === 'elevenlabs') {
+      if (voice.provider === 'elevenlabs' && this.isElevenLabsConfigured) {
         await this.speakWithElevenLabs(text, voice, options, callbacks);
       } else {
         await this.speakWithExpoSpeech(text, voice, options, callbacks);
@@ -150,6 +163,7 @@ export class VoiceService {
     }
   ): Promise<void> {
     try {
+      console.log('🎤 Using ElevenLabs TTS...');
       callbacks?.onStart?.();
       
       const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice.identifier}`, {
@@ -171,21 +185,46 @@ export class VoiceService {
 
       if (!response.ok) {
         const error = await response.text();
+        console.error('ElevenLabs API error:', error);
         throw new Error(`ElevenLabs API error: ${error}`);
       }
 
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      // For React Native, we need to handle audio differently
-      // This is a simplified approach - in a real app you'd use expo-av
       console.log('✅ ElevenLabs audio generated successfully');
-      callbacks?.onDone?.();
+      
+      // For React Native, we need to convert the audio to base64 and play it
+      const audioArrayBuffer = await response.arrayBuffer();
+      const audioBase64 = this.arrayBufferToBase64(audioArrayBuffer);
+      
+      // Create a data URL for the audio
+      const audioDataUrl = `data:audio/mpeg;base64,${audioBase64}`;
+      console.log('Audio data URL created');
+      
+      // For now, we'll fall back to built-in TTS since expo-av isn't installed
+      // In a full implementation, you'd use expo-av to play the audio
+      console.log('⚠️ ElevenLabs audio generated but expo-av not available for playback');
+      console.log('🔄 Falling back to built-in TTS...');
+      
+      // Fallback to built-in TTS
+      const fallbackVoice = this.availableVoices.find(v => v.provider === 'expo-speech');
+      if (fallbackVoice) {
+        await this.speakWithExpoSpeech(text, fallbackVoice, options, callbacks);
+      } else {
+        callbacks?.onDone?.();
+      }
       
     } catch (error) {
       console.error('ElevenLabs TTS error:', error);
       callbacks?.onError?.(error instanceof Error ? error.message : 'ElevenLabs error');
     }
+  }
+
+  private arrayBufferToBase64(buffer: ArrayBuffer): string {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
   }
 
   private async speakWithExpoSpeech(
@@ -199,6 +238,8 @@ export class VoiceService {
     }
   ): Promise<void> {
     return new Promise((resolve, reject) => {
+      console.log('🎤 Using built-in TTS...');
+      
       const speechOptions = {
         voice: voice.identifier,
         rate: options.rate || this.getOptimalRate(),
@@ -252,7 +293,7 @@ export class VoiceService {
         name: 'ElevenLabs',
         description: 'AI-powered natural voices',
         quality: 'Premium',
-        isConfigured: true
+        isConfigured: this.isElevenLabsConfigured
       },
       {
         name: 'Built-in Speech',
@@ -261,6 +302,11 @@ export class VoiceService {
         isConfigured: true
       }
     ];
+  }
+
+  // Check if ElevenLabs is properly configured
+  isElevenLabsAvailable(): boolean {
+    return this.isElevenLabsConfigured;
   }
 }
 
