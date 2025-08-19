@@ -67,7 +67,7 @@ export class VoiceService {
       }
 
       // Get built-in voices
-      const builtInVoices = await this.getAvailableVoices();
+      const builtInVoices = await this.getBuiltInVoices();
       
       // Combine all voices
       this.availableVoices = [
@@ -83,7 +83,7 @@ export class VoiceService {
     }
   }
 
-  private async getAvailableVoices(): Promise<VoiceOption[]> {
+  private async getBuiltInVoices(): Promise<VoiceOption[]> {
     try {
       const voices = await Speech.getAvailableVoicesAsync();
       return voices.map(voice => ({
@@ -91,7 +91,6 @@ export class VoiceService {
         name: `${voice.name} (Built-in)`,
         language: voice.language,
         quality: 'basic',
-        gender: voice.gender,
         provider: 'expo-speech' as const
       }));
     } catch (error) {
@@ -195,9 +194,8 @@ export class VoiceService {
       const audioArrayBuffer = await response.arrayBuffer();
       const audioBase64 = this.arrayBufferToBase64(audioArrayBuffer);
       
-      // Create a data URL for the audio
-      const audioDataUrl = `data:audio/mpeg;base64,${audioBase64}`;
-      console.log('Audio data URL created');
+      // Note: Audio data generated but not used in fallback
+      console.log('Audio data generated, length:', audioBase64.length);
       
       // For now, we'll fall back to built-in TTS since expo-av isn't installed
       // In a full implementation, you'd use expo-av to play the audio
@@ -253,9 +251,10 @@ export class VoiceService {
           callbacks?.onDone?.();
           resolve();
         },
-        onError: (error: string) => {
-          callbacks?.onError?.(error);
-          reject(new Error(error));
+        onError: (error: Error) => {
+          const errorMessage = error.message || 'Speech error';
+          callbacks?.onError?.(errorMessage);
+          reject(error);
         },
       };
 
@@ -284,7 +283,9 @@ export class VoiceService {
   }
 
   isSupported(): boolean {
-    return Speech.isAvailableAsync();
+    // expo-speech is always available on supported platforms
+    // There's no isAvailableAsync method in expo-speech
+    return Platform.OS === 'ios' || Platform.OS === 'android' || Platform.OS === 'web';
   }
 
   getVoiceProviders(): VoiceProvider[] {
