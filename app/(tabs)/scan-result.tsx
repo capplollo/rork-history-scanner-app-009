@@ -79,46 +79,64 @@ export default function ScanResultScreen() {
       return '';
     }
     
-    let fullText = `${monument.name}. `;
+    // Create a more natural, narrator-style introduction
+    let fullText = `Welcome to the story of ${monument.name}. `;
     
-    // Add location and period information
-    if (monument.location) {
-      fullText += `Located in ${monument.location}. `;
+    // Add location and period information with natural transitions
+    if (monument.location && monument.period) {
+      fullText += `This magnificent ${monument.period} monument stands proudly in ${monument.location}. `;
+    } else if (monument.location) {
+      fullText += `Located in the beautiful ${monument.location}. `;
+    } else if (monument.period) {
+      fullText += `This remarkable structure dates back to the ${monument.period}. `;
     }
-    if (monument.period) {
-      fullText += `From the ${monument.period}. `;
-    }
+    
+    // Add a brief pause for dramatic effect
+    fullText += `Let me tell you its fascinating story. `;
     
     if (monument.detailedDescription) {
       if (monument.detailedDescription.quickOverview) {
         fullText += `${monument.detailedDescription.quickOverview} `;
+        fullText += `Now, let's dive deeper into its history. `;
       }
       if (monument.detailedDescription.inDepthContext) {
         fullText += `${monument.detailedDescription.inDepthContext} `;
       }
       if (monument.detailedDescription.curiosities) {
-        fullText += `Here are some interesting curiosities: ${monument.detailedDescription.curiosities} `;
+        fullText += `Here's something truly fascinating about this place: ${monument.detailedDescription.curiosities} `;
       }
       if (monument.detailedDescription.keyTakeaways && monument.detailedDescription.keyTakeaways.length > 0) {
-        fullText += `Key takeaways: ${monument.detailedDescription.keyTakeaways.join('. ')}.`;
+        fullText += `To wrap up, here are the key things to remember: ${monument.detailedDescription.keyTakeaways.join('. ')}.`;
       }
     } else {
       if (monument.description) {
         fullText += `${monument.description} `;
       }
       if (monument.significance) {
-        fullText += `Historical significance: ${monument.significance} `;
+        fullText += `What makes this place truly special is its historical significance: ${monument.significance} `;
       }
       if (monument.facts && monument.facts.length > 0) {
-        fullText += `Here are some quick facts: ${monument.facts.join('. ')}.`;
+        fullText += `Here are some remarkable facts that will amaze you: ${monument.facts.join('. ')}.`;
       }
     }
     
-    // Clean up the text for better speech synthesis
+    // Add a natural conclusion
+    fullText += ` Thank you for exploring the rich history of ${monument.name} with me. I hope you enjoyed this journey through time.`;
+    
+    // Enhanced text processing for better speech synthesis
     fullText = fullText
       .replace(/\n/g, ' ') // Replace newlines with spaces
       .replace(/\s+/g, ' ') // Replace multiple spaces with single space
       .replace(/([.!?])\s*([A-Z])/g, '$1 $2') // Ensure proper spacing after punctuation
+      .replace(/\b(\d{4})\b/g, '$1') // Keep years as numbers for better pronunciation
+      .replace(/\b(BC|AD)\b/g, ' $1 ') // Add spaces around BC/AD for better pronunciation
+      .replace(/\b(St\.|Saint)\s/g, 'Saint ') // Expand abbreviations
+      .replace(/\b(Dr\.|Doctor)\s/g, 'Doctor ') // Expand doctor abbreviation
+      .replace(/\b(Mr\.|Mister)\s/g, 'Mister ') // Expand mister abbreviation
+      .replace(/\b(Mrs\.|Missus)\s/g, 'Missus ') // Expand missus abbreviation
+      .replace(/\b&\b/g, 'and') // Replace & with 'and'
+      .replace(/\b@\b/g, 'at') // Replace @ with 'at'
+      .replace(/([.!?])([A-Z])/g, '$1 $2') // Add space after punctuation if missing
       .trim();
     
     return fullText;
@@ -148,28 +166,55 @@ export default function ScanResultScreen() {
         setIsPlaying(true);
         setIsPaused(false);
         
-        await Speech.speak(fullText, {
-          language: 'en-US',
-          pitch: 1.0,
-          rate: 0.75, // Slightly slower for better comprehension
+        // Enhanced speech settings for more natural, realistic voice
+        const speechOptions = {
+          language: Platform.select({
+            ios: 'en-US', // iOS has better voice quality
+            android: 'en-US',
+            default: 'en-US'
+          }),
+          pitch: Platform.select({
+            ios: 0.95, // Slightly lower pitch for more natural sound on iOS
+            android: 1.0,
+            default: 1.0
+          }),
+          rate: Platform.select({
+            ios: 0.65, // Slower rate for better comprehension and more natural delivery
+            android: 0.7,
+            default: 0.7
+          }),
+          quality: Platform.select({
+            ios: 'enhanced' as any, // Use enhanced quality on iOS if available
+            default: 'default' as any
+          }),
+          voice: Platform.select({
+            ios: 'com.apple.ttsbundle.Samantha-compact', // Try to use a more natural voice on iOS
+            default: undefined
+          }),
           onStart: () => {
+            console.log('Speech started');
             setIsPlaying(true);
             setIsPaused(false);
           },
           onDone: () => {
+            console.log('Speech completed');
             setIsPlaying(false);
             setIsPaused(false);
           },
           onStopped: () => {
+            console.log('Speech stopped');
             setIsPlaying(false);
             setIsPaused(false);
           },
-          onError: (error) => {
+          onError: (error: any) => {
+            console.error('Speech error:', error);
             setIsPlaying(false);
             setIsPaused(false);
             Alert.alert('Speech Error', 'Unable to play audio. Please check your device settings and try again.');
           }
-        });
+        };
+        
+        await Speech.speak(fullText, speechOptions);
       }
     } catch (error) {
       setIsPlaying(false);
@@ -258,9 +303,9 @@ export default function ScanResultScreen() {
           {/* Voice Narrator - Only show when monument is identified and has content */}
           {monument && monument.name && (
             <View style={styles.narratorSection}>
-              <Text style={styles.narratorTitle}>🎧 Voice Narrator</Text>
+              <Text style={styles.narratorTitle}>🎧 AI Voice Narrator</Text>
               <Text style={styles.narratorDescription}>
-                Listen to the complete information about this monument
+                Experience an immersive audio journey through the history and stories of this monument with our enhanced AI narrator
               </Text>
               <View style={styles.narratorControls}>
                 <TouchableOpacity 
@@ -277,7 +322,7 @@ export default function ScanResultScreen() {
                     <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
                   )}
                   <Text style={[styles.narratorButtonText, isPlaying && styles.narratorButtonTextActive]}>
-                    {isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Listen to Story'}
+                    {isPlaying ? (isPaused ? 'Resume Audio' : 'Pause Audio') : 'Start Audio Tour'}
                   </Text>
                 </TouchableOpacity>
                 
@@ -295,7 +340,7 @@ export default function ScanResultScreen() {
                 <View style={styles.playingIndicatorContainer}>
                   <View style={styles.playingDot} />
                   <Text style={styles.playingIndicator}>
-                    {isPaused ? 'Audio paused' : 'Playing complete story...'}
+                    {isPaused ? 'Audio tour paused - tap Resume to continue' : 'Playing immersive audio tour...'}
                   </Text>
                 </View>
               )}
