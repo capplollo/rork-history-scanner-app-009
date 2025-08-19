@@ -134,7 +134,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFEFE',
   },
   keyboardView: {
     flex: 1,
@@ -149,14 +149,25 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold' as const,
-    color: '#1a1a1a',
+    fontSize: 28,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
+    fontWeight: '400' as const,
+    color: '#2C3E50',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
+    fontStyle: 'italic',
+    color: '#64748b',
     textAlign: 'center',
   },
   form: {
@@ -166,11 +177,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e1e1e1',
-    borderRadius: 12,
+    borderColor: '#E8E8E8',
+    borderRadius: 16,
     marginBottom: 16,
     paddingHorizontal: 16,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FAFAFA',
   },
   inputIcon: {
     marginRight: 12,
@@ -178,8 +189,13 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 50,
-    fontSize: 16,
-    color: '#1a1a1a',
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
+    color: '#2C3E50',
   },
   eyeIcon: {
     padding: 4,
@@ -189,25 +205,40 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   forgotPasswordText: {
-    color: '#007AFF',
+    color: '#8B4513',
     fontSize: 14,
-    fontWeight: '500' as const,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
+    fontWeight: '400' as const,
   },
   loginButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    height: 50,
+    backgroundColor: '#8B4513',
+    borderRadius: 16,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   loginButtonDisabled: {
     backgroundColor: '#ccc',
   },
   loginButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '600' as const,
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
+    fontWeight: '500' as const,
   },
   signupContainer: {
     flexDirection: 'row',
@@ -215,12 +246,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   signupText: {
-    color: '#666',
+    color: '#64748b',
     fontSize: 14,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
   },
   signupLink: {
-    color: '#007AFF',
+    color: '#8B4513',
     fontSize: 14,
-    fontWeight: '600' as const,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
+    fontWeight: '500' as const,
   },
 });

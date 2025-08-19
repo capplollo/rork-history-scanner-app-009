@@ -7,14 +7,28 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#1e3a8a",
-        tabBarInactiveTintColor: "#9ca3af",
+        tabBarActiveTintColor: "#8B4513",
+        tabBarInactiveTintColor: "#A0A0A0",
         tabBarStyle: {
-          backgroundColor: "#ffffff",
-          borderTopWidth: 1,
-          borderTopColor: "#e5e7eb",
-          paddingBottom: Platform.OS === "ios" ? 0 : 5,
-          height: Platform.OS === "ios" ? 85 : 60,
+          backgroundColor: "#FEFEFE",
+          borderTopWidth: 0.5,
+          borderTopColor: "#E8E8E8",
+          paddingBottom: Platform.OS === "ios" ? 0 : 8,
+          height: Platform.OS === "ios" ? 88 : 65,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 8,
+          elevation: 8,
+        },
+        tabBarLabelStyle: {
+          fontFamily: Platform.select({
+            ios: "Times New Roman",
+            android: "serif",
+            default: "Times New Roman"
+          }),
+          fontSize: 11,
+          fontWeight: "500",
         },
         headerShown: false,
       }}

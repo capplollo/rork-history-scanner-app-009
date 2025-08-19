@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Image,
   Alert,
+  Platform,
 } from "react-native";
 import { 
   User, 
@@ -82,7 +83,7 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <LinearGradient
-          colors={["#334155", "#1e293b"]}
+          colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
           <View style={styles.profileSection}>
@@ -192,7 +193,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#FEFEFE",
   },
   headerGradient: {
     paddingTop: 30,
@@ -233,14 +234,25 @@ const styles = StyleSheet.create({
     borderColor: "#ffffff",
   },
   userName: {
-    fontSize: 28,
-    fontWeight: "900",
+    fontSize: 24,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "400",
     color: "#ffffff",
     marginBottom: 4,
   },
   userEmail: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.8)",
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.9)",
     marginBottom: 20,
   },
   levelProgress: {
@@ -263,8 +275,13 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
-    fontWeight: "500",
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "rgba(255,255,255,0.9)",
+    fontWeight: "400",
   },
   statsContainer: {
     flexDirection: "row",
@@ -285,24 +302,39 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   statValue: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#1e293b",
+    fontSize: 22,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#64748b",
     marginTop: 4,
-    fontWeight: "500",
+    fontWeight: "400",
   },
   section: {
     marginTop: 30,
     paddingHorizontal: 20,
   },
   sectionTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#1e293b",
+    fontSize: 20,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
     marginBottom: 16,
   },
   achievementsGrid: {
@@ -334,15 +366,20 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   achievementIconUnlocked: {
-    backgroundColor: "#4f46e5",
+    backgroundColor: "#8B4513",
   },
   achievementIconLocked: {
     backgroundColor: "#f1f5f9",
   },
   achievementName: {
     fontSize: 12,
-    fontWeight: "600",
-    color: "#1e293b",
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
     textAlign: "center",
   },
   achievementNameLocked: {
@@ -361,8 +398,13 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 10,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#ffffff",
-    fontWeight: "600",
+    fontWeight: "500",
   },
   menuContainer: {
     backgroundColor: "#ffffff",
@@ -397,8 +439,13 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 16,
-    color: "#1e293b",
-    fontWeight: "500",
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#2C3E50",
+    fontWeight: "400",
   },
   clearButton: {
     marginHorizontal: 20,
@@ -413,7 +460,12 @@ const styles = StyleSheet.create({
   },
   clearButtonText: {
     color: "#dc2626",
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
   },
 });

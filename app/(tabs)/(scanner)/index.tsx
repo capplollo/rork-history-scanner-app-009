@@ -371,7 +371,7 @@ export default function ScannerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#334155",
+    backgroundColor: "#2C3E50",
   },
   contentContainer: {
     paddingBottom: 30,
@@ -440,25 +440,36 @@ const styles = StyleSheet.create({
     marginBottom: 60,
   },
   mainTitle: {
-    fontSize: 48,
-    fontWeight: "900",
+    fontSize: 42,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "400",
     color: "#ffffff",
     textAlign: "center",
     marginBottom: 16,
-    letterSpacing: 1,
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    letterSpacing: 0.5,
+    textShadowColor: "rgba(0, 0, 0, 0.4)",
     textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    textShadowRadius: 6,
   },
   mainSubtitle: {
-    fontSize: 18,
-    color: "rgba(255, 255, 255, 0.9)",
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontStyle: "italic",
+    color: "rgba(255, 255, 255, 0.95)",
     textAlign: "center",
-    lineHeight: 26,
-    maxWidth: 300,
+    lineHeight: 24,
+    maxWidth: 320,
     textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    textShadowRadius: 3,
   },
   buttonContainer: {
     width: "100%",
@@ -468,38 +479,48 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 20,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 6,
-    minHeight: 56,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+    minHeight: 52,
   },
   photoButton: {
-    backgroundColor: "rgba(79, 70, 229, 0.95)",
+    backgroundColor: "rgba(139, 69, 19, 0.95)",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   galleryButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backgroundColor: "rgba(255, 255, 255, 0.98)",
     borderWidth: 1,
-    borderColor: "rgba(51, 65, 85, 0.1)",
+    borderColor: "rgba(139, 69, 19, 0.1)",
   },
   buttonIconContainer: {
     marginRight: 12,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
     color: "#ffffff",
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   galleryButtonText: {
     color: "#334155",
-    fontWeight: "600",
+    fontWeight: "500",
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
   },
   imagePreviewContainer: {
     margin: 20,
@@ -529,7 +550,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#4f46e5",
+    backgroundColor: "#8B4513",
     paddingVertical: 18,
     gap: 10,
   },
@@ -538,8 +559,13 @@ const styles = StyleSheet.create({
   },
   analyzeButtonText: {
     color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
   },
   additionalInfoSection: {
     backgroundColor: "#f8fafc",
@@ -560,7 +586,12 @@ const styles = StyleSheet.create({
   },
   additionalInfoTitle: {
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "400",
     color: "#475569",
   },
   additionalInfoForm: {
@@ -573,7 +604,12 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 13,
-    fontWeight: "500",
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "400",
     color: "#374151",
   },
   textInput: {
@@ -584,6 +620,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#1f2937",
   },
   textInputMultiline: {

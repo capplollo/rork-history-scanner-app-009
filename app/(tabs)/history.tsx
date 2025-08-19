@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   SafeAreaView,
+  Platform,
 } from "react-native";
 import { useHistory } from "@/providers/HistoryProvider";
 import { Clock, MapPin, Calendar, Search, Filter } from "lucide-react-native";
@@ -37,7 +38,7 @@ export default function HistoryScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient
-        colors={["#334155", "#1e293b"]}
+        colors={["#2C3E50", "#34495E"]}
         style={styles.headerGradient}
       >
         <View style={styles.headerContent}>
@@ -61,7 +62,7 @@ export default function HistoryScreen() {
       {history.length === 0 ? (
         <View style={styles.emptyContainer}>
           <View style={styles.emptyIconContainer}>
-            <Clock size={60} color="#4f46e5" />
+            <Clock size={60} color="#8B4513" />
           </View>
           <Text style={styles.emptyTitle}>Start Your Journey</Text>
           <Text style={styles.emptyText}>
@@ -135,7 +136,7 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#FEFEFE",
   },
   headerGradient: {
     paddingTop: 20,
@@ -146,14 +147,25 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   headerTitle: {
-    fontSize: 32,
-    fontWeight: "900",
+    fontSize: 28,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "400",
     color: "#ffffff",
     marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.8)",
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.9)",
   },
   searchContainer: {
     flexDirection: "row",
@@ -172,6 +184,11 @@ const styles = StyleSheet.create({
   },
   searchPlaceholder: {
     fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#64748b",
   },
   filterButton: {
@@ -201,19 +218,34 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   statNumber: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#1e293b",
+    fontSize: 22,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#64748b",
     marginTop: 4,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1e293b",
+    fontSize: 18,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
     marginBottom: 16,
   },
   historyCard: {
@@ -240,9 +272,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   monumentName: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1e293b",
+    fontSize: 17,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
     marginBottom: 8,
   },
   infoRow: {
@@ -253,6 +290,11 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 13,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#64748b",
   },
   scanInfo: {
@@ -263,11 +305,21 @@ const styles = StyleSheet.create({
   },
   scanDate: {
     fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#94a3b8",
-    fontWeight: "500",
+    fontWeight: "400",
   },
   scanTime: {
     fontSize: 11,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#cbd5e1",
     marginTop: 2,
   },
@@ -275,15 +327,20 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 12,
     right: 12,
-    backgroundColor: "#4f46e5",
+    backgroundColor: "#8B4513",
     borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   badgeText: {
     fontSize: 10,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#ffffff",
-    fontWeight: "600",
+    fontWeight: "500",
   },
   emptyContainer: {
     flex: 1,
@@ -301,27 +358,42 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   emptyTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#1e293b",
+    fontSize: 22,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
     marginBottom: 12,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#64748b",
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 32,
   },
   startButton: {
-    backgroundColor: "#4f46e5",
+    backgroundColor: "#8B4513",
     paddingHorizontal: 32,
     paddingVertical: 16,
-    borderRadius: 25,
+    borderRadius: 20,
   },
   startButtonText: {
     color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
   },
 });

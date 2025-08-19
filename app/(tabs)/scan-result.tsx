@@ -461,7 +461,7 @@ export default function ScanResultScreen() {
             }}
           >
             <LinearGradient
-              colors={["#4f46e5", "#6366f1"]}
+              colors={["#8B4513", "#A0522D"]}
               style={styles.chatGradient}
             >
               <MessageCircle size={24} color="#ffffff" />
@@ -471,7 +471,7 @@ export default function ScanResultScreen() {
 
           <TouchableOpacity style={styles.shareButton}>
             <LinearGradient
-              colors={["#1e3a8a", "#3b82f6"]}
+              colors={["#2C3E50", "#34495E"]}
               style={styles.shareGradient}
             >
               <Share2 size={20} color="#ffffff" />
@@ -487,7 +487,7 @@ export default function ScanResultScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fafaf9",
+    backgroundColor: "#FEFEFE",
   },
   errorContainer: {
     flex: 1,
@@ -523,10 +523,18 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   monumentName: {
-    fontSize: 32,
-    fontWeight: "bold",
+    fontSize: 28,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "400",
     color: "#ffffff",
     marginBottom: 10,
+    textShadowColor: "rgba(0, 0, 0, 0.5)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   closeButton: {
     position: "absolute",
@@ -560,13 +568,23 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#6b7280",
     marginBottom: 2,
   },
   infoValue: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#1f2937",
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
   },
   section: {
     marginBottom: 25,
@@ -578,13 +596,23 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#1f2937",
+    fontSize: 18,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
     marginBottom: 12,
   },
   description: {
     fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#4b5563",
     lineHeight: 24,
   },
@@ -596,25 +624,40 @@ const styles = StyleSheet.create({
   },
   quickOverview: {
     fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#374151",
     lineHeight: 26,
-    fontWeight: "500",
+    fontWeight: "400",
   },
   inDepthContext: {
     fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#4b5563",
     lineHeight: 24,
   },
   curiosities: {
     fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#4b5563",
     lineHeight: 24,
     fontStyle: "italic",
-    backgroundColor: "#fef3c7",
+    backgroundColor: "#FFF8E7",
     padding: 15,
-    borderRadius: 10,
-    borderLeftWidth: 4,
-    borderLeftColor: "#f59e0b",
+    borderRadius: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: "#D4A574",
   },
   factsSection: {
     backgroundColor: "#ffffff",
@@ -634,6 +677,11 @@ const styles = StyleSheet.create({
   },
   factText: {
     fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#4b5563",
     flex: 1,
     lineHeight: 20,
@@ -647,13 +695,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 18,
-    gap: 12,
+    paddingVertical: 16,
+    gap: 10,
   },
   chatButtonText: {
     color: "#ffffff",
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
   },
   shareButton: {
     borderRadius: 15,
@@ -669,8 +722,13 @@ const styles = StyleSheet.create({
   },
   shareButtonText: {
     color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
   },
   confidenceContainer: {
     flexDirection: "row",
@@ -708,9 +766,14 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   narratorTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1f2937",
+    fontSize: 17,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
     marginBottom: 15,
   },
   narratorControls: {
@@ -721,21 +784,26 @@ const styles = StyleSheet.create({
   narratorButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "#F8F6F0",
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 25,
+    borderRadius: 20,
     gap: 8,
-    borderWidth: 2,
-    borderColor: "#4f46e5",
+    borderWidth: 1.5,
+    borderColor: "#8B4513",
   },
   narratorButtonActive: {
-    backgroundColor: "#4f46e5",
+    backgroundColor: "#8B4513",
   },
   narratorButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#4f46e5",
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#8B4513",
   },
   narratorButtonTextActive: {
     color: "#ffffff",
@@ -758,6 +826,11 @@ const styles = StyleSheet.create({
   },
   narratorDescription: {
     fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: "#6b7280",
     marginBottom: 15,
     lineHeight: 20,
@@ -772,11 +845,16 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#4f46e5",
+    backgroundColor: "#8B4513",
   },
   playingIndicator: {
     fontSize: 14,
-    color: "#4f46e5",
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#8B4513",
     fontStyle: "italic",
   },
 });
