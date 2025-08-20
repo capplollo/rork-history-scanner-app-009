@@ -18,8 +18,7 @@ import {
   Grid3X3,
   List,
   Heart,
-  Share2,
-  Clock
+  Share2
 } from "lucide-react-native";
 import { useHistory } from "@/providers/HistoryProvider";
 import { router } from "expo-router";
@@ -54,14 +53,7 @@ export default function HistoryScreen() {
     });
   }, [history, searchQuery, sortBy]);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
+
 
   const handleItemPress = (item: any) => {
     const resultId = scanResultStore.store(item);
@@ -108,8 +100,7 @@ export default function HistoryScreen() {
           <Text style={styles.gridCardLocation} numberOfLines={1}>{item.location}</Text>
         </View>
         <View style={styles.gridCardMeta}>
-          <Clock size={10} color="#94a3b8" />
-          <Text style={styles.gridCardDate}>{formatDate(item.scannedAt)}</Text>
+          <Text style={styles.gridCardPeriod}>{item.period}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -141,8 +132,7 @@ export default function HistoryScreen() {
         </View>
         <Text style={styles.listCardDescription} numberOfLines={2}>{item.description}</Text>
         <View style={styles.listCardMeta}>
-          <Clock size={12} color="#94a3b8" />
-          <Text style={styles.listCardDate}>{formatDate(item.scannedAt)}</Text>
+          <Text style={styles.listCardPeriod}>{item.period}</Text>
         </View>
       </View>
       <View style={styles.listCardActions}>
@@ -474,14 +464,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
   },
-  gridCardDate: {
+  gridCardPeriod: {
     fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#94a3b8",
+    color: "#8B4513",
+    fontStyle: "italic",
   },
   listCard: {
     flexDirection: "row",
@@ -570,14 +561,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
   },
-  listCardDate: {
+  listCardPeriod: {
     fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#94a3b8",
+    color: "#8B4513",
+    fontStyle: "italic",
   },
   listCardActions: {
     justifyContent: "center",
