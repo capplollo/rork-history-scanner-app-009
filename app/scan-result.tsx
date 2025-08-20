@@ -94,9 +94,7 @@ export default function ScanResultScreen() {
     const loadMonumentData = async () => {
       let loadedMonument: HistoryItem | undefined;
       let retryCount = 0;
-      const maxRetries = 5; // Increased retries
-      
-      console.log('Starting monument data loading with params:', { resultId, scanData, monumentId });
+      const maxRetries = 3;
       
       while (!loadedMonument && retryCount < maxRetries) {
         console.log(`Attempting to load monument data (attempt ${retryCount + 1}/${maxRetries})`);
@@ -105,7 +103,7 @@ export default function ScanResultScreen() {
         if (resultId && typeof resultId === 'string') {
           try {
             const retrievedMonument = scanResultStore.retrieve(resultId);
-            if (retrievedMonument && retrievedMonument.name && retrievedMonument.name !== 'Unknown Artwork') {
+            if (retrievedMonument && retrievedMonument.name) {
               loadedMonument = retrievedMonument;
               console.log('✅ Retrieved monument from store:', loadedMonument.name);
               break;
@@ -121,7 +119,7 @@ export default function ScanResultScreen() {
         if (!loadedMonument && scanData && typeof scanData === 'string') {
           try {
             const parsedData = JSON.parse(scanData) as HistoryItem;
-            if (parsedData && parsedData.name && parsedData.name !== 'Unknown Artwork') {
+            if (parsedData && parsedData.name) {
               loadedMonument = parsedData;
               console.log('✅ Retrieved monument from scanData:', loadedMonument.name);
               break;
@@ -147,41 +145,22 @@ export default function ScanResultScreen() {
         
         // If no data found, wait a bit and retry (helps with race conditions)
         if (!loadedMonument && retryCount < maxRetries - 1) {
-          const waitTime = 200 + (retryCount * 300); // Progressive backoff
-          console.log(`No monument data found, retrying in ${waitTime}ms...`);
-          await new Promise(resolve => setTimeout(resolve, waitTime));
+          console.log(`No monument data found, retrying in 500ms...`);
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
         
         retryCount++;
       }
       
-      // If still no monument found, create a fallback
       if (!loadedMonument) {
         console.error('❌ Failed to load monument data after all retries');
-        console.log('Creating fallback monument data...');
-        
-        // Create a fallback monument to prevent the error screen
-        loadedMonument = {
-          id: 'fallback-' + Date.now(),
-          name: 'Artwork Analysis',
-          location: 'Unknown Location',
-          period: 'Unknown Period',
-          description: 'We encountered an issue loading the detailed analysis of your scanned artwork. This might be due to a temporary technical issue or network connectivity problem.',
-          significance: 'The artwork analysis is temporarily unavailable. Please try scanning again or check your internet connection.',
-          facts: [
-            'Try scanning the artwork again with better lighting',
-            'Ensure the artwork is clearly visible in the photo',
-            'Check your internet connection',
-            'The AI analysis service may be temporarily busy'
-          ],
-          image: '',
-          scannedImage: '',
-          scannedAt: new Date().toISOString(),
-          confidence: 0,
-          isRecognized: false,
-        };
-        
-        console.log('✅ Created fallback monument data');
+        // Try to get the most recent scan from history as a last resort
+        try {
+          // This would require accessing the history provider, but for now we'll show the error
+          console.log('Attempting to get most recent scan from history...');
+        } catch (error) {
+          console.error('Failed to get recent scan from history:', error);
+        }
       }
       
       setMonument(loadedMonument);
@@ -525,15 +504,7 @@ export default function ScanResultScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          <Image 
-            source={{ uri: monument.scannedImage || monument.image }} 
-            style={styles.monumentImage}
-            defaultSource={require('@/assets/images/icon.png')}
-            onError={(error) => {
-              console.log('Monument image failed to load:', error.nativeEvent.error);
-              console.log('Monument image URI:', monument.scannedImage || monument.image);
-            }}
-          />
+          <Image source={{ uri: monument.scannedImage || monument.image }} style={styles.monumentImage} />
           <LinearGradient
             colors={["transparent", "rgba(0,0,0,0.8)"]}
             style={styles.imageOverlay}

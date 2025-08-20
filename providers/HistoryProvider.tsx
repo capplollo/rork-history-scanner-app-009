@@ -51,10 +51,10 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             }
           }, 8000); // Reduced to 8 seconds
           
-          // Fetch all fields needed for history display
+          // Only fetch essential fields first for better performance
           const { data, error } = await supabase
             .from('scan_history')
-            .select('id, monument_name, location, period, description, significance, facts, image_url, scanned_image_url, scanned_at, is_recognized, confidence, detailed_description')
+            .select('id, monument_name, location, scanned_at, image_url, is_recognized, confidence')
             .eq('user_id', user.id)
             .order('scanned_at', { ascending: false })
             .limit(15) // Further reduced limit
@@ -77,28 +77,23 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             // Fallback to local storage
             await loadFromLocalStorage();
           } else {
-            // Map Supabase data to HistoryItem format with full data
+            // Map Supabase data to HistoryItem format with minimal data
             const mappedData = (data || []).map(item => {
               try {
                 return {
                   id: item.id || '',
                   name: item.monument_name || '',
                   location: item.location || '',
-                  period: item.period || '',
-                  description: item.description || '',
-                  significance: item.significance || '',
-                  facts: Array.isArray(item.facts) ? item.facts : [],
+                  period: '', // Will be loaded on demand
+                  description: '', // Will be loaded on demand
+                  significance: '', // Will be loaded on demand
+                  facts: [], // Will be loaded on demand
                   image: item.image_url || '',
-                  scannedImage: item.scanned_image_url || '',
+                  scannedImage: '', // Will be loaded on demand
                   scannedAt: item.scanned_at ? new Date(item.scanned_at).toISOString() : new Date().toISOString(),
                   confidence: typeof item.confidence === 'number' ? item.confidence : undefined,
                   isRecognized: typeof item.is_recognized === 'boolean' ? item.is_recognized : undefined,
-                  detailedDescription: item.detailed_description ? {
-                    keyTakeaways: item.detailed_description.keyTakeaways || '',
-                    inDepthContext: item.detailed_description.inDepthContext || '',
-                    curiosities: item.detailed_description.curiosities,
-                    keyTakeawaysList: Array.isArray(item.detailed_description.keyTakeawaysList) ? item.detailed_description.keyTakeawaysList : [],
-                  } : undefined,
+                  detailedDescription: undefined, // Will be loaded on demand
                 };
               } catch (mappingError) {
                 console.error('Error mapping history item:', mappingError, item);

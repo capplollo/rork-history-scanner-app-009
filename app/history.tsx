@@ -111,12 +111,7 @@ export default function HistoryScreen() {
         <View style={styles.instagramImageContainer}>
           <Image 
             source={{ uri: item.scannedImage || item.image }} 
-            style={styles.instagramImage}
-            defaultSource={require('@/assets/images/icon.png')}
-            onError={(error) => {
-              console.log('Image failed to load:', error.nativeEvent.error);
-              console.log('Image URI:', item.scannedImage || item.image);
-            }}
+            style={styles.instagramImage} 
           />
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.8)']}
@@ -164,12 +159,7 @@ export default function HistoryScreen() {
         <View style={styles.listImageContainer}>
           <Image 
             source={{ uri: item.scannedImage || item.image }} 
-            style={styles.listImage}
-            defaultSource={require('@/assets/images/icon.png')}
-            onError={(error) => {
-              console.log('List image failed to load:', error.nativeEvent.error);
-              console.log('List image URI:', item.scannedImage || item.image);
-            }}
+            style={styles.listImage} 
           />
         </View>
         <View style={styles.listCardContent}>
