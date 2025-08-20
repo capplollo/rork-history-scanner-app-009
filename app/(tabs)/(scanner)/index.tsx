@@ -81,12 +81,19 @@ export default function ScannerScreen() {
     setAnalysisStatus("Preparing image...");
     
     try {
-      setAnalysisStatus("Analyzing with AI...");
+      setAnalysisStatus("Analyzing with AI (first attempt)...");
       const detectionResult: DetectionResult = await detectMonument(selectedImage, additionalInfo);
       
       console.log('Detection result:', detectionResult);
       
-      setAnalysisStatus("Processing results...");
+      // Provide feedback based on the result
+      if (detectionResult.isRecognized && detectionResult.confidence > 50) {
+        setAnalysisStatus("Monument recognized! Processing results...");
+      } else if (detectionResult.confidence > 30) {
+        setAnalysisStatus("Partial recognition, processing results...");
+      } else {
+        setAnalysisStatus("Monument not recognized, but processing available information...");
+      }
       
       // Create a scan result from the AI detection
       const scanResult = {
@@ -133,15 +140,26 @@ export default function ScannerScreen() {
       
     } catch (error) {
       console.error('Error analyzing image:', error);
-      setAnalysisStatus("Analysis failed, using fallback...");
+      setAnalysisStatus("Analysis failed, creating basic result...");
       
-      // Fallback to mock data if AI fails
-      const randomMonument = mockMonuments[Math.floor(Math.random() * mockMonuments.length)];
+      // Create a basic result instead of random mock data
       const scanResult = {
-        ...randomMonument,
+        id: Date.now().toString(),
+        name: "Unknown Monument",
+        location: "Unknown",
+        period: "Unknown",
+        description: "Unable to analyze this monument. The AI service may be temporarily unavailable or the image may not contain a recognizable monument.",
+        significance: "Analysis failed due to technical issues or unrecognized monument.",
+        facts: [
+          "Please try again with a clearer photo",
+          "Ensure the monument is clearly visible in the image",
+          "Check your internet connection",
+          "Try adding more context in the additional info section"
+        ],
+        image: selectedImage,
         scannedImage: selectedImage,
         scannedAt: new Date().toISOString(),
-        confidence: 60,
+        confidence: 0,
         isRecognized: false,
       };
       

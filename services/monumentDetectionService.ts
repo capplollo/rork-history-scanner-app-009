@@ -32,150 +32,22 @@ export async function detectMonument(imageUri: string, additionalInfo?: Addition
     const base64Image = await convertImageToBase64(imageUri);
     console.log('Image converted to base64, length:', base64Image.length);
     
-    // Build the analysis prompt with optional additional context
-    let analysisPrompt = `Analyze this image carefully and identify if it contains a famous historical monument, landmark, or significant architectural structure. Look at architectural details, distinctive features, and any visible text or signs.`;
+    // First attempt: Standard analysis
+    let result = await performAnalysis(base64Image, additionalInfo, false);
     
-    // Add additional context if provided
-    if (additionalInfo && (additionalInfo.name || additionalInfo.location || additionalInfo.building || additionalInfo.notes)) {
-      analysisPrompt += `\n\nAdditional context provided by the user:`;
-      if (additionalInfo.name) {
-        analysisPrompt += `\n- Monument/Art Name: ${additionalInfo.name}`;
-      }
-      if (additionalInfo.location) {
-        analysisPrompt += `\n- Location: ${additionalInfo.location}`;
-      }
-      if (additionalInfo.building) {
-        analysisPrompt += `\n- Building/Museum: ${additionalInfo.building}`;
-      }
-      if (additionalInfo.notes) {
-        analysisPrompt += `\n- Additional Notes: ${additionalInfo.notes}`;
-      }
-      analysisPrompt += `\n\nUse this context to help with your analysis, but still verify what you see in the image. If the provided information matches what you observe, increase your confidence. If there's a mismatch, trust what you see in the image.`;
-    }
-    
-    analysisPrompt += `\n\nIf you recognize a specific monument, provide:
-1. The exact name of the monument
-2. Its location (city, country)
-3. Historical period or construction dates
-4. Brief description (2-3 sentences)
-5. Historical significance (2-3 sentences)
-6. 3-4 interesting facts
-7. Confidence level (0-100)
-
-If you don't recognize a specific famous monument but see architectural elements, describe what you see and suggest it might be a local landmark or historical building with lower confidence.
-
-Be very specific about what you see in the image. Don't default to famous monuments unless you're confident.
-
-Respond ONLY in valid JSON format:
-{
-  "monumentName": "Name of monument or 'Unknown Monument'",
-  "confidence": 85,
-  "location": "City, Country or 'Unknown'",
-  "period": "Time period or 'Unknown'",
-  "description": "Description of what you see",
-  "significance": "Historical or cultural significance",
-  "facts": ["fact1", "fact2", "fact3"],
-  "isRecognized": true/false
-}`;
-
-    const messages = [
-      {
-        role: 'user' as const,
-        content: [
-          {
-            type: 'text' as const,
-            text: analysisPrompt
-          },
-          {
-            type: 'image' as const,
-            image: base64Image
-          }
-        ]
-      }
-    ];
-
-    console.log('Sending request to AI API...');
-    console.log('Request payload:', JSON.stringify({ messages: messages }, null, 2));
-    
-    const response = await fetch('https://toolkit.rork.com/text/llm/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        messages: messages
-      })
-    });
-
-    console.log('AI API response status:', response.status);
-    console.log('AI API response headers:', Object.fromEntries(response.headers.entries()));
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI API error details:');
-      console.error('Status:', response.status, response.statusText);
-      console.error('Response body:', errorText);
-      console.error('Request was:', JSON.stringify({ messages: messages }, null, 2));
+    // If first attempt failed or has low confidence, try second attempt with enhanced context
+    if (!result.isRecognized || result.confidence < 50) {
+      console.log('First analysis failed or low confidence, attempting second analysis with enhanced context...');
       
-      // Provide more specific error messages
-      if (response.status === 500) {
-        throw new Error('AI service is temporarily unavailable. Please try again in a few moments.');
-      } else if (response.status === 429) {
-        throw new Error('Too many requests. Please wait a moment and try again.');
-      } else if (response.status === 413) {
-        throw new Error('Image is too large. Please try with a smaller image.');
+      const secondResult = await performAnalysis(base64Image, additionalInfo, true);
+      
+      // Use the better result
+      if (secondResult.confidence > result.confidence) {
+        console.log('Second analysis provided better results, using it');
+        result = secondResult;
       } else {
-        throw new Error(`AI API error: ${response.status} ${response.statusText}`);
+        console.log('Second analysis did not improve results, keeping first attempt');
       }
-    }
-
-    const data = await response.json();
-    console.log('AI response received:', data);
-    
-    const content = data.completion;
-    if (!content) {
-      throw new Error('No content in AI response');
-    }
-
-    console.log('Raw AI content:', content);
-
-    // Clean up the response and parse JSON
-    let cleanContent = content.trim();
-    
-    // Remove markdown code blocks
-    cleanContent = cleanContent.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-    
-    // Remove any backticks that might be left
-    cleanContent = cleanContent.replace(/`/g, '');
-    
-    // Try to extract JSON from the content if it's mixed with other text
-    const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      cleanContent = jsonMatch[0];
-    }
-    
-    // Clean up any remaining formatting issues
-    cleanContent = cleanContent.trim();
-    
-    console.log('Cleaned content for parsing:', cleanContent);
-
-    let result: DetectionResult;
-    try {
-      result = JSON.parse(cleanContent) as DetectionResult;
-      console.log('Parsed result:', result);
-    } catch (parseError) {
-      console.error('Failed to parse AI response as JSON:', parseError);
-      console.error('Content that failed to parse:', cleanContent);
-      console.error('Original content:', content);
-      
-      // Try to create a fallback result from the text content
-      const fallbackResult = createFallbackResult(content);
-      if (fallbackResult) {
-        console.log('Using fallback result:', fallbackResult);
-        return fallbackResult;
-      }
-      
-      throw new Error('Invalid JSON response from AI');
     }
     
     // If it's a recognized monument, get detailed description
@@ -217,6 +89,165 @@ Respond ONLY in valid JSON format:
       isRecognized: false,
     };
   }
+}
+
+async function performAnalysis(base64Image: string, additionalInfo?: AdditionalInfo, isSecondAttempt: boolean = false): Promise<DetectionResult> {
+  // Build the analysis prompt with optional additional context
+  let analysisPrompt = `Analyze this image carefully and identify if it contains a famous historical monument, landmark, or significant architectural structure. Look at architectural details, distinctive features, and any visible text or signs.`;
+  
+  if (isSecondAttempt) {
+    analysisPrompt += `\n\nThis is a second analysis attempt. The first attempt was unsuccessful, so please be more thorough and consider local landmarks, churches, and lesser-known monuments.`;
+  }
+  
+  // Add additional context if provided
+  if (additionalInfo && (additionalInfo.name || additionalInfo.location || additionalInfo.building || additionalInfo.notes)) {
+    analysisPrompt += `\n\nAdditional context provided by the user:`;
+    if (additionalInfo.name) {
+      analysisPrompt += `\n- Monument/Art Name: ${additionalInfo.name}`;
+    }
+    if (additionalInfo.location) {
+      analysisPrompt += `\n- Location: ${additionalInfo.location}`;
+    }
+    if (additionalInfo.building) {
+      analysisPrompt += `\n- Building/Museum: ${additionalInfo.building}`;
+    }
+    if (additionalInfo.notes) {
+      analysisPrompt += `\n- Additional Notes: ${additionalInfo.notes}`;
+    }
+    
+    if (isSecondAttempt) {
+      analysisPrompt += `\n\nIMPORTANT: This is a second attempt. Use the provided context more heavily to identify local monuments, churches, or lesser-known landmarks. Even if it's not a world-famous monument, if you can identify it based on the context and visual clues, provide that information.`;
+    } else {
+      analysisPrompt += `\n\nUse this context to help with your analysis, but still verify what you see in the image. If the provided information matches what you observe, increase your confidence. If there's a mismatch, trust what you see in the image.`;
+    }
+  }
+  
+  analysisPrompt += `\n\nIf you recognize a specific monument, provide:
+1. The exact name of the monument
+2. Its location (city, country)
+3. Historical period or construction dates
+4. Brief description (2-3 sentences)
+5. Historical significance (2-3 sentences)
+6. 3-4 interesting facts
+7. Confidence level (0-100)
+
+If you don't recognize a specific famous monument but see architectural elements, describe what you see and suggest it might be a local landmark or historical building with lower confidence.
+
+Be very specific about what you see in the image. Don't default to famous monuments unless you're confident.
+
+Respond ONLY in valid JSON format:
+{
+  "monumentName": "Name of monument or 'Unknown Monument'",
+  "confidence": 85,
+  "location": "City, Country or 'Unknown'",
+  "period": "Time period or 'Unknown'",
+  "description": "Description of what you see",
+  "significance": "Historical or cultural significance",
+  "facts": ["fact1", "fact2", "fact3"],
+  "isRecognized": true/false
+}`;
+
+  const messages = [
+    {
+      role: 'user' as const,
+      content: [
+        {
+          type: 'text' as const,
+          text: analysisPrompt
+        },
+        {
+          type: 'image' as const,
+          image: base64Image
+        }
+      ]
+    }
+  ];
+
+  console.log(`Sending ${isSecondAttempt ? 'second' : 'first'} analysis request to AI API...`);
+  console.log('Request payload:', JSON.stringify({ messages: messages }, null, 2));
+  
+  const response = await fetch('https://toolkit.rork.com/text/llm/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      messages: messages
+    })
+  });
+
+  console.log('AI API response status:', response.status);
+  console.log('AI API response headers:', Object.fromEntries(response.headers.entries()));
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('AI API error details:');
+    console.error('Status:', response.status, response.statusText);
+    console.error('Response body:', errorText);
+    console.error('Request was:', JSON.stringify({ messages: messages }, null, 2));
+    
+    // Provide more specific error messages
+    if (response.status === 500) {
+      throw new Error('AI service is temporarily unavailable. Please try again in a few moments.');
+    } else if (response.status === 429) {
+      throw new Error('Too many requests. Please wait a moment and try again.');
+    } else if (response.status === 413) {
+      throw new Error('Image is too large. Please try with a smaller image.');
+    } else {
+      throw new Error(`AI API error: ${response.status} ${response.statusText}`);
+    }
+  }
+
+  const data = await response.json();
+  console.log('AI response received:', data);
+  
+  const content = data.completion;
+  if (!content) {
+    throw new Error('No content in AI response');
+  }
+
+  console.log('Raw AI content:', content);
+
+  // Clean up the response and parse JSON
+  let cleanContent = content.trim();
+  
+  // Remove markdown code blocks
+  cleanContent = cleanContent.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+  
+  // Remove any backticks that might be left
+  cleanContent = cleanContent.replace(/`/g, '');
+  
+  // Try to extract JSON from the content if it's mixed with other text
+  const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    cleanContent = jsonMatch[0];
+  }
+  
+  // Clean up any remaining formatting issues
+  cleanContent = cleanContent.trim();
+  
+  console.log('Cleaned content for parsing:', cleanContent);
+
+  let result: DetectionResult;
+  try {
+    result = JSON.parse(cleanContent) as DetectionResult;
+    console.log('Parsed result:', result);
+  } catch (parseError) {
+    console.error('Failed to parse AI response as JSON:', parseError);
+    console.error('Content that failed to parse:', cleanContent);
+    console.error('Original content:', content);
+    
+    // Try to create a fallback result from the text content
+    const fallbackResult = createFallbackResult(content);
+    if (fallbackResult) {
+      console.log('Using fallback result:', fallbackResult);
+      return fallbackResult;
+    }
+    
+    throw new Error('Invalid JSON response from AI');
+  }
+  
+  return result;
 }
 
 function findExactMatchingMonument(detectedName: string) {
