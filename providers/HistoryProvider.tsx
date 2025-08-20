@@ -47,12 +47,12 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           .limit(MAX_HISTORY_ITEMS);
         
         if (error) {
-          console.error('Error loading history from Supabase:', {
+          console.error('Error loading history from Supabase:', error.message || 'Unknown error');
+          console.error('Supabase error details:', {
             message: error.message,
             code: error.code,
             details: error.details,
             hint: error.hint,
-            fullError: JSON.stringify(error, null, 2),
           });
           // Fallback to local storage
           await loadFromLocalStorage();
@@ -87,11 +87,9 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
         await loadFromLocalStorage();
       }
     } catch (error) {
-      console.error("Error loading history:", {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        fullError: JSON.stringify(error, null, 2),
-      });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Error loading history:", errorMessage);
+      console.error("Full error details:", error);
       await loadFromLocalStorage();
     } finally {
       setIsLoading(false);
@@ -125,7 +123,6 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
       const { error } = await supabase
         .from('scan_history')
         .insert({
-          id: item.id,
           user_id: user.id,
           monument_name: item.name,
           location: item.location,
@@ -139,26 +136,23 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           confidence: item.confidence || null,
           is_recognized: item.isRecognized || null,
           detailed_description: item.detailedDescription || null,
-          created_at: new Date().toISOString(),
         });
       
       if (error) {
-        console.error('Error saving to Supabase:', {
+        console.error('Error saving to Supabase:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
           message: error.message,
           code: error.code,
           details: error.details,
           hint: error.hint,
-          fullError: JSON.stringify(error, null, 2),
         });
         return false;
       }
       return true;
     } catch (error) {
-      console.error('Error saving to Supabase:', {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        fullError: JSON.stringify(error, null, 2),
-      });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error saving to Supabase:', errorMessage);
+      console.error('Full error details:', error);
       return false;
     }
   }, [user]);
@@ -263,12 +257,12 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           .eq('user_id', user.id);
         
         if (error) {
-          console.error('Error clearing Supabase history:', {
+          console.error('Error clearing Supabase history:', error.message || 'Unknown error');
+          console.error('Supabase error details:', {
             message: error.message,
             code: error.code,
             details: error.details,
             hint: error.hint,
-            fullError: JSON.stringify(error, null, 2),
           });
         }
       }

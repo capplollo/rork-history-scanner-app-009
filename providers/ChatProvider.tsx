@@ -32,12 +32,12 @@ export const [ChatProvider, useChat] = createContextHook(() => {
         .order('last_updated', { ascending: false });
 
       if (error) {
-        console.error('Error loading chat sessions:', {
+        console.error('Error loading chat sessions:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
           message: error.message,
           code: error.code,
           details: error.details,
           hint: error.hint,
-          fullError: JSON.stringify(error, null, 2),
         });
         setIsLoading(false);
         return;
@@ -67,11 +67,9 @@ export const [ChatProvider, useChat] = createContextHook(() => {
         }
       }
     } catch (error) {
-      console.error("Error loading chat sessions:", {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        fullError: JSON.stringify(error, null, 2),
-      });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Error loading chat sessions:", errorMessage);
+      console.error("Full error details:", error);
     } finally {
       setIsLoading(false);
     }
@@ -104,23 +102,21 @@ export const [ChatProvider, useChat] = createContextHook(() => {
         );
 
       if (error) {
-        console.error('Error saving chat sessions:', {
+        console.error('Error saving chat sessions:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
           message: error.message,
           code: error.code,
           details: error.details,
           hint: error.hint,
-          fullError: JSON.stringify(error, null, 2),
         });
         throw error;
       }
 
       return sessionsToSave;
     } catch (error) {
-      console.error("Error saving chat sessions:", {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        fullError: JSON.stringify(error, null, 2),
-      });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Error saving chat sessions:", errorMessage);
+      console.error("Full error details:", error);
       throw error;
     }
   }, []);
@@ -279,12 +275,12 @@ export const [ChatProvider, useChat] = createContextHook(() => {
         .eq('user_id', user.id);
 
       if (error) {
-        console.error('Error deleting session:', {
+        console.error('Error deleting session:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
           message: error.message,
           code: error.code,
           details: error.details,
           hint: error.hint,
-          fullError: JSON.stringify(error, null, 2),
         });
         throw error;
       }
@@ -297,11 +293,9 @@ export const [ChatProvider, useChat] = createContextHook(() => {
         setCurrentSessionId(newSessions.length > 0 ? newSessions[0].id : null);
       }
     } catch (error) {
-      console.error('Error deleting session:', {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        fullError: JSON.stringify(error, null, 2),
-      });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error deleting session:', errorMessage);
+      console.error('Full error details:', error);
       throw error;
     }
   }, [sessions, currentSessionId]);
@@ -321,12 +315,12 @@ export const [ChatProvider, useChat] = createContextHook(() => {
         .eq('user_id', user.id);
 
       if (error) {
-        console.error('Error clearing all sessions:', {
+        console.error('Error clearing all sessions:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
           message: error.message,
           code: error.code,
           details: error.details,
           hint: error.hint,
-          fullError: JSON.stringify(error, null, 2),
         });
         throw error;
       }
@@ -334,11 +328,9 @@ export const [ChatProvider, useChat] = createContextHook(() => {
       setSessions([]);
       setCurrentSessionId(null);
     } catch (error) {
-      console.error('Error clearing all sessions:', {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        fullError: JSON.stringify(error, null, 2),
-      });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error clearing all sessions:', errorMessage);
+      console.error('Full error details:', error);
     }
   }, []);
 

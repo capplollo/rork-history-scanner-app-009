@@ -31,7 +31,7 @@ export class SupabaseHistoryService {
     try {
       console.log('Saving scan to Supabase for user:', userId);
       
-      const supabaseScanData: SupabaseScanHistory = {
+      const supabaseScanData: Omit<SupabaseScanHistory, 'id' | 'created_at' | 'updated_at'> = {
         user_id: userId,
         monument_name: scanData.name,
         location: scanData.location,
@@ -54,7 +54,8 @@ export class SupabaseHistoryService {
         .single();
 
       if (error) {
-        console.error('Error saving scan to Supabase:', {
+        console.error('Error saving scan to Supabase:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
           message: error.message,
           code: error.code,
           details: error.details,
@@ -66,10 +67,12 @@ export class SupabaseHistoryService {
       console.log('✅ Scan saved successfully to Supabase:', data.id);
       return { success: true };
     } catch (error) {
-      console.error('Unexpected error saving scan:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Unexpected error saving scan:', errorMessage);
+      console.error('Full error details:', error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred' 
+        error: errorMessage
       };
     }
   }
@@ -86,7 +89,8 @@ export class SupabaseHistoryService {
         .order('scanned_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching scans from Supabase:', {
+        console.error('Error fetching scans from Supabase:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
           message: error.message,
           code: error.code,
           details: error.details,
@@ -108,16 +112,23 @@ export class SupabaseHistoryService {
         scannedAt: item.scanned_at,
         confidence: item.confidence,
         isRecognized: item.is_recognized,
-        detailedDescription: item.detailed_description,
+        detailedDescription: item.detailed_description ? {
+          quickOverview: item.detailed_description.quickOverview || '',
+          inDepthContext: item.detailed_description.inDepthContext || '',
+          curiosities: item.detailed_description.curiosities,
+          keyTakeaways: item.detailed_description.keyTakeaways || [],
+        } : undefined,
       }));
 
       console.log('✅ Fetched', scans.length, 'scans from Supabase');
       return { scans };
     } catch (error) {
-      console.error('Unexpected error fetching scans:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Unexpected error fetching scans:', errorMessage);
+      console.error('Full error details:', error);
       return { 
         scans: [], 
-        error: error instanceof Error ? error.message : 'Unknown error occurred' 
+        error: errorMessage
       };
     }
   }
@@ -133,7 +144,8 @@ export class SupabaseHistoryService {
         .eq('id', scanId);
 
       if (error) {
-        console.error('Error deleting scan from Supabase:', {
+        console.error('Error deleting scan from Supabase:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
           message: error.message,
           code: error.code,
           details: error.details,
@@ -144,10 +156,12 @@ export class SupabaseHistoryService {
       console.log('✅ Scan deleted successfully from Supabase');
       return { success: true };
     } catch (error) {
-      console.error('Unexpected error deleting scan:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Unexpected error deleting scan:', errorMessage);
+      console.error('Full error details:', error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred' 
+        error: errorMessage
       };
     }
   }
@@ -177,7 +191,8 @@ export class SupabaseHistoryService {
         .eq('id', scanId);
 
       if (error) {
-        console.error('Error updating scan in Supabase:', {
+        console.error('Error updating scan in Supabase:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
           message: error.message,
           code: error.code,
           details: error.details,
@@ -188,10 +203,12 @@ export class SupabaseHistoryService {
       console.log('✅ Scan updated successfully in Supabase');
       return { success: true };
     } catch (error) {
-      console.error('Unexpected error updating scan:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Unexpected error updating scan:', errorMessage);
+      console.error('Full error details:', error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred' 
+        error: errorMessage
       };
     }
   }
@@ -212,7 +229,8 @@ export class SupabaseHistoryService {
         .eq('user_id', userId);
 
       if (error) {
-        console.error('Error fetching user stats from Supabase:', {
+        console.error('Error fetching user stats from Supabase:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
           message: error.message,
           code: error.code,
           details: error.details,
@@ -229,12 +247,14 @@ export class SupabaseHistoryService {
       console.log('✅ User stats calculated:', { totalScans, recognizedScans, averageConfidence });
       return { totalScans, recognizedScans, averageConfidence };
     } catch (error) {
-      console.error('Unexpected error fetching user stats:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Unexpected error fetching user stats:', errorMessage);
+      console.error('Full error details:', error);
       return { 
         totalScans: 0, 
         recognizedScans: 0, 
         averageConfidence: 0, 
-        error: error instanceof Error ? error.message : 'Unknown error occurred' 
+        error: errorMessage
       };
     }
   }
