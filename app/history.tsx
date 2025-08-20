@@ -18,7 +18,8 @@ import {
   Grid3X3,
   List,
   Heart,
-  Share2
+  Share2,
+  ChevronDown
 } from "lucide-react-native";
 import { useHistory } from "@/providers/HistoryProvider";
 import { router } from "expo-router";
@@ -33,12 +34,42 @@ export default function HistoryScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'location'>('date');
+  const [selectedCountry, setSelectedCountry] = useState<string>('all');
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+
+  // Extract unique countries from history
+  const availableCountries = useMemo(() => {
+    const countries = new Set<string>();
+    history.forEach(item => {
+      if (item.location) {
+        // Extract country from location (assuming format like "City, Country" or "Location, Country")
+        const parts = item.location.split(',').map(part => part.trim());
+        if (parts.length > 1) {
+          countries.add(parts[parts.length - 1]); // Last part is usually the country
+        } else {
+          countries.add(item.location); // If no comma, treat whole location as country
+        }
+      }
+    });
+    return Array.from(countries).sort();
+  }, [history]);
 
   const filteredAndSortedHistory = useMemo(() => {
-    let filtered = history.filter(item => 
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.location.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    let filtered = history.filter(item => {
+      // Name and location search filter
+      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.location.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Country filter
+      let matchesCountry = true;
+      if (selectedCountry !== 'all' && item.location) {
+        const parts = item.location.split(',').map(part => part.trim());
+        const itemCountry = parts.length > 1 ? parts[parts.length - 1] : item.location;
+        matchesCountry = itemCountry === selectedCountry;
+      }
+      
+      return matchesSearch && matchesCountry;
+    });
 
     return filtered.sort((a, b) => {
       switch (sortBy) {
@@ -51,7 +82,7 @@ export default function HistoryScreen() {
           return new Date(b.scannedAt).getTime() - new Date(a.scannedAt).getTime();
       }
     });
-  }, [history, searchQuery, sortBy]);
+  }, [history, searchQuery, sortBy, selectedCountry]);
 
 
 
@@ -175,6 +206,51 @@ export default function HistoryScreen() {
           />
         </View>
         
+        {/* Country Filter */}
+        {availableCountries.length > 0 && (
+          <View style={styles.countryFilterContainer}>
+            <TouchableOpacity 
+              style={styles.countryDropdown}
+              onPress={() => setShowCountryDropdown(!showCountryDropdown)}
+            >
+              <Text style={styles.countryDropdownText}>
+                {selectedCountry === 'all' ? 'All Countries' : selectedCountry}
+              </Text>
+              <ChevronDown size={16} color="#64748b" />
+            </TouchableOpacity>
+            
+            {showCountryDropdown && (
+              <View style={styles.countryDropdownMenu}>
+                <TouchableOpacity
+                  style={[styles.countryOption, selectedCountry === 'all' && styles.countryOptionActive]}
+                  onPress={() => {
+                    setSelectedCountry('all');
+                    setShowCountryDropdown(false);
+                  }}
+                >
+                  <Text style={[styles.countryOptionText, selectedCountry === 'all' && styles.countryOptionTextActive]}>
+                    All Countries
+                  </Text>
+                </TouchableOpacity>
+                {availableCountries.map((country) => (
+                  <TouchableOpacity
+                    key={country}
+                    style={[styles.countryOption, selectedCountry === country && styles.countryOptionActive]}
+                    onPress={() => {
+                      setSelectedCountry(country);
+                      setShowCountryDropdown(false);
+                    }}
+                  >
+                    <Text style={[styles.countryOptionText, selectedCountry === country && styles.countryOptionTextActive]}>
+                      {country}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+        
         <View style={styles.filterRow}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.sortButtons}>
             {[{ key: 'date', label: 'Recent' }, { key: 'name', label: 'Name' }, { key: 'location', label: 'Location' }].map((sort) => (
@@ -217,7 +293,7 @@ export default function HistoryScreen() {
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateTitle}>No discoveries found</Text>
             <Text style={styles.emptyStateText}>
-              {searchQuery ? 'Try adjusting your search terms' : 'Start scanning monuments to build your collection'}
+              {searchQuery || selectedCountry !== 'all' ? 'Try adjusting your search terms or filters' : 'Start scanning monuments to build your collection'}
             </Text>
           </View>
         ) : (
@@ -611,5 +687,70 @@ const styles = StyleSheet.create({
     color: "#64748b",
     textAlign: "center",
     lineHeight: 22,
+  },
+  countryFilterContainer: {
+    position: "relative",
+    marginBottom: 16,
+    zIndex: 1000,
+  },
+  countryDropdown: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#f8f9fa",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  countryDropdownText: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#2C3E50",
+    fontWeight: "500",
+  },
+  countryDropdownMenu: {
+    position: "absolute",
+    top: "100%",
+    left: 0,
+    right: 0,
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    marginTop: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    maxHeight: 200,
+  },
+  countryOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+  },
+  countryOptionActive: {
+    backgroundColor: "#f8f4f0",
+  },
+  countryOptionText: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#2C3E50",
+  },
+  countryOptionTextActive: {
+    color: "#8B4513",
+    fontWeight: "600",
   },
 });
