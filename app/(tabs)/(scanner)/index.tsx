@@ -81,18 +81,18 @@ export default function ScannerScreen() {
     setAnalysisStatus("Preparing image...");
     
     try {
-      setAnalysisStatus("Analyzing with AI (first attempt)...");
+      setAnalysisStatus("Analyzing artwork with AI...");
       const detectionResult: DetectionResult = await detectArtwork(selectedImage, additionalInfo);
       
       console.log('Detection result:', detectionResult);
       
       // Provide feedback based on the result
       if (detectionResult.isRecognized && detectionResult.confidence > 50) {
-        setAnalysisStatus("Artwork recognized! Processing results...");
+        setAnalysisStatus("Artwork recognized! Finalizing...");
       } else if (detectionResult.confidence > 30) {
-        setAnalysisStatus("Partial recognition, processing results...");
+        setAnalysisStatus("Partial recognition, finalizing...");
       } else {
-        setAnalysisStatus("Artwork not recognized, but processing available information...");
+        setAnalysisStatus("Processing results...");
       }
       
       // Create a scan result from the AI detection
@@ -306,7 +306,7 @@ export default function ScannerScreen() {
             ) : (
               <>
                 <Sparkles size={20} color="#ffffff" />
-                <Text style={styles.analyzeButtonText}>Analyze Artwork</Text>
+                <Text style={styles.analyzeButtonText}>Analyze Artwork (~15s)</Text>
               </>
             )}
           </TouchableOpacity>
