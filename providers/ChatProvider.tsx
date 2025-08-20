@@ -32,13 +32,21 @@ export const [ChatProvider, useChat] = createContextHook(() => {
         .order('last_updated', { ascending: false });
 
       if (error) {
-        console.error('Error loading chat sessions:', error.message || 'Unknown error');
+        const errorMessage = error.message || 'Unknown error';
+        console.error('Error loading chat sessions:', errorMessage);
         console.error('Supabase error details:', {
           message: error.message,
           code: error.code,
           details: error.details,
           hint: error.hint,
         });
+        
+        // Check if it's a table not found error
+        if (error.message?.includes('chat_sessions') && error.message?.includes('does not exist')) {
+          console.error('❌ The chat_sessions table does not exist in your Supabase database.');
+          console.error('📝 Please run the create-chat-sessions-table.sql file in your Supabase SQL Editor.');
+        }
+        
         setIsLoading(false);
         return;
       }
@@ -70,6 +78,12 @@ export const [ChatProvider, useChat] = createContextHook(() => {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("Error loading chat sessions:", errorMessage);
       console.error("Full error details:", error);
+      
+      // Check if it's a table not found error
+      if (errorMessage.includes('chat_sessions') && (errorMessage.includes('does not exist') || errorMessage.includes('schema cache'))) {
+        console.error('❌ The chat_sessions table does not exist in your Supabase database.');
+        console.error('📝 Please run the create-chat-sessions-table.sql file in your Supabase SQL Editor.');
+      }
     } finally {
       setIsLoading(false);
     }
