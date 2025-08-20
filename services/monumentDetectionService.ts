@@ -116,15 +116,11 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
   // Clean up the response and parse JSON with better error handling
   let cleanContent = content.trim();
   
-  // Remove markdown code blocks
-  cleanContent = cleanContent.replace(/```json\s*/gi, '').replace(/```\s*/g, '');
+  // Remove markdown code blocks more aggressively
+  cleanContent = cleanContent.replace(/```json\s*/gi, '').replace(/```\s*/g, '').replace(/```/g, '');
   
-  // Remove any backticks
+  // Remove any remaining backticks
   cleanContent = cleanContent.replace(/`/g, '');
-  
-  // Fix common JSON issues that cause parsing errors
-  // Fix unescaped quotes in strings
-  cleanContent = cleanContent.replace(/"([^"]*?)"([^":,}\]]*?)"([^":,}\]]*?)"/g, '"$1\\"$2\\"$3"');
   
   // Try to extract JSON from the content - look for the outermost braces
   const jsonStart = cleanContent.indexOf('{');
@@ -134,12 +130,24 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
     cleanContent = cleanContent.substring(jsonStart, jsonEnd + 1);
   }
   
-  // Additional cleanup for common JSON issues
+  // Fix common JSON issues that cause parsing errors
   // Fix trailing commas
   cleanContent = cleanContent.replace(/,\s*([}\]])/g, '$1');
   
-  // Fix unescaped newlines in strings
-  cleanContent = cleanContent.replace(/"([^"]*?)\n([^"]*?)"/g, '"$1\\n$2"');
+  // Fix unescaped newlines in strings - be more careful with this
+  cleanContent = cleanContent.replace(/"([^"]*?)\r?\n([^"]*?)"/g, '"$1\\n$2"');
+  
+  // Fix unescaped quotes in strings - be more specific
+  cleanContent = cleanContent.replace(/"([^"]*?)"([^":,}\]\s]*?)"([^":,}\]]*?)"/g, (match: string, p1: string, p2: string, p3: string) => {
+    // Only replace if this looks like an unescaped quote in a string value
+    if (p2.includes(':') || p2.includes(',')) {
+      return match; // Don't modify if it looks like proper JSON structure
+    }
+    return `"${p1}\\"${p2}\\"${p3}"`;
+  });
+  
+  // Fix escaped backslashes that might cause issues
+  cleanContent = cleanContent.replace(/\\\\/g, '\\');
   
   console.log('Cleaned content for parsing (first 500 chars):', cleanContent.substring(0, 500));
 
