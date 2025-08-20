@@ -284,36 +284,34 @@ async function getDetailedDescription(monumentName: string): Promise<{
   curiosities?: string;
   keyTakeaways: string[];
 }> {
-  const messages = [
-    {
-      role: 'user' as const,
-      content: `Provide a structured explanation of the monument "${monumentName}" in four sections, written in an elegant, logically constructed, and easy-to-digest style. Use refined but accessible language.
+  const detailedPrompt = `Provide a structured explanation of the monument "${monumentName}" in four sections, written in an elegant, logically constructed, and easy-to-digest style. Use refined but accessible language.
 
 Quick Overview (≈500 characters): A concise, captivating description of the monument and its immediate historical significance. This should be approximately 500 characters (about 3-4 sentences).
 
-In-Depth Context (1000-3000 characters): A longer, detailed explanation of the monument, including its broader historical context, the era and place in which it appeared, cultural and political circumstances, and any notable architectural style or artistic importance. This must be between 1000-3000 characters.
+In-Depth Context (1000-3000 characters): A longer, detailed explanation of the monument, including its specific broader historical context, the era and place in which it appeared, cultural and political circumstances, and any notable architectural style or artistic importance. Info should be very specific and interesting. This must be between 1000-3000 characters.
 
 Curiosities (if applicable): Mention only if there are famous, meaningful, or widely recognized anecdotes, legends, or curiosities tied to the monument. If none exist, write "No widely known curiosities are associated with this monument."
 
 Quick Facts (bullet points): A short list of the most essential facts and highlights about the monument. Provide 4-5 bullet points.
 
-IMPORTANT: Follow the character count requirements strictly. The Quick Overview should be around 500 characters, and the In-Depth Context should be 1000-3000 characters.
-
 Respond ONLY in valid JSON format:
 {
-  "quickOverview": "[Write exactly around 500 characters - 3-4 sentences describing the monument and its significance]",
-  "inDepthContext": "[Write 1000-3000 characters - comprehensive historical context, architectural details, cultural importance, and broader significance]",
-  "curiosities": "[Write interesting anecdotes, legends, or curiosities if they exist, otherwise write 'No widely known curiosities are associated with this monument.']",
-  "keyTakeaways": [
-    "Essential fact about construction or history",
-    "Architectural or artistic significance",
-    "Cultural or political importance",
-    "Notable visitor information or recognition",
-    "Interesting highlight or unique feature"
-  ]
-}
+"quickOverview": "[Write exactly around 500 characters - 3-4 sentences describing the monument and its significance]",
+"inDepthContext": "[Write 1000-3000 characters - comprehensive historical context, architectural details, cultural importance, and broader significance]",
+"curiosities": "[Write interesting anecdotes, legends, or curiosities if they exist, otherwise write 'No widely known curiosities are associated with this monument.']",
+"keyTakeaways": [
+  "Essential fact about construction or history",
+  "Architectural or artistic significance",
+  "Cultural or political importance",
+  "Notable visitor information or recognition",
+  "Interesting highlight or unique feature"
+]
+}`;
 
-Ensure the content is informative, engaging, and properly formatted. Do NOT include markdown or any text outside the JSON.`
+  const messages = [
+    {
+      role: 'user' as const,
+      content: detailedPrompt
     }
   ];
 
