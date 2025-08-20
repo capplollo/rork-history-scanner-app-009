@@ -123,6 +123,7 @@ class ScanResultStore {
     }
     
     // Keep image URLs but remove base64 data to prevent size issues
+    // Only remove base64 data, preserve local URIs and HTTP URLs
     if (optimized.image && optimized.image.startsWith('data:')) {
       // If it's a base64 image, remove it to prevent size issues
       console.log('Removing base64 image data to prevent size issues');
@@ -135,10 +136,13 @@ class ScanResultStore {
       optimized.scannedImage = '';
     }
     
-    // Ensure we have some image reference for display
-    if (!optimized.image && !optimized.scannedImage) {
-      console.log('No image available after optimization');
-    }
+    // Log image status for debugging
+    console.log('Image optimization result:', {
+      hasImage: !!optimized.image,
+      hasScannedImage: !!optimized.scannedImage,
+      imageType: optimized.image ? (optimized.image.startsWith('http') ? 'URL' : optimized.image.startsWith('file') ? 'Local' : 'Other') : 'None',
+      scannedImageType: optimized.scannedImage ? (optimized.scannedImage.startsWith('http') ? 'URL' : optimized.scannedImage.startsWith('file') ? 'Local' : 'Other') : 'None'
+    });
     
     return optimized;
   }
@@ -209,8 +213,9 @@ class ScanResultStore {
       description: result.description.substring(0, 200) + '...',
       significance: result.significance.substring(0, 200) + '...',
       facts: result.facts.slice(0, 3).map(fact => fact.substring(0, 80) + '...'),
-      image: '', // Remove images in emergency mode
-      scannedImage: '',
+      // Keep images if they're not base64 (local URIs or URLs are fine)
+      image: (result.image && !result.image.startsWith('data:')) ? result.image : '',
+      scannedImage: (result.scannedImage && !result.scannedImage.startsWith('data:')) ? result.scannedImage : '',
       scannedAt: result.scannedAt,
       confidence: result.confidence,
       isRecognized: result.isRecognized,

@@ -122,6 +122,10 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
   // Remove any backticks
   cleanContent = cleanContent.replace(/`/g, '');
   
+  // Fix common JSON issues that cause parsing errors
+  // Fix unescaped quotes in strings
+  cleanContent = cleanContent.replace(/"([^"]*?)"([^":,}\]]*?)"([^":,}\]]*?)"/g, '"$1\\"$2\\"$3"');
+  
   // Try to extract JSON from the content - look for the outermost braces
   const jsonStart = cleanContent.indexOf('{');
   const jsonEnd = cleanContent.lastIndexOf('}');
@@ -130,7 +134,14 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
     cleanContent = cleanContent.substring(jsonStart, jsonEnd + 1);
   }
   
-  console.log('Cleaned content for parsing:', cleanContent);
+  // Additional cleanup for common JSON issues
+  // Fix trailing commas
+  cleanContent = cleanContent.replace(/,\s*([}\]])/g, '$1');
+  
+  // Fix unescaped newlines in strings
+  cleanContent = cleanContent.replace(/"([^"]*?)\n([^"]*?)"/g, '"$1\\n$2"');
+  
+  console.log('Cleaned content for parsing (first 500 chars):', cleanContent.substring(0, 500));
 
   try {
     // Validate that we have proper JSON structure
