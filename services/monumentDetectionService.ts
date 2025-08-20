@@ -10,10 +10,10 @@ export interface DetectionResult {
   facts: string[];
   isRecognized: boolean;
   detailedDescription?: {
-    quickOverview: string;
+    keyTakeaways: string;
     inDepthContext: string;
     curiosities?: string;
-    keyTakeaways: string[];
+    keyTakeawaysList: string[];
   };
 }
 
@@ -67,7 +67,7 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
     if (additionalInfo.notes) analysisPrompt += ` Notes: ${additionalInfo.notes}.`;
   }
   
-  analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond in this JSON format:\n{\n  "artworkName": "Name or 'Unknown Artwork'",\n  "confidence": 85,\n  "location": "Actual location",\n  "period": "Period/artist or 'Unknown'",\n  "description": "Brief description (2-3 sentences)",\n  "significance": "Cultural significance (2-3 sentences)",\n  "facts": ["fact1", "fact2", "fact3"],\n  "isRecognized": true/false,\n  "detailedDescription": {\n    "quickOverview": "Captivating overview (~500 chars)",\n    "inDepthContext": "Detailed historical context (1000-3000 chars, 2-3 paragraphs with **bold** highlights)",\n    "curiosities": "Interesting anecdotes or 'No widely known curiosities are associated with this artwork.'",\n    "keyTakeaways": ["Essential fact 1", "Artistic significance", "Cultural importance", "Notable recognition", "Unique feature"]\n  }\n}\n\nIf not recognized with high confidence, omit detailedDescription.`;
+  analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond in this JSON format:\n{\n  "artworkName": "Name or 'Unknown Artwork'",\n  "confidence": 85,\n  "location": "Actual location",\n  "period": "Period/artist or 'Unknown'",\n  "description": "Brief description (2-3 sentences)",\n  "significance": "Cultural significance (2-3 sentences)",\n  "facts": ["fact1", "fact2", "fact3"],\n  "isRecognized": true/false,\n  "detailedDescription": {\n    "keyTakeaways": "Summary of most important pieces of information (~500 chars)",\n    "inDepthContext": "Dense, specific historical context (1200-3000 chars, 2-3 paragraphs with **bold** highlights). Include historical context, artistic details, architectural specifics, cultural significance, creation circumstances, artist biography details, technical aspects, restoration history, and interesting anecdotes. Be specific and dense, not general.",\n    "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories or 'No widely known curiosities are associated with this artwork.'",\n    "keyTakeawaysList": ["Essential historical fact", "Artistic/architectural significance", "Cultural importance", "Notable recognition/influence", "Unique technical feature"]\n  }\n}\n\nIf not recognized with high confidence, omit detailedDescription.`;
 
   const messages = [
     {
@@ -128,10 +128,10 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
     // Validate and set defaults for detailed description if missing
     if (result.isRecognized && result.confidence > 75 && !result.detailedDescription) {
       result.detailedDescription = {
-        quickOverview: result.description,
-        inDepthContext: `**${result.artworkName}** is a significant ${result.period} artwork located in ${result.location}. This piece represents important cultural heritage and artistic achievement of its era. The work showcases the artistic techniques and cultural values of its time period.`,
+        keyTakeaways: result.description,
+        inDepthContext: `**${result.artworkName}** is a significant ${result.period} artwork located in ${result.location}. This piece represents important cultural heritage and artistic achievement of its era. The work showcases the artistic techniques and cultural values of its time period, reflecting the historical context and artistic movements of the period. The creation involved specific materials and techniques characteristic of the era, and its preservation allows us to understand the cultural and artistic priorities of the time.`,
         curiosities: "No widely known curiosities are associated with this artwork.",
-        keyTakeaways: result.facts.slice(0, 5)
+        keyTakeawaysList: result.facts.slice(0, 5)
       };
     }
     

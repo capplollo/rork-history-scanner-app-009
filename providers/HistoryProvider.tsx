@@ -18,10 +18,10 @@ export interface HistoryItem {
   confidence?: number;
   isRecognized?: boolean;
   detailedDescription?: {
-    quickOverview: string;
+    keyTakeaways: string;
     inDepthContext: string;
     curiosities?: string;
-    keyTakeaways: string[];
+    keyTakeawaysList: string[];
   };
 }
 
