@@ -169,74 +169,21 @@ export default function ScanResultScreen() {
         return '';
       }
       
-      // Create a more natural, narrator-style introduction
-      let fullText = `Welcome to the story of ${monument.name}. `;
+      let textToRead = '';
       
-      // Add location and period information with natural transitions
-      if (monument.location && monument.period) {
-        fullText += `This magnificent ${monument.period} monument stands proudly in ${monument.location}. `;
-      } else if (monument.location) {
-        fullText += `Located in the beautiful ${monument.location}. `;
-      } else if (monument.period) {
-        fullText += `This remarkable structure dates back to the ${monument.period}. `;
-      }
-      
-      // Add a brief pause for dramatic effect
-      fullText += `Let me tell you its fascinating story. `;
-      
-      // Check if we have detailed description or fallback to basic info
-      let hasContent = false;
-      
-      if (monument.detailedDescription) {
-        if (monument.detailedDescription.quickOverview) {
-          fullText += `${monument.detailedDescription.quickOverview} `;
-          fullText += `Now, let's dive deeper into its history. `;
-          hasContent = true;
-        }
-        if (monument.detailedDescription.inDepthContext) {
-          fullText += `${monument.detailedDescription.inDepthContext} `;
-          hasContent = true;
-        }
-        if (monument.detailedDescription.curiosities) {
-          fullText += `Here's something truly fascinating about this place: ${monument.detailedDescription.curiosities} `;
-          hasContent = true;
-        }
-        if (monument.detailedDescription.keyTakeaways && monument.detailedDescription.keyTakeaways.length > 0) {
-          fullText += `To wrap up, here are the key things to remember: ${monument.detailedDescription.keyTakeaways.join('. ')}.`;
-          hasContent = true;
-        }
+      // Use in-depth context directly if available
+      if (monument.detailedDescription?.inDepthContext) {
+        textToRead = monument.detailedDescription.inDepthContext;
+      } else if (monument.description) {
+        // Fallback to basic description if no detailed description
+        textToRead = monument.description;
       } else {
-        if (monument.description) {
-          fullText += `${monument.description} `;
-          hasContent = true;
-        }
-        if (monument.significance) {
-          fullText += `What makes this place truly special is its historical significance: ${monument.significance} `;
-          hasContent = true;
-        }
-        if (monument.facts && monument.facts.length > 0) {
-          fullText += `Here are some remarkable facts that will amaze you: ${monument.facts.join('. ')}.`;
-          hasContent = true;
-        }
+        console.warn('No content available for voice narration');
+        return '';
       }
       
-      // If no content was found, create a basic description
-      if (!hasContent) {
-        fullText += `This is ${monument.name}, a remarkable historical site that has stood the test of time. `;
-        if (monument.location) {
-          fullText += `It's located in ${monument.location}. `;
-        }
-        if (monument.period) {
-          fullText += `This structure dates back to the ${monument.period}. `;
-        }
-        fullText += `While we don't have detailed information about this specific monument, it represents an important part of our shared cultural heritage. `;
-      }
-      
-      // Add a natural conclusion
-      fullText += ` Thank you for exploring the rich history of ${monument.name} with me. I hope you enjoyed this journey through time.`;
-      
-      // Enhanced text processing for better speech synthesis
-      fullText = fullText
+      // Clean up text for better speech synthesis
+      textToRead = textToRead
         .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown formatting for speech
         .replace(/\n/g, ' ') // Replace newlines with spaces
         .replace(/\s+/g, ' ') // Replace multiple spaces with single space
@@ -253,16 +200,16 @@ export default function ScanResultScreen() {
         .trim();
       
       // Final validation
-      if (fullText.length < 50) {
+      if (textToRead.length < 50) {
         console.warn('Generated text is too short, may not provide good narration');
         return '';
       }
       
-      console.log('Generated voice narration text, length:', fullText.length);
-      return fullText;
+      console.log('Voice will read in-depth context directly, length:', textToRead.length);
+      return textToRead;
       
     } catch (error) {
-      console.error('Error generating voice narration text:', error);
+      console.error('Error preparing text for voice narration:', error);
       return '';
     }
   };
