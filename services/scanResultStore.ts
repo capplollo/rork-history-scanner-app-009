@@ -64,8 +64,9 @@ class ScanResultStore {
           description: 'Monument information available',
           significance: 'Historical significance',
           facts: ['This monument has historical importance'],
-          image: '',
-          scannedImage: '',
+          // Keep file URIs but remove base64 images in minimal fallback
+          image: result.image && result.image.startsWith('data:') ? '' : (result.image || ''),
+          scannedImage: result.scannedImage && result.scannedImage.startsWith('data:') ? '' : (result.scannedImage || ''),
           scannedAt: result.scannedAt || new Date().toISOString(),
           confidence: result.confidence || 50,
           isRecognized: result.isRecognized || false,
@@ -122,7 +123,7 @@ class ScanResultStore {
         .map((fact: string) => fact.length > 120 ? fact.substring(0, 120) + '...' : fact);
     }
     
-    // Remove or limit image data that might be too large
+    // Only remove base64 images that are too large, preserve file URIs
     if (optimized.image && optimized.image.startsWith('data:')) {
       // If it's a base64 image, remove it to prevent size issues
       optimized.image = '';
@@ -132,6 +133,7 @@ class ScanResultStore {
       // If it's a base64 image, remove it to prevent size issues
       optimized.scannedImage = '';
     }
+    // Keep file URIs (from camera/gallery) as they don't cause size issues
     
     return optimized;
   }
@@ -202,8 +204,9 @@ class ScanResultStore {
       description: result.description.substring(0, 200) + '...',
       significance: result.significance.substring(0, 200) + '...',
       facts: result.facts.slice(0, 3).map(fact => fact.substring(0, 80) + '...'),
-      image: '', // Remove images in emergency mode
-      scannedImage: '',
+      // Keep file URIs but remove base64 images in emergency mode
+      image: result.image && result.image.startsWith('data:') ? '' : result.image,
+      scannedImage: result.scannedImage && result.scannedImage.startsWith('data:') ? '' : result.scannedImage,
       scannedAt: result.scannedAt,
       confidence: result.confidence,
       isRecognized: result.isRecognized,
