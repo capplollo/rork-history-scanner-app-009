@@ -1,7 +1,6 @@
 import * as Speech from 'expo-speech';
-import { Platform } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import { Audio } from 'expo-av';
-import { Alert } from 'react-native';
 
 export interface VoiceOption {
   identifier: string;
@@ -176,10 +175,31 @@ export class VoiceService {
           }
         });
       
-      return Array.from(uniqueVoices.values());
+      const voiceArray = Array.from(uniqueVoices.values());
+      
+      // If no voices were found, create a default fallback
+      if (voiceArray.length === 0) {
+        console.warn('No built-in voices found, creating default fallback');
+        voiceArray.push({
+          identifier: 'default',
+          name: 'Default Voice (Built-in)',
+          language: 'en-US',
+          quality: 'basic',
+          provider: 'expo-speech' as const
+        });
+      }
+      
+      return voiceArray;
     } catch (error) {
       console.error('Failed to get available voices:', error);
-      return [];
+      // Return a default voice as fallback
+      return [{
+        identifier: 'default',
+        name: 'Default Voice (Built-in)',
+        language: 'en-US',
+        quality: 'basic',
+        provider: 'expo-speech' as const
+      }];
     }
   }
 
@@ -195,6 +215,19 @@ export class VoiceService {
     
     // Find the best built-in voice as fallback
     const builtInVoices = this.availableVoices.filter(voice => voice.provider === 'expo-speech');
+    
+    // If no built-in voices are available, try to get them directly
+    if (builtInVoices.length === 0) {
+      console.warn('No built-in voices found in availableVoices, creating fallback voice');
+      // Create a fallback voice that should work on most platforms
+      return {
+        identifier: 'default',
+        name: 'Default Voice (Built-in)',
+        language: 'en-US',
+        quality: 'basic',
+        provider: 'expo-speech' as const
+      };
+    }
     
     // Look for high-quality English voices
     const preferredVoice = builtInVoices.find(voice => {
@@ -216,9 +249,16 @@ export class VoiceService {
     }
     
     // Fallback to any English voice
-    return builtInVoices.find(voice => 
+    const englishVoice = builtInVoices.find(voice => 
       voice.language.startsWith('en')
-    ) || builtInVoices[0] || null;
+    );
+    
+    if (englishVoice) {
+      return englishVoice;
+    }
+    
+    // Last resort: return the first available voice
+    return builtInVoices[0] || null;
   }
 
   async speak(text: string, options: VoiceOptions = {}, callbacks?: {
@@ -282,10 +322,22 @@ export class VoiceService {
     // Get all built-in voices (not just the ones in availableVoices)
     const builtInVoices = this.availableVoices.filter(voice => voice.provider === 'expo-speech');
     
+    // If no built-in voices available, create a default fallback
+    if (builtInVoices.length === 0) {
+      console.log('Creating default fallback voice');
+      return {
+        identifier: 'default',
+        name: 'Default Voice (Built-in)',
+        language: 'en-US',
+        quality: 'basic',
+        provider: 'expo-speech' as const
+      };
+    }
+    
     // Return the best built-in voice or any available one
     return builtInVoices.find(voice => 
       voice.language.startsWith('en')
-    ) || builtInVoices[0] || null;
+    ) || builtInVoices[0];
   }
 
   private async speakWithElevenLabs(
@@ -415,8 +467,7 @@ export class VoiceService {
     return new Promise((resolve, reject) => {
       console.log('🎤 Using built-in TTS...');
       
-      const speechOptions = {
-        voice: voice.identifier,
+      const speechOptions: any = {
         rate: options.rate || this.getOptimalRate(),
         pitch: options.pitch || this.getOptimalPitch(),
         volume: options.volume || 1.0,
@@ -434,6 +485,11 @@ export class VoiceService {
           reject(error);
         },
       };
+      
+      // Only set voice if it's not the default fallback
+      if (voice.identifier !== 'default') {
+        speechOptions.voice = voice.identifier;
+      }
 
       Speech.speak(text, speechOptions);
     });
