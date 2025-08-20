@@ -329,6 +329,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#2C3E50",
   },
   contentContainer: {
+    flexGrow: 1,
     paddingBottom: 30,
   },
   mainContainer: {
