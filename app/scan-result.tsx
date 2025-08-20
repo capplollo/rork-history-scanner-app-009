@@ -94,7 +94,9 @@ export default function ScanResultScreen() {
     const loadMonumentData = async () => {
       let loadedMonument: HistoryItem | undefined;
       let retryCount = 0;
-      const maxRetries = 3;
+      const maxRetries = 5; // Increased retries
+      
+      console.log('Starting monument data loading with params:', { resultId, scanData, monumentId });
       
       while (!loadedMonument && retryCount < maxRetries) {
         console.log(`Attempting to load monument data (attempt ${retryCount + 1}/${maxRetries})`);
@@ -103,7 +105,7 @@ export default function ScanResultScreen() {
         if (resultId && typeof resultId === 'string') {
           try {
             const retrievedMonument = scanResultStore.retrieve(resultId);
-            if (retrievedMonument && retrievedMonument.name) {
+            if (retrievedMonument && retrievedMonument.name && retrievedMonument.name !== 'Unknown Artwork') {
               loadedMonument = retrievedMonument;
               console.log('✅ Retrieved monument from store:', loadedMonument.name);
               break;
@@ -119,7 +121,7 @@ export default function ScanResultScreen() {
         if (!loadedMonument && scanData && typeof scanData === 'string') {
           try {
             const parsedData = JSON.parse(scanData) as HistoryItem;
-            if (parsedData && parsedData.name) {
+            if (parsedData && parsedData.name && parsedData.name !== 'Unknown Artwork') {
               loadedMonument = parsedData;
               console.log('✅ Retrieved monument from scanData:', loadedMonument.name);
               break;
@@ -145,22 +147,41 @@ export default function ScanResultScreen() {
         
         // If no data found, wait a bit and retry (helps with race conditions)
         if (!loadedMonument && retryCount < maxRetries - 1) {
-          console.log(`No monument data found, retrying in 500ms...`);
-          await new Promise(resolve => setTimeout(resolve, 500));
+          const waitTime = 200 + (retryCount * 300); // Progressive backoff
+          console.log(`No monument data found, retrying in ${waitTime}ms...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
         }
         
         retryCount++;
       }
       
+      // If still no monument found, create a fallback
       if (!loadedMonument) {
         console.error('❌ Failed to load monument data after all retries');
-        // Try to get the most recent scan from history as a last resort
-        try {
-          // This would require accessing the history provider, but for now we'll show the error
-          console.log('Attempting to get most recent scan from history...');
-        } catch (error) {
-          console.error('Failed to get recent scan from history:', error);
-        }
+        console.log('Creating fallback monument data...');
+        
+        // Create a fallback monument to prevent the error screen
+        loadedMonument = {
+          id: 'fallback-' + Date.now(),
+          name: 'Artwork Analysis',
+          location: 'Unknown Location',
+          period: 'Unknown Period',
+          description: 'We encountered an issue loading the detailed analysis of your scanned artwork. This might be due to a temporary technical issue or network connectivity problem.',
+          significance: 'The artwork analysis is temporarily unavailable. Please try scanning again or check your internet connection.',
+          facts: [
+            'Try scanning the artwork again with better lighting',
+            'Ensure the artwork is clearly visible in the photo',
+            'Check your internet connection',
+            'The AI analysis service may be temporarily busy'
+          ],
+          image: '',
+          scannedImage: '',
+          scannedAt: new Date().toISOString(),
+          confidence: 0,
+          isRecognized: false,
+        };
+        
+        console.log('✅ Created fallback monument data');
       }
       
       setMonument(loadedMonument);

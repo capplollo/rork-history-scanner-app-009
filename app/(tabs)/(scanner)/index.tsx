@@ -142,20 +142,52 @@ export default function ScannerScreen() {
       console.error('Error analyzing image:', error);
       setAnalysisStatus("Analysis failed, creating basic result...");
       
+      // Determine error type for better user feedback
+      let errorDescription = "Unable to analyze this artwork, monument, sculpture, or cultural landmark.";
+      let errorFacts = [
+        "Please try again with a clearer photo",
+        "Ensure the artwork/monument is clearly visible in the image",
+        "Check your internet connection",
+        "Try adding more context in the additional info section"
+      ];
+      
+      if (error instanceof Error) {
+        if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorDescription = "Network connection issue prevented the analysis. Please check your internet connection and try again.";
+          errorFacts = [
+            "Check your internet connection",
+            "Try again in a few moments",
+            "Ensure you have a stable network connection",
+            "The AI service may be temporarily busy"
+          ];
+        } else if (error.message.includes('AI service error')) {
+          errorDescription = "The AI analysis service is temporarily unavailable. This is usually a temporary issue.";
+          errorFacts = [
+            "The AI service may be experiencing high demand",
+            "Try again in a few minutes",
+            "Check your internet connection",
+            "Contact support if the issue persists"
+          ];
+        } else if (error.message.includes('Invalid JSON')) {
+          errorDescription = "The AI analysis completed but returned unexpected data. Please try scanning again.";
+          errorFacts = [
+            "Try scanning the same artwork again",
+            "Ensure good lighting and clear view",
+            "Add more context information if available",
+            "The AI may need a clearer image to analyze"
+          ];
+        }
+      }
+      
       // Create a basic result instead of random mock data
       const scanResult = {
         id: Date.now().toString(),
-        name: "Unknown Artwork",
+        name: "Analysis Failed",
         location: "Unknown",
         period: "Unknown",
-        description: "Unable to analyze this artwork, monument, sculpture, or cultural landmark. The AI service may be temporarily unavailable or the image may not contain a recognizable piece.",
-        significance: "Analysis failed due to technical issues or unrecognized artwork.",
-        facts: [
-          "Please try again with a clearer photo",
-          "Ensure the artwork/monument is clearly visible in the image",
-          "Check your internet connection",
-          "Try adding more context in the additional info section"
-        ],
+        description: errorDescription,
+        significance: "The artwork analysis encountered a technical issue. You can try scanning again or add more context to help with identification.",
+        facts: errorFacts,
         image: selectedImage,
         scannedImage: selectedImage,
         scannedAt: new Date().toISOString(),
@@ -163,10 +195,7 @@ export default function ScannerScreen() {
         isRecognized: false,
       };
       
-      // Only add to history if monument is recognized
-      if (scanResult.isRecognized && scanResult.confidence && scanResult.confidence > 50) {
-        await addToHistory(scanResult);
-      }
+      // Don't add failed analyses to history
       setIsAnalyzing(false);
       setAnalysisStatus("");
       setSelectedImage(null);
@@ -174,7 +203,7 @@ export default function ScannerScreen() {
       // Store the result and navigate with just the ID
       try {
         const resultId = scanResultStore.store(scanResult);
-        console.log('Stored scan result with ID:', resultId);
+        console.log('Stored failed scan result with ID:', resultId);
         
         // Use replace instead of push to avoid history stack issues
         router.replace({
