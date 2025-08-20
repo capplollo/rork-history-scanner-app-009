@@ -36,7 +36,7 @@ export async function detectMonument(imageUri: string, additionalInfo?: Addition
     let result = await performAnalysis(base64Image, additionalInfo, false);
     
     // If first attempt failed or has low confidence, try second attempt with enhanced context
-    if (!result.isRecognized || result.confidence < 50) {
+    if (!result.isRecognized || result.confidence < 60) {
       console.log('First analysis failed or low confidence, attempting second analysis with enhanced context...');
       
       const secondResult = await performAnalysis(base64Image, additionalInfo, true);
@@ -50,8 +50,8 @@ export async function detectMonument(imageUri: string, additionalInfo?: Addition
       }
     }
     
-    // If it's a recognized monument, get detailed description
-    if (result.isRecognized && result.confidence > 70) {
+    // Require higher confidence for monument recognition (75 instead of 70)
+    if (result.isRecognized && result.confidence > 75) {
       console.log('Getting detailed description for recognized monument:', result.monumentName);
       
       try {
@@ -106,7 +106,7 @@ async function performAnalysis(base64Image: string, additionalInfo?: AdditionalI
       analysisPrompt += `\n- Monument/Art Name: ${additionalInfo.name}`;
     }
     if (additionalInfo.location) {
-      analysisPrompt += `\n- Location: ${additionalInfo.location}`;
+      analysisPrompt += `\n- Location: ${additionalInfo.location} (IMPORTANT: This location context should be heavily weighted in your analysis)`;
     }
     if (additionalInfo.building) {
       analysisPrompt += `\n- Building/Museum: ${additionalInfo.building}`;
@@ -116,30 +116,33 @@ async function performAnalysis(base64Image: string, additionalInfo?: AdditionalI
     }
     
     if (isSecondAttempt) {
-      analysisPrompt += `\n\nIMPORTANT: This is a second attempt. Use the provided context more heavily to identify local monuments, churches, or lesser-known landmarks. Even if it's not a world-famous monument, if you can identify it based on the context and visual clues, provide that information.`;
+      analysisPrompt += `\n\nIMPORTANT: This is a second attempt. Use the provided context more heavily to identify local monuments, churches, or lesser-known landmarks. The location information is particularly important - look for monuments, churches, or landmarks specifically in or near the provided location. Even if it's not a world-famous monument, if you can identify it based on the context and visual clues, provide that information.`;
     } else {
-      analysisPrompt += `\n\nUse this context to help with your analysis, but still verify what you see in the image. If the provided information matches what you observe, increase your confidence. If there's a mismatch, trust what you see in the image.`;
+      analysisPrompt += `\n\nIMPORTANT: The location context provided is very valuable. Use it heavily in your analysis to identify monuments, churches, or landmarks in that specific area. If the provided location information helps you identify what's in the image, increase your confidence significantly. Always verify the actual location of any monument you identify and include it in your response.`;
     }
   }
   
   analysisPrompt += `\n\nIf you recognize a specific monument, provide:
 1. The exact name of the monument
-2. Its location (city, country)
+2. Its ACTUAL location (city, country) - not just the user-provided location, but the real location of the monument
 3. Historical period or construction dates
 4. Brief description (2-3 sentences)
 5. Historical significance (2-3 sentences)
 6. 3-4 interesting facts
-7. Confidence level (0-100)
+7. Confidence level (0-100) - be more conservative, only use high confidence (75+) if you're very sure
 
-If you don't recognize a specific famous monument but see architectural elements, describe what you see and suggest it might be a local landmark or historical building with lower confidence.
-
-Be very specific about what you see in the image. Don't default to famous monuments unless you're confident.
+IMPORTANT GUIDELINES:
+- Only mark isRecognized as true if you have high confidence (75+) in the identification
+- Always provide the ACTUAL location of the monument you identify, not just the user's provided location
+- If the user provided location context helps you identify a local monument, use that information but still verify and provide the correct location
+- Be more selective - it's better to say "Unknown Monument" than to incorrectly identify something
+- If you see architectural elements but can't confidently identify a specific monument, describe what you see with lower confidence
 
 Respond ONLY in valid JSON format:
 {
   "monumentName": "Name of monument or 'Unknown Monument'",
   "confidence": 85,
-  "location": "City, Country or 'Unknown'",
+  "location": "Actual City, Country of the monument (not user's provided location unless they match)",
   "period": "Time period or 'Unknown'",
   "description": "Description of what you see",
   "significance": "Historical or cultural significance",
