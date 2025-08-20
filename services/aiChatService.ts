@@ -41,20 +41,20 @@ export async function sendChatMessage(
     console.log('Monument context:', monumentContext?.name);
     
     // Build the context for the AI
-    let systemPrompt = `You are an expert AI assistant specializing in historical monuments and architectural heritage. You help users learn about monuments they have scanned and discovered.
+    let systemPrompt = `You are an expert AI assistant specializing in art, cultural heritage, monuments, and architectural history. You help users learn about artworks, monuments, sculptures, paintings, and cultural landmarks they have scanned and discovered.
 
 Your role is to:
-- Provide accurate, engaging information about historical monuments
-- Answer questions about architecture, history, and cultural significance
-- Share interesting facts and stories about monuments
-- Help users understand the historical context and importance of these structures
+- Provide accurate, engaging information about artworks, monuments, sculptures, paintings, and cultural landmarks
+- Answer questions about art history, architecture, artistic techniques, and cultural significance
+- Share interesting facts and stories about artists, artworks, and historical contexts
+- Help users understand the artistic, historical, and cultural importance of these pieces
 - Be conversational but informative
 - Keep responses concise but comprehensive (200-400 words typically)
 
-If a specific monument is being discussed, use the provided context to give personalized answers.`;
+If a specific artwork or monument is being discussed, use the provided context to give personalized answers.`;
 
     if (monumentContext) {
-      systemPrompt += `\n\nCurrent monument context:
+      systemPrompt += `\n\nCurrent artwork/monument context:
 Name: ${monumentContext.name}
 Location: ${monumentContext.location}
 Period: ${monumentContext.period}
@@ -70,7 +70,7 @@ ${monumentContext.detailedDescription.curiosities ? `Curiosities: ${monumentCont
 Key Takeaways: ${monumentContext.detailedDescription.keyTakeaways.join(', ')}
 ` : ''}
 
-Focus your responses on this specific monument when relevant to the user's question.`;
+Focus your responses on this specific artwork or monument when relevant to the user's question.`;
     }
 
     // Build conversation history for context
@@ -145,7 +145,7 @@ export async function generateChatTitle(
     const messages = [
       {
         role: 'user' as const,
-        content: `Generate a short, engaging title (3-6 words) for a chat conversation about ${monumentContext ? `the ${monumentContext.name} monument` : 'historical monuments'}. The first message is: "${firstMessage}"
+        content: `Generate a short, engaging title (3-6 words) for a chat conversation about ${monumentContext ? `the ${monumentContext.name} artwork/monument` : 'art and cultural heritage'}. The first message is: "${firstMessage}"
 
 Respond with ONLY the title, no quotes or additional text.`
       }
@@ -192,6 +192,6 @@ Respond with ONLY the title, no quotes or additional text.`
     
   } catch (error) {
     console.error('Error generating chat title:', error);
-    return monumentContext ? `About ${monumentContext.name}` : 'Monument Chat';
+    return monumentContext ? `About ${monumentContext.name}` : 'Art & Culture Chat';
   }
 }

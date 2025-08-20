@@ -1,7 +1,7 @@
 
 
 export interface DetectionResult {
-  monumentName: string;
+  artworkName: string;
   confidence: number;
   location: string;
   period: string;
@@ -24,9 +24,9 @@ export interface AdditionalInfo {
   notes: string;
 }
 
-export async function detectMonument(imageUri: string, additionalInfo?: AdditionalInfo): Promise<DetectionResult> {
+export async function detectArtwork(imageUri: string, additionalInfo?: AdditionalInfo): Promise<DetectionResult> {
   try {
-    console.log('Starting monument detection for image:', imageUri);
+    console.log('Starting artwork/monument detection for image:', imageUri);
     
     // Convert image to base64
     const base64Image = await convertImageToBase64(imageUri);
@@ -35,12 +35,12 @@ export async function detectMonument(imageUri: string, additionalInfo?: Addition
     // Single analysis attempt - no double processing
     const result = await performAnalysis(base64Image, additionalInfo);
     
-    // Only get detailed description if monument is recognized with high confidence
+    // Only get detailed description if artwork is recognized with high confidence
     if (result.isRecognized && result.confidence > 75) {
-      console.log('Getting detailed description for recognized monument:', result.monumentName);
+      console.log('Getting detailed description for recognized artwork:', result.artworkName);
       
       try {
-        const detailedDescription = await getDetailedDescription(result.monumentName, result.location, additionalInfo);
+        const detailedDescription = await getDetailedDescription(result.artworkName, result.location, additionalInfo);
         result.detailedDescription = detailedDescription;
       } catch (error) {
         console.error('Error getting detailed description:', error);
@@ -54,13 +54,13 @@ export async function detectMonument(imageUri: string, additionalInfo?: Addition
     
     // Return a proper "unknown" result instead of random mock data
     return {
-      monumentName: 'Unknown Monument',
+      artworkName: 'Unknown Artwork',
       confidence: 0,
       location: 'Unknown',
       period: 'Unknown',
-      description: 'Unable to identify this monument. Please try taking a clearer photo or ensure the monument is clearly visible.',
-      significance: 'Monument detection failed due to technical issues.',
-      facts: ['Please try again with a different photo', 'Ensure good lighting and clear view of the monument', 'Check your internet connection'],
+      description: 'Unable to identify this artwork, monument, sculpture, or cultural landmark. Please try taking a clearer photo or ensure the subject is clearly visible.',
+      significance: 'Artwork detection failed due to technical issues.',
+      facts: ['Please try again with a different photo', 'Ensure good lighting and clear view of the artwork/monument', 'Check your internet connection'],
       isRecognized: false,
     };
   }
@@ -68,13 +68,25 @@ export async function detectMonument(imageUri: string, additionalInfo?: Addition
 
 async function performAnalysis(base64Image: string, additionalInfo?: AdditionalInfo): Promise<DetectionResult> {
   // Build the analysis prompt with optional additional context
-  let analysisPrompt = `Analyze this image carefully and identify if it contains a famous historical monument, landmark, or significant architectural structure. Look at architectural details, distinctive features, and any visible text or signs.`;
+  let analysisPrompt = `Analyze this image carefully and identify if it contains a famous artwork, monument, sculpture, painting, cultural landmark, or significant architectural structure. This includes:
+
+- Historical monuments and landmarks
+- Famous sculptures and statues
+- Renowned paintings and frescoes
+- Architectural masterpieces
+- Cultural heritage sites
+- Religious art and structures
+- Public art installations
+- Archaeological sites
+- Museum pieces and gallery works
+
+Look at artistic details, architectural features, distinctive characteristics, style, and any visible text, signatures, or identifying marks.`;
   
   // Add additional context if provided
   if (additionalInfo && (additionalInfo.name || additionalInfo.location || additionalInfo.building || additionalInfo.notes)) {
     analysisPrompt += `\n\nAdditional context provided by the user:`;
     if (additionalInfo.name) {
-      analysisPrompt += `\n- Monument/Art Name: ${additionalInfo.name}`;
+      analysisPrompt += `\n- Artwork/Monument Name: ${additionalInfo.name}`;
     }
     if (additionalInfo.location) {
       analysisPrompt += `\n- Location: ${additionalInfo.location} (IMPORTANT: This location context should be heavily weighted in your analysis)`;
@@ -86,33 +98,34 @@ async function performAnalysis(base64Image: string, additionalInfo?: AdditionalI
       analysisPrompt += `\n- Additional Notes: ${additionalInfo.notes}`;
     }
     
-    analysisPrompt += `\n\nIMPORTANT: The location context provided is very valuable. Use it heavily in your analysis to identify monuments, churches, or landmarks in that specific area. If the provided location information helps you identify what's in the image, increase your confidence significantly. Always verify the actual location of any monument you identify and include it in your response.`;
+    analysisPrompt += `\n\nIMPORTANT: The location context provided is very valuable. Use it heavily in your analysis to identify artworks, monuments, sculptures, paintings, churches, or cultural landmarks in that specific area. If the provided location information helps you identify what's in the image, increase your confidence significantly. Always verify the actual location of any artwork or monument you identify and include it in your response.`;
   }
   
-  analysisPrompt += `\n\nIf you recognize a specific monument, provide:
-1. The exact name of the monument
-2. Its ACTUAL location (city, country) - not just the user-provided location, but the real location of the monument
-3. Historical period or construction dates
-4. Brief description (2-3 sentences)
-5. Historical significance (2-3 sentences)
-6. 3-4 interesting facts
+  analysisPrompt += `\n\nIf you recognize a specific artwork, monument, sculpture, painting, or cultural landmark, provide:
+1. The exact name of the artwork/monument
+2. Its ACTUAL location (city, country, museum, building) - not just the user-provided location, but the real location
+3. Historical period, creation dates, or artist information
+4. Brief description (2-3 sentences) including artistic style, medium, or architectural features
+5. Historical, artistic, or cultural significance (2-3 sentences)
+6. 3-4 interesting facts about the piece, artist, or historical context
 7. Confidence level (0-100) - be more selective, only use high confidence (80+) if you're very sure
 
 IMPORTANT GUIDELINES:
 - Only mark isRecognized as true if you have high confidence (80+) in the identification
-- Always provide the ACTUAL location of the monument you identify, not just the user's provided location
-- If the user provided location context helps you identify a local monument, use that information but still verify and provide the correct location
-- Be more selective - it's better to say "Unknown Monument" than to incorrectly identify something
-- If you see architectural elements but can't confidently identify a specific monument, describe what you see with lower confidence
+- Always provide the ACTUAL location of the artwork/monument you identify, not just the user's provided location
+- If the user provided location context helps you identify a local artwork or monument, use that information but still verify and provide the correct location
+- Be more selective - it's better to say "Unknown Artwork" than to incorrectly identify something
+- Consider various art forms: sculptures, paintings, frescoes, mosaics, architectural details, monuments, etc.
+- If you see artistic or architectural elements but can't confidently identify a specific piece, describe what you see with lower confidence
 
 Respond ONLY in valid JSON format:
 {
-  "monumentName": "Name of monument or 'Unknown Monument'",
+  "artworkName": "Name of artwork/monument or 'Unknown Artwork'",
   "confidence": 85,
-  "location": "Actual City, Country of the monument (not user's provided location unless they match)",
-  "period": "Time period or 'Unknown'",
-  "description": "Description of what you see",
-  "significance": "Historical or cultural significance",
+  "location": "Actual City, Country, Museum/Building of the artwork (not user's provided location unless they match)",
+  "period": "Time period, artist, or 'Unknown'",
+  "description": "Description of what you see including artistic style and medium",
+  "significance": "Historical, artistic, or cultural significance",
   "facts": ["fact1", "fact2", "fact3"],
   "isRecognized": true/false
 }`;
@@ -181,7 +194,7 @@ Respond ONLY in valid JSON format:
 
 
 
-async function getDetailedDescription(monumentName: string, detectedLocation?: string, additionalInfo?: AdditionalInfo): Promise<{
+async function getDetailedDescription(artworkName: string, detectedLocation?: string, additionalInfo?: AdditionalInfo): Promise<{
   quickOverview: string;
   inDepthContext: string;
   curiosities?: string;
@@ -195,29 +208,29 @@ async function getDetailedDescription(monumentName: string, detectedLocation?: s
     locationContext = ` located in ${additionalInfo.location}`;
   }
   
-  const detailedPrompt = `Provide a structured explanation of the monument "${monumentName}"${locationContext} in four sections, written in an elegant, logically constructed, and easy-to-digest style. Use refined but accessible language. Highlight in bold most relevant words/pieces of info.
+  const detailedPrompt = `Provide a structured explanation of the artwork/monument "${artworkName}"${locationContext} in four sections, written in an elegant, logically constructed, and easy-to-digest style. Use refined but accessible language. Highlight in bold most relevant words/pieces of info.
 
-IMPORTANT: Make sure you are providing information about the specific monument${locationContext}. If there are multiple monuments with the same name in different locations, focus specifically on the one${locationContext}.
+IMPORTANT: Make sure you are providing information about the specific artwork, monument, sculpture, painting, or cultural landmark${locationContext}. If there are multiple works with the same name in different locations, focus specifically on the one${locationContext}.
 
-Quick Overview (≈500 characters): A concise, captivating description of the monument and its immediate historical significance. This should be approximately 500 characters (about 3-4 sentences).
+Quick Overview (≈500 characters): A concise, captivating description of the artwork/monument and its immediate historical or artistic significance. This should be approximately 500 characters (about 3-4 sentences).
 
-In-Depth Context (1000-3000 characters): A longer, detailed explanation of the monument, including its specific broader historical context, the era and place in which it appeared, cultural and political circumstances, and any notable architectural style or artistic importance. Info should be very specific and interesting, mentioning specific names, parts and episodes. This must be between 1000-3000 characters. Divide this section in 2-3 paragraphs.
+In-Depth Context (1000-3000 characters): A longer, detailed explanation of the artwork/monument, including its specific broader historical context, the era and place in which it was created, cultural and political circumstances, artistic movement or style, creator/architect information, and any notable artistic techniques or architectural importance. Info should be very specific and interesting, mentioning specific names, artistic techniques, historical episodes, and cultural impact. This must be between 1000-3000 characters. Divide this section in 2-3 paragraphs.
 
-Curiosities (if applicable): Mention only if there are famous, meaningful, or widely recognized anecdotes, legends, or curiosities tied to the monument. If none exist, write "No widely known curiosities are associated with this monument."
+Curiosities (if applicable): Mention only if there are famous, meaningful, or widely recognized anecdotes, legends, artistic stories, or curiosities tied to the artwork/monument. If none exist, write "No widely known curiosities are associated with this artwork."
 
-Quick Facts (bullet points): A short list of the most essential facts and highlights about the monument. Provide 4-5 bullet points.
+Quick Facts (bullet points): A short list of the most essential facts and highlights about the artwork/monument. Provide 4-5 bullet points covering creation, artistic significance, cultural impact, and interesting details.
 
 Respond ONLY in valid JSON format:
 {
-"quickOverview": "[Write exactly around 500 characters - 3-4 sentences describing the monument and its significance]",
-"inDepthContext": "[Write 1000-3000 characters - comprehensive historical context, architectural details, cultural importance, and broader significance]",
-"curiosities": "[Write interesting anecdotes, legends, or curiosities if they exist, otherwise write 'No widely known curiosities are associated with this monument.']",
+"quickOverview": "[Write exactly around 500 characters - 3-4 sentences describing the artwork/monument and its significance]",
+"inDepthContext": "[Write 1000-3000 characters - comprehensive historical context, artistic details, cultural importance, and broader significance]",
+"curiosities": "[Write interesting anecdotes, legends, or curiosities if they exist, otherwise write 'No widely known curiosities are associated with this artwork.']",
 "keyTakeaways": [
-  "Essential fact about construction or history",
-  "Architectural or artistic significance",
-  "Cultural or political importance",
-  "Notable visitor information or recognition",
-  "Interesting highlight or unique feature"
+  "Essential fact about creation, artist, or history",
+  "Artistic, architectural, or stylistic significance",
+  "Cultural, political, or religious importance",
+  "Notable recognition, location, or visitor information",
+  "Interesting highlight, technique, or unique feature"
 ]
 }`;
 
@@ -281,11 +294,11 @@ Respond ONLY in valid JSON format:
     
     if (!Array.isArray(parsed.keyTakeaways) || parsed.keyTakeaways.length < 3) {
       parsed.keyTakeaways = [
-        "Construction represents a masterpiece of historical architecture",
-        "Showcases advanced engineering and artistic techniques of its era",
-        "Serves as a symbol of cultural heritage and national identity",
+        "Represents a masterpiece of artistic or architectural achievement",
+        "Showcases advanced techniques and creative vision of its era",
+        "Serves as a symbol of cultural heritage and artistic identity",
         "Attracts visitors annually as a significant cultural destination",
-        "Recognized as an important monument with historical significance"
+        "Recognized as an important artwork with historical or artistic significance"
       ];
     }
     

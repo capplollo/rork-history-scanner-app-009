@@ -22,7 +22,7 @@ import { HistoryItem, useHistory } from "@/providers/HistoryProvider";
 import { scanResultStore } from "@/services/scanResultStore";
 import { voiceService, VoiceOption } from "@/services/voiceService";
 import VoiceSettings from "@/components/VoiceSettings";
-import { detectMonument, AdditionalInfo } from "@/services/monumentDetectionService";
+import { detectArtwork, AdditionalInfo } from "@/services/monumentDetectionService";
 import FormattedText from "@/components/FormattedText";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -235,9 +235,9 @@ export default function ScanResultScreen() {
         // Start speaking
         console.log('Starting voice narration...');
         
-        // Validate monument data first
+        // Validate artwork data first
         if (!monument) {
-          Alert.alert('No Data', 'Monument information is not available. Please try scanning again.');
+          Alert.alert('No Data', 'Artwork information is not available. Please try scanning again.');
           return;
         }
         
@@ -332,12 +332,12 @@ export default function ScanResultScreen() {
     setIsReanalyzing(true);
     
     try {
-      const detectionResult = await detectMonument(monument.scannedImage, contextInfo);
+      const detectionResult = await detectArtwork(monument.scannedImage, contextInfo);
       
       // Create updated scan result
       const updatedResult = {
         id: monument.id,
-        name: detectionResult.monumentName,
+        name: detectionResult.artworkName,
         location: detectionResult.location,
         period: detectionResult.period,
         description: detectionResult.description,
@@ -361,17 +361,17 @@ export default function ScanResultScreen() {
       
       // If now recognized, add to history
       if (detectionResult.isRecognized && detectionResult.confidence > 50) {
-        Alert.alert('Success!', `Monument identified as ${detectionResult.monumentName} with ${detectionResult.confidence}% confidence.`);
+        Alert.alert('Success!', `Artwork identified as ${detectionResult.artworkName} with ${detectionResult.confidence}% confidence.`);
         
-        // Add to history when monument becomes recognized
+        // Add to history when artwork becomes recognized
         try {
           await addToHistory(updatedResult);
-          console.log('✅ Added newly recognized monument to history');
+          console.log('✅ Added newly recognized artwork to history');
         } catch (historyError) {
           console.error('Error adding to history:', historyError);
         }
       } else {
-        Alert.alert('Analysis Complete', 'The monument is still unrecognized. You can try adding more context or take a clearer photo.');
+        Alert.alert('Analysis Complete', 'The artwork is still unrecognized. You can try adding more context or take a clearer photo.');
       }
       
     } catch (error) {
@@ -417,7 +417,7 @@ export default function ScanResultScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingTitle}>Loading Monument Information</Text>
+          <Text style={styles.loadingTitle}>Loading Artwork Information</Text>
           <Text style={styles.loadingText}>Please wait while we prepare your scan results...</Text>
         </View>
       </SafeAreaView>
@@ -429,9 +429,9 @@ export default function ScanResultScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
-          <Text style={styles.errorTitle}>Monument Information Not Available</Text>
+          <Text style={styles.errorTitle}>Artwork Information Not Available</Text>
           <Text style={styles.errorText}>
-            We couldn&apos;t load the monument details. This might be due to:
+            We couldn&apos;t load the artwork details. This might be due to:
           </Text>
           <View style={styles.errorList}>
             <Text style={styles.errorListItem}>• The scan data is still processing</Text>
@@ -482,8 +482,8 @@ export default function ScanResultScreen() {
     );
   }
 
-  // Check if this is an unknown monument
-  const isUnknownMonument = !monument.isRecognized || monument.name === 'Unknown Monument' || (monument.confidence !== undefined && monument.confidence < 50);
+  // Check if this is an unknown artwork
+  const isUnknownArtwork = !monument.isRecognized || monument.name === 'Unknown Artwork' || monument.name === 'Unknown Monument' || (monument.confidence !== undefined && monument.confidence < 50);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -513,15 +513,15 @@ export default function ScanResultScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Unknown Monument Context Section */}
-        {isUnknownMonument && (
+        {/* Unknown Artwork Context Section */}
+        {isUnknownArtwork && (
           <View style={styles.unknownMonumentSection}>
             <View style={styles.unknownHeader}>
               <AlertCircle size={20} color="#f59e0b" />
-              <Text style={styles.unknownTitle}>Monument Not Recognized</Text>
+              <Text style={styles.unknownTitle}>Artwork Not Recognized</Text>
             </View>
             <Text style={styles.unknownDescription}>
-              We couldn&apos;t identify this monument with confidence. Add more context below to help improve the identification, then try analyzing again.
+              We couldn&apos;t identify this artwork, monument, sculpture, or cultural landmark with confidence. Add more context below to help improve the identification, then try analyzing again.
             </Text>
             
             <TouchableOpacity 
@@ -541,10 +541,10 @@ export default function ScanResultScreen() {
             {showContextForm && (
               <View style={styles.contextForm}>
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Monument/Art Name</Text>
+                  <Text style={styles.inputLabel}>Artwork/Monument Name</Text>
                   <TextInput
                     style={styles.textInput}
-                    placeholder="e.g., Statue of Liberty, Eiffel Tower"
+                    placeholder="e.g., Mona Lisa, David, Eiffel Tower"
                     value={contextInfo.name}
                     onChangeText={(text) => updateContextInfo('name', text)}
                     placeholderTextColor="#94a3b8"
@@ -563,10 +563,10 @@ export default function ScanResultScreen() {
                 </View>
                 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Building/Museum</Text>
+                  <Text style={styles.inputLabel}>Building/Museum/Gallery</Text>
                   <TextInput
                     style={styles.textInput}
-                    placeholder="e.g., Louvre Museum, St. Peter's Basilica"
+                    placeholder="e.g., Louvre Museum, Uffizi Gallery, St. Peter's Basilica"
                     value={contextInfo.building}
                     onChangeText={(text) => updateContextInfo('building', text)}
                     placeholderTextColor="#94a3b8"
@@ -634,7 +634,7 @@ export default function ScanResultScreen() {
             </View>
           )}
 
-          {/* Voice Narrator - Only show when monument is identified and has content */}
+          {/* Voice Narrator - Only show when artwork is identified and has content */}
           {monument && monument.name && (
             <View style={styles.narratorSection}>
               <Text style={styles.narratorTitle}>Voice narration</Text>
@@ -759,7 +759,7 @@ export default function ScanResultScreen() {
               style={styles.chatGradient}
             >
               <MessageCircle size={24} color="#ffffff" />
-              <Text style={styles.chatButtonText}>Ask AI About This Monument</Text>
+              <Text style={styles.chatButtonText}>Ask AI About This Artwork</Text>
             </LinearGradient>
           </TouchableOpacity>
 

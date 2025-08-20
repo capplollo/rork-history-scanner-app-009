@@ -17,7 +17,7 @@ import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, Che
 import { router } from "expo-router";
 import { useHistory } from "@/providers/HistoryProvider";
 import { mockMonuments } from "@/data/mockMonuments";
-import { detectMonument, DetectionResult } from "@/services/monumentDetectionService";
+import { detectArtwork, DetectionResult } from "@/services/monumentDetectionService";
 import { scanResultStore } from "@/services/scanResultStore";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -82,23 +82,23 @@ export default function ScannerScreen() {
     
     try {
       setAnalysisStatus("Analyzing with AI (first attempt)...");
-      const detectionResult: DetectionResult = await detectMonument(selectedImage, additionalInfo);
+      const detectionResult: DetectionResult = await detectArtwork(selectedImage, additionalInfo);
       
       console.log('Detection result:', detectionResult);
       
       // Provide feedback based on the result
       if (detectionResult.isRecognized && detectionResult.confidence > 50) {
-        setAnalysisStatus("Monument recognized! Processing results...");
+        setAnalysisStatus("Artwork recognized! Processing results...");
       } else if (detectionResult.confidence > 30) {
         setAnalysisStatus("Partial recognition, processing results...");
       } else {
-        setAnalysisStatus("Monument not recognized, but processing available information...");
+        setAnalysisStatus("Artwork not recognized, but processing available information...");
       }
       
       // Create a scan result from the AI detection
       const scanResult = {
         id: Date.now().toString(),
-        name: detectionResult.monumentName,
+        name: detectionResult.artworkName,
         location: detectionResult.location,
         period: detectionResult.period,
         description: detectionResult.description,
@@ -145,14 +145,14 @@ export default function ScannerScreen() {
       // Create a basic result instead of random mock data
       const scanResult = {
         id: Date.now().toString(),
-        name: "Unknown Monument",
+        name: "Unknown Artwork",
         location: "Unknown",
         period: "Unknown",
-        description: "Unable to analyze this monument. The AI service may be temporarily unavailable or the image may not contain a recognizable monument.",
-        significance: "Analysis failed due to technical issues or unrecognized monument.",
+        description: "Unable to analyze this artwork, monument, sculpture, or cultural landmark. The AI service may be temporarily unavailable or the image may not contain a recognizable piece.",
+        significance: "Analysis failed due to technical issues or unrecognized artwork.",
         facts: [
           "Please try again with a clearer photo",
-          "Ensure the monument is clearly visible in the image",
+          "Ensure the artwork/monument is clearly visible in the image",
           "Check your internet connection",
           "Try adding more context in the additional info section"
         ],
@@ -243,10 +243,10 @@ export default function ScannerScreen() {
             {showAdditionalInfo && (
               <View style={styles.additionalInfoForm}>
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Monument/Art Name</Text>
+                  <Text style={styles.inputLabel}>Artwork/Monument Name</Text>
                   <TextInput
                     style={styles.textInput}
-                    placeholder="e.g., Statue of Liberty, Eiffel Tower"
+                    placeholder="e.g., Mona Lisa, David, Eiffel Tower"
                     value={additionalInfo.name}
                     onChangeText={(text) => updateAdditionalInfo('name', text)}
                     placeholderTextColor="#94a3b8"
@@ -265,10 +265,10 @@ export default function ScannerScreen() {
                 </View>
                 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Building/Museum</Text>
+                  <Text style={styles.inputLabel}>Building/Museum/Gallery</Text>
                   <TextInput
                     style={styles.textInput}
-                    placeholder="e.g., Louvre Museum, St. Peter's Basilica"
+                    placeholder="e.g., Louvre Museum, Uffizi Gallery, St. Peter's Basilica"
                     value={additionalInfo.building}
                     onChangeText={(text) => updateAdditionalInfo('building', text)}
                     placeholderTextColor="#94a3b8"
@@ -306,7 +306,7 @@ export default function ScannerScreen() {
             ) : (
               <>
                 <Sparkles size={20} color="#ffffff" />
-                <Text style={styles.analyzeButtonText}>Analyze Monument</Text>
+                <Text style={styles.analyzeButtonText}>Analyze Artwork</Text>
               </>
             )}
           </TouchableOpacity>
@@ -314,9 +314,9 @@ export default function ScannerScreen() {
       ) : (
         <View style={styles.mainContainer}>
           <View style={styles.titleSection}>
-            <Text style={styles.mainTitle}>Snap into history</Text>
+            <Text style={styles.mainTitle}>Discover art & culture</Text>
             <Text style={styles.mainSubtitle}>
-              step into the living stories of art and monuments
+              explore the stories behind monuments, sculptures, paintings & cultural landmarks
             </Text>
           </View>
           
