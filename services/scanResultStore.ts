@@ -157,6 +157,34 @@ class ScanResultStore {
     }
   }
   
+  update(id: string, result: HistoryItem): boolean {
+    try {
+      console.log('Updating scan result with ID:', id);
+      
+      if (!this.results.has(id)) {
+        console.warn('Cannot update: ID not found in store:', id);
+        return false;
+      }
+      
+      // Validate the result before updating
+      if (!result || !result.name || result.name.trim().length === 0) {
+        console.error('Invalid scan result for update: missing or empty name');
+        return false;
+      }
+      
+      // Create optimized version for storage
+      const optimizedResult = this.optimizeForStorage(result);
+      
+      // Update the stored result
+      this.results.set(id, optimizedResult);
+      console.log('✅ Successfully updated result:', result.name);
+      return true;
+    } catch (error) {
+      console.error('Error updating scan result:', error);
+      return false;
+    }
+  }
+
   clear(id: string): void {
     this.results.delete(id);
   }

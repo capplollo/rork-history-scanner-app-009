@@ -10,26 +10,38 @@ import {
   Dimensions,
   Platform,
   Alert,
+  TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle, Volume2, VolumeX, Pause, Settings } from "lucide-react-native";
+import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle, Volume2, VolumeX, Pause, Settings, RefreshCw, ChevronDown, ChevronUp } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Speech from 'expo-speech';
 import { mockMonuments } from "@/data/mockMonuments";
-import { HistoryItem } from "@/providers/HistoryProvider";
+import { HistoryItem, useHistory } from "@/providers/HistoryProvider";
 import { scanResultStore } from "@/services/scanResultStore";
 import { voiceService, VoiceOption } from "@/services/voiceService";
 import VoiceSettings from "@/components/VoiceSettings";
+import { detectMonument, AdditionalInfo } from "@/services/monumentDetectionService";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 export default function ScanResultScreen() {
   const { monumentId, scanData, resultId } = useLocalSearchParams();
+  const { addToHistory } = useHistory();
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showVoiceSettings, setShowVoiceSettings] = useState<boolean>(false);
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption | null>(null);
+  const [isReanalyzing, setIsReanalyzing] = useState<boolean>(false);
+  const [showContextForm, setShowContextForm] = useState<boolean>(false);
+  const [contextInfo, setContextInfo] = useState<AdditionalInfo>({
+    name: "",
+    location: "",
+    building: "",
+    notes: "",
+  });
   
   // Cleanup speech when component unmounts or when navigating away
   useEffect(() => {
@@ -361,6 +373,69 @@ export default function ScanResultScreen() {
     }
   };
 
+  const handleReanalyze = async () => {
+    if (!monument?.scannedImage) {
+      Alert.alert('Error', 'No image available for re-analysis.');
+      return;
+    }
+
+    setIsReanalyzing(true);
+    
+    try {
+      const detectionResult = await detectMonument(monument.scannedImage, contextInfo);
+      
+      // Create updated scan result
+      const updatedResult = {
+        id: monument.id,
+        name: detectionResult.monumentName,
+        location: detectionResult.location,
+        period: detectionResult.period,
+        description: detectionResult.description,
+        significance: detectionResult.significance,
+        facts: detectionResult.facts,
+        image: monument.scannedImage,
+        scannedImage: monument.scannedImage,
+        scannedAt: monument.scannedAt,
+        confidence: detectionResult.confidence,
+        isRecognized: detectionResult.isRecognized,
+        detailedDescription: detectionResult.detailedDescription,
+      };
+      
+      // Update the monument state
+      setMonument(updatedResult);
+      
+      // Store the updated result
+      if (resultId && typeof resultId === 'string') {
+        scanResultStore.update(resultId, updatedResult);
+      }
+      
+      // If now recognized, add to history
+      if (detectionResult.isRecognized && detectionResult.confidence > 50) {
+        Alert.alert('Success!', `Monument identified as ${detectionResult.monumentName} with ${detectionResult.confidence}% confidence.`);
+        
+        // Add to history when monument becomes recognized
+        try {
+          await addToHistory(updatedResult);
+          console.log('✅ Added newly recognized monument to history');
+        } catch (historyError) {
+          console.error('Error adding to history:', historyError);
+        }
+      } else {
+        Alert.alert('Analysis Complete', 'The monument is still unrecognized. You can try adding more context or take a clearer photo.');
+      }
+      
+    } catch (error) {
+      console.error('Re-analysis error:', error);
+      Alert.alert('Error', 'Failed to re-analyze the image. Please try again.');
+    } finally {
+      setIsReanalyzing(false);
+    }
+  };
+
+  const updateContextInfo = (field: keyof AdditionalInfo, value: string) => {
+    setContextInfo(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleStop = async () => {
     try {
       await voiceService.stop();
@@ -441,6 +516,9 @@ export default function ScanResultScreen() {
     );
   }
 
+  // Check if this is an unknown monument
+  const isUnknownMonument = !monument.isRecognized || monument.name === 'Unknown Monument' || (monument.confidence !== undefined && monument.confidence < 50);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -468,6 +546,101 @@ export default function ScanResultScreen() {
             <X size={24} color="#ffffff" />
           </TouchableOpacity>
         </View>
+
+        {/* Unknown Monument Context Section */}
+        {isUnknownMonument && (
+          <View style={styles.unknownMonumentSection}>
+            <View style={styles.unknownHeader}>
+              <AlertCircle size={20} color="#f59e0b" />
+              <Text style={styles.unknownTitle}>Monument Not Recognized</Text>
+            </View>
+            <Text style={styles.unknownDescription}>
+              We couldn't identify this monument with confidence. Add more context below to help improve the identification, then try analyzing again.
+            </Text>
+            
+            <TouchableOpacity 
+              style={styles.contextToggle} 
+              onPress={() => setShowContextForm(!showContextForm)}
+            >
+              <Text style={styles.contextToggleText}>
+                Add Context for Better Identification
+              </Text>
+              {showContextForm ? (
+                <ChevronUp size={20} color="#64748b" />
+              ) : (
+                <ChevronDown size={20} color="#64748b" />
+              )}
+            </TouchableOpacity>
+            
+            {showContextForm && (
+              <View style={styles.contextForm}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Monument/Art Name</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="e.g., Statue of Liberty, Eiffel Tower"
+                    value={contextInfo.name}
+                    onChangeText={(text) => updateContextInfo('name', text)}
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+                
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Location</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="e.g., Paris, France or Central Park, NYC"
+                    value={contextInfo.location}
+                    onChangeText={(text) => updateContextInfo('location', text)}
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+                
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Building/Museum</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="e.g., Louvre Museum, St. Peter's Basilica"
+                    value={contextInfo.building}
+                    onChangeText={(text) => updateContextInfo('building', text)}
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+                
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Additional Notes</Text>
+                  <TextInput
+                    style={[styles.textInput, styles.textInputMultiline]}
+                    placeholder="Any other details that might help..."
+                    value={contextInfo.notes}
+                    onChangeText={(text) => updateContextInfo('notes', text)}
+                    placeholderTextColor="#94a3b8"
+                    multiline
+                    numberOfLines={3}
+                  />
+                </View>
+              </View>
+            )}
+            
+            <TouchableOpacity
+              style={[styles.reanalyzeButton, isReanalyzing && styles.reanalyzeButtonDisabled]}
+              onPress={handleReanalyze}
+              disabled={isReanalyzing}
+            >
+              {isReanalyzing ? (
+                <>
+                  <ActivityIndicator color="#ffffff" size="small" />
+                  <Text style={styles.reanalyzeButtonText}>Analyzing...</Text>
+                </>
+              ) : (
+                <>
+                  <RefreshCw size={20} color="#ffffff" />
+                  <Text style={styles.reanalyzeButtonText}>Analyze Again</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
 
         <View style={styles.content}>
           <View style={styles.infoCards}>
@@ -1137,5 +1310,123 @@ const styles = StyleSheet.create({
     }),
     color: "#8B4513",
     fontStyle: "italic",
+  },
+  unknownMonumentSection: {
+    backgroundColor: "#fef3c7",
+    margin: 20,
+    padding: 20,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#f59e0b",
+  },
+  unknownHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  unknownTitle: {
+    fontSize: 18,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#92400e",
+  },
+  unknownDescription: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#92400e",
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  contextToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#ffffff",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+  },
+  contextToggleText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#374151",
+  },
+  contextForm: {
+    backgroundColor: "#ffffff",
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+    gap: 12,
+  },
+  inputGroup: {
+    gap: 6,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#374151",
+  },
+  textInput: {
+    backgroundColor: "#f9fafb",
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#1f2937",
+  },
+  textInputMultiline: {
+    height: 70,
+    textAlignVertical: "top",
+  },
+  reanalyzeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f59e0b",
+    paddingVertical: 14,
+    borderRadius: 8,
+    gap: 8,
+  },
+  reanalyzeButtonDisabled: {
+    opacity: 0.7,
+  },
+  reanalyzeButtonText: {
+    color: "#ffffff",
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
   },
 });

@@ -105,7 +105,10 @@ export default function ScannerScreen() {
         detailedDescription: detectionResult.detailedDescription,
       };
       
-      await addToHistory(scanResult);
+      // Only add to history if monument is recognized
+      if (scanResult.isRecognized && scanResult.confidence && scanResult.confidence > 50) {
+        await addToHistory(scanResult);
+      }
       setIsAnalyzing(false);
       setAnalysisStatus("");
       setSelectedImage(null);
@@ -142,7 +145,10 @@ export default function ScannerScreen() {
         isRecognized: false,
       };
       
-      await addToHistory(scanResult);
+      // Only add to history if monument is recognized
+      if (scanResult.isRecognized && scanResult.confidence && scanResult.confidence > 50) {
+        await addToHistory(scanResult);
+      }
       setIsAnalyzing(false);
       setAnalysisStatus("");
       setSelectedImage(null);
