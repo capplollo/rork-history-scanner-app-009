@@ -17,7 +17,7 @@ import { Send, X, Sparkles, MapPin } from "lucide-react-native";
 import { useChat } from "@/providers/ChatProvider";
 import { useHistory } from "@/providers/HistoryProvider";
 import { MonumentContext } from "@/services/aiChatService";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 
 export default function ChatModalScreen() {
   const { 
@@ -29,9 +29,23 @@ export default function ChatModalScreen() {
   
   const { history } = useHistory();
   const params = useLocalSearchParams();
+  const navigation = useNavigation();
   const [inputText, setInputText] = useState("");
   const [selectedMonument, setSelectedMonument] = useState<MonumentContext | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
+
+  const handleGoBack = () => {
+    try {
+      if (navigation.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/(tabs)');
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      router.replace('/(tabs)');
+    }
+  };
 
   // Handle monument context from navigation params
   useEffect(() => {
@@ -140,7 +154,7 @@ export default function ChatModalScreen() {
           <View style={styles.headerContent}>
             <View style={styles.headerTop}>
               <Text style={styles.headerTitle}>AI Chat</Text>
-              <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
+              <TouchableOpacity style={styles.closeButton} onPress={handleGoBack}>
                 <X size={24} color="#ffffff" />
               </TouchableOpacity>
             </View>

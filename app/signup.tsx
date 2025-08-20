@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/providers/AuthProvider';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react-native';
 
 export default function SignUpScreen() {
@@ -23,8 +23,22 @@ export default function SignUpScreen() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const navigation = useNavigation();
   
   const { signUp } = useAuth();
+
+  const handleGoBack = () => {
+    try {
+      if (navigation.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/login');
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      router.replace('/login');
+    }
+  };
 
   const handleSignUp = async () => {
     if (!fullName || !email || !password || !confirmPassword) {
@@ -95,7 +109,7 @@ export default function SignUpScreen() {
   };
 
   const navigateToLogin = () => {
-    router.back();
+    handleGoBack();
   };
 
   return (

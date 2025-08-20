@@ -12,14 +12,28 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/providers/AuthProvider';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { Mail, ArrowLeft } from 'lucide-react-native';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const navigation = useNavigation();
   
   const { resetPassword } = useAuth();
+
+  const handleGoBack = () => {
+    try {
+      if (navigation.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/login');
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      router.replace('/login');
+    }
+  };
 
   const handleResetPassword = async () => {
     if (!email) {
@@ -37,13 +51,13 @@ export default function ForgotPasswordScreen() {
       Alert.alert(
         'Success',
         'Password reset email sent! Please check your email for instructions.',
-        [{ text: 'OK', onPress: () => router.back() }]
+        [{ text: 'OK', onPress: handleGoBack }]
       );
     }
   };
 
   const navigateBack = () => {
-    router.back();
+    handleGoBack();
   };
 
   return (

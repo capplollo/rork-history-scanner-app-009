@@ -13,7 +13,7 @@ import {
   TextInput,
   ActivityIndicator,
 } from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams, router, useNavigation } from "expo-router";
 import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle, Volume2, VolumeX, Pause, RefreshCw, ChevronDown, ChevronUp } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -30,6 +30,7 @@ const { width: screenWidth } = Dimensions.get("window");
 export default function ScanResultScreen() {
   const { monumentId, scanData, resultId } = useLocalSearchParams();
   const { addToHistory } = useHistory();
+  const navigation = useNavigation();
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -395,6 +396,22 @@ export default function ScanResultScreen() {
     }
   };
 
+  const handleGoBack = () => {
+    try {
+      // Check if we can go back in the navigation stack
+      if (navigation.canGoBack()) {
+        router.back();
+      } else {
+        // If no screen to go back to, navigate to the main tabs
+        router.replace('/(tabs)');
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback to main tabs
+      router.replace('/(tabs)');
+    }
+  };
+
   // Show loading state while data is being loaded
   if (isLoading) {
     return (
@@ -455,7 +472,7 @@ export default function ScanResultScreen() {
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.backButtonContainer}
-              onPress={() => router.back()}
+              onPress={handleGoBack}
             >
               <Text style={styles.backButtonText}>Go Back</Text>
             </TouchableOpacity>
@@ -491,7 +508,7 @@ export default function ScanResultScreen() {
               </View>
             )}
           </LinearGradient>
-          <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.closeButton} onPress={handleGoBack}>
             <X size={24} color="#ffffff" />
           </TouchableOpacity>
         </View>
