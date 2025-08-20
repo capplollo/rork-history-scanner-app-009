@@ -99,7 +99,7 @@ export default function HistoryScreen() {
                 // Store the item and navigate with just the ID to avoid URL size limits
                 const resultId = scanResultStore.store(item);
                 router.push({
-                  pathname: "/(tabs)/scan-result" as any,
+                  pathname: "/scan-result" as any,
                   params: { resultId: resultId },
                 });
               }}

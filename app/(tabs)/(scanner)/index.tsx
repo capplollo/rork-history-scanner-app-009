@@ -120,7 +120,7 @@ export default function ScannerScreen() {
         
         // Use replace instead of push to avoid history stack issues
         router.replace({
-          pathname: "/(tabs)/scan-result" as any,
+          pathname: "/scan-result" as any,
           params: { 
             resultId: resultId
           },
@@ -128,7 +128,7 @@ export default function ScannerScreen() {
       } catch (navError) {
         console.error('Navigation error:', navError);
         // Fallback: try to navigate without params
-        router.replace("/(tabs)/scan-result" as any);
+        router.replace("/scan-result" as any);
       }
       
     } catch (error) {
@@ -160,7 +160,7 @@ export default function ScannerScreen() {
         
         // Use replace instead of push to avoid history stack issues
         router.replace({
-          pathname: "/(tabs)/scan-result" as any,
+          pathname: "/scan-result" as any,
           params: { 
             resultId: resultId
           },
@@ -168,7 +168,7 @@ export default function ScannerScreen() {
       } catch (navError) {
         console.error('Navigation error:', navError);
         // Fallback: try to navigate without params
-        router.replace("/(tabs)/scan-result" as any);
+        router.replace("/scan-result" as any);
       }
     }
   };

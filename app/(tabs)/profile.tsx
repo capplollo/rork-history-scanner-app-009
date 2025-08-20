@@ -167,7 +167,7 @@ export default function ProfileScreen() {
                     onPress={() => {
                       const resultId = scanResultStore.store(item);
                       router.push({
-                        pathname: "/(tabs)/scan-result" as any,
+                        pathname: "/scan-result" as any,
                         params: { resultId: resultId },
                       });
                     }}
