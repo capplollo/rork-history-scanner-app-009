@@ -525,15 +525,22 @@ export default function ScanResultScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          <Image 
-            source={{ uri: monument.scannedImage || monument.image }} 
-            style={styles.monumentImage}
-            defaultSource={require('@/assets/images/icon.png')}
-            onError={(error) => {
-              console.log('Monument image failed to load:', error.nativeEvent.error);
-              console.log('Monument image URI:', monument.scannedImage || monument.image);
-            }}
-          />
+          {(monument.scannedImage || monument.image) ? (
+            <Image 
+              source={{ uri: monument.scannedImage || monument.image }} 
+              style={styles.monumentImage}
+              defaultSource={require('@/assets/images/icon.png')}
+              onError={(error) => {
+                console.log('Monument image failed to load:', error.nativeEvent.error);
+                console.log('Monument image URI:', monument.scannedImage || monument.image);
+              }}
+            />
+          ) : (
+            <View style={[styles.monumentImage, styles.placeholderImage]}>
+              <Text style={styles.placeholderText}>📸</Text>
+              <Text style={styles.placeholderSubtext}>Image not available</Text>
+            </View>
+          )}
           <LinearGradient
             colors={["transparent", "rgba(0,0,0,0.8)"]}
             style={styles.imageOverlay}
@@ -1403,6 +1410,28 @@ const styles = StyleSheet.create({
   reanalyzeButtonText: {
     color: "#ffffff",
     fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+  },
+  placeholderImage: {
+    backgroundColor: "#f3f4f6",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#d1d5db",
+    borderStyle: "dashed",
+  },
+  placeholderText: {
+    fontSize: 48,
+    marginBottom: 8,
+  },
+  placeholderSubtext: {
+    fontSize: 16,
+    color: "#6b7280",
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
