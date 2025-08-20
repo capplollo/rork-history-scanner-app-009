@@ -154,14 +154,6 @@ export default function ProfileScreen() {
             
             <View style={styles.historyGrid}>
               {history.slice(0, 6).map((item, index) => {
-                const formatDate = (dateString: string) => {
-                  const date = new Date(dateString);
-                  return date.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  });
-                };
-                
                 return (
                   <TouchableOpacity
                     key={`${item.id}-${index}`}
@@ -178,22 +170,17 @@ export default function ProfileScreen() {
                     <View style={styles.historyImageContainer}>
                       <Image source={{ uri: item.scannedImage || item.image }} style={styles.historyThumbnail} />
                       <LinearGradient
-                        colors={['transparent', 'rgba(0,0,0,0.6)']}
+                        colors={['transparent', 'rgba(0,0,0,0.8)']}
                         style={styles.historyImageOverlay}
                       />
                       <View style={styles.historyImageActions}>
                         <TouchableOpacity style={styles.historyActionButton}>
-                          <Heart size={14} color="#ffffff" />
+                          <Heart size={16} color="#ffffff" />
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.historyActionButton}>
-                          <Share2 size={14} color="#ffffff" />
+                          <Share2 size={16} color="#ffffff" />
                         </TouchableOpacity>
                       </View>
-                      {item.confidence && (
-                        <View style={styles.historyConfidenceBadge}>
-                          <Text style={styles.historyConfidenceText}>{Math.round(item.confidence)}%</Text>
-                        </View>
-                      )}
                     </View>
                     <View style={styles.historyCardContent}>
                       <Text style={styles.historyMonumentName} numberOfLines={2}>{item.name}</Text>
@@ -201,10 +188,9 @@ export default function ProfileScreen() {
                         <MapPin size={12} color="#8B4513" />
                         <Text style={styles.historyInfoText} numberOfLines={1}>{item.location}</Text>
                       </View>
-                      <View style={styles.historyDateRow}>
-                        <Clock size={10} color="#94a3b8" />
-                        <Text style={styles.historyScanDate}>{formatDate(item.scannedAt)}</Text>
-                      </View>
+                      {item.period && (
+                        <Text style={styles.historyPeriod} numberOfLines={1}>{item.period}</Text>
+                      )}
                     </View>
                   </TouchableOpacity>
                 );
@@ -437,21 +423,23 @@ const styles = StyleSheet.create({
   historyCard: {
     width: "48%",
     backgroundColor: "#ffffff",
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
-    marginBottom: 4,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "rgba(139, 69, 19, 0.1)",
   },
   historyImageContainer: {
     position: "relative",
   },
   historyThumbnail: {
     width: "100%",
-    height: 140,
+    height: 160,
     resizeMode: "cover",
   },
   historyImageOverlay: {
@@ -459,65 +447,51 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 50,
+    height: 80,
   },
   historyImageActions: {
     position: "absolute",
-    top: 10,
-    right: 10,
+    top: 12,
+    right: 12,
     flexDirection: "row",
-    gap: 6,
+    gap: 8,
   },
   historyActionButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
+    backdropFilter: "blur(10px)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
   },
-  historyConfidenceBadge: {
-    position: "absolute",
-    top: 10,
-    left: 10,
-    backgroundColor: "rgba(139, 69, 19, 0.9)",
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  historyConfidenceText: {
-    fontSize: 10,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#ffffff",
-    fontWeight: "600",
-  },
+
   historyCardContent: {
-    padding: 14,
-    gap: 6,
+    padding: 16,
+    gap: 8,
   },
   historyMonumentName: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "500",
+    fontWeight: "600",
     color: "#2C3E50",
-    lineHeight: 18,
+    lineHeight: 20,
+    marginBottom: 4,
   },
   historyInfoRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    marginBottom: 4,
+    gap: 6,
+    marginBottom: 6,
   },
   historyInfoText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -527,19 +501,15 @@ const styles = StyleSheet.create({
     flex: 1,
     fontWeight: "500",
   },
-  historyDateRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-  },
-  historyScanDate: {
-    fontSize: 11,
+  historyPeriod: {
+    fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     color: "#94a3b8",
+    fontStyle: "italic",
   },
   viewAllButton: {
     flexDirection: "row",
