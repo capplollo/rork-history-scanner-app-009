@@ -14,9 +14,9 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle, Volume2, VolumeX, Pause, Settings, RefreshCw, ChevronDown, ChevronUp } from "lucide-react-native";
+import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle, Volume2, VolumeX, Pause, RefreshCw, ChevronDown, ChevronUp } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Speech from 'expo-speech';
+
 import { mockMonuments } from "@/data/mockMonuments";
 import { HistoryItem, useHistory } from "@/providers/HistoryProvider";
 import { scanResultStore } from "@/services/scanResultStore";
@@ -307,7 +307,7 @@ export default function ScanResultScreen() {
         // Stop any existing speech first
         try {
           await voiceService.stop();
-        } catch (stopError) {
+        } catch {
           console.log('No existing speech to stop');
         }
         
@@ -465,7 +465,7 @@ export default function ScanResultScreen() {
         <View style={styles.errorContainer}>
           <Text style={styles.errorTitle}>Monument Information Not Available</Text>
           <Text style={styles.errorText}>
-            We couldn't load the monument details. This might be due to:
+            We couldn&apos;t load the monument details. This might be due to:
           </Text>
           <View style={styles.errorList}>
             <Text style={styles.errorListItem}>• The scan data is still processing</Text>
@@ -555,7 +555,7 @@ export default function ScanResultScreen() {
               <Text style={styles.unknownTitle}>Monument Not Recognized</Text>
             </View>
             <Text style={styles.unknownDescription}>
-              We couldn't identify this monument with confidence. Add more context below to help improve the identification, then try analyzing again.
+              We couldn&apos;t identify this monument with confidence. Add more context below to help improve the identification, then try analyzing again.
             </Text>
             
             <TouchableOpacity 
@@ -671,23 +671,7 @@ export default function ScanResultScreen() {
           {/* Voice Narrator - Only show when monument is identified and has content */}
           {monument && monument.name && (
             <View style={styles.narratorSection}>
-              <View style={styles.narratorHeader}>
-                <Text style={styles.narratorTitle}>🎧 AI Voice Narrator</Text>
-                <TouchableOpacity 
-                  style={styles.voiceSettingsButton}
-                  onPress={() => setShowVoiceSettings(true)}
-                >
-                  <Settings size={16} color="#6b7280" />
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.narratorDescription}>
-                Experience an immersive audio journey through the history and stories of this monument with our enhanced AI narrator
-                {selectedVoice && (
-                  <Text style={styles.currentVoiceText}>
-                    {'\n'}Current voice: {selectedVoice.name}
-                  </Text>
-                )}
-              </Text>
+              <Text style={styles.narratorTitle}>Voice narration</Text>
               <View style={styles.narratorControls}>
                 <TouchableOpacity 
                   style={[styles.narratorButton, isPlaying && styles.narratorButtonActive]} 
@@ -703,28 +687,18 @@ export default function ScanResultScreen() {
                     <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
                   )}
                   <Text style={[styles.narratorButtonText, isPlaying && styles.narratorButtonTextActive]}>
-                    {isPlaying ? (isPaused ? 'Resume Audio' : 'Pause Audio') : 'Start Audio Tour'}
+                    {isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Play'}
                   </Text>
                 </TouchableOpacity>
                 
-                {isPlaying && (
-                  <TouchableOpacity 
-                    style={styles.stopButton} 
-                    onPress={handleStop}
-                  >
-                    <VolumeX size={18} color="#6b7280" />
-                    <Text style={styles.stopButtonText}>Stop</Text>
-                  </TouchableOpacity>
-                )}
+                <TouchableOpacity 
+                  style={styles.stopButton} 
+                  onPress={handleStop}
+                >
+                  <VolumeX size={18} color="#6b7280" />
+                  <Text style={styles.stopButtonText}>Stop</Text>
+                </TouchableOpacity>
               </View>
-              {isPlaying && (
-                <View style={styles.playingIndicatorContainer}>
-                  <View style={styles.playingDot} />
-                  <Text style={styles.playingIndicator}>
-                    {isPaused ? 'Audio tour paused - tap Resume to continue' : 'Playing immersive audio tour...'}
-                  </Text>
-                </View>
-              )}
             </View>
           )}
 
