@@ -312,7 +312,7 @@ export default function ScannerScreen() {
               onPress={pickImageFromGallery}
             >
               <View style={styles.buttonIconContainer}>
-                <ImageIcon size={28} color="#334155" />
+                <ImageIcon size={28} color="#ffffff" />
               </View>
               <Text style={[styles.buttonText, styles.galleryButtonText]}>Choose from Gallery</Text>
             </TouchableOpacity>
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
   },
   titleSection: {
     alignItems: "center",
-    marginBottom: 80,
+    marginBottom: 120,
   },
   mainTitle: {
     fontSize: 42,
@@ -375,21 +375,22 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: "100%",
-    gap: 20,
+    gap: 16,
   },
   scanButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+    borderRadius: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
-    minHeight: 52,
+    minHeight: 64,
+    width: "100%",
   },
   photoButton: {
     backgroundColor: "rgba(139, 69, 19, 0.95)",
@@ -397,9 +398,9 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
   galleryButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.98)",
+    backgroundColor: "rgba(139, 69, 19, 0.95)",
     borderWidth: 1,
-    borderColor: "rgba(139, 69, 19, 0.1)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   buttonIconContainer: {
     marginRight: 12,
@@ -416,7 +417,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   galleryButtonText: {
-    color: "#334155",
+    color: "#ffffff",
     fontWeight: "500",
     fontFamily: Platform.select({
       ios: "Times New Roman",
