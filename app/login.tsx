@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -20,12 +19,15 @@ export default function LoginScreen() {
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   
   const { signIn } = useAuth();
 
   const handleLogin = async () => {
+    setErrorMessage('');
+    
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      setErrorMessage('Please fill in all fields');
       return;
     }
 
@@ -34,7 +36,23 @@ export default function LoginScreen() {
     setIsLoading(false);
 
     if (error) {
-      Alert.alert('Login Failed', error.message);
+      let errorMsg = 'Invalid email or password';
+      
+      if (error.message) {
+        if (error.message.includes('Invalid login credentials') || 
+            error.message.includes('Email not confirmed') ||
+            error.message.includes('Invalid email or password')) {
+          errorMsg = 'Invalid email or password';
+        } else if (error.message.includes('Too many requests')) {
+          errorMsg = 'Too many login attempts. Please try again later.';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMsg = 'Please check your email and confirm your account first.';
+        } else {
+          errorMsg = error.message;
+        }
+      }
+      
+      setErrorMessage(errorMsg);
     } else {
       router.replace('/(tabs)');
     }
@@ -106,6 +124,12 @@ export default function LoginScreen() {
             >
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
+
+            {errorMessage ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              </View>
+            ) : null}
 
             <TouchableOpacity
               style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
@@ -263,5 +287,23 @@ const styles = StyleSheet.create({
       default: 'Times New Roman'
     }),
     fontWeight: '500' as const,
+  },
+  errorContainer: {
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#DC2626',
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
+    textAlign: 'center',
   },
 });

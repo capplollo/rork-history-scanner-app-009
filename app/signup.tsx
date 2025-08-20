@@ -106,7 +106,7 @@ export default function SignUpScreen() {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <TouchableOpacity style={styles.backButton} onPress={navigateToLogin}>
-            <ArrowLeft size={24} color="#007AFF" />
+            <ArrowLeft size={24} color="#8B4513" />
           </TouchableOpacity>
 
           <View style={styles.header}>
@@ -216,7 +216,7 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FEFEFE',
   },
   keyboardView: {
     flex: 1,
@@ -238,14 +238,25 @@ const styles = StyleSheet.create({
     marginTop: 60,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold' as const,
-    color: '#1a1a1a',
+    fontSize: 28,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
+    fontWeight: '400' as const,
+    color: '#2C3E50',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
+    fontStyle: 'italic',
+    color: '#64748b',
     textAlign: 'center',
   },
   form: {
@@ -255,11 +266,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e1e1e1',
-    borderRadius: 12,
+    borderColor: '#E8E8E8',
+    borderRadius: 16,
     marginBottom: 16,
     paddingHorizontal: 16,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FAFAFA',
   },
   inputIcon: {
     marginRight: 12,
@@ -267,28 +278,43 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 50,
-    fontSize: 16,
-    color: '#1a1a1a',
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
+    color: '#2C3E50',
   },
   eyeIcon: {
     padding: 4,
   },
   signupButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    height: 50,
+    backgroundColor: '#8B4513',
+    borderRadius: 16,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 8,
     marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   signupButtonDisabled: {
     backgroundColor: '#ccc',
   },
   signupButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '600' as const,
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
+    fontWeight: '500' as const,
   },
   loginContainer: {
     flexDirection: 'row',
@@ -296,12 +322,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loginText: {
-    color: '#666',
+    color: '#64748b',
     fontSize: 14,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
   },
   loginLink: {
-    color: '#007AFF',
+    color: '#8B4513',
     fontSize: 14,
-    fontWeight: '600' as const,
+    fontFamily: Platform.select({
+      ios: 'Times New Roman',
+      android: 'serif',
+      default: 'Times New Roman'
+    }),
+    fontWeight: '500' as const,
   },
 });
