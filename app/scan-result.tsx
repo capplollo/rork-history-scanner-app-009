@@ -636,7 +636,9 @@ export default function ScanResultScreen() {
               <Calendar size={20} color="#1e3a8a" />
               <View>
                 <Text style={styles.infoLabel}>Period</Text>
-                <Text style={styles.infoValue}>{monument.period}</Text>
+                <Text style={styles.infoValue}>
+                  {monument.period ? monument.period.replace(/artistic period/gi, '').replace(/period/gi, '').trim() : ''}
+                </Text>
               </View>
             </View>
           </View>

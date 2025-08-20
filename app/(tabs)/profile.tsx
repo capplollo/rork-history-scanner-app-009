@@ -13,14 +13,12 @@ import {
 import { 
   User, 
   MapPin, 
-  Calendar,
   Settings,
   LogOut,
   ChevronRight,
   Camera,
   Globe,
   Clock,
-  Heart,
   Share2
 } from "lucide-react-native";
 import { useHistory } from "@/providers/HistoryProvider";
@@ -154,6 +152,13 @@ export default function ProfileScreen() {
             
             <View style={styles.historyGrid}>
               {history.slice(0, 6).map((item, index) => {
+                // Extract century/dates from period, removing "artistic period" text
+                const formatPeriod = (period: string) => {
+                  if (!period) return '';
+                  // Remove "artistic period" and similar phrases, keep only dates/centuries
+                  return period.replace(/artistic period/gi, '').replace(/period/gi, '').trim();
+                };
+
                 return (
                   <TouchableOpacity
                     key={`${item.id}-${index}`}
@@ -165,7 +170,7 @@ export default function ProfileScreen() {
                         params: { resultId: resultId },
                       });
                     }}
-                    activeOpacity={0.9}
+                    activeOpacity={0.95}
                   >
                     <View style={styles.historyImageContainer}>
                       <Image source={{ uri: item.scannedImage || item.image }} style={styles.historyThumbnail} />
@@ -173,24 +178,25 @@ export default function ProfileScreen() {
                         colors={['transparent', 'rgba(0,0,0,0.8)']}
                         style={styles.historyImageOverlay}
                       />
-                      <View style={styles.historyImageActions}>
-                        <TouchableOpacity style={styles.historyActionButton}>
-                          <Heart size={16} color="#ffffff" />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.historyActionButton}>
-                          <Share2 size={16} color="#ffffff" />
-                        </TouchableOpacity>
+                      <View style={styles.historyContent}>
+                        <Text style={styles.historyTitle} numberOfLines={2}>{item.name}</Text>
+                        <View style={styles.historyLocationRow}>
+                          <MapPin size={12} color="#ffffff" />
+                          <Text style={styles.historyLocationText} numberOfLines={1}>{item.location}</Text>
+                        </View>
+                        {formatPeriod(item.period) && (
+                          <Text style={styles.historyPeriodText}>{formatPeriod(item.period)}</Text>
+                        )}
                       </View>
-                    </View>
-                    <View style={styles.historyCardContent}>
-                      <Text style={styles.historyMonumentName} numberOfLines={2}>{item.name}</Text>
-                      <View style={styles.historyInfoRow}>
-                        <MapPin size={12} color="#8B4513" />
-                        <Text style={styles.historyInfoText} numberOfLines={1}>{item.location}</Text>
-                      </View>
-                      {item.period && (
-                        <Text style={styles.historyPeriod} numberOfLines={1}>{item.period}</Text>
-                      )}
+                      <TouchableOpacity 
+                        style={styles.historyShareButton}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          // TODO: Implement share functionality
+                        }}
+                      >
+                        <Share2 size={16} color="#ffffff" />
+                      </TouchableOpacity>
                     </View>
                   </TouchableOpacity>
                 );
@@ -200,7 +206,7 @@ export default function ProfileScreen() {
             {history.length > 6 && (
               <TouchableOpacity 
                 style={styles.viewAllButton}
-                onPress={() => router.push('/history')}
+                onPress={() => router.push('/history' as any)}
               >
                 <Text style={styles.viewAllButtonText}>View All Discoveries</Text>
                 <ChevronRight size={16} color="#8B4513" />
@@ -422,24 +428,23 @@ const styles = StyleSheet.create({
   },
   historyCard: {
     width: "48%",
-    backgroundColor: "#ffffff",
+    height: 200,
     borderRadius: 20,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.25,
     shadowRadius: 20,
-    elevation: 8,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: "rgba(139, 69, 19, 0.1)",
+    elevation: 12,
+    marginBottom: 12,
   },
   historyImageContainer: {
+    flex: 1,
     position: "relative",
   },
   historyThumbnail: {
     width: "100%",
-    height: 160,
+    height: "100%",
     resizeMode: "cover",
   },
   historyImageOverlay: {
@@ -447,69 +452,77 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 80,
+    height: "100%",
   },
-  historyImageActions: {
+  historyContent: {
     position: "absolute",
-    top: 12,
-    right: 12,
-    flexDirection: "row",
-    gap: 8,
-  },
-  historyActionButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    backdropFilter: "blur(10px)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
-  },
-
-  historyCardContent: {
+    bottom: 0,
+    left: 0,
+    right: 0,
     padding: 16,
-    gap: 8,
+    paddingBottom: 20,
   },
-  historyMonumentName: {
+  historyTitle: {
     fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "600",
-    color: "#2C3E50",
+    fontWeight: "700",
+    color: "#ffffff",
+    marginBottom: 6,
     lineHeight: 20,
-    marginBottom: 4,
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
-  historyInfoRow: {
+  historyLocationRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    marginBottom: 6,
+    gap: 4,
+    marginBottom: 4,
   },
-  historyInfoText: {
+  historyLocationText: {
     fontSize: 13,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#8B4513",
+    color: "rgba(255, 255, 255, 0.9)",
     flex: 1,
     fontWeight: "500",
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
-  historyPeriod: {
+  historyPeriodText: {
     fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#94a3b8",
+    color: "rgba(255, 255, 255, 0.8)",
     fontStyle: "italic",
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  historyShareButton: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    backdropFilter: "blur(10px)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   viewAllButton: {
     flexDirection: "row",

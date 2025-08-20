@@ -17,7 +17,6 @@ import {
   MapPin,
   Grid3X3,
   List,
-  Heart,
   Share2,
   ChevronDown
 } from "lucide-react-native";
@@ -94,88 +93,102 @@ export default function HistoryScreen() {
     });
   };
 
-  const renderGridItem = (item: any, index: number) => (
-    <TouchableOpacity
-      key={`${item.id}-${index}`}
-      style={styles.gridCard}
-      onPress={() => handleItemPress(item)}
-      activeOpacity={0.9}
-    >
-      <View style={styles.imageContainer}>
-        <Image 
-          source={{ uri: item.scannedImage || item.image }} 
-          style={styles.gridImage} 
-        />
-        <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.7)']}
-          style={styles.imageOverlay}
-        />
-        <View style={styles.imageActions}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Heart size={16} color="#ffffff" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Share2 size={16} color="#ffffff" />
-          </TouchableOpacity>
-        </View>
-        {item.confidence && (
-          <View style={styles.confidenceBadge}>
-            <Text style={styles.confidenceText}>{Math.round(item.confidence)}%</Text>
-          </View>
-        )}
-      </View>
-      <View style={styles.gridCardContent}>
-        <Text style={styles.gridCardTitle} numberOfLines={2}>{item.name}</Text>
-        <View style={styles.gridCardInfo}>
-          <MapPin size={12} color="#8B4513" />
-          <Text style={styles.gridCardLocation} numberOfLines={1}>{item.location}</Text>
-        </View>
-        <View style={styles.gridCardMeta}>
-          <Text style={styles.gridCardPeriod}>{item.period}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderGridItem = (item: any, index: number) => {
+    // Extract century/dates from period, removing "artistic period" text
+    const formatPeriod = (period: string) => {
+      if (!period) return '';
+      // Remove "artistic period" and similar phrases, keep only dates/centuries
+      return period.replace(/artistic period/gi, '').replace(/period/gi, '').trim();
+    };
 
-  const renderListItem = (item: any, index: number) => (
-    <TouchableOpacity
-      key={`${item.id}-${index}`}
-      style={styles.listCard}
-      onPress={() => handleItemPress(item)}
-      activeOpacity={0.9}
-    >
-      <View style={styles.listImageContainer}>
-        <Image 
-          source={{ uri: item.scannedImage || item.image }} 
-          style={styles.listImage} 
-        />
-        {item.confidence && (
-          <View style={styles.listConfidenceBadge}>
-            <Text style={styles.listConfidenceText}>{Math.round(item.confidence)}%</Text>
+    return (
+      <TouchableOpacity
+        key={`${item.id}-${index}`}
+        style={styles.instagramCard}
+        onPress={() => handleItemPress(item)}
+        activeOpacity={0.95}
+      >
+        <View style={styles.instagramImageContainer}>
+          <Image 
+            source={{ uri: item.scannedImage || item.image }} 
+            style={styles.instagramImage} 
+          />
+          <LinearGradient
+            colors={['transparent', 'rgba(0,0,0,0.8)']}
+            style={styles.instagramOverlay}
+          />
+          <View style={styles.instagramContent}>
+            <Text style={styles.instagramTitle} numberOfLines={2}>{item.name}</Text>
+            <View style={styles.instagramLocation}>
+              <MapPin size={14} color="#ffffff" />
+              <Text style={styles.instagramLocationText} numberOfLines={1}>{item.location}</Text>
+            </View>
+            {formatPeriod(item.period) && (
+              <Text style={styles.instagramPeriod}>{formatPeriod(item.period)}</Text>
+            )}
           </View>
-        )}
-      </View>
-      <View style={styles.listCardContent}>
-        <Text style={styles.listCardTitle} numberOfLines={2}>{item.name}</Text>
-        <View style={styles.listCardInfo}>
-          <MapPin size={14} color="#8B4513" />
-          <Text style={styles.listCardLocation} numberOfLines={1}>{item.location}</Text>
+          <TouchableOpacity 
+            style={styles.instagramShareButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              // TODO: Implement share functionality
+            }}
+          >
+            <Share2 size={18} color="#ffffff" />
+          </TouchableOpacity>
         </View>
-        <Text style={styles.listCardDescription} numberOfLines={2}>{item.description}</Text>
-        <View style={styles.listCardMeta}>
-          <Text style={styles.listCardPeriod}>{item.period}</Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderListItem = (item: any, index: number) => {
+    // Extract century/dates from period, removing "artistic period" text
+    const formatPeriod = (period: string) => {
+      if (!period) return '';
+      // Remove "artistic period" and similar phrases, keep only dates/centuries
+      return period.replace(/artistic period/gi, '').replace(/period/gi, '').trim();
+    };
+
+    return (
+      <TouchableOpacity
+        key={`${item.id}-${index}`}
+        style={styles.listCard}
+        onPress={() => handleItemPress(item)}
+        activeOpacity={0.9}
+      >
+        <View style={styles.listImageContainer}>
+          <Image 
+            source={{ uri: item.scannedImage || item.image }} 
+            style={styles.listImage} 
+          />
         </View>
-      </View>
-      <View style={styles.listCardActions}>
-        <TouchableOpacity style={styles.listActionButton}>
-          <Heart size={18} color="#8B4513" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.listActionButton}>
-          <Share2 size={18} color="#8B4513" />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
+        <View style={styles.listCardContent}>
+          <Text style={styles.listCardTitle} numberOfLines={2}>{item.name}</Text>
+          <View style={styles.listCardInfo}>
+            <MapPin size={14} color="#8B4513" />
+            <Text style={styles.listCardLocation} numberOfLines={1}>{item.location}</Text>
+          </View>
+          <Text style={styles.listCardDescription} numberOfLines={2}>{item.description}</Text>
+          {formatPeriod(item.period) && (
+            <View style={styles.listCardMeta}>
+              <Text style={styles.listCardPeriod}>{formatPeriod(item.period)}</Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.listCardActions}>
+          <TouchableOpacity 
+            style={styles.listActionButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              // TODO: Implement share functionality
+            }}
+          >
+            <Share2 size={18} color="#8B4513" />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -443,112 +456,103 @@ const styles = StyleSheet.create({
   listContainer: {
     gap: 16,
   },
-  gridCard: {
+  instagramCard: {
     width: cardWidth,
-    backgroundColor: "#ffffff",
-    borderRadius: 16,
+    height: 280,
     marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    borderRadius: 20,
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 12,
   },
-  imageContainer: {
+  instagramImageContainer: {
+    flex: 1,
     position: "relative",
   },
-  gridImage: {
+  instagramImage: {
     width: "100%",
-    height: 180,
+    height: "100%",
     resizeMode: "cover",
   },
-  imageOverlay: {
+  instagramOverlay: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: 60,
+    height: "100%",
   },
-  imageActions: {
+  instagramContent: {
     position: "absolute",
-    top: 12,
-    right: 12,
-    flexDirection: "row",
-    gap: 8,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    paddingBottom: 24,
   },
-  actionButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  confidenceBadge: {
-    position: "absolute",
-    top: 12,
-    left: 12,
-    backgroundColor: "rgba(139, 69, 19, 0.9)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  confidenceText: {
-    fontSize: 12,
+  instagramTitle: {
+    fontSize: 18,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
+    fontWeight: "700",
     color: "#ffffff",
-    fontWeight: "600",
-  },
-  gridCardContent: {
-    padding: 16,
-  },
-  gridCardTitle: {
-    fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "600",
-    color: "#2C3E50",
     marginBottom: 8,
-    lineHeight: 20,
+    lineHeight: 22,
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
-  gridCardInfo: {
+  instagramLocation: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    marginBottom: 8,
+    marginBottom: 6,
   },
-  gridCardLocation: {
+  instagramLocationText: {
     fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#8B4513",
+    color: "rgba(255, 255, 255, 0.9)",
+    fontWeight: "500",
     flex: 1,
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
-  gridCardMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  gridCardPeriod: {
-    fontSize: 12,
+  instagramPeriod: {
+    fontSize: 13,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#8B4513",
+    color: "rgba(255, 255, 255, 0.8)",
     fontStyle: "italic",
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  instagramShareButton: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    backdropFilter: "blur(10px)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   listCard: {
     flexDirection: "row",
@@ -571,27 +575,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     resizeMode: "cover",
   },
-  listConfidenceBadge: {
-    position: "absolute",
-    top: -6,
-    right: -6,
-    backgroundColor: "#8B4513",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: "#ffffff",
-  },
-  listConfidenceText: {
-    fontSize: 10,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#ffffff",
-    fontWeight: "600",
-  },
+
   listCardContent: {
     flex: 1,
     gap: 4,
@@ -650,16 +634,20 @@ const styles = StyleSheet.create({
   listCardActions: {
     justifyContent: "center",
     alignItems: "center",
-    gap: 12,
     marginLeft: 12,
   },
   listActionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "#f8f4f0",
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   emptyState: {
     alignItems: "center",
