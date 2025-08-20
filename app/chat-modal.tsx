@@ -18,6 +18,7 @@ import { useChat } from "@/providers/ChatProvider";
 import { useHistory } from "@/providers/HistoryProvider";
 import { MonumentContext } from "@/services/aiChatService";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { voiceService } from "@/services/voiceService";
 
 export default function ChatModalScreen() {
   const { 
@@ -36,6 +37,11 @@ export default function ChatModalScreen() {
 
   const handleGoBack = () => {
     try {
+      // Stop any playing voice when leaving chat
+      voiceService.forceCleanup().catch(error => {
+        console.error('Error during chat voice cleanup:', error);
+      });
+      
       if (navigation.canGoBack()) {
         router.back();
       } else {
@@ -46,6 +52,27 @@ export default function ChatModalScreen() {
       router.replace('/(tabs)');
     }
   };
+  
+  // Cleanup voice when component unmounts
+  useEffect(() => {
+    return () => {
+      voiceService.forceCleanup().catch(error => {
+        console.error('Error during chat unmount voice cleanup:', error);
+      });
+    };
+  }, []);
+  
+  // Additional cleanup when navigation focus changes
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      // Stop voice when navigating away from chat
+      voiceService.forceCleanup().catch(error => {
+        console.error('Error during chat navigation voice cleanup:', error);
+      });
+    });
+    
+    return unsubscribe;
+  }, [navigation]);
 
   // Handle monument context from navigation params
   useEffect(() => {

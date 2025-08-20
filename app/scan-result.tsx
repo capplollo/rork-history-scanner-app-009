@@ -48,14 +48,29 @@ export default function ScanResultScreen() {
   // Cleanup speech when component unmounts or when navigating away
   useEffect(() => {
     return () => {
-      // Stop speech when component unmounts
-      voiceService.stop();
+      // Force cleanup of voice service when component unmounts
+      voiceService.forceCleanup().catch(error => {
+        console.error('Error during voice cleanup:', error);
+      });
+      
       // Clean up stored result when component unmounts
       if (resultId && typeof resultId === 'string') {
         scanResultStore.clear(resultId);
       }
     };
   }, [resultId]);
+  
+  // Additional cleanup when navigation focus changes
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      // Stop voice when navigating away
+      voiceService.forceCleanup().catch(error => {
+        console.error('Error during navigation voice cleanup:', error);
+      });
+    });
+    
+    return unsubscribe;
+  }, [navigation]);
 
   // Initialize voice service and set default voice
   useEffect(() => {

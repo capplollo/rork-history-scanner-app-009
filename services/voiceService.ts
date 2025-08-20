@@ -39,6 +39,8 @@ export class VoiceService {
   private elevenLabsVoices: VoiceOption[] = [];
   private isElevenLabsConfigured: boolean = false;
   private audioPermissionsGranted: boolean = false;
+  private currentSound: Audio.Sound | null = null;
+  private isCurrentlyPlaying: boolean = false;
 
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
@@ -411,15 +413,27 @@ export class VoiceService {
       
       // Create and play the sound with error handling
       try {
+        // Stop any existing sound first
+        if (this.currentSound) {
+          await this.currentSound.unloadAsync();
+          this.currentSound = null;
+        }
+        
         const { sound } = await Audio.Sound.createAsync(
           { uri: audioUri },
           { shouldPlay: true, volume: options.volume || 1.0 }
         );
         
+        // Store reference to current sound
+        this.currentSound = sound;
+        this.isCurrentlyPlaying = true;
+        
         // Set up playback status listener
         sound.setOnPlaybackStatusUpdate((status) => {
           if (status.isLoaded) {
             if (status.didJustFinish) {
+              this.currentSound = null;
+              this.isCurrentlyPlaying = false;
               sound.unloadAsync();
               callbacks?.onDone?.();
             }
@@ -504,15 +518,53 @@ export class VoiceService {
   }
 
   async stop(): Promise<void> {
-    await Speech.stop();
+    try {
+      // Stop expo-speech
+      await Speech.stop();
+      
+      // Stop and cleanup ElevenLabs audio if playing
+      if (this.currentSound) {
+        await this.currentSound.stopAsync();
+        await this.currentSound.unloadAsync();
+        this.currentSound = null;
+      }
+      
+      this.isCurrentlyPlaying = false;
+      console.log('✅ Voice service stopped successfully');
+    } catch (error) {
+      console.error('Error stopping voice service:', error);
+      // Reset state even if there's an error
+      this.currentSound = null;
+      this.isCurrentlyPlaying = false;
+    }
   }
 
   async pause(): Promise<void> {
-    await Speech.pause();
+    try {
+      // Pause expo-speech
+      await Speech.pause();
+      
+      // Pause ElevenLabs audio if playing
+      if (this.currentSound) {
+        await this.currentSound.pauseAsync();
+      }
+    } catch (error) {
+      console.error('Error pausing voice service:', error);
+    }
   }
 
   async resume(): Promise<void> {
-    await Speech.resume();
+    try {
+      // Resume expo-speech
+      await Speech.resume();
+      
+      // Resume ElevenLabs audio if paused
+      if (this.currentSound) {
+        await this.currentSound.playAsync();
+      }
+    } catch (error) {
+      console.error('Error resuming voice service:', error);
+    }
   }
 
   isSupported(): boolean {
@@ -541,6 +593,40 @@ export class VoiceService {
   // Check if ElevenLabs is properly configured
   isElevenLabsAvailable(): boolean {
     return this.isElevenLabsConfigured;
+  }
+  
+  // Check if voice is currently playing
+  isPlaying(): boolean {
+    return this.isCurrentlyPlaying;
+  }
+  
+  // Force cleanup - useful for navigation cleanup
+  async forceCleanup(): Promise<void> {
+    try {
+      console.log('🧹 Force cleaning up voice service...');
+      
+      // Stop all speech
+      await Speech.stop();
+      
+      // Clean up ElevenLabs audio
+      if (this.currentSound) {
+        try {
+          await this.currentSound.stopAsync();
+          await this.currentSound.unloadAsync();
+        } catch (error) {
+          console.warn('Error cleaning up sound:', error);
+        }
+        this.currentSound = null;
+      }
+      
+      this.isCurrentlyPlaying = false;
+      console.log('✅ Voice service force cleanup completed');
+    } catch (error) {
+      console.error('Error during force cleanup:', error);
+      // Reset state regardless of errors
+      this.currentSound = null;
+      this.isCurrentlyPlaying = false;
+    }
   }
 }
 
