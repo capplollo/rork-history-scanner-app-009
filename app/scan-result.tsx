@@ -360,20 +360,15 @@ export default function ScanResultScreen() {
   };
 
   const handleReanalyze = async () => {
-    // Check if we have an image to analyze
-    const imageToAnalyze = monument?.scannedImage || monument?.image;
-    if (!imageToAnalyze) {
-      Alert.alert('Error', 'No image available for re-analysis. Please take a new photo.');
+    if (!monument?.scannedImage) {
+      Alert.alert('Error', 'No image available for re-analysis.');
       return;
     }
 
     setIsReanalyzing(true);
     
     try {
-      console.log('Re-analyzing image:', imageToAnalyze);
-      const detectionResult = await detectArtwork(imageToAnalyze, contextInfo);
-      
-      console.log('Re-analysis result:', detectionResult);
+      const detectionResult = await detectArtwork(monument.scannedImage, contextInfo);
       
       // Create updated scan result
       const updatedResult = {
@@ -384,8 +379,8 @@ export default function ScanResultScreen() {
         description: detectionResult.description,
         significance: detectionResult.significance,
         facts: detectionResult.facts,
-        image: imageToAnalyze,
-        scannedImage: imageToAnalyze,
+        image: monument.scannedImage,
+        scannedImage: monument.scannedImage,
         scannedAt: monument.scannedAt,
         confidence: detectionResult.confidence,
         isRecognized: detectionResult.isRecognized,
@@ -417,17 +412,7 @@ export default function ScanResultScreen() {
       
     } catch (error) {
       console.error('Re-analysis error:', error);
-      let errorMessage = 'Failed to re-analyze the image. Please try again.';
-      
-      if (error instanceof Error) {
-        if (error.message.includes('Invalid JSON')) {
-          errorMessage = 'The analysis completed but returned unexpected data. Please try again.';
-        } else if (error.message.includes('network') || error.message.includes('fetch')) {
-          errorMessage = 'Network error during analysis. Please check your connection and try again.';
-        }
-      }
-      
-      Alert.alert('Analysis Error', errorMessage);
+      Alert.alert('Error', 'Failed to re-analyze the image. Please try again.');
     } finally {
       setIsReanalyzing(false);
     }
@@ -675,121 +660,118 @@ export default function ScanResultScreen() {
         )}
 
         <View style={styles.content}>
-          {/* Only show info cards, voice narration, and content when artwork is recognized */}
-          {!isUnknownArtwork && (
-            <>
-              <View style={styles.infoCards}>
-                <View style={styles.infoCard}>
-                  <MapPin size={20} color="#1e3a8a" />
-                  <View>
-                    <Text style={styles.infoLabel}>Location</Text>
-                    <Text style={styles.infoValue}>{monument.location}</Text>
-                  </View>
-                </View>
-                <View style={styles.infoCard}>
-                  <Calendar size={20} color="#1e3a8a" />
-                  <View>
-                    <Text style={styles.infoLabel}>Period</Text>
-                    <Text style={styles.infoValue}>
-                      {monument.period ? monument.period.replace(/artistic period/gi, '').replace(/period/gi, '').trim() : ''}
-                    </Text>
-                  </View>
-                </View>
+          <View style={styles.infoCards}>
+            <View style={styles.infoCard}>
+              <MapPin size={20} color="#1e3a8a" />
+              <View>
+                <Text style={styles.infoLabel}>Location</Text>
+                <Text style={styles.infoValue}>{monument.location}</Text>
               </View>
-              
-              {monument.scannedAt && (
-                <View style={styles.scanInfo}>
-                  <Text style={styles.scanInfoText}>
-                    Scanned on {new Date(monument.scannedAt).toLocaleDateString()}
-                  </Text>
-                </View>
-              )}
+            </View>
+            <View style={styles.infoCard}>
+              <Calendar size={20} color="#1e3a8a" />
+              <View>
+                <Text style={styles.infoLabel}>Period</Text>
+                <Text style={styles.infoValue}>
+                  {monument.period ? monument.period.replace(/artistic period/gi, '').replace(/period/gi, '').trim() : ''}
+                </Text>
+              </View>
+            </View>
+          </View>
+          
+          {monument.scannedAt && (
+            <View style={styles.scanInfo}>
+              <Text style={styles.scanInfoText}>
+                Scanned on {new Date(monument.scannedAt).toLocaleDateString()}
+              </Text>
+            </View>
+          )}
 
-              {/* Voice Narrator - Only show when artwork is identified and has content */}
-              <View style={styles.narratorSection}>
-                <Text style={styles.narratorTitle}>Voice narration</Text>
-                <View style={styles.narratorControls}>
-                  <TouchableOpacity 
-                    style={[styles.narratorButton, isPlaying && styles.narratorButtonActive]} 
-                    onPress={handlePlayPause}
-                  >
-                    {isPlaying ? (
-                      isPaused ? (
-                        <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
-                      ) : (
-                        <Pause size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
-                      )
-                    ) : (
+          {/* Voice Narrator - Only show when artwork is identified and has content */}
+          {monument && monument.name && (
+            <View style={styles.narratorSection}>
+              <Text style={styles.narratorTitle}>Voice narration</Text>
+              <View style={styles.narratorControls}>
+                <TouchableOpacity 
+                  style={[styles.narratorButton, isPlaying && styles.narratorButtonActive]} 
+                  onPress={handlePlayPause}
+                >
+                  {isPlaying ? (
+                    isPaused ? (
                       <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
-                    )}
-                    <Text style={[styles.narratorButtonText, isPlaying && styles.narratorButtonTextActive]}>
-                      {isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Play'}
-                    </Text>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity 
-                    style={styles.stopButton} 
-                    onPress={handleStop}
-                  >
-                    <VolumeX size={18} color="#6b7280" />
-                    <Text style={styles.stopButtonText}>Stop</Text>
-                  </TouchableOpacity>
+                    ) : (
+                      <Pause size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
+                    )
+                  ) : (
+                    <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
+                  )}
+                  <Text style={[styles.narratorButtonText, isPlaying && styles.narratorButtonTextActive]}>
+                    {isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Play'}
+                  </Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={styles.stopButton} 
+                  onPress={handleStop}
+                >
+                  <VolumeX size={18} color="#6b7280" />
+                  <Text style={styles.stopButtonText}>Stop</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {monument.detailedDescription ? (
+            <>
+              <View style={styles.factsSection}>
+                <View style={styles.sectionHeader}>
+                  <Info size={20} color="#1e3a8a" />
+                  <Text style={styles.sectionTitle}>Key Takeaways</Text>
                 </View>
+                {monument.detailedDescription.keyTakeawaysList?.map((takeaway: string, index: number) => (
+                  <View key={index} style={styles.factItem}>
+                    <Text style={styles.factBullet}>•</Text>
+                    <Text style={styles.factText}>{takeaway}</Text>
+                  </View>
+                )) || []}
               </View>
 
-              {monument.detailedDescription ? (
-                <>
-                  <View style={styles.factsSection}>
-                    <View style={styles.sectionHeader}>
-                      <Info size={20} color="#1e3a8a" />
-                      <Text style={styles.sectionTitle}>Key Takeaways</Text>
-                    </View>
-                    {monument.detailedDescription.keyTakeawaysList?.map((takeaway: string, index: number) => (
-                      <View key={index} style={styles.factItem}>
-                        <Text style={styles.factBullet}>•</Text>
-                        <Text style={styles.factText}>{takeaway}</Text>
-                      </View>
-                    )) || []}
-                  </View>
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>In-Depth Context</Text>
+                <FormattedText style={styles.inDepthContext}>{monument.detailedDescription.inDepthContext}</FormattedText>
+              </View>
 
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>In-Depth Context</Text>
-                    <FormattedText style={styles.inDepthContext}>{monument.detailedDescription.inDepthContext}</FormattedText>
-                  </View>
-
-                  {monument.detailedDescription.curiosities && (
-                    <View style={styles.section}>
-                      <Text style={styles.sectionTitle}>Curiosities</Text>
-                      <FormattedText style={styles.curiosities}>{monument.detailedDescription.curiosities}</FormattedText>
-                    </View>
-                  )}
-                </>
-              ) : (
-                <>
-                  <View style={styles.section}>
-                    <View style={styles.sectionHeader}>
-                      <Info size={20} color="#1e3a8a" />
-                      <Text style={styles.sectionTitle}>About</Text>
-                    </View>
-                    <Text style={styles.description}>{monument.description}</Text>
-                  </View>
-
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Historical Significance</Text>
-                    <Text style={styles.significance}>{monument.significance}</Text>
-                  </View>
-
-                  <View style={styles.factsSection}>
-                    <Text style={styles.sectionTitle}>Quick Facts</Text>
-                    {monument.facts.map((fact: string, index: number) => (
-                      <View key={index} style={styles.factItem}>
-                        <Text style={styles.factBullet}>•</Text>
-                        <Text style={styles.factText}>{fact}</Text>
-                      </View>
-                    ))}
-                  </View>
-                </>
+              {monument.detailedDescription.curiosities && (
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Curiosities</Text>
+                  <FormattedText style={styles.curiosities}>{monument.detailedDescription.curiosities}</FormattedText>
+                </View>
               )}
+            </>
+          ) : (
+            <>
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Info size={20} color="#1e3a8a" />
+                  <Text style={styles.sectionTitle}>About</Text>
+                </View>
+                <Text style={styles.description}>{monument.description}</Text>
+              </View>
+
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Historical Significance</Text>
+                <Text style={styles.significance}>{monument.significance}</Text>
+              </View>
+
+              <View style={styles.factsSection}>
+                <Text style={styles.sectionTitle}>Quick Facts</Text>
+                {monument.facts.map((fact: string, index: number) => (
+                  <View key={index} style={styles.factItem}>
+                    <Text style={styles.factBullet}>•</Text>
+                    <Text style={styles.factText}>{fact}</Text>
+                  </View>
+                ))}
+              </View>
             </>
           )}
 
