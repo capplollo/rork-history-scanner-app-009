@@ -111,35 +111,72 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
     throw new Error('No content in AI response');
   }
 
-  // Clean up the response and parse JSON
-  let cleanContent = content.trim()
-    .replace(/```json\s*/g, '')
-    .replace(/```\s*/g, '')
-    .replace(/`/g, '');
+  console.log('Raw AI response content:', content);
   
-  // Try to extract JSON from the content if it's mixed with other text
-  const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
-  if (jsonMatch) {
-    cleanContent = jsonMatch[0];
+  // Clean up the response and parse JSON with better error handling
+  let cleanContent = content.trim();
+  
+  // Remove markdown code blocks
+  cleanContent = cleanContent.replace(/```json\s*/gi, '').replace(/```\s*/g, '');
+  
+  // Remove any backticks
+  cleanContent = cleanContent.replace(/`/g, '');
+  
+  // Try to extract JSON from the content - look for the outermost braces
+  const jsonStart = cleanContent.indexOf('{');
+  const jsonEnd = cleanContent.lastIndexOf('}');
+  
+  if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+    cleanContent = cleanContent.substring(jsonStart, jsonEnd + 1);
   }
+  
+  console.log('Cleaned content for parsing:', cleanContent);
 
   try {
+    // Validate that we have proper JSON structure
+    if (!cleanContent.startsWith('{') || !cleanContent.endsWith('}')) {
+      throw new Error('Response does not contain valid JSON structure');
+    }
+    
     const result = JSON.parse(cleanContent) as DetectionResult;
+    
+    // Validate required fields
+    if (!result.artworkName || typeof result.confidence !== 'number' || !result.location) {
+      console.error('Invalid result structure:', result);
+      throw new Error('AI response missing required fields');
+    }
+    
+    // Ensure facts is an array
+    if (!Array.isArray(result.facts)) {
+      result.facts = [];
+    }
     
     // Validate and set defaults for detailed description if missing
     if (result.isRecognized && result.confidence > 75 && !result.detailedDescription) {
       result.detailedDescription = {
-        keyTakeaways: result.description,
+        keyTakeaways: result.description || 'No description available',
         inDepthContext: `**${result.artworkName}** is a significant ${result.period} artwork located in ${result.location}. This piece represents important cultural heritage and artistic achievement of its era. The work showcases the artistic techniques and cultural values of its time period, reflecting the historical context and artistic movements of the period. The creation involved specific materials and techniques characteristic of the era, and its preservation allows us to understand the cultural and artistic priorities of the time.`,
         curiosities: "No widely known curiosities are associated with this artwork.",
-        keyTakeawaysList: result.facts.slice(0, 5)
+        keyTakeawaysList: result.facts.slice(0, 4)
       };
     }
     
+    console.log('Successfully parsed detection result:', result);
     return result;
+    
   } catch (parseError) {
     console.error('Failed to parse AI response as JSON:', parseError);
-    throw new Error('Invalid JSON response from AI');
+    console.error('Content that failed to parse:', cleanContent);
+    console.error('Original AI response:', content);
+    
+    // Try to extract basic information even if JSON parsing fails
+    const fallbackResult = extractFallbackInfo(content);
+    if (fallbackResult) {
+      console.log('Using fallback extraction:', fallbackResult);
+      return fallbackResult;
+    }
+    
+    throw new Error(`Invalid JSON response from AI: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
   }
 }
 
@@ -168,6 +205,33 @@ async function convertImageToBase64(imageUri: string): Promise<string> {
     reader.onerror = reject;
     reader.readAsDataURL(finalBlob);
   });
+}
+
+// Fallback function to extract basic info when JSON parsing fails
+function extractFallbackInfo(content: string): DetectionResult | null {
+  try {
+    // Try to extract basic information using regex patterns
+    const nameMatch = content.match(/(?:artworkName|name)["']?\s*:\s*["']([^"']+)["']/i);
+    const locationMatch = content.match(/(?:location)["']?\s*:\s*["']([^"']+)["']/i);
+    const confidenceMatch = content.match(/(?:confidence)["']?\s*:\s*(\d+)/i);
+    
+    if (nameMatch || locationMatch) {
+      return {
+        artworkName: nameMatch?.[1] || 'Unknown Artwork',
+        confidence: confidenceMatch ? parseInt(confidenceMatch[1]) : 0,
+        location: locationMatch?.[1] || 'Unknown',
+        period: 'Unknown',
+        description: 'Artwork detected but full analysis unavailable due to parsing error.',
+        significance: 'Unable to determine significance.',
+        facts: ['Please try scanning again for detailed information'],
+        isRecognized: false
+      };
+    }
+  } catch (error) {
+    console.error('Fallback extraction failed:', error);
+  }
+  
+  return null;
 }
 
 async function compressImage(blob: Blob): Promise<Blob> {
