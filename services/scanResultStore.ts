@@ -122,17 +122,15 @@ class ScanResultStore {
         .map((fact: string) => fact.length > 120 ? fact.substring(0, 120) + '...' : fact);
     }
     
-    // Keep image URLs but remove base64 data to prevent size issues
+    // Keep image URLs but handle base64 data carefully
     if (optimized.image && optimized.image.startsWith('data:')) {
-      // If it's a base64 image, remove it to prevent size issues
-      console.log('Removing base64 image data to prevent size issues');
-      optimized.image = '';
+      // If it's a base64 image, keep it but warn about size
+      console.log('Keeping base64 image data (may affect performance)');
     }
     
     if (optimized.scannedImage && optimized.scannedImage.startsWith('data:')) {
-      // If it's a base64 image, remove it to prevent size issues
-      console.log('Removing base64 scanned image data to prevent size issues');
-      optimized.scannedImage = '';
+      // If it's a base64 scanned image, keep it but warn about size
+      console.log('Keeping base64 scanned image data (may affect performance)');
     }
     
     // Ensure we have some image reference for display

@@ -122,6 +122,16 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
   // Remove any backticks
   cleanContent = cleanContent.replace(/`/g, '');
   
+  // Fix common JSON issues
+  cleanContent = cleanContent
+    .replace(/\n/g, ' ') // Remove newlines that might break JSON
+    .replace(/\r/g, ' ') // Remove carriage returns
+    .replace(/\t/g, ' ') // Remove tabs
+    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+    .replace(/,\s*}/g, '}') // Remove trailing commas before closing braces
+    .replace(/,\s*]/g, ']') // Remove trailing commas before closing brackets
+    .trim();
+  
   // Try to extract JSON from the content - look for the outermost braces
   const jsonStart = cleanContent.indexOf('{');
   const jsonEnd = cleanContent.lastIndexOf('}');
@@ -130,7 +140,51 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
     cleanContent = cleanContent.substring(jsonStart, jsonEnd + 1);
   }
   
-  console.log('Cleaned content for parsing:', cleanContent);
+  // Fix unterminated strings by ensuring all quotes are properly closed
+  let quoteCount = 0;
+  let inString = false;
+  let fixedContent = '';
+  
+  for (let i = 0; i < cleanContent.length; i++) {
+    const char = cleanContent[i];
+    const prevChar = i > 0 ? cleanContent[i - 1] : '';
+    
+    if (char === '"' && prevChar !== '\\') {
+      quoteCount++;
+      inString = !inString;
+    }
+    
+    fixedContent += char;
+  }
+  
+  // If we have an odd number of quotes, we have an unterminated string
+  if (quoteCount % 2 !== 0) {
+    console.warn('Detected unterminated string in JSON, attempting to fix...');
+    // Try to close the last unterminated string
+    if (inString) {
+      // Find the last quote and see if we can close it properly
+      const lastQuoteIndex = fixedContent.lastIndexOf('"');
+      if (lastQuoteIndex !== -1) {
+        // Look for the next comma, brace, or bracket after the last quote
+        const afterQuote = fixedContent.substring(lastQuoteIndex + 1);
+        const nextDelimiter = afterQuote.search(/[,}\]]/); 
+        if (nextDelimiter !== -1) {
+          // Insert a closing quote before the delimiter
+          const insertPos = lastQuoteIndex + 1 + nextDelimiter;
+          fixedContent = fixedContent.substring(0, insertPos) + '"' + fixedContent.substring(insertPos);
+        } else {
+          // Just add a quote at the end before the last brace
+          const lastBrace = fixedContent.lastIndexOf('}');
+          if (lastBrace !== -1) {
+            fixedContent = fixedContent.substring(0, lastBrace) + '"' + fixedContent.substring(lastBrace);
+          }
+        }
+      }
+    }
+  }
+  
+  cleanContent = fixedContent;
+  console.log('Cleaned content for parsing:', cleanContent.substring(0, 500) + (cleanContent.length > 500 ? '...' : ''));
 
   try {
     // Validate that we have proper JSON structure
