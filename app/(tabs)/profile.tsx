@@ -19,7 +19,9 @@ import {
   ChevronRight,
   Camera,
   Globe,
-  Clock
+  Clock,
+  Heart,
+  Share2
 } from "lucide-react-native";
 import { useHistory } from "@/providers/HistoryProvider";
 import { useAuth } from "@/providers/AuthProvider";
@@ -171,15 +173,38 @@ export default function ProfileScreen() {
                         params: { resultId: resultId },
                       });
                     }}
+                    activeOpacity={0.9}
                   >
-                    <Image source={{ uri: item.scannedImage }} style={styles.historyThumbnail} />
+                    <View style={styles.historyImageContainer}>
+                      <Image source={{ uri: item.scannedImage || item.image }} style={styles.historyThumbnail} />
+                      <LinearGradient
+                        colors={['transparent', 'rgba(0,0,0,0.6)']}
+                        style={styles.historyImageOverlay}
+                      />
+                      <View style={styles.historyImageActions}>
+                        <TouchableOpacity style={styles.historyActionButton}>
+                          <Heart size={14} color="#ffffff" />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.historyActionButton}>
+                          <Share2 size={14} color="#ffffff" />
+                        </TouchableOpacity>
+                      </View>
+                      {item.confidence && (
+                        <View style={styles.historyConfidenceBadge}>
+                          <Text style={styles.historyConfidenceText}>{Math.round(item.confidence)}%</Text>
+                        </View>
+                      )}
+                    </View>
                     <View style={styles.historyCardContent}>
                       <Text style={styles.historyMonumentName} numberOfLines={2}>{item.name}</Text>
                       <View style={styles.historyInfoRow}>
-                        <MapPin size={12} color="#64748b" />
+                        <MapPin size={12} color="#8B4513" />
                         <Text style={styles.historyInfoText} numberOfLines={1}>{item.location}</Text>
                       </View>
-                      <Text style={styles.historyScanDate}>{formatDate(item.scannedAt)}</Text>
+                      <View style={styles.historyDateRow}>
+                        <Clock size={10} color="#94a3b8" />
+                        <Text style={styles.historyScanDate}>{formatDate(item.scannedAt)}</Text>
+                      </View>
                     </View>
                   </TouchableOpacity>
                 );
@@ -187,7 +212,10 @@ export default function ProfileScreen() {
             </View>
             
             {history.length > 6 && (
-              <TouchableOpacity style={styles.viewAllButton}>
+              <TouchableOpacity 
+                style={styles.viewAllButton}
+                onPress={() => router.push('/history')}
+              >
                 <Text style={styles.viewAllButtonText}>View All Discoveries</Text>
                 <ChevronRight size={16} color="#8B4513" />
               </TouchableOpacity>
@@ -412,18 +440,63 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+    marginBottom: 4,
+  },
+  historyImageContainer: {
+    position: "relative",
   },
   historyThumbnail: {
     width: "100%",
-    height: 120,
+    height: 140,
     resizeMode: "cover",
   },
+  historyImageOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 50,
+  },
+  historyImageActions: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    flexDirection: "row",
+    gap: 6,
+  },
+  historyActionButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  historyConfidenceBadge: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    backgroundColor: "rgba(139, 69, 19, 0.9)",
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  historyConfidenceText: {
+    fontSize: 10,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#ffffff",
+    fontWeight: "600",
+  },
   historyCardContent: {
-    padding: 12,
+    padding: 14,
     gap: 6,
   },
   historyMonumentName: {
@@ -441,6 +514,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+    marginBottom: 4,
   },
   historyInfoText: {
     fontSize: 12,
@@ -449,8 +523,14 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: "#8B4513",
     flex: 1,
+    fontWeight: "500",
+  },
+  historyDateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
   },
   historyScanDate: {
     fontSize: 11,
@@ -460,16 +540,21 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     color: "#94a3b8",
-    marginTop: 2,
   },
   viewAllButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#f8f4f0",
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 12,
     gap: 6,
+    marginTop: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   viewAllButtonText: {
     fontSize: 14,
