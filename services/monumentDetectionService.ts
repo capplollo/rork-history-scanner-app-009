@@ -55,7 +55,7 @@ export async function detectMonument(imageUri: string, additionalInfo?: Addition
       console.log('Getting detailed description for recognized monument:', result.monumentName);
       
       try {
-        const detailedDescription = await getDetailedDescription(result.monumentName);
+        const detailedDescription = await getDetailedDescription(result.monumentName, result.location, additionalInfo);
         result.detailedDescription = detailedDescription;
       } catch (error) {
         console.error('Error getting detailed description:', error);
@@ -281,13 +281,23 @@ function createFallbackResult(content: string): DetectionResult | null {
   }
 }
 
-async function getDetailedDescription(monumentName: string): Promise<{
+async function getDetailedDescription(monumentName: string, detectedLocation?: string, additionalInfo?: AdditionalInfo): Promise<{
   quickOverview: string;
   inDepthContext: string;
   curiosities?: string;
   keyTakeaways: string[];
 }> {
-  const detailedPrompt = `Provide a structured explanation of the monument "${monumentName}" in four sections, written in an elegant, logically constructed, and easy-to-digest style. Use refined but accessible language. Highlight in bold most relevant words/pieces of info.
+  // Build location context for the prompt
+  let locationContext = '';
+  if (detectedLocation && detectedLocation !== 'Unknown') {
+    locationContext = ` located in ${detectedLocation}`;
+  } else if (additionalInfo?.location) {
+    locationContext = ` located in ${additionalInfo.location}`;
+  }
+  
+  const detailedPrompt = `Provide a structured explanation of the monument "${monumentName}"${locationContext} in four sections, written in an elegant, logically constructed, and easy-to-digest style. Use refined but accessible language. Highlight in bold most relevant words/pieces of info.
+
+IMPORTANT: Make sure you are providing information about the specific monument${locationContext}. If there are multiple monuments with the same name in different locations, focus specifically on the one${locationContext}.
 
 Quick Overview (≈500 characters): A concise, captivating description of the monument and its immediate historical significance. This should be approximately 500 characters (about 3-4 sentences).
 
