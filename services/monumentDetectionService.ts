@@ -68,7 +68,7 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
     analysisPrompt += `]`;
   }
   
-  analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond ONLY with valid JSON - no markdown, no code blocks, no extra text. Use this exact format:\n{\n  "artworkName": "Name or 'Unknown Artwork'",\n  "confidence": 85,\n  "location": "Actual location",\n  "period": "Period/artist or 'Unknown'",\n  "isRecognized": true/false,\n  "detailedDescription": {\n    "keyTakeaways": "Summary of the most important pieces of information (approximately 500 characters)",\n    "inDepthContext": "Write exactly 3 paragraphs (1200-3000 characters total). Separate paragraphs with double line breaks only - NO paragraph titles or labels. Use **bold** highlights for key terms, names, dates, and important details. Be specific and interesting with historical facts, technical details, measurements, materials, and anecdotes. Avoid generalizations. First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context. Second paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features. Third paragraph: Discuss cultural impact, restoration efforts, current significance, recognition, and notable events or stories associated with the artwork.",\n    "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with this artwork.'",\n    "keyTakeawaysList": ["Four main points summarizing the in-depth context"]\n  }\n}\n\nIMPORTANT: If not recognized with high confidence (confidence < 80), omit the entire detailedDescription object. RESPOND ONLY WITH JSON - NO MARKDOWN BLOCKS.`;
+  analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond in this exact JSON format:\n{\n  "artworkName": "Name or 'Unknown Artwork'",\n  "confidence": 85,\n  "location": "Actual location",\n  "period": "Period/artist or 'Unknown'",\n  "isRecognized": true/false,\n  "detailedDescription": {\n    "keyTakeaways": "Summary of the most important pieces of information (approximately 500 characters)",\n    "inDepthContext": "Write exactly 3 paragraphs (1200-3000 characters total). Separate paragraphs with double line breaks only - NO paragraph titles or labels. Use **bold** highlights for key terms, names, dates, and important details. Be specific and interesting with historical facts, technical details, measurements, materials, and anecdotes. Avoid generalizations.\n\nFirst paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context.\n\nSecond paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features.\n\nThird paragraph: Discuss cultural impact, restoration efforts, current significance, recognition, and notable events or stories associated with the artwork.",\n    "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with this artwork.'",\n    "keyTakeawaysList": ["Four main points summarizing the in-depth context"]\n  }\n}\n\nIMPORTANT: If not recognized with high confidence (confidence < 80), omit the entire detailedDescription object.`;
 
   const messages = [
     {
@@ -111,91 +111,35 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
     throw new Error('No content in AI response');
   }
 
-  console.log('Raw AI response content:', content);
+  // Clean up the response and parse JSON
+  let cleanContent = content.trim()
+    .replace(/```json\s*/g, '')
+    .replace(/```\s*/g, '')
+    .replace(/`/g, '');
   
-  // Clean up the response and parse JSON with better error handling
-  let cleanContent = content.trim();
-  
-  // Remove markdown code blocks more aggressively - handle all variations
-  cleanContent = cleanContent.replace(/^```(?:json)?\s*/gi, '').replace(/```\s*$/g, '');
-  cleanContent = cleanContent.replace(/```json/gi, '').replace(/```/g, '');
-  
-  // Remove any remaining backticks
-  cleanContent = cleanContent.replace(/`/g, '');
-  
-  // Try to extract JSON from the content - look for the outermost braces
-  const jsonStart = cleanContent.indexOf('{');
-  const jsonEnd = cleanContent.lastIndexOf('}');
-  
-  if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-    cleanContent = cleanContent.substring(jsonStart, jsonEnd + 1);
+  // Try to extract JSON from the content if it's mixed with other text
+  const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    cleanContent = jsonMatch[0];
   }
-  
-  // Fix common JSON issues that cause parsing errors
-  // Fix trailing commas
-  cleanContent = cleanContent.replace(/,\s*([}\]])/g, '$1');
-  
-  // Handle newlines in JSON strings more carefully
-  // First, normalize all line endings to \n
-  cleanContent = cleanContent.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-  
-  // Now fix unescaped newlines within JSON string values
-  // This regex finds strings that contain actual newlines and escapes them
-  cleanContent = cleanContent.replace(/"([^"]*?)\n([^"]*?)"/g, (match: string, before: string, after: string) => {
-    // Only escape if this looks like it's within a string value, not a key
-    return `"${before}\\n${after}"`;
-  });
-  
-  // Fix any remaining control characters that might cause issues
-  cleanContent = cleanContent.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
-  
-  console.log('Cleaned content for parsing (first 500 chars):', cleanContent.substring(0, 500));
 
   try {
-    // Validate that we have proper JSON structure
-    if (!cleanContent.startsWith('{') || !cleanContent.endsWith('}')) {
-      throw new Error('Response does not contain valid JSON structure');
-    }
-    
     const result = JSON.parse(cleanContent) as DetectionResult;
-    
-    // Validate required fields
-    if (!result.artworkName || typeof result.confidence !== 'number' || !result.location) {
-      console.error('Invalid result structure:', result);
-      throw new Error('AI response missing required fields');
-    }
-    
-    // Ensure facts is an array
-    if (!Array.isArray(result.facts)) {
-      result.facts = [];
-    }
     
     // Validate and set defaults for detailed description if missing
     if (result.isRecognized && result.confidence > 75 && !result.detailedDescription) {
       result.detailedDescription = {
-        keyTakeaways: result.description || 'No description available',
+        keyTakeaways: result.description,
         inDepthContext: `**${result.artworkName}** is a significant ${result.period} artwork located in ${result.location}. This piece represents important cultural heritage and artistic achievement of its era. The work showcases the artistic techniques and cultural values of its time period, reflecting the historical context and artistic movements of the period. The creation involved specific materials and techniques characteristic of the era, and its preservation allows us to understand the cultural and artistic priorities of the time.`,
         curiosities: "No widely known curiosities are associated with this artwork.",
-        keyTakeawaysList: result.facts.slice(0, 4)
+        keyTakeawaysList: result.facts.slice(0, 5)
       };
     }
     
-    console.log('Successfully parsed detection result:', result);
     return result;
-    
   } catch (parseError) {
     console.error('Failed to parse AI response as JSON:', parseError);
-    console.error('Content that failed to parse:', cleanContent);
-    console.error('Original AI response:', content);
-    
-    // Try to extract basic information even if JSON parsing fails
-    const fallbackResult = extractFallbackInfo(content);
-    if (fallbackResult) {
-      console.log('Using fallback extraction:', fallbackResult);
-      return fallbackResult;
-    }
-    
-    throw new Error(`Invalid JSON response from AI: ${parseError instanceof Error ? parseError.message : String(parseError)}`);
+    throw new Error('Invalid JSON response from AI');
   }
 }
 
@@ -224,33 +168,6 @@ async function convertImageToBase64(imageUri: string): Promise<string> {
     reader.onerror = reject;
     reader.readAsDataURL(finalBlob);
   });
-}
-
-// Fallback function to extract basic info when JSON parsing fails
-function extractFallbackInfo(content: string): DetectionResult | null {
-  try {
-    // Try to extract basic information using regex patterns
-    const nameMatch = content.match(/(?:artworkName|name)["']?\s*:\s*["']([^"']+)["']/i);
-    const locationMatch = content.match(/(?:location)["']?\s*:\s*["']([^"']+)["']/i);
-    const confidenceMatch = content.match(/(?:confidence)["']?\s*:\s*(\d+)/i);
-    
-    if (nameMatch || locationMatch) {
-      return {
-        artworkName: nameMatch?.[1] || 'Unknown Artwork',
-        confidence: confidenceMatch ? parseInt(confidenceMatch[1]) : 0,
-        location: locationMatch?.[1] || 'Unknown',
-        period: 'Unknown',
-        description: 'Artwork detected but full analysis unavailable due to parsing error.',
-        significance: 'Unable to determine significance.',
-        facts: ['Please try scanning again for detailed information'],
-        isRecognized: false
-      };
-    }
-  } catch (error) {
-    console.error('Fallback extraction failed:', error);
-  }
-  
-  return null;
 }
 
 async function compressImage(blob: Blob): Promise<Blob> {
