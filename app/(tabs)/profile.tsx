@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,13 +12,13 @@ import {
 } from "react-native";
 import { 
   User, 
-  Trophy, 
   MapPin, 
   Calendar,
   Settings,
   LogOut,
   ChevronRight,
-  Camera
+  Camera,
+  Globe
 } from "lucide-react-native";
 import { useHistory } from "@/providers/HistoryProvider";
 import { useAuth } from "@/providers/AuthProvider";
@@ -61,21 +61,38 @@ export default function ProfileScreen() {
     return null;
   }
 
-  const stats = [
-    { label: "Scanned", value: history.length.toString() },
-    { label: "Countries", value: "5" },
-    { label: "Points", value: "1,250" },
-  ];
+  const visitedCountries = useMemo(() => {
+    const countries = new Set<string>();
+    history.forEach(item => {
+      if (item.location) {
+        // Extract country from location string (assuming format like "City, Country" or "Country")
+        const parts = item.location.split(',');
+        const country = parts[parts.length - 1].trim();
+        if (country) {
+          countries.add(country);
+        }
+      }
+    });
+    return countries.size;
+  }, [history]);
 
-  const achievements = [
-    { id: "1", name: "First Scan", icon: Trophy, unlocked: history.length > 0 },
-    { id: "2", name: "History Buff", icon: Calendar, unlocked: history.length >= 5 },
-    { id: "3", name: "Explorer", icon: MapPin, unlocked: history.length >= 10 },
+  const stats = [
+    { 
+      label: "Discoveries", 
+      value: history.length.toString(),
+      icon: Camera,
+      description: "Monuments explored"
+    },
+    { 
+      label: "Destinations", 
+      value: visitedCountries.toString(),
+      icon: Globe,
+      description: "Countries visited"
+    },
   ];
 
   const menuItems = [
     { icon: Settings, label: "Settings", action: () => {} },
-    { icon: Trophy, label: "Achievements", action: () => {} },
     { icon: LogOut, label: "Sign Out", action: handleSignOut },
   ];
 
@@ -98,62 +115,27 @@ export default function ProfileScreen() {
             <Text style={styles.userName}>{user.user_metadata?.full_name || 'Explorer'}</Text>
             <Text style={styles.userEmail}>{user.email}</Text>
             
-            <View style={styles.levelProgress}>
-              <View style={styles.progressBar}>
-                <View style={styles.progressFill} />
-              </View>
-              <Text style={styles.progressText}>2,450 / 5,000 XP</Text>
-            </View>
+            <Text style={styles.userSubtitle}>Cultural Explorer</Text>
           </View>
         </LinearGradient>
 
         <View style={styles.statsContainer}>
-          {stats.map((stat, index) => (
-            <View key={index} style={styles.statCard}>
-              <Text style={styles.statValue}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-            </View>
-          ))}
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <View key={index} style={styles.statCard}>
+                <View style={styles.statIconContainer}>
+                  <Icon size={24} color="#8B4513" />
+                </View>
+                <Text style={styles.statValue}>{stat.value}</Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+                <Text style={styles.statDescription}>{stat.description}</Text>
+              </View>
+            );
+          })}
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Achievements</Text>
-          <View style={styles.achievementsGrid}>
-            {achievements.map((achievement) => {
-              const Icon = achievement.icon;
-              return (
-                <TouchableOpacity
-                  key={achievement.id}
-                  style={[
-                    styles.achievementCard,
-                    !achievement.unlocked && styles.achievementLocked,
-                  ]}
-                >
-                  <View style={[
-                    styles.achievementIcon,
-                    achievement.unlocked ? styles.achievementIconUnlocked : styles.achievementIconLocked,
-                  ]}>
-                    <Icon 
-                      size={24} 
-                      color={achievement.unlocked ? "#ffffff" : "#9ca3af"} 
-                    />
-                  </View>
-                  <Text style={[
-                    styles.achievementName,
-                    !achievement.unlocked && styles.achievementNameLocked,
-                  ]}>
-                    {achievement.name}
-                  </Text>
-                  {achievement.unlocked && (
-                    <View style={styles.achievementBadge}>
-                      <Text style={styles.badgeText}>✓</Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
+
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Settings</Text>
@@ -255,33 +237,16 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.9)",
     marginBottom: 20,
   },
-  levelProgress: {
-    width: "100%",
-    alignItems: "center",
-    gap: 8,
-  },
-  progressBar: {
-    width: "80%",
-    height: 8,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    borderRadius: 4,
-    overflow: "hidden",
-  },
-  progressFill: {
-    width: "49%",
-    height: "100%",
-    backgroundColor: "#ffffff",
-    borderRadius: 4,
-  },
-  progressText: {
-    fontSize: 12,
+  userSubtitle: {
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "rgba(255,255,255,0.9)",
-    fontWeight: "400",
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.8)",
+    marginTop: 8,
   },
   statsContainer: {
     flexDirection: "row",
@@ -300,18 +265,38 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 4,
+    gap: 8,
+  },
+  statIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#f8f4f0",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
   },
   statValue: {
-    fontSize: 22,
+    fontSize: 28,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "500",
+    fontWeight: "600",
     color: "#2C3E50",
   },
   statLabel: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#2C3E50",
+    fontWeight: "500",
+  },
+  statDescription: {
     fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
@@ -319,8 +304,8 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     color: "#64748b",
-    marginTop: 4,
     fontWeight: "400",
+    textAlign: "center",
   },
   section: {
     marginTop: 30,
@@ -337,75 +322,7 @@ const styles = StyleSheet.create({
     color: "#2C3E50",
     marginBottom: 16,
   },
-  achievementsGrid: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  achievementCard: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-    padding: 16,
-    borderRadius: 16,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    position: "relative",
-  },
-  achievementLocked: {
-    opacity: 0.6,
-  },
-  achievementIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  achievementIconUnlocked: {
-    backgroundColor: "#8B4513",
-  },
-  achievementIconLocked: {
-    backgroundColor: "#f1f5f9",
-  },
-  achievementName: {
-    fontSize: 12,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-    color: "#2C3E50",
-    textAlign: "center",
-  },
-  achievementNameLocked: {
-    color: "#94a3b8",
-  },
-  achievementBadge: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    backgroundColor: "#10b981",
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  badgeText: {
-    fontSize: 10,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#ffffff",
-    fontWeight: "500",
-  },
+
   menuContainer: {
     backgroundColor: "#ffffff",
     borderRadius: 16,
