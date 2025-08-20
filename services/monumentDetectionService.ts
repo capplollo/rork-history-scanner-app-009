@@ -148,29 +148,64 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
 
 
 async function convertImageToBase64(imageUri: string): Promise<string> {
-  const response = await fetch(imageUri);
-  const blob = await response.blob();
+  const { Platform } = await import('react-native');
   
-  // Compress image if it's too large (>1MB)
-  let finalBlob = blob;
-  if (blob.size > 1024 * 1024) {
-    console.log('Compressing large image:', blob.size, 'bytes');
-    finalBlob = await compressImage(blob);
-    console.log('Compressed to:', finalBlob.size, 'bytes');
+  if (Platform.OS === 'web') {
+    // Web implementation
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+    
+    // Compress image if it's too large (>1MB)
+    let finalBlob = blob;
+    if (blob.size > 1024 * 1024) {
+      console.log('Compressing large image:', blob.size, 'bytes');
+      finalBlob = await compressImageWeb(blob);
+      console.log('Compressed to:', finalBlob.size, 'bytes');
+    }
+    
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = (reader.result as string).split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(finalBlob);
+    });
+  } else {
+    // React Native implementation
+    const { manipulateAsync, SaveFormat } = await import('expo-image-manipulator');
+    
+    try {
+      // Compress and convert to base64 using expo-image-manipulator
+      const manipulatedImage = await manipulateAsync(
+        imageUri,
+        [{ resize: { width: 1024 } }], // Resize to max 1024px width
+        {
+          compress: 0.8,
+          format: SaveFormat.JPEG,
+          base64: true,
+        }
+      );
+      
+      if (!manipulatedImage.base64) {
+        throw new Error('Failed to convert image to base64');
+      }
+      
+      return manipulatedImage.base64;
+    } catch (error) {
+      console.error('Error processing image with expo-image-manipulator:', error);
+      // Fallback: try to read the file directly
+      const FileSystemModule = await import('expo-file-system');
+      const base64 = await FileSystemModule.readAsStringAsync(imageUri, {
+        encoding: FileSystemModule.EncodingType.Base64,
+      });
+      return base64;
+    }
   }
-  
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = (reader.result as string).split(',')[1];
-      resolve(base64);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(finalBlob);
-  });
 }
 
-async function compressImage(blob: Blob): Promise<Blob> {
+async function compressImageWeb(blob: Blob): Promise<Blob> {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;
