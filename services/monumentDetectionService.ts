@@ -72,7 +72,7 @@ async function performAnalysis(base64Image: string, additionalInfo?: AdditionalI
 
 - Historical monuments and landmarks
 - Famous sculptures and statues
-- Renowned paintings and frescoes
+- Renowned paintings and frescoes (including paintings OF buildings/landmarks)
 - Architectural masterpieces
 - Cultural heritage sites
 - Religious art and structures
@@ -80,7 +80,12 @@ async function performAnalysis(base64Image: string, additionalInfo?: AdditionalI
 - Archaeological sites
 - Museum pieces and gallery works
 
-Look at artistic details, architectural features, distinctive characteristics, style, and any visible text, signatures, or identifying marks.`;
+CRITICAL DISTINCTION: If you see a painting, fresco, or artwork that DEPICTS a building, landmark, or architectural structure, you should identify the PAINTING/ARTWORK itself, NOT the building shown in the painting. For example:
+- If you see Canaletto's painting of Venice, identify it as "Canaletto's [specific painting name]" not "St. Mark's Square"
+- If you see a fresco depicting a biblical scene in a church, identify the fresco, not the church
+- If you see a painting of the Eiffel Tower, identify the painting and artist, not the Eiffel Tower itself
+
+Look at artistic details, brushwork, canvas texture, frame, museum setting, artistic style, signatures, and any visible text or identifying marks that indicate this is an artwork rather than the actual structure.`;
   
   // Add additional context if provided
   if (additionalInfo && (additionalInfo.name || additionalInfo.location || additionalInfo.building || additionalInfo.notes)) {
@@ -111,20 +116,23 @@ Look at artistic details, architectural features, distinctive characteristics, s
 7. Confidence level (0-100) - be more selective, only use high confidence (80+) if you're very sure
 
 IMPORTANT GUIDELINES:
+- PAINTINGS vs BUILDINGS: If this is a painting/artwork depicting a building or landmark, identify the PAINTING, not the building shown in it
+- Look for artistic medium clues: canvas texture, brushstrokes, frame, museum lighting, protective glass, wall mounting
 - Only mark isRecognized as true if you have high confidence (80+) in the identification
 - Always provide the ACTUAL location of the artwork/monument you identify, not just the user's provided location
 - If the user provided location context helps you identify a local artwork or monument, use that information but still verify and provide the correct location
 - Be more selective - it's better to say "Unknown Artwork" than to incorrectly identify something
 - Consider various art forms: sculptures, paintings, frescoes, mosaics, architectural details, monuments, etc.
 - If you see artistic or architectural elements but can't confidently identify a specific piece, describe what you see with lower confidence
+- Pay attention to the MEDIUM: Is this a real 3D structure/monument, or is it a 2D representation (painting, fresco, photograph, etc.)?
 
 Respond ONLY in valid JSON format:
 {
   "artworkName": "Name of artwork/monument or 'Unknown Artwork'",
   "confidence": 85,
-  "location": "Actual City, Country, Museum/Building of the artwork (not user's provided location unless they match)",
+  "location": "Actual City, Country, Museum/Building where the artwork/monument is located (not user's provided location unless they match)",
   "period": "Time period, artist, or 'Unknown'",
-  "description": "Description of what you see including artistic style and medium",
+  "description": "Description of what you see including artistic style, medium, and whether it's the actual structure or an artwork depicting it",
   "significance": "Historical, artistic, or cultural significance",
   "facts": ["fact1", "fact2", "fact3"],
   "isRecognized": true/false
