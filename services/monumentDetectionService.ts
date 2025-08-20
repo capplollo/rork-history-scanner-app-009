@@ -60,14 +60,14 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
   
   // Add context if provided
   if (additionalInfo && (additionalInfo.name || additionalInfo.location || additionalInfo.building || additionalInfo.notes)) {
-    analysisPrompt += ` Context:`;
+    analysisPrompt += `\n\nContext:`;
     if (additionalInfo.name) analysisPrompt += ` Name: ${additionalInfo.name}.`;
     if (additionalInfo.location) analysisPrompt += ` Location: ${additionalInfo.location} (weight this heavily).`;
     if (additionalInfo.building) analysisPrompt += ` Building: ${additionalInfo.building}.`;
     if (additionalInfo.notes) analysisPrompt += ` Notes: ${additionalInfo.notes}.`;
   }
   
-  analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond in this JSON format:\n{\n  "artworkName": "Name or 'Unknown Artwork'",\n  "confidence": 85,\n  "location": "Actual location",\n  "period": "Period/artist or 'Unknown'",\n  "description": "Brief description (2-3 sentences)",\n  "significance": "Cultural significance (2-3 sentences)",\n  "facts": ["fact1", "fact2", "fact3"],\n  "isRecognized": true/false,\n  "detailedDescription": {\n    "quickOverview": "Captivating overview (~500 chars)",\n    "inDepthContext": "Detailed historical context (1000-3000 chars, 2-3 paragraphs with **bold** highlights)",\n    "curiosities": "Interesting anecdotes or 'No widely known curiosities are associated with this artwork.'",\n    "keyTakeaways": ["Essential fact 1", "Artistic significance", "Cultural importance", "Notable recognition", "Unique feature"]\n  }\n}\n\nIf not recognized with high confidence, omit detailedDescription.`;
+  analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond in this JSON format:\n{\n"artworkName": "Name or 'Unknown Artwork'",\n"confidence": 85,\n"location": "Actual location",\n"period": "Period/artist or 'Unknown'",\n"description": "Brief description (2-3 sentences)",\n"significance": "Cultural significance (2-3 sentences)",\n"facts": ["fact1", "fact2", "fact3"],\n"isRecognized": true/false,\n"detailedDescription": {\n  "quickOverview": "Captivating overview (~500 characters, with **bold** highlights)",\n  "inDepthContext": "comprehensive historical context, artistic details, cultural and broader significance. Be specific with names and anecdotes (1000-3000 characters, organized in 2-3 paragraphs with **bold** highlights)",\n  "curiosities": "Interesting anecdotes or 'No widely known curiosities are associated with this artwork.'",\n  "keyTakeaways": ["Essential fact 1", "Artistic significance", "Cultural importance", "Notable recognition", "Unique feature"]\n}\n}\n\nIf not recognized with high confidence, omit detailedDescription.`;
 
   const messages = [
     {
