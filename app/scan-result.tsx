@@ -23,6 +23,7 @@ import { scanResultStore } from "@/services/scanResultStore";
 import { voiceService, VoiceOption } from "@/services/voiceService";
 import VoiceSettings from "@/components/VoiceSettings";
 import { detectMonument, AdditionalInfo } from "@/services/monumentDetectionService";
+import FormattedText from "@/components/FormattedText";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -236,6 +237,7 @@ export default function ScanResultScreen() {
       
       // Enhanced text processing for better speech synthesis
       fullText = fullText
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown formatting for speech
         .replace(/\n/g, ' ') // Replace newlines with spaces
         .replace(/\s+/g, ' ') // Replace multiple spaces with single space
         .replace(/([.!?])\s*([A-Z])/g, '$1 $2') // Ensure proper spacing after punctuation
@@ -441,7 +443,7 @@ export default function ScanResultScreen() {
       await voiceService.stop();
       setIsPlaying(false);
       setIsPaused(false);
-    } catch (error) {
+    } catch {
       // Silently handle stop errors
     }
   };
@@ -709,18 +711,18 @@ export default function ScanResultScreen() {
                   <Info size={20} color="#1e3a8a" />
                   <Text style={styles.sectionTitle}>Quick Overview</Text>
                 </View>
-                <Text style={styles.quickOverview}>{monument.detailedDescription.quickOverview}</Text>
+                <FormattedText style={styles.quickOverview}>{monument.detailedDescription.quickOverview}</FormattedText>
               </View>
 
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>In-Depth Context</Text>
-                <Text style={styles.inDepthContext}>{monument.detailedDescription.inDepthContext}</Text>
+                <FormattedText style={styles.inDepthContext}>{monument.detailedDescription.inDepthContext}</FormattedText>
               </View>
 
               {monument.detailedDescription.curiosities && (
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>Curiosities</Text>
-                  <Text style={styles.curiosities}>{monument.detailedDescription.curiosities}</Text>
+                  <FormattedText style={styles.curiosities}>{monument.detailedDescription.curiosities}</FormattedText>
                 </View>
               )}
 
@@ -729,7 +731,7 @@ export default function ScanResultScreen() {
                 {monument.detailedDescription.keyTakeaways.map((takeaway: string, index: number) => (
                   <View key={index} style={styles.factItem}>
                     <Text style={styles.factBullet}>•</Text>
-                    <Text style={styles.factText}>{takeaway}</Text>
+                    <FormattedText style={styles.factText}>{takeaway}</FormattedText>
                   </View>
                 ))}
               </View>

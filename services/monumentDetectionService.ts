@@ -288,7 +288,7 @@ async function getDetailedDescription(monumentName: string): Promise<{
 
 Quick Overview (≈500 characters): A concise, captivating description of the monument and its immediate historical significance. This should be approximately 500 characters (about 3-4 sentences).
 
-In-Depth Context (1000-3000 characters): A longer, detailed explanation of the monument, including its specific broader historical context, the era and place in which it appeared, cultural and political circumstances, and any notable architectural style or artistic importance. Info should be very specific and interesting. This must be between 1000-3000 characters. Divide this section in 2-3 paragraphs.
+In-Depth Context (1000-3000 characters): A longer, detailed explanation of the monument, including its specific broader historical context, the era and place in which it appeared, cultural and political circumstances, and any notable architectural style or artistic importance. Info should be very specific and interesting, mentioning specific names, parts and episodes. This must be between 1000-3000 characters. Divide this section in 2-3 paragraphs.
 
 Curiosities (if applicable): Mention only if there are famous, meaningful, or widely recognized anecdotes, legends, or curiosities tied to the monument. If none exist, write "No widely known curiosities are associated with this monument."
 
