@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -43,15 +43,13 @@ export default function ScanResultScreen() {
     };
   }, [resultId]);
 
-  // Initialize voice service and set default voice (fast initialization)
+  // Initialize voice service and set default voice
   useEffect(() => {
     const initializeVoice = async () => {
       try {
-        // Fast initialization - no blocking async calls
         await voiceService.initialize();
         const bestVoice = voiceService.getBestVoice();
         setSelectedVoice(bestVoice);
-        console.log('🚀 Voice service ready for immediate use');
       } catch (error) {
         console.error('Error initializing voice service:', error);
       }
@@ -145,8 +143,7 @@ export default function ScanResultScreen() {
   
 
 
-  // Memoize text generation to avoid recalculation
-  const fullText = useMemo(() => {
+  const getFullText = () => {
     if (!monument) {
       console.warn('No monument data available for voice narration');
       return '';
@@ -160,94 +157,101 @@ export default function ScanResultScreen() {
       }
       
       // Create a more natural, narrator-style introduction
-      let text = `Welcome to the story of ${monument.name}. `;
+      let fullText = `Welcome to the story of ${monument.name}. `;
       
       // Add location and period information with natural transitions
       if (monument.location && monument.period) {
-        text += `This magnificent ${monument.period} monument stands proudly in ${monument.location}. `;
+        fullText += `This magnificent ${monument.period} monument stands proudly in ${monument.location}. `;
       } else if (monument.location) {
-        text += `Located in the beautiful ${monument.location}. `;
+        fullText += `Located in the beautiful ${monument.location}. `;
       } else if (monument.period) {
-        text += `This remarkable structure dates back to the ${monument.period}. `;
+        fullText += `This remarkable structure dates back to the ${monument.period}. `;
       }
       
       // Add a brief pause for dramatic effect
-      text += `Let me tell you its fascinating story. `;
+      fullText += `Let me tell you its fascinating story. `;
       
       // Check if we have detailed description or fallback to basic info
       let hasContent = false;
       
       if (monument.detailedDescription) {
         if (monument.detailedDescription.quickOverview) {
-          text += `${monument.detailedDescription.quickOverview} `;
-          text += `Now, let's dive deeper into its history. `;
+          fullText += `${monument.detailedDescription.quickOverview} `;
+          fullText += `Now, let's dive deeper into its history. `;
           hasContent = true;
         }
         if (monument.detailedDescription.inDepthContext) {
-          text += `${monument.detailedDescription.inDepthContext} `;
+          fullText += `${monument.detailedDescription.inDepthContext} `;
           hasContent = true;
         }
         if (monument.detailedDescription.curiosities) {
-          text += `Here's something truly fascinating about this place: ${monument.detailedDescription.curiosities} `;
+          fullText += `Here's something truly fascinating about this place: ${monument.detailedDescription.curiosities} `;
           hasContent = true;
         }
         if (monument.detailedDescription.keyTakeaways && monument.detailedDescription.keyTakeaways.length > 0) {
-          text += `To wrap up, here are the key things to remember: ${monument.detailedDescription.keyTakeaways.join('. ')}.`;
+          fullText += `To wrap up, here are the key things to remember: ${monument.detailedDescription.keyTakeaways.join('. ')}.`;
           hasContent = true;
         }
       } else {
         if (monument.description) {
-          text += `${monument.description} `;
+          fullText += `${monument.description} `;
           hasContent = true;
         }
         if (monument.significance) {
-          text += `What makes this place truly special is its historical significance: ${monument.significance} `;
+          fullText += `What makes this place truly special is its historical significance: ${monument.significance} `;
           hasContent = true;
         }
         if (monument.facts && monument.facts.length > 0) {
-          text += `Here are some remarkable facts that will amaze you: ${monument.facts.join('. ')}.`;
+          fullText += `Here are some remarkable facts that will amaze you: ${monument.facts.join('. ')}.`;
           hasContent = true;
         }
       }
       
       // If no content was found, create a basic description
       if (!hasContent) {
-        text += `This is ${monument.name}, a remarkable historical site that has stood the test of time. `;
+        fullText += `This is ${monument.name}, a remarkable historical site that has stood the test of time. `;
         if (monument.location) {
-          text += `It's located in ${monument.location}. `;
+          fullText += `It's located in ${monument.location}. `;
         }
         if (monument.period) {
-          text += `This structure dates back to the ${monument.period}. `;
+          fullText += `This structure dates back to the ${monument.period}. `;
         }
-        text += `While we don't have detailed information about this specific monument, it represents an important part of our shared cultural heritage. `;
+        fullText += `While we don't have detailed information about this specific monument, it represents an important part of our shared cultural heritage. `;
       }
       
       // Add a natural conclusion
-      text += ` Thank you for exploring the rich history of ${monument.name} with me. I hope you enjoyed this journey through time.`;
+      fullText += ` Thank you for exploring the rich history of ${monument.name} with me. I hope you enjoyed this journey through time.`;
       
-      // Optimized text processing for better speech synthesis
-      const processedText = text
+      // Enhanced text processing for better speech synthesis
+      fullText = fullText
         .replace(/\n/g, ' ') // Replace newlines with spaces
         .replace(/\s+/g, ' ') // Replace multiple spaces with single space
         .replace(/([.!?])\s*([A-Z])/g, '$1 $2') // Ensure proper spacing after punctuation
+        .replace(/\b(\d{4})\b/g, '$1') // Keep years as numbers for better pronunciation
+        .replace(/\b(BC|AD)\b/g, ' $1 ') // Add spaces around BC/AD for better pronunciation
+        .replace(/\b(St\.|Saint)\s/g, 'Saint ') // Expand abbreviations
+        .replace(/\b(Dr\.|Doctor)\s/g, 'Doctor ') // Expand doctor abbreviation
+        .replace(/\b(Mr\.|Mister)\s/g, 'Mister ') // Expand mister abbreviation
+        .replace(/\b(Mrs\.|Missus)\s/g, 'Missus ') // Expand missus abbreviation
         .replace(/\b&\b/g, 'and') // Replace & with 'and'
         .replace(/\b@\b/g, 'at') // Replace @ with 'at'
+        .replace(/([.!?])([A-Z])/g, '$1 $2') // Add space after punctuation if missing
         .trim();
       
       // Final validation
-      if (processedText.length < 50) {
+      if (fullText.length < 50) {
         console.warn('Generated text is too short, may not provide good narration');
         return '';
       }
       
-      console.log('Generated voice narration text, length:', processedText.length);
-      return processedText;
+      console.log('Generated voice narration text, length:', fullText.length);
+      return fullText;
       
     } catch (error) {
       console.error('Error generating voice narration text:', error);
       return '';
     }
-  }, [monument]);
+  };
 
   const handlePlayPause = async () => {
     try {
@@ -275,6 +279,8 @@ export default function ScanResultScreen() {
           return;
         }
         
+        const fullText = getFullText();
+        
         if (!fullText || fullText.trim().length === 0) {
           Alert.alert('No Content', 'No text content available to read aloud. Please try scanning again or check your internet connection.');
           return;
@@ -293,13 +299,18 @@ export default function ScanResultScreen() {
           console.log('No existing speech to stop');
         }
         
-        // Skip permission check for faster startup - voice service handles fallback automatically
-        console.log('🚀 Starting voice immediately...');
+        // Check and request permissions if needed for ElevenLabs
+        if (selectedVoice?.provider === 'elevenlabs') {
+          const hasPermissions = await voiceService.requestPermissionsWithUserPrompt();
+          if (!hasPermissions) {
+            console.log('🔄 Audio permissions denied, will fallback to built-in voice');
+          }
+        }
         
         setIsPlaying(true);
         setIsPaused(false);
         
-        // Use the optimized voice service with selected voice
+        // Use the new voice service with selected voice
         await voiceService.speak(fullText, {
           voice: selectedVoice?.identifier,
           language: 'en-US',
@@ -319,19 +330,21 @@ export default function ScanResultScreen() {
             setIsPlaying(false);
             setIsPaused(false);
             
-            // Show user-friendly error message only for critical errors
-            if (!error.includes('timeout') && !error.includes('fallback')) {
-              let errorMessage = 'Voice narration encountered an issue.';
-              if (error.includes('network') || error.includes('fetch')) {
-                errorMessage = 'Network issue detected. Please check your connection and try again.';
-              } else if (error.includes('not supported')) {
-                errorMessage = 'Voice narration is not supported on this device.';
-              }
-              
-              Alert.alert('Voice Narration Notice', errorMessage, [
-                { text: 'OK', style: 'default' }
-              ]);
+            // Show user-friendly error message
+            let errorMessage = 'Voice narration encountered an issue.';
+            if (error.includes('network') || error.includes('fetch')) {
+              errorMessage = 'Network issue detected. Please check your connection and try again.';
+            } else if (error.includes('permission') || error.includes('not allowed')) {
+              errorMessage = 'Audio permission required. The app will use built-in voice instead.';
+            } else if (error.includes('not supported')) {
+              errorMessage = 'Voice narration is not supported on this device.';
+            } else if (error.includes('ElevenLabs')) {
+              errorMessage = 'ElevenLabs voice service is temporarily unavailable. Using built-in voice instead.';
             }
+            
+            Alert.alert('Voice Narration Notice', errorMessage, [
+              { text: 'OK', style: 'default' }
+            ]);
           }
         });
       }
