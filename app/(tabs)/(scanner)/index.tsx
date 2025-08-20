@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -13,7 +13,6 @@ import {
   TextInput,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info } from "lucide-react-native";
 import { router } from "expo-router";
 import { useHistory } from "@/providers/HistoryProvider";
@@ -28,10 +27,6 @@ export default function ScannerScreen() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<string>("");
   const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
-  const [showCamera, setShowCamera] = useState(false);
-  const [facing, setFacing] = useState<CameraType>('back');
-  const [permission, requestPermission] = useCameraPermissions();
-  const cameraRef = useRef<any>(null);
   const [additionalInfo, setAdditionalInfo] = useState({
     name: "",
     location: "",
@@ -61,42 +56,22 @@ export default function ScannerScreen() {
   };
 
   const takePhoto = async () => {
-    if (!permission) {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    
+    if (!permissionResult.granted) {
+      Alert.alert("Permission Required", "Please allow access to your camera to take photos.");
       return;
     }
 
-    if (!permission.granted) {
-      const result = await requestPermission();
-      if (!result.granted) {
-        Alert.alert("Permission Required", "Please allow access to your camera to take photos.");
-        return;
-      }
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      setSelectedImage(result.assets[0].uri);
     }
-
-    setShowCamera(true);
-  };
-
-  const capturePhoto = async () => {
-    if (cameraRef.current) {
-      try {
-        const photo = await cameraRef.current.takePictureAsync({
-          quality: 0.8,
-        });
-        setSelectedImage(photo.uri);
-        setShowCamera(false);
-      } catch (error) {
-        console.error('Error taking photo:', error);
-        Alert.alert('Error', 'Failed to take photo. Please try again.');
-      }
-    }
-  };
-
-  const closeCamera = () => {
-    setShowCamera(false);
-  };
-
-  const toggleCameraFacing = () => {
-    setFacing((current: CameraType) => (current === 'back' ? 'front' : 'back'));
   };
 
   const analyzeImage = async () => {
@@ -236,42 +211,6 @@ export default function ScannerScreen() {
   };
 
 
-
-  if (showCamera) {
-    return (
-      <View style={styles.cameraContainer}>
-        <CameraView 
-          style={styles.camera} 
-          facing={facing}
-          ref={cameraRef}
-        >
-          <View style={styles.cameraOverlay}>
-            <View style={styles.cameraHeader}>
-              <TouchableOpacity style={styles.cameraCloseButton} onPress={closeCamera}>
-                <X size={24} color="#ffffff" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.cameraFlipButton} onPress={toggleCameraFacing}>
-                <Text style={styles.cameraFlipText}>Flip</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <View style={styles.cameraViewfinder}>
-              <View style={styles.viewfinderFrame} />
-            </View>
-            
-            <View style={styles.cameraFooter}>
-              <TouchableOpacity 
-                style={styles.captureButton}
-                onPress={capturePhoto}
-              >
-                <View style={styles.captureButtonInner} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </CameraView>
-      </View>
-    );
-  }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -618,75 +557,5 @@ const styles = StyleSheet.create({
   textInputMultiline: {
     height: 70,
     textAlignVertical: "top",
-  },
-  cameraContainer: {
-    flex: 1,
-    backgroundColor: '#000000',
-  },
-  camera: {
-    flex: 1,
-  },
-  cameraOverlay: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
-  cameraHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 50,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  cameraCloseButton: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 20,
-    padding: 8,
-  },
-  cameraFlipButton: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  cameraFlipText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  cameraViewfinder: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  viewfinderFrame: {
-    width: screenWidth - 80,
-    height: (screenWidth - 80) * 0.75,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
-    borderRadius: 12,
-    backgroundColor: 'transparent',
-  },
-  cameraFooter: {
-    paddingBottom: 50,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-  },
-  captureButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#ffffff',
-  },
-  captureButtonInner: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#ffffff',
   },
 });
