@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,12 +10,10 @@ import {
   Alert,
   Platform,
   Dimensions,
-  ImageBackground,
   TextInput,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, MapPin, Clock, ChevronDown, ChevronUp, Info } from "lucide-react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info } from "lucide-react-native";
 import { router } from "expo-router";
 import { useHistory } from "@/providers/HistoryProvider";
 import { mockMonuments } from "@/data/mockMonuments";
@@ -188,20 +186,7 @@ export default function ScannerScreen() {
     setAdditionalInfo(prev => ({ ...prev, [field]: value }));
   };
 
-  const collageImages = [
-    "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=300&h=300&fit=crop", // Colosseum
-    "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=300&h=300&fit=crop", // Mona Lisa at Louvre
-    "https://images.unsplash.com/photo-1549144511-f099e773c147?w=300&h=300&fit=crop", // Eiffel Tower
-    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=300&fit=crop", // Classical sculpture
-    "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=300&h=300&fit=crop", // Big Ben
-    "https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=300&h=300&fit=crop", // Renaissance painting
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=300&fit=crop", // Parthenon
-    "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=300&h=300&fit=crop", // Modern art sculpture
-    "https://images.unsplash.com/photo-1471919743851-c4df8b6ee133?w=300&h=300&fit=crop", // Taj Mahal
-    "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=300&h=300&fit=crop", // Ancient Greek art
-    "https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=300&h=300&fit=crop", // Statue of Liberty
-    "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=300&fit=crop", // Classical art piece
-  ];
+
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
@@ -304,84 +289,33 @@ export default function ScannerScreen() {
         </View>
       ) : (
         <View style={styles.mainContainer}>
-          {/* Logo Section */}
-          <View style={styles.logoContainer}>
-            <View style={styles.logoIconContainer}>
-              <View style={styles.logoIcon}>
-                <View style={styles.logoRoof} />
-                <View style={styles.logoColumns}>
-                  <View style={styles.logoColumn} />
-                  <View style={styles.logoColumn} />
-                  <View style={styles.logoColumn} />
-                  <View style={styles.logoColumn} />
-                </View>
-                <View style={styles.logoBase} />
+          <View style={styles.titleSection}>
+            <Text style={styles.mainTitle}>Snap into history</Text>
+            <Text style={styles.mainSubtitle}>
+              step into the living stories of art and monuments
+            </Text>
+          </View>
+          
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity 
+              style={[styles.scanButton, styles.photoButton]} 
+              onPress={takePhoto}
+            >
+              <View style={styles.buttonIconContainer}>
+                <CameraIcon size={28} color="#ffffff" />
               </View>
-            </View>
-            <Text style={styles.logoText}>Heritage Scan</Text>
-          </View>
-          
-          {/* Collage Background */}
-          <View style={styles.collageContainer}>
-            <View style={styles.collageGrid}>
-              {collageImages.map((imageUri, index) => (
-                <View key={index} style={[
-                  styles.collageItem,
-                  index % 2 === 0 ? styles.collageItemEven : styles.collageItemOdd
-                ]}>
-                  <Image 
-                    source={{ uri: imageUri }} 
-                    style={styles.collageImage}
-                  />
-                  <View style={[
-                    styles.collageOverlay,
-                    index % 2 === 0 ? styles.overlayBlue : styles.overlayWhite
-                  ]} />
-                </View>
-              ))}
-            </View>
+              <Text style={styles.buttonText}>Take Photo</Text>
+            </TouchableOpacity>
             
-            {/* Main overlay with gradient */}
-            <LinearGradient
-              colors={[
-                "rgba(51, 65, 85, 0.4)",
-                "rgba(51, 65, 85, 0.7)",
-                "rgba(51, 65, 85, 0.9)"
-              ]}
-              style={styles.mainOverlay}
-            />
-          </View>
-          
-          {/* Content over collage */}
-          <View style={styles.contentOverlay}>
-            <View style={styles.titleSection}>
-              <Text style={styles.mainTitle}>Snap into history</Text>
-              <Text style={styles.mainSubtitle}>
-                step into the living stories of art and monuments
-              </Text>
-            </View>
-            
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity 
-                style={[styles.scanButton, styles.photoButton]} 
-                onPress={takePhoto}
-              >
-                <View style={styles.buttonIconContainer}>
-                  <CameraIcon size={28} color="#ffffff" />
-                </View>
-                <Text style={styles.buttonText}>Scan from Photo</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.scanButton, styles.galleryButton]} 
-                onPress={pickImageFromGallery}
-              >
-                <View style={styles.buttonIconContainer}>
-                  <ImageIcon size={28} color="#334155" />
-                </View>
-                <Text style={[styles.buttonText, styles.galleryButtonText]}>Scan from Gallery</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity 
+              style={[styles.scanButton, styles.galleryButton]} 
+              onPress={pickImageFromGallery}
+            >
+              <View style={styles.buttonIconContainer}>
+                <ImageIcon size={28} color="#334155" />
+              </View>
+              <Text style={[styles.buttonText, styles.galleryButtonText]}>Choose from Gallery</Text>
+            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -399,123 +333,13 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
     flex: 1,
-    position: "relative",
-  },
-  logoContainer: {
-    alignItems: "center",
-    paddingTop: 20,
-    paddingBottom: 10,
-    backgroundColor: "#2C3E50",
-    zIndex: 20,
-  },
-  logoIconContainer: {
-    marginBottom: 4,
-  },
-  logoIcon: {
-    width: 36,
-    height: 30,
-    alignItems: "center",
-  },
-  logoRoof: {
-    width: 30,
-    height: 0,
-    borderLeftWidth: 15,
-    borderRightWidth: 15,
-    borderBottomWidth: 5,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderBottomColor: "#ffffff",
-    marginBottom: 1,
-  },
-  logoColumns: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: 30,
-    height: 16,
-    marginBottom: 1,
-  },
-  logoColumn: {
-    width: 3,
-    height: 16,
-    backgroundColor: "#ffffff",
-    borderRadius: 0.5,
-  },
-  logoBase: {
-    width: 34,
-    height: 4,
-    backgroundColor: "#ffffff",
-    borderRadius: 0.5,
-  },
-  logoText: {
-    fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "400",
-    color: "#ffffff",
-    letterSpacing: 0.3,
-  },
-  collageContainer: {
-    flex: 1,
-    minHeight: screenHeight - 200,
-  },
-  collageGrid: {
-    flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  collageItem: {
-    width: "25%",
-    height: screenHeight / 6,
-    position: "relative",
-  },
-  collageItemEven: {
-    backgroundColor: "#334155",
-  },
-  collageItemOdd: {
-    backgroundColor: "#ffffff",
-  },
-  collageImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-  collageOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  overlayBlue: {
-    backgroundColor: "rgba(51, 65, 85, 0.6)",
-  },
-  overlayWhite: {
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-  },
-  mainOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  contentOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 30,
-    zIndex: 10,
   },
   titleSection: {
     alignItems: "center",
-    marginBottom: 60,
+    marginBottom: 80,
   },
   mainTitle: {
     fontSize: 42,
