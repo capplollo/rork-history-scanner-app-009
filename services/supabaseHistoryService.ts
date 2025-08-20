@@ -82,11 +82,20 @@ export class SupabaseHistoryService {
     try {
       console.log('Fetching scans from Supabase for user:', userId, 'with limit:', limit);
       
-      // Create abort controller for timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+      // Create abort controller for timeout with improved handling
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
+      let controller: AbortController | null = null;
       
       try {
+        controller = new AbortController();
+        
+        // Set up timeout with proper cleanup
+        timeoutId = setTimeout(() => {
+          if (controller && !controller.signal.aborted) {
+            controller.abort();
+          }
+        }, 6000); // Reduced to 6 seconds for better UX
+        
         // Only fetch essential fields for better performance
         const { data, error } = await supabase
           .from('scan_history')
@@ -96,15 +105,19 @@ export class SupabaseHistoryService {
           .limit(limit)
           .abortSignal(controller.signal);
 
-        clearTimeout(timeoutId);
+        // Clear timeout on successful completion
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
 
         if (error) {
           console.error('Error fetching scans from Supabase:', error.message || 'Unknown error');
-          console.error('Supabase error details:', {
+          console.error('Supabase error details:', JSON.stringify({
             message: error.message,
             code: error.code,
             details: error.details,
-          });
+          }));
           return { scans: [], error: error.message };
         }
 
@@ -132,13 +145,24 @@ export class SupabaseHistoryService {
 
         console.log('✅ Fetched', scans.length, 'scans from Supabase');
         return { scans };
-      } catch (abortError: unknown) {
-        clearTimeout(timeoutId);
-        if (abortError instanceof Error && abortError.name === 'AbortError') {
-          console.error('Supabase query timed out');
-          return { scans: [], error: 'Request timed out. Please try again.' };
+      } catch (requestError: unknown) {
+        // Clean up timeout
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        
+        // Handle different types of errors
+        if (requestError instanceof Error) {
+          if (requestError.name === 'AbortError') {
+            console.warn('Supabase query was cancelled (timeout or abort)');
+            return { scans: [], error: 'Request timed out. Please try again.' };
+          } else {
+            console.error('Supabase query failed:', requestError.message);
+            console.error('Error details:', JSON.stringify(requestError));
+            return { scans: [], error: 'Failed to fetch history. Please try again.' };
+          }
         } else {
-          console.error('Supabase query failed:', abortError);
+          console.error('Unknown error during Supabase query:', requestError);
           return { scans: [], error: 'Failed to fetch history. Please try again.' };
         }
       }
@@ -243,26 +267,39 @@ export class SupabaseHistoryService {
     try {
       console.log('Fetching user stats from Supabase for user:', userId);
       
-      // Create abort controller for timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for stats
+      // Create abort controller for timeout with improved handling
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
+      let controller: AbortController | null = null;
       
       try {
+        controller = new AbortController();
+        
+        // Set up timeout with proper cleanup
+        timeoutId = setTimeout(() => {
+          if (controller && !controller.signal.aborted) {
+            controller.abort();
+          }
+        }, 4000); // Reduced to 4 seconds for stats
+        
         const { data, error } = await supabase
           .from('scan_history')
           .select('confidence, is_recognized')
           .eq('user_id', userId)
           .abortSignal(controller.signal);
 
-        clearTimeout(timeoutId);
+        // Clear timeout on successful completion
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
 
         if (error) {
           console.error('Error fetching user stats from Supabase:', error.message || 'Unknown error');
-          console.error('Supabase error details:', {
+          console.error('Supabase error details:', JSON.stringify({
             message: error.message,
             code: error.code,
             details: error.details,
-          });
+          }));
           return { totalScans: 0, recognizedScans: 0, averageConfidence: 0, error: error.message };
         }
 
@@ -274,13 +311,24 @@ export class SupabaseHistoryService {
 
         console.log('✅ User stats calculated:', { totalScans, recognizedScans, averageConfidence });
         return { totalScans, recognizedScans, averageConfidence };
-      } catch (abortError: unknown) {
-        clearTimeout(timeoutId);
-        if (abortError instanceof Error && abortError.name === 'AbortError') {
-          console.error('User stats query timed out');
-          return { totalScans: 0, recognizedScans: 0, averageConfidence: 0, error: 'Request timed out. Please try again.' };
+      } catch (requestError: unknown) {
+        // Clean up timeout
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        
+        // Handle different types of errors
+        if (requestError instanceof Error) {
+          if (requestError.name === 'AbortError') {
+            console.warn('User stats query was cancelled (timeout or abort)');
+            return { totalScans: 0, recognizedScans: 0, averageConfidence: 0, error: 'Request timed out. Please try again.' };
+          } else {
+            console.error('User stats query failed:', requestError.message);
+            console.error('Error details:', JSON.stringify(requestError));
+            return { totalScans: 0, recognizedScans: 0, averageConfidence: 0, error: 'Failed to fetch stats. Please try again.' };
+          }
         } else {
-          console.error('User stats query failed:', abortError);
+          console.error('Unknown error during user stats query:', requestError);
           return { totalScans: 0, recognizedScans: 0, averageConfidence: 0, error: 'Failed to fetch stats. Please try again.' };
         }
       }

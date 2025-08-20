@@ -26,7 +26,6 @@ export interface HistoryItem {
 }
 
 const HISTORY_STORAGE_KEY = "@monument_scanner_history";
-const SUPABASE_LIMIT = 20; // Reduced for better performance
 const LOCAL_STORAGE_LIMIT = 3; // Very small limit for local storage to prevent quota issues
 const EMERGENCY_LIMIT = 1; // Emergency fallback
 
@@ -38,30 +37,43 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
   const loadHistory = useCallback(async () => {
     try {
       if (user) {
-        // Load from Supabase with timeout and pagination
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        // Load from Supabase with improved timeout handling
+        let timeoutId: ReturnType<typeof setTimeout> | null = null;
+        let controller: AbortController | null = null;
         
         try {
+          controller = new AbortController();
+          
+          // Set up timeout with proper cleanup
+          timeoutId = setTimeout(() => {
+            if (controller && !controller.signal.aborted) {
+              controller.abort();
+            }
+          }, 8000); // Reduced to 8 seconds
+          
           // Only fetch essential fields first for better performance
           const { data, error } = await supabase
             .from('scan_history')
             .select('id, monument_name, location, scanned_at, image_url, is_recognized, confidence')
             .eq('user_id', user.id)
             .order('scanned_at', { ascending: false })
-            .limit(20) // Reduced limit for better performance
+            .limit(15) // Further reduced limit
             .abortSignal(controller.signal);
           
-          clearTimeout(timeoutId);
+          // Clear timeout on successful completion
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+          }
           
           if (error) {
             console.error('Error loading history from Supabase:', error.message || 'Unknown error');
-            console.error('Supabase error details:', {
+            console.error('Supabase error details:', JSON.stringify({
               message: error.message,
               code: error.code,
               details: error.details,
               hint: error.hint,
-            });
+            }));
             // Fallback to local storage
             await loadFromLocalStorage();
           } else {
@@ -90,13 +102,24 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             }).filter(Boolean) as HistoryItem[];
             setHistory(mappedData);
           }
-        } catch (abortError: unknown) {
-          clearTimeout(timeoutId);
-          if (abortError instanceof Error && abortError.name === 'AbortError') {
-            console.warn('Supabase query timed out, falling back to local storage');
-          } else {
-            console.error('Supabase query failed:', abortError);
+        } catch (requestError: unknown) {
+          // Clean up timeout
+          if (timeoutId) {
+            clearTimeout(timeoutId);
           }
+          
+          // Handle different types of errors
+          if (requestError instanceof Error) {
+            if (requestError.name === 'AbortError') {
+              console.warn('Supabase query was cancelled (timeout or abort), falling back to local storage');
+            } else {
+              console.error('Supabase query failed:', requestError.message);
+              console.error('Error details:', JSON.stringify(requestError));
+            }
+          } else {
+            console.error('Unknown error during Supabase query:', requestError);
+          }
+          
           await loadFromLocalStorage();
         }
       } else {
@@ -106,7 +129,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("Error loading history:", errorMessage);
-      console.error("Full error details:", error);
+      console.error("Full error details:", JSON.stringify(error));
       await loadFromLocalStorage();
     } finally {
       setIsLoading(false);
