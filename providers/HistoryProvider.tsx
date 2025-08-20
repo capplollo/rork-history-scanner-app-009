@@ -26,7 +26,7 @@ export interface HistoryItem {
 }
 
 const HISTORY_STORAGE_KEY = "@monument_scanner_history";
-const MAX_HISTORY_ITEMS = 100; // Supabase can handle more
+const SUPABASE_LIMIT = 20; // Reduced for better performance
 const LOCAL_STORAGE_LIMIT = 3; // Very small limit for local storage to prevent quota issues
 const EMERGENCY_LIMIT = 1; // Emergency fallback
 
@@ -38,49 +38,66 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
   const loadHistory = useCallback(async () => {
     try {
       if (user) {
-        // Load from Supabase if user is authenticated
-        const { data, error } = await supabase
-          .from('scan_history')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('scanned_at', { ascending: false })
-          .limit(MAX_HISTORY_ITEMS);
+        // Load from Supabase with timeout and pagination
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
         
-        if (error) {
-          console.error('Error loading history from Supabase:', error.message || 'Unknown error');
-          console.error('Supabase error details:', {
-            message: error.message,
-            code: error.code,
-            details: error.details,
-            hint: error.hint,
-          });
-          // Fallback to local storage
+        try {
+          // Only fetch essential fields first for better performance
+          const { data, error } = await supabase
+            .from('scan_history')
+            .select('id, monument_name, location, scanned_at, image_url, is_recognized, confidence')
+            .eq('user_id', user.id)
+            .order('scanned_at', { ascending: false })
+            .limit(20) // Reduced limit for better performance
+            .abortSignal(controller.signal);
+          
+          clearTimeout(timeoutId);
+          
+          if (error) {
+            console.error('Error loading history from Supabase:', error.message || 'Unknown error');
+            console.error('Supabase error details:', {
+              message: error.message,
+              code: error.code,
+              details: error.details,
+              hint: error.hint,
+            });
+            // Fallback to local storage
+            await loadFromLocalStorage();
+          } else {
+            // Map Supabase data to HistoryItem format with minimal data
+            const mappedData = (data || []).map(item => {
+              try {
+                return {
+                  id: item.id || '',
+                  name: item.monument_name || '',
+                  location: item.location || '',
+                  period: '', // Will be loaded on demand
+                  description: '', // Will be loaded on demand
+                  significance: '', // Will be loaded on demand
+                  facts: [], // Will be loaded on demand
+                  image: item.image_url || '',
+                  scannedImage: '', // Will be loaded on demand
+                  scannedAt: item.scanned_at ? new Date(item.scanned_at).toISOString() : new Date().toISOString(),
+                  confidence: typeof item.confidence === 'number' ? item.confidence : undefined,
+                  isRecognized: typeof item.is_recognized === 'boolean' ? item.is_recognized : undefined,
+                  detailedDescription: undefined, // Will be loaded on demand
+                };
+              } catch (mappingError) {
+                console.error('Error mapping history item:', mappingError, item);
+                return null;
+              }
+            }).filter(Boolean) as HistoryItem[];
+            setHistory(mappedData);
+          }
+        } catch (abortError: unknown) {
+          clearTimeout(timeoutId);
+          if (abortError instanceof Error && abortError.name === 'AbortError') {
+            console.warn('Supabase query timed out, falling back to local storage');
+          } else {
+            console.error('Supabase query failed:', abortError);
+          }
           await loadFromLocalStorage();
-        } else {
-          // Map Supabase data to HistoryItem format
-          const mappedData = (data || []).map(item => {
-            try {
-              return {
-                id: item.id || '',
-                name: item.monument_name || '',
-                location: item.location || '',
-                period: item.period || '',
-                description: item.description || '',
-                significance: item.significance || '',
-                facts: Array.isArray(item.facts) ? item.facts : [],
-                image: item.image_url || '',
-                scannedImage: item.scanned_image_url || '',
-                scannedAt: item.scanned_at ? new Date(item.scanned_at).toISOString() : new Date().toISOString(),
-                confidence: typeof item.confidence === 'number' ? item.confidence : undefined,
-                isRecognized: typeof item.is_recognized === 'boolean' ? item.is_recognized : undefined,
-                detailedDescription: item.detailed_description || undefined,
-              };
-            } catch (mappingError) {
-              console.error('Error mapping history item:', mappingError, item);
-              return null;
-            }
-          }).filter(Boolean) as HistoryItem[];
-          setHistory(mappedData);
         }
       } else {
         // Load from local storage if not authenticated

@@ -77,51 +77,71 @@ export class SupabaseHistoryService {
     }
   }
 
-  // Get all scans for a user
-  static async getUserScans(userId: string): Promise<{ scans: HistoryItem[]; error?: string }> {
+  // Get all scans for a user with timeout and pagination
+  static async getUserScans(userId: string, limit: number = 20): Promise<{ scans: HistoryItem[]; error?: string }> {
     try {
-      console.log('Fetching scans from Supabase for user:', userId);
+      console.log('Fetching scans from Supabase for user:', userId, 'with limit:', limit);
       
-      const { data, error } = await supabase
-        .from('scan_history')
-        .select('*')
-        .eq('user_id', userId)
-        .order('scanned_at', { ascending: false });
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+      
+      try {
+        // Only fetch essential fields for better performance
+        const { data, error } = await supabase
+          .from('scan_history')
+          .select('id, monument_name, location, scanned_at, image_url, is_recognized, confidence, period, description, significance, facts, detailed_description')
+          .eq('user_id', userId)
+          .order('scanned_at', { ascending: false })
+          .limit(limit)
+          .abortSignal(controller.signal);
 
-      if (error) {
-        console.error('Error fetching scans from Supabase:', error.message || 'Unknown error');
-        console.error('Supabase error details:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-        });
-        return { scans: [], error: error.message };
+        clearTimeout(timeoutId);
+
+        if (error) {
+          console.error('Error fetching scans from Supabase:', error.message || 'Unknown error');
+          console.error('Supabase error details:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+          });
+          return { scans: [], error: error.message };
+        }
+
+        // Convert Supabase data to HistoryItem format
+        const scans: HistoryItem[] = (data || []).map((item: any) => ({
+          id: item.id || '',
+          name: item.monument_name || '',
+          location: item.location || '',
+          period: item.period || '',
+          description: item.description || '',
+          significance: item.significance || '',
+          facts: Array.isArray(item.facts) ? item.facts : [],
+          image: item.image_url || '',
+          scannedImage: item.scanned_image_url || '',
+          scannedAt: item.scanned_at || new Date().toISOString(),
+          confidence: item.confidence,
+          isRecognized: item.is_recognized,
+          detailedDescription: item.detailed_description ? {
+            quickOverview: item.detailed_description.quickOverview || '',
+            inDepthContext: item.detailed_description.inDepthContext || '',
+            curiosities: item.detailed_description.curiosities,
+            keyTakeaways: Array.isArray(item.detailed_description.keyTakeaways) ? item.detailed_description.keyTakeaways : [],
+          } : undefined,
+        }));
+
+        console.log('✅ Fetched', scans.length, 'scans from Supabase');
+        return { scans };
+      } catch (abortError: unknown) {
+        clearTimeout(timeoutId);
+        if (abortError instanceof Error && abortError.name === 'AbortError') {
+          console.error('Supabase query timed out');
+          return { scans: [], error: 'Request timed out. Please try again.' };
+        } else {
+          console.error('Supabase query failed:', abortError);
+          return { scans: [], error: 'Failed to fetch history. Please try again.' };
+        }
       }
-
-      // Convert Supabase data to HistoryItem format
-      const scans: HistoryItem[] = data.map((item: SupabaseScanHistory) => ({
-        id: item.id || '',
-        name: item.monument_name,
-        location: item.location || '',
-        period: item.period || '',
-        description: item.description || '',
-        significance: item.significance || '',
-        facts: item.facts || [],
-        image: item.image_url || '',
-        scannedImage: item.scanned_image_url || '',
-        scannedAt: item.scanned_at,
-        confidence: item.confidence,
-        isRecognized: item.is_recognized,
-        detailedDescription: item.detailed_description ? {
-          quickOverview: item.detailed_description.quickOverview || '',
-          inDepthContext: item.detailed_description.inDepthContext || '',
-          curiosities: item.detailed_description.curiosities,
-          keyTakeaways: item.detailed_description.keyTakeaways || [],
-        } : undefined,
-      }));
-
-      console.log('✅ Fetched', scans.length, 'scans from Supabase');
-      return { scans };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Unexpected error fetching scans:', errorMessage);
@@ -213,7 +233,7 @@ export class SupabaseHistoryService {
     }
   }
 
-  // Get scan statistics for a user
+  // Get scan statistics for a user with timeout
   static async getUserStats(userId: string): Promise<{ 
     totalScans: number; 
     recognizedScans: number; 
@@ -223,29 +243,47 @@ export class SupabaseHistoryService {
     try {
       console.log('Fetching user stats from Supabase for user:', userId);
       
-      const { data, error } = await supabase
-        .from('scan_history')
-        .select('confidence, is_recognized')
-        .eq('user_id', userId);
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout for stats
+      
+      try {
+        const { data, error } = await supabase
+          .from('scan_history')
+          .select('confidence, is_recognized')
+          .eq('user_id', userId)
+          .abortSignal(controller.signal);
 
-      if (error) {
-        console.error('Error fetching user stats from Supabase:', error.message || 'Unknown error');
-        console.error('Supabase error details:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-        });
-        return { totalScans: 0, recognizedScans: 0, averageConfidence: 0, error: error.message };
+        clearTimeout(timeoutId);
+
+        if (error) {
+          console.error('Error fetching user stats from Supabase:', error.message || 'Unknown error');
+          console.error('Supabase error details:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+          });
+          return { totalScans: 0, recognizedScans: 0, averageConfidence: 0, error: error.message };
+        }
+
+        const totalScans = data?.length || 0;
+        const recognizedScans = data?.filter((scan: any) => scan.is_recognized).length || 0;
+        const averageConfidence = totalScans > 0 
+          ? (data?.reduce((sum: number, scan: any) => sum + (scan.confidence || 0), 0) || 0) / totalScans 
+          : 0;
+
+        console.log('✅ User stats calculated:', { totalScans, recognizedScans, averageConfidence });
+        return { totalScans, recognizedScans, averageConfidence };
+      } catch (abortError: unknown) {
+        clearTimeout(timeoutId);
+        if (abortError instanceof Error && abortError.name === 'AbortError') {
+          console.error('User stats query timed out');
+          return { totalScans: 0, recognizedScans: 0, averageConfidence: 0, error: 'Request timed out. Please try again.' };
+        } else {
+          console.error('User stats query failed:', abortError);
+          return { totalScans: 0, recognizedScans: 0, averageConfidence: 0, error: 'Failed to fetch stats. Please try again.' };
+        }
       }
-
-      const totalScans = data.length;
-      const recognizedScans = data.filter((scan: any) => scan.is_recognized).length;
-      const averageConfidence = data.length > 0 
-        ? data.reduce((sum: number, scan: any) => sum + (scan.confidence || 0), 0) / data.length 
-        : 0;
-
-      console.log('✅ User stats calculated:', { totalScans, recognizedScans, averageConfidence });
-      return { totalScans, recognizedScans, averageConfidence };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Unexpected error fetching user stats:', errorMessage);
