@@ -18,12 +18,14 @@ import {
   LogOut,
   ChevronRight,
   Camera,
-  Globe
+  Globe,
+  Clock
 } from "lucide-react-native";
 import { useHistory } from "@/providers/HistoryProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import { scanResultStore } from "@/services/scanResultStore";
 
 export default function ProfileScreen() {
   const { history, clearHistory } = useHistory();
@@ -135,7 +137,63 @@ export default function ProfileScreen() {
           })}
         </View>
 
-
+        {/* History Section */}
+        {history.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionTitleContainer}>
+                <Clock size={20} color="#8B4513" />
+                <Text style={styles.sectionTitle}>Your Discoveries</Text>
+              </View>
+              <Text style={styles.sectionSubtitle}>
+                {history.length} {history.length === 1 ? "monument" : "monuments"} explored
+              </Text>
+            </View>
+            
+            <View style={styles.historyGrid}>
+              {history.slice(0, 6).map((item, index) => {
+                const formatDate = (dateString: string) => {
+                  const date = new Date(dateString);
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
+                };
+                
+                return (
+                  <TouchableOpacity
+                    key={`${item.id}-${index}`}
+                    style={styles.historyCard}
+                    onPress={() => {
+                      const resultId = scanResultStore.store(item);
+                      router.push({
+                        pathname: "/(tabs)/scan-result" as any,
+                        params: { resultId: resultId },
+                      });
+                    }}
+                  >
+                    <Image source={{ uri: item.scannedImage }} style={styles.historyThumbnail} />
+                    <View style={styles.historyCardContent}>
+                      <Text style={styles.historyMonumentName} numberOfLines={2}>{item.name}</Text>
+                      <View style={styles.historyInfoRow}>
+                        <MapPin size={12} color="#64748b" />
+                        <Text style={styles.historyInfoText} numberOfLines={1}>{item.location}</Text>
+                      </View>
+                      <Text style={styles.historyScanDate}>{formatDate(item.scannedAt)}</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            
+            {history.length > 6 && (
+              <TouchableOpacity style={styles.viewAllButton}>
+                <Text style={styles.viewAllButtonText}>View All Discoveries</Text>
+                <ChevronRight size={16} color="#8B4513" />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Settings</Text>
@@ -161,12 +219,14 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <TouchableOpacity 
-          style={styles.clearButton}
-          onPress={clearHistory}
-        >
-          <Text style={styles.clearButtonText}>Clear Scan History</Text>
-        </TouchableOpacity>
+        {history.length > 0 && (
+          <TouchableOpacity 
+            style={styles.clearButton}
+            onPress={clearHistory}
+          >
+            <Text style={styles.clearButtonText}>Clear Discovery History</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -311,6 +371,15 @@ const styles = StyleSheet.create({
     marginTop: 30,
     paddingHorizontal: 20,
   },
+  sectionHeader: {
+    marginBottom: 20,
+  },
+  sectionTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 4,
+  },
   sectionTitle: {
     fontSize: 20,
     fontFamily: Platform.select({
@@ -320,7 +389,97 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "500",
     color: "#2C3E50",
-    marginBottom: 16,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#64748b",
+    fontStyle: "italic",
+  },
+  historyGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    marginBottom: 20,
+  },
+  historyCard: {
+    width: "48%",
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  historyThumbnail: {
+    width: "100%",
+    height: 120,
+    resizeMode: "cover",
+  },
+  historyCardContent: {
+    padding: 12,
+    gap: 6,
+  },
+  historyMonumentName: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
+    lineHeight: 18,
+  },
+  historyInfoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  historyInfoText: {
+    fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#64748b",
+    flex: 1,
+  },
+  historyScanDate: {
+    fontSize: 11,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#94a3b8",
+    marginTop: 2,
+  },
+  viewAllButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f8f4f0",
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 6,
+  },
+  viewAllButtonText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#8B4513",
+    fontWeight: "500",
   },
 
   menuContainer: {

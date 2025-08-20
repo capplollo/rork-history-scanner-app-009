@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
-import { Camera, Clock, BookOpen, User } from "lucide-react-native";
+import { Camera, BookOpen, User } from "lucide-react-native";
 import React from "react";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 
 export default function TabLayout() {
   return (
@@ -34,17 +34,35 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="(scanner)"
+        name="profile"
         options={{
-          title: "Scanner",
-          tabBarIcon: ({ color, size }) => <Camera size={size} color={color} />,
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="history"
+        name="(scanner)"
         options={{
-          title: "History",
-          tabBarIcon: ({ color, size }) => <Clock size={size} color={color} />,
+          title: "Scanner",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={{
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: focused ? "#8B4513" : "#D4A574",
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 20,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 8,
+              elevation: 8,
+            }}>
+              <Camera size={28} color="#ffffff" />
+            </View>
+          ),
+          tabBarLabel: () => null,
         }}
       />
       <Tabs.Screen
@@ -52,13 +70,6 @@ export default function TabLayout() {
         options={{
           title: "Learn",
           tabBarIcon: ({ color, size }) => <BookOpen size={size} color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
         }}
       />
     </Tabs>
