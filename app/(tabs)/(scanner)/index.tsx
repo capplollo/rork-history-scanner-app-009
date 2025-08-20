@@ -314,9 +314,9 @@ export default function ScannerScreen() {
       ) : (
         <View style={styles.mainContainer}>
           <View style={styles.titleSection}>
-            <Text style={styles.mainTitle}>Discover art & culture</Text>
+            <Text style={styles.mainTitle}>Snap into heritage</Text>
             <Text style={styles.mainSubtitle}>
-              explore the stories behind monuments, sculptures, paintings & cultural landmarks
+              Discover the living stories of art and monuments
             </Text>
           </View>
           
