@@ -45,16 +45,15 @@ export class VoiceService {
     if (this.isInitialized) return;
 
     try {
-      // Request audio permissions first
-      await this.requestAudioPermissions();
+      console.log('🚀 Fast initializing voice service...');
       
-      // Check if ElevenLabs is properly configured
+      // Check if ElevenLabs is properly configured (no async calls)
       this.isElevenLabsConfigured = !!ELEVENLABS_API_KEY && ELEVENLABS_API_KEY !== 'your-api-key-here';
       
       if (this.isElevenLabsConfigured) {
         console.log('✅ ElevenLabs API key found');
         
-        // Initialize ElevenLabs voices
+        // Initialize ElevenLabs voices immediately
         this.elevenLabsVoices = ELEVENLABS_VOICES.map(voice => ({
           identifier: voice.id,
           name: voice.name,
@@ -63,32 +62,28 @@ export class VoiceService {
           gender: voice.gender,
           provider: 'elevenlabs' as const
         }));
+        
+        this.availableVoices.push(...this.elevenLabsVoices);
+        console.log('✅ ElevenLabs voices added instantly');
       } else {
         console.log('⚠️ ElevenLabs API key not configured, using built-in voices only');
       }
 
-      // Get built-in voices
-      const builtInVoices = await this.getBuiltInVoices();
+      // Initialize with basic built-in voices immediately (no async call)
+      const basicBuiltInVoices = this.getBasicBuiltInVoices();
+      this.availableVoices.push(...basicBuiltInVoices);
       
-      // Always include both ElevenLabs and built-in voices for fallback
-      this.availableVoices = [];
-      
-      if (this.isElevenLabsConfigured && this.elevenLabsVoices.length > 0) {
-        this.availableVoices.push(...this.elevenLabsVoices);
-        console.log('✅ ElevenLabs voices added');
-      }
-      
-      // Always add built-in voices as fallback
-      const builtInFiltered = builtInVoices.filter(voice => voice.provider === 'expo-speech');
-      this.availableVoices.push(...builtInFiltered);
-      
-      console.log(`✅ Total voices available: ${this.availableVoices.length} (ElevenLabs: ${this.elevenLabsVoices.length}, Built-in: ${builtInFiltered.length})`);
-
       this.isInitialized = true;
-      console.log(`✅ Voice service initialized with ${this.availableVoices.length} voices`);
-      console.log(`📊 ElevenLabs voices: ${this.elevenLabsVoices.length}, Built-in voices: ${builtInVoices.length}`);
+      console.log(`✅ Voice service fast-initialized with ${this.availableVoices.length} voices`);
+      
+      // Load full built-in voices and permissions in background
+      this.initializeBackgroundTasks();
+      
     } catch (error) {
       console.error('❌ Failed to initialize voice service:', error);
+      // Fallback to basic voices
+      this.availableVoices = this.getBasicBuiltInVoices();
+      this.isInitialized = true;
     }
   }
 
@@ -116,6 +111,63 @@ export class VoiceService {
       console.error('❌ Failed to request audio permissions:', error);
       this.audioPermissionsGranted = false;
     }
+  }
+
+  // Background initialization for non-critical tasks
+  private async initializeBackgroundTasks(): Promise<void> {
+    try {
+      console.log('🔄 Loading background tasks...');
+      
+      // Request permissions in background
+      await this.requestAudioPermissions();
+      
+      // Load full built-in voices in background
+      const fullBuiltInVoices = await this.getBuiltInVoices();
+      const builtInFiltered = fullBuiltInVoices.filter(voice => voice.provider === 'expo-speech');
+      
+      // Replace basic voices with full voices
+      this.availableVoices = this.availableVoices.filter(voice => voice.provider !== 'expo-speech');
+      this.availableVoices.push(...builtInFiltered);
+      
+      console.log(`🔄 Background loading complete. Total voices: ${this.availableVoices.length}`);
+    } catch (error) {
+      console.error('❌ Background initialization failed:', error);
+    }
+  }
+
+  // Get basic built-in voices without async calls
+  private getBasicBuiltInVoices(): VoiceOption[] {
+    // Return basic fallback voices that work on all platforms
+    const basicVoices: VoiceOption[] = [];
+    
+    if (Platform.OS === 'ios') {
+      basicVoices.push({
+        identifier: 'com.apple.ttsbundle.Samantha-compact',
+        name: 'Samantha (Built-in)',
+        language: 'en-US',
+        quality: 'basic',
+        provider: 'expo-speech' as const
+      });
+    } else if (Platform.OS === 'android') {
+      basicVoices.push({
+        identifier: 'en-us-x-sfg#female_1-local',
+        name: 'Default Female (Built-in)',
+        language: 'en-US',
+        quality: 'basic',
+        provider: 'expo-speech' as const
+      });
+    } else {
+      // Web fallback
+      basicVoices.push({
+        identifier: 'default',
+        name: 'Default Voice (Built-in)',
+        language: 'en-US',
+        quality: 'basic',
+        provider: 'expo-speech' as const
+      });
+    }
+    
+    return basicVoices;
   }
 
   // Public method to request permissions with user feedback
@@ -239,22 +291,23 @@ export class VoiceService {
     }
 
     try {
-      // Check if we should use ElevenLabs
-      if (voice.provider === 'elevenlabs' && this.isElevenLabsConfigured && this.audioPermissionsGranted) {
-        await this.speakWithElevenLabs(text, voice, options, callbacks);
-      } else {
-        // Fall back to built-in TTS if ElevenLabs is not available or permissions denied
-        if (voice.provider === 'elevenlabs' && (!this.audioPermissionsGranted || !this.isElevenLabsConfigured)) {
-          console.log('🔄 Falling back to built-in TTS (permissions or config issue)');
+      // Start immediately with built-in voice for instant feedback
+      if (voice.provider === 'elevenlabs' && this.isElevenLabsConfigured) {
+        // Check permissions quickly without blocking
+        if (!this.audioPermissionsGranted) {
+          console.log('🔄 No audio permissions, using built-in TTS immediately');
           const fallbackVoice = this.getBuiltInFallbackVoice();
           if (fallbackVoice) {
             await this.speakWithExpoSpeech(text, fallbackVoice, options, callbacks);
-          } else {
-            callbacks?.onError?.('No fallback voice available');
+            return;
           }
-        } else {
-          await this.speakWithExpoSpeech(text, voice, options, callbacks);
         }
+        
+        // Try ElevenLabs with timeout
+        await this.speakWithElevenLabsTimeout(text, voice, options, callbacks);
+      } else {
+        // Use built-in TTS immediately
+        await this.speakWithExpoSpeech(text, voice, options, callbacks);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -286,6 +339,41 @@ export class VoiceService {
     return builtInVoices.find(voice => 
       voice.language.startsWith('en')
     ) || builtInVoices[0] || null;
+  }
+
+  // ElevenLabs with timeout to prevent long delays
+  private async speakWithElevenLabsTimeout(
+    text: string, 
+    voice: VoiceOption, 
+    options: VoiceOptions,
+    callbacks?: {
+      onStart?: () => void;
+      onDone?: () => void;
+      onError?: (error: string) => void;
+    }
+  ): Promise<void> {
+    const timeoutMs = 5000; // 5 second timeout
+    
+    try {
+      await Promise.race([
+        this.speakWithElevenLabs(text, voice, options, callbacks),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('ElevenLabs timeout')), timeoutMs)
+        )
+      ]);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('timeout')) {
+        console.log('🔄 ElevenLabs timeout, falling back to built-in TTS');
+        const fallbackVoice = this.getBuiltInFallbackVoice();
+        if (fallbackVoice) {
+          await this.speakWithExpoSpeech(text, fallbackVoice, options, callbacks);
+        } else {
+          callbacks?.onError?.('Timeout and no fallback voice available');
+        }
+      } else {
+        throw error;
+      }
+    }
   }
 
   private async speakWithElevenLabs(
