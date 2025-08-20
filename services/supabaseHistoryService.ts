@@ -19,7 +19,8 @@ export interface SupabaseScanHistory {
     quickOverview?: string;
     inDepthContext?: string;
     curiosities?: string;
-    keyTakeaways?: string[];
+    keyTakeaways?: string;
+    keyTakeawaysList?: string[];
   };
   created_at?: string;
   updated_at?: string;
@@ -99,7 +100,7 @@ export class SupabaseHistoryService {
         // Only fetch essential fields for better performance
         const { data, error } = await supabase
           .from('scan_history')
-          .select('id, monument_name, location, scanned_at, image_url, is_recognized, confidence, period, description, significance, facts, detailed_description')
+          .select('id, monument_name, location, scanned_at, image_url, scanned_image_url, is_recognized, confidence, period, description, significance, facts, detailed_description')
           .eq('user_id', userId)
           .order('scanned_at', { ascending: false })
           .limit(limit)
@@ -122,26 +123,36 @@ export class SupabaseHistoryService {
         }
 
         // Convert Supabase data to HistoryItem format
-        const scans: HistoryItem[] = (data || []).map((item: any) => ({
-          id: item.id || '',
-          name: item.monument_name || '',
-          location: item.location || '',
-          period: item.period || '',
-          description: item.description || '',
-          significance: item.significance || '',
-          facts: Array.isArray(item.facts) ? item.facts : [],
-          image: item.image_url || '',
-          scannedImage: item.scanned_image_url || '',
-          scannedAt: item.scanned_at || new Date().toISOString(),
-          confidence: item.confidence,
-          isRecognized: item.is_recognized,
-          detailedDescription: item.detailed_description ? {
-            quickOverview: item.detailed_description.quickOverview || '',
-            inDepthContext: item.detailed_description.inDepthContext || '',
-            curiosities: item.detailed_description.curiosities,
-            keyTakeaways: Array.isArray(item.detailed_description.keyTakeaways) ? item.detailed_description.keyTakeaways : [],
-          } : undefined,
-        }));
+        const scans: HistoryItem[] = (data || []).map((item: any) => {
+          console.log('Processing scan item:', {
+            id: item.id,
+            name: item.monument_name,
+            image_url: item.image_url,
+            scanned_image_url: item.scanned_image_url
+          });
+          
+          return {
+            id: item.id || '',
+            name: item.monument_name || '',
+            location: item.location || '',
+            period: item.period || '',
+            description: item.description || '',
+            significance: item.significance || '',
+            facts: Array.isArray(item.facts) ? item.facts : [],
+            image: item.image_url || item.scanned_image_url || '',
+            scannedImage: item.scanned_image_url || item.image_url || '',
+            scannedAt: item.scanned_at || new Date().toISOString(),
+            confidence: item.confidence,
+            isRecognized: item.is_recognized,
+            detailedDescription: item.detailed_description ? {
+              quickOverview: item.detailed_description.quickOverview || '',
+              inDepthContext: item.detailed_description.inDepthContext || '',
+              curiosities: item.detailed_description.curiosities,
+              keyTakeaways: item.detailed_description.keyTakeaways || '',
+              keyTakeawaysList: Array.isArray(item.detailed_description.keyTakeaways) ? item.detailed_description.keyTakeaways : [],
+            } : undefined,
+          };
+        });
 
         console.log('✅ Fetched', scans.length, 'scans from Supabase');
         return { scans };

@@ -504,7 +504,15 @@ export default function ScanResultScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          <Image source={{ uri: monument.scannedImage || monument.image }} style={styles.monumentImage} />
+          <Image 
+            source={{ uri: monument.scannedImage || monument.image }} 
+            style={styles.monumentImage}
+            defaultSource={require('@/assets/images/icon.png')}
+            onError={(error) => {
+              console.log('Monument image failed to load:', error.nativeEvent.error);
+              console.log('Monument image URI:', monument.scannedImage || monument.image);
+            }}
+          />
           <LinearGradient
             colors={["transparent", "rgba(0,0,0,0.8)"]}
             style={styles.imageOverlay}
