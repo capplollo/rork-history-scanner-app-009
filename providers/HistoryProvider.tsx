@@ -35,35 +35,24 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
   const [isLoading, setIsLoading] = useState(true);
 
   const loadHistory = useCallback(async () => {
+    let isCancelled = false;
+    
     try {
       if (user) {
-        // Load from Supabase with improved timeout handling
-        let timeoutId: ReturnType<typeof setTimeout> | null = null;
-        let controller: AbortController | null = null;
-        
+        // Load from Supabase with improved error handling
         try {
-          controller = new AbortController();
-          
-          // Set up timeout with proper cleanup
-          timeoutId = setTimeout(() => {
-            if (controller && !controller.signal.aborted) {
-              controller.abort();
-            }
-          }, 8000); // Reduced to 8 seconds
-          
-          // Only fetch essential fields first for better performance
+          // Simple query without abort controller to avoid AbortError issues
           const { data, error } = await supabase
             .from('scan_history')
             .select('id, monument_name, location, scanned_at, image_url, is_recognized, confidence')
             .eq('user_id', user.id)
             .order('scanned_at', { ascending: false })
-            .limit(15) // Further reduced limit
-            .abortSignal(controller.signal);
+            .limit(15);
           
-          // Clear timeout on successful completion
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-            timeoutId = null;
+          // Check if component was unmounted during the request
+          if (isCancelled) {
+            console.log('History load was cancelled due to component unmount');
+            return;
           }
           
           if (error) {
@@ -100,27 +89,26 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
                 return null;
               }
             }).filter(Boolean) as HistoryItem[];
-            setHistory(mappedData);
+            
+            if (!isCancelled) {
+              setHistory(mappedData);
+            }
           }
         } catch (requestError: unknown) {
-          // Clean up timeout
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
-          
           // Handle different types of errors
           if (requestError instanceof Error) {
             if (requestError.name === 'AbortError') {
-              console.warn('Supabase query was cancelled (timeout or abort), falling back to local storage');
+              console.warn('Supabase query was cancelled, falling back to local storage');
             } else {
               console.error('Supabase query failed:', requestError.message);
-              console.error('Error details:', JSON.stringify(requestError));
             }
           } else {
             console.error('Unknown error during Supabase query:', requestError);
           }
           
-          await loadFromLocalStorage();
+          if (!isCancelled) {
+            await loadFromLocalStorage();
+          }
         }
       } else {
         // Load from local storage if not authenticated
@@ -129,15 +117,34 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("Error loading history:", errorMessage);
-      console.error("Full error details:", JSON.stringify(error));
-      await loadFromLocalStorage();
+      if (!isCancelled) {
+        await loadFromLocalStorage();
+      }
     } finally {
-      setIsLoading(false);
+      if (!isCancelled) {
+        setIsLoading(false);
+      }
     }
+    
+    // Return cleanup function
+    return () => {
+      isCancelled = true;
+    };
   }, [user]);
 
   useEffect(() => {
-    loadHistory();
+    const cleanup = loadHistory();
+    
+    // Return cleanup function for useEffect
+    return () => {
+      if (cleanup && typeof cleanup.then === 'function') {
+        cleanup.then(cleanupFn => {
+          if (typeof cleanupFn === 'function') {
+            cleanupFn();
+          }
+        });
+      }
+    };
   }, [loadHistory]);
 
   const loadFromLocalStorage = async () => {
