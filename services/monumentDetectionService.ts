@@ -109,28 +109,60 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
   console.log('Sending comprehensive analysis request to AI API...');
   console.log('Request payload size:', JSON.stringify({ messages: messages }).length);
   
-  // Add timeout and better error handling
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+  // Platform-specific timeout and error handling
+  const { Platform } = await import('react-native');
+  const isMobile = Platform.OS !== 'web';
+  const timeout = isMobile ? 90000 : 60000; // Longer timeout for mobile
+  
+  console.log(`Setting up request with ${timeout}ms timeout for ${Platform.OS}`);
+  
+  let controller: AbortController | undefined;
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  
+  // Only use AbortController on web to avoid mobile issues
+  if (!isMobile) {
+    controller = new AbortController();
+    timeoutId = setTimeout(() => controller?.abort(), timeout);
+  }
+  
+  const requestOptions: RequestInit = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'User-Agent': isMobile ? 'MonumentScanner-Mobile' : 'MonumentScanner-Web',
+    },
+    body: JSON.stringify({
+      messages: messages
+    }),
+  };
+  
+  // Only add signal for web
+  if (controller) {
+    requestOptions.signal = controller.signal;
+  }
+  
+  let response: Response;
   
   try {
-    const response = await fetch('https://toolkit.rork.com/text/llm/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        messages: messages
-      }),
-      signal: controller.signal
-    });
+    console.log('Making fetch request to AI API...');
+    response = await fetch('https://toolkit.rork.com/text/llm/', requestOptions);
     
-    clearTimeout(timeoutId);
-    console.log('AI API response status:', response.status);
-    console.log('AI API response headers:', Object.fromEntries(response.headers.entries()));
-
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+    
+    console.log('AI API response received');
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
+    
     if (!response.ok) {
-      const errorText = await response.text();
+      let errorText = 'Unknown error';
+      try {
+        errorText = await response.text();
+      } catch (textError) {
+        console.warn('Could not read error response text:', textError);
+      }
+      
       console.error('AI API error details:');
       console.error('Status:', response.status, response.statusText);
       console.error('Response body:', errorText);
@@ -141,24 +173,50 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
         throw new Error('Too many requests. Please wait a moment and try again.');
       } else if (response.status >= 500) {
         throw new Error('AI service is temporarily unavailable. Please try again later.');
+      } else if (response.status === 0 || response.status === 408) {
+        throw new Error('Network timeout. Please check your internet connection and try again.');
       } else {
         throw new Error(`AI service error: ${response.status} - ${errorText || response.statusText}`);
       }
     }
   } catch (error) {
-    clearTimeout(timeoutId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
     
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Request timed out. Please try again with a smaller image or better internet connection.');
+    console.error('Fetch request failed:', error);
+    
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Request timed out. Please try again with a smaller image or better internet connection.');
+      } else if (error.name === 'TypeError' && error.message.includes('Network request failed')) {
+        throw new Error('Network error. Please check your internet connection and try again.');
+      } else if (error.message.includes('timeout')) {
+        throw new Error('Request timed out. Please try again with a smaller image or better internet connection.');
+      }
     }
     
     throw error;
   }
 
-  const data = await response.json();
-  const content = data.completion;
-  if (!content) {
-    throw new Error('No content in AI response');
+  let data: any;
+  let content: string;
+  
+  try {
+    console.log('Parsing response JSON...');
+    data = await response.json();
+    console.log('Response data keys:', Object.keys(data));
+    
+    content = data.completion;
+    if (!content) {
+      console.error('No completion in response:', data);
+      throw new Error('No content in AI response');
+    }
+    
+    console.log('AI response content length:', content.length);
+  } catch (jsonError) {
+    console.error('Failed to parse JSON response:', jsonError);
+    throw new Error('Invalid JSON response from AI service');
   }
 
   // Clean up the response and parse JSON
@@ -234,11 +292,32 @@ async function convertImageToBase64Web(imageUri: string): Promise<string> {
 // Mobile implementation using expo-file-system
 async function convertImageToBase64Mobile(imageUri: string): Promise<string> {
   console.log('Converting mobile image to base64:', imageUri);
+  console.log('Image URI type:', typeof imageUri);
+  console.log('Image URI starts with:', imageUri.substring(0, 50));
+  
+  // Validate URI format
+  if (!imageUri || typeof imageUri !== 'string') {
+    throw new Error('Invalid image URI provided');
+  }
   
   // Method 1: Try expo-file-system first
   try {
     const FileSystem = await import('expo-file-system');
     console.log('Using expo-file-system for base64 conversion');
+    
+    // Check if file exists first
+    const fileInfo = await FileSystem.default.getInfoAsync(imageUri);
+    console.log('File info:', fileInfo);
+    
+    if (!fileInfo.exists) {
+      throw new Error('Image file does not exist at the provided URI');
+    }
+    
+    if (fileInfo.size === 0) {
+      throw new Error('Image file is empty');
+    }
+    
+    console.log('File size:', fileInfo.size, 'bytes');
     
     // For mobile, we'll read the file directly as base64
     // expo-image-picker already provides optimized images
@@ -249,12 +328,21 @@ async function convertImageToBase64Mobile(imageUri: string): Promise<string> {
     console.log('Mobile image converted to base64 using FileSystem, length:', base64.length);
     
     if (base64 && base64.length > 100) {
+      // Validate base64 format
+      if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64)) {
+        throw new Error('Invalid base64 format returned by FileSystem');
+      }
       return base64;
     } else {
       throw new Error('FileSystem returned empty or invalid base64');
     }
   } catch (fileSystemError) {
     console.error('expo-file-system conversion failed:', fileSystemError);
+    console.error('FileSystem error details:', {
+      name: fileSystemError instanceof Error ? fileSystemError.name : 'Unknown',
+      message: fileSystemError instanceof Error ? fileSystemError.message : String(fileSystemError),
+      stack: fileSystemError instanceof Error ? fileSystemError.stack : undefined
+    });
   }
   
   // Method 2: Try fetch + arrayBuffer approach

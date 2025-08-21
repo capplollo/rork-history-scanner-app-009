@@ -26,9 +26,86 @@ const supabaseConfig = {
     persistSession: true,
     detectSessionInUrl: false,
   },
+  global: {
+    headers: {
+      'X-Client-Info': 'monument-scanner-app',
+    },
+  },
+  db: {
+    schema: 'public',
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 2,
+    },
+  },
 };
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, supabaseConfig);
+
+// Add connection health check
+export const checkSupabaseConnection = async (): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('scan_history')
+      .select('id')
+      .limit(1);
+    
+    if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows found" which is OK
+      console.warn('Supabase connection check failed:', error.message);
+      return false;
+    }
+    
+    console.log('✅ Supabase connection healthy');
+    return true;
+  } catch (error) {
+    console.error('Supabase connection check error:', error);
+    return false;
+  }
+};
+
+// Retry wrapper for Supabase operations
+export const withRetry = async <T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 2,
+  delay: number = 1000
+): Promise<T> => {
+  let lastError: Error;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      
+      if (attempt === maxRetries) {
+        throw lastError;
+      }
+      
+      // Don't retry on certain errors
+      if (lastError.message.includes('AbortError') || 
+          lastError.message.includes('auth') ||
+          lastError.message.includes('permission')) {
+        throw lastError;
+      }
+      
+      console.warn(`Attempt ${attempt + 1} failed, retrying in ${delay}ms:`, lastError.message);
+      await new Promise(resolve => setTimeout(resolve, delay * (attempt + 1)));
+    }
+  }
+  
+  throw lastError!;
+};
+
+// Initialize connection check on startup
+if (Platform.OS !== 'web') {
+  // Only run connection check on mobile to avoid web CORS issues
+  setTimeout(() => {
+    checkSupabaseConnection().catch(error => {
+      console.warn('Initial Supabase connection check failed:', error);
+    });
+  }, 2000);
+}
 
 // Storage cleanup utility to prevent quota issues
 export const cleanupLocalStorage = async () => {
