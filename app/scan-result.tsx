@@ -28,7 +28,7 @@ import FormattedText from "@/components/FormattedText";
 const { width: screenWidth } = Dimensions.get("window");
 
 export default function ScanResultScreen() {
-  const { monumentId, scanData, resultId } = useLocalSearchParams();
+  const { monumentId, scanData, resultId, historyItemId, monumentName, location, period, scannedImage, regenerate } = useLocalSearchParams();
   const { addToHistory } = useHistory();
   const navigation = useNavigation();
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -38,6 +38,7 @@ export default function ScanResultScreen() {
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption | null>(null);
   const [isReanalyzing, setIsReanalyzing] = useState<boolean>(false);
   const [showContextForm, setShowContextForm] = useState<boolean>(false);
+  const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
   const [contextInfo, setContextInfo] = useState<AdditionalInfo>({
     name: "",
     location: "",
@@ -96,70 +97,127 @@ export default function ScanResultScreen() {
       let retryCount = 0;
       const maxRetries = 3;
       
-      while (!loadedMonument && retryCount < maxRetries) {
-        console.log(`Attempting to load monument data (attempt ${retryCount + 1}/${maxRetries})`);
+      // Check if this is a regeneration request from history
+      if (regenerate === 'true' && monumentName && typeof monumentName === 'string') {
+        console.log('🔄 Regenerating content for history item:', monumentName);
+        setIsRegenerating(true);
         
-        // Try to get data from resultId first (new method)
-        if (resultId && typeof resultId === 'string') {
-          try {
-            const retrievedMonument = scanResultStore.retrieve(resultId);
-            if (retrievedMonument && retrievedMonument.name) {
-              loadedMonument = retrievedMonument;
-              console.log('✅ Retrieved monument from store:', loadedMonument.name);
-              break;
-            } else {
-              console.warn(`No valid monument found for resultId: ${resultId} (attempt ${retryCount + 1})`);
-            }
-          } catch (error) {
-            console.error('Error retrieving monument from store:', error);
-          }
-        }
-        
-        // Legacy support for scanData (in case some old navigation still uses it)
-        if (!loadedMonument && scanData && typeof scanData === 'string') {
-          try {
-            const parsedData = JSON.parse(scanData) as HistoryItem;
-            if (parsedData && parsedData.name) {
-              loadedMonument = parsedData;
-              console.log('✅ Retrieved monument from scanData:', loadedMonument.name);
-              break;
-            }
-          } catch (error) {
-            console.error('Error parsing scan data:', error);
-          }
-        }
-        
-        // Fallback to mock data if no scan data
-        if (!loadedMonument && monumentId) {
-          const mockMonument = mockMonuments.find(m => m.id === monumentId);
-          if (mockMonument) {
-            loadedMonument = {
-              ...mockMonument,
-              scannedImage: mockMonument.image,
-              scannedAt: new Date().toISOString(),
-            };
-            console.log('✅ Retrieved monument from mock data:', loadedMonument.name);
-            break;
-          }
-        }
-        
-        // If no data found, wait a bit and retry (helps with race conditions)
-        if (!loadedMonument && retryCount < maxRetries - 1) {
-          console.log(`No monument data found, retrying in 500ms...`);
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-        
-        retryCount++;
-      }
-      
-      if (!loadedMonument) {
-        console.error('❌ Failed to load monument data after all retries');
-        // Try to get the most recent scan from history as a last resort
         try {
-          // This would require accessing the history provider, but for now we'll show the error
-          console.log('Attempting to get most recent scan from history...');
+          // Create a basic monument object with available data
+          const basicMonument: HistoryItem = {
+            id: (historyItemId as string) || 'history-item',
+            name: monumentName as string,
+            location: (location as string) || '',
+            period: (period as string) || '',
+            description: '', // Will be regenerated
+            significance: '', // Will be regenerated
+            facts: [], // Will be regenerated
+            image: '',
+            scannedImage: (scannedImage as string) || '',
+            scannedAt: new Date().toISOString(),
+            confidence: undefined,
+            isRecognized: true, // Assume recognized since it's in history
+            detailedDescription: undefined, // Will be regenerated
+          };
+          
+          // Regenerate content via API
+          if (basicMonument.scannedImage) {
+            try {
+              const detectionResult = await detectArtwork(basicMonument.scannedImage);
+              
+              // Update the monument with regenerated content
+              loadedMonument = {
+                ...basicMonument,
+                description: detectionResult.description,
+                significance: detectionResult.significance,
+                facts: detectionResult.facts,
+                confidence: detectionResult.confidence,
+                isRecognized: detectionResult.isRecognized,
+                detailedDescription: detectionResult.detailedDescription,
+              };
+              
+              console.log('✅ Content regenerated successfully for:', monumentName);
+            } catch (regenerationError) {
+              console.error('❌ Failed to regenerate content:', regenerationError);
+              // Use basic monument data as fallback
+              loadedMonument = basicMonument;
+            }
+          } else {
+            // No image available, use basic data
+            loadedMonument = basicMonument;
+          }
         } catch (error) {
-          console.error('Failed to get recent scan from history:', error);
+          console.error('Error setting up regeneration:', error);
+        } finally {
+          setIsRegenerating(false);
+        }
+      } else {
+        // Original loading logic for new scans
+        while (!loadedMonument && retryCount < maxRetries) {
+          console.log(`Attempting to load monument data (attempt ${retryCount + 1}/${maxRetries})`);
+          
+          // Try to get data from resultId first (new method)
+          if (resultId && typeof resultId === 'string') {
+            try {
+              const retrievedMonument = scanResultStore.retrieve(resultId);
+              if (retrievedMonument && retrievedMonument.name) {
+                loadedMonument = retrievedMonument;
+                console.log('✅ Retrieved monument from store:', loadedMonument.name);
+                break;
+              } else {
+                console.warn(`No valid monument found for resultId: ${resultId} (attempt ${retryCount + 1})`);
+              }
+            } catch (error) {
+              console.error('Error retrieving monument from store:', error);
+            }
+          }
+          
+          // Legacy support for scanData (in case some old navigation still uses it)
+          if (!loadedMonument && scanData && typeof scanData === 'string') {
+            try {
+              const parsedData = JSON.parse(scanData) as HistoryItem;
+              if (parsedData && parsedData.name) {
+                loadedMonument = parsedData;
+                console.log('✅ Retrieved monument from scanData:', loadedMonument.name);
+                break;
+              }
+            } catch (error) {
+              console.error('Error parsing scan data:', error);
+            }
+          }
+          
+          // Fallback to mock data if no scan data
+          if (!loadedMonument && monumentId) {
+            const mockMonument = mockMonuments.find(m => m.id === monumentId);
+            if (mockMonument) {
+              loadedMonument = {
+                ...mockMonument,
+                scannedImage: mockMonument.image,
+                scannedAt: new Date().toISOString(),
+              };
+              console.log('✅ Retrieved monument from mock data:', loadedMonument.name);
+              break;
+            }
+          }
+          
+          // If no data found, wait a bit and retry (helps with race conditions)
+          if (!loadedMonument && retryCount < maxRetries - 1) {
+            console.log(`No monument data found, retrying in 500ms...`);
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+          
+          retryCount++;
+        }
+        
+        if (!loadedMonument) {
+          console.error('❌ Failed to load monument data after all retries');
+          // Try to get the most recent scan from history as a last resort
+          try {
+            // This would require accessing the history provider, but for now we'll show the error
+            console.log('Attempting to get most recent scan from history...');
+          } catch (error) {
+            console.error('Failed to get recent scan from history:', error);
+          }
         }
       }
       
@@ -168,7 +226,7 @@ export default function ScanResultScreen() {
     };
     
     loadMonumentData();
-  }, [resultId, scanData, monumentId]);
+  }, [resultId, scanData, monumentId, regenerate, monumentName, location, period, scannedImage, historyItemId]);
   
 
 
@@ -429,11 +487,19 @@ export default function ScanResultScreen() {
 
   // Show loading state while data is being loaded
   if (isLoading) {
+    const isRegeneratingContent = regenerate === 'true';
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingTitle}>Loading Artwork Information</Text>
-          <Text style={styles.loadingText}>Please wait while we prepare your scan results...</Text>
+          <Text style={styles.loadingTitle}>
+            {isRegeneratingContent ? 'Regenerating Content' : 'Loading Artwork Information'}
+          </Text>
+          <Text style={styles.loadingText}>
+            {isRegeneratingContent 
+              ? 'Please wait while we regenerate the latest information about this artwork...' 
+              : 'Please wait while we prepare your scan results...'
+            }
+          </Text>
         </View>
       </SafeAreaView>
     );

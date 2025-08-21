@@ -44,7 +44,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           // Simple query without abort controller to avoid AbortError issues
           const { data, error } = await supabase
             .from('scan_history')
-            .select('id, monument_name, location, scanned_at, image_url, is_recognized, confidence')
+            .select('id, monument_name, location, period, scanned_at, image_url, scanned_image_url, is_recognized, confidence')
             .eq('user_id', user.id)
             .order('scanned_at', { ascending: false })
             .limit(15);
@@ -66,23 +66,23 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             // Fallback to local storage
             await loadFromLocalStorage();
           } else {
-            // Map Supabase data to HistoryItem format with minimal data
+            // Map Supabase data to HistoryItem format with minimal data for history cards
             const mappedData = (data || []).map(item => {
               try {
                 return {
                   id: item.id || '',
                   name: item.monument_name || '',
                   location: item.location || '',
-                  period: '', // Will be loaded on demand
-                  description: '', // Will be loaded on demand
-                  significance: '', // Will be loaded on demand
-                  facts: [], // Will be loaded on demand
+                  period: item.period || '', // Keep period for display
+                  description: '', // Will be regenerated via API when needed
+                  significance: '', // Will be regenerated via API when needed
+                  facts: [], // Will be regenerated via API when needed
                   image: item.image_url || '',
-                  scannedImage: '', // Will be loaded on demand
+                  scannedImage: item.scanned_image_url || '', // Keep for history card display
                   scannedAt: item.scanned_at ? new Date(item.scanned_at).toISOString() : new Date().toISOString(),
                   confidence: typeof item.confidence === 'number' ? item.confidence : undefined,
                   isRecognized: typeof item.is_recognized === 'boolean' ? item.is_recognized : undefined,
-                  detailedDescription: undefined, // Will be loaded on demand
+                  detailedDescription: undefined, // Will be regenerated via API when needed
                 };
               } catch (mappingError) {
                 console.error('Error mapping history item:', mappingError, item);
@@ -167,6 +167,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
     if (!user) return false;
     
     try {
+      // Only save minimal data to Supabase - no detailed descriptions or large content
       const { error } = await supabase
         .from('scan_history')
         .insert({
@@ -174,15 +175,13 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           monument_name: item.name,
           location: item.location,
           period: item.period,
-          description: item.description,
-          significance: item.significance,
-          facts: item.facts,
           image_url: item.image,
-          scanned_image_url: item.scannedImage,
+          scanned_image_url: item.scannedImage, // Keep for history card display
           scanned_at: new Date(item.scannedAt).toISOString(),
           confidence: item.confidence || null,
           is_recognized: item.isRecognized || null,
-          detailed_description: item.detailedDescription || null,
+          // Don't save description, significance, facts, or detailed_description
+          // These will be regenerated via API when needed
         });
       
       if (error) {
@@ -265,17 +264,24 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
       setHistory(newHistory);
       
       if (user) {
-        // Try to save to Supabase first
+        // Save minimal data to Supabase for history cards only
         const supabaseSuccess = await saveToSupabase(item);
         if (!supabaseSuccess) {
           console.warn('Supabase save failed, using local storage fallback');
           await saveToLocalStorage(newHistory);
         } else {
-          // If Supabase save successful, only save minimal data locally as backup
+          console.log('✅ Minimal history data saved to Supabase for card display');
+          // Also save minimal data locally as backup
           const minimalBackup = [{
             id: item.id,
             name: item.name,
+            location: item.location,
+            period: item.period,
+            image: item.image,
+            scannedImage: item.scannedImage,
             scannedAt: item.scannedAt,
+            confidence: item.confidence,
+            isRecognized: item.isRecognized,
           }];
           try {
             await AsyncStorage.setItem(HISTORY_STORAGE_KEY + '_backup', JSON.stringify(minimalBackup));
@@ -284,7 +290,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           }
         }
       } else {
-        // Save to local storage if not authenticated (with size limits)
+        // Save minimal data to local storage if not authenticated
         await saveToLocalStorage(newHistory);
       }
     } catch (error) {

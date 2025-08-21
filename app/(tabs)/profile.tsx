@@ -25,7 +25,7 @@ import { useHistory } from "@/providers/HistoryProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { scanResultStore } from "@/services/scanResultStore";
+
 
 export default function ProfileScreen() {
   const { history, clearHistory } = useHistory();
@@ -165,10 +165,17 @@ export default function ProfileScreen() {
                     <TouchableOpacity
                       style={styles.historyCard}
                       onPress={() => {
-                        const resultId = scanResultStore.store(item);
+                        // Navigate to scan result with minimal data - content will be regenerated via API
                         router.push({
                           pathname: "/scan-result" as any,
-                          params: { resultId: resultId },
+                          params: { 
+                            historyItemId: item.id,
+                            monumentName: item.name,
+                            location: item.location,
+                            period: item.period,
+                            scannedImage: item.scannedImage,
+                            regenerate: 'true' // Flag to indicate content should be regenerated
+                          },
                         });
                       }}
                     >
