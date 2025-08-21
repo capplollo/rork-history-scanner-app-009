@@ -172,15 +172,16 @@ export default function ProfileScreen() {
                       });
                     }}
                   >
-                    <Image source={{ uri: item.scannedImage }} style={styles.historyThumbnail} />
-                    <View style={styles.historyCardContent}>
-                      <Text style={styles.historyMonumentName} numberOfLines={2}>{item.name}</Text>
-                      <View style={styles.historyInfoRow}>
-                        <MapPin size={12} color="#64748b" />
-                        <Text style={styles.historyInfoText} numberOfLines={1}>{item.location}</Text>
+                    <Image source={{ uri: item.scannedImage }} style={styles.historyCardBackground} />
+                    <LinearGradient
+                      colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.3)', 'transparent']}
+                      style={styles.historyCardOverlay}
+                    >
+                      <View style={styles.historyCardContent}>
+                        <Text style={styles.historyMonumentName} numberOfLines={2}>{item.name}</Text>
+                        <Text style={styles.historyPeriod} numberOfLines={1}>{item.period || formatDate(item.scannedAt)}</Text>
                       </View>
-                      <Text style={styles.historyScanDate}>{formatDate(item.scannedAt)}</Text>
-                    </View>
+                    </LinearGradient>
                   </TouchableOpacity>
                 );
               })}
@@ -408,34 +409,60 @@ const styles = StyleSheet.create({
   },
   historyCard: {
     width: "48%",
-    backgroundColor: "#ffffff",
+    height: 200,
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+    position: "relative",
   },
-  historyThumbnail: {
+  historyCardBackground: {
     width: "100%",
-    height: 120,
+    height: "100%",
     resizeMode: "cover",
+    position: "absolute",
+  },
+  historyCardOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: "60%",
+    justifyContent: "flex-end",
   },
   historyCardContent: {
-    padding: 12,
-    gap: 6,
+    padding: 16,
+    gap: 4,
   },
   historyMonumentName: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "500",
-    color: "#2C3E50",
-    lineHeight: 18,
+    fontWeight: "600",
+    color: "#ffffff",
+    lineHeight: 20,
+    textShadowColor: "rgba(0,0,0,0.5)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  historyPeriod: {
+    fontSize: 13,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "rgba(255,255,255,0.9)",
+    fontStyle: "italic",
+    textShadowColor: "rgba(0,0,0,0.5)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   historyInfoRow: {
     flexDirection: "row",
