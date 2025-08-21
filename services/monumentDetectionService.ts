@@ -1,4 +1,6 @@
-
+import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 
 export interface DetectionResult {
   artworkName: string;
@@ -27,6 +29,8 @@ export interface AdditionalInfo {
 export async function detectArtwork(imageUri: string, additionalInfo?: AdditionalInfo): Promise<DetectionResult> {
   try {
     console.log('Starting artwork/monument detection for image:', imageUri);
+    console.log('Platform:', Platform.OS);
+    console.log('Additional info provided:', additionalInfo);
     
     // Convert image to base64 with compression
     const base64Image = await convertImageToBase64(imageUri);
@@ -34,11 +38,18 @@ export async function detectArtwork(imageUri: string, additionalInfo?: Additiona
     
     // Single comprehensive analysis - get everything in one call
     const result = await performComprehensiveAnalysis(base64Image, additionalInfo);
+    console.log('Analysis completed successfully:', result.artworkName, 'confidence:', result.confidence);
     
     return result;
     
   } catch (error) {
     console.error('Error detecting monument:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      platform: Platform.OS,
+      imageUri: imageUri?.substring(0, 100) + '...' // Log first 100 chars of URI
+    });
     
     // Return a proper "unknown" result instead of random mock data
     return {
@@ -148,29 +159,83 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
 
 
 async function convertImageToBase64(imageUri: string): Promise<string> {
-  const response = await fetch(imageUri);
-  const blob = await response.blob();
+  console.log('convertImageToBase64 called with:', { imageUri: imageUri?.substring(0, 100) + '...', platform: Platform.OS });
   
-  // Compress image if it's too large (>1MB)
-  let finalBlob = blob;
-  if (blob.size > 1024 * 1024) {
-    console.log('Compressing large image:', blob.size, 'bytes');
-    finalBlob = await compressImage(blob);
-    console.log('Compressed to:', finalBlob.size, 'bytes');
+  if (Platform.OS === 'web') {
+    console.log('Using web implementation for image conversion');
+    // Web implementation
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+    
+    // Compress image if it's too large (>1MB)
+    let finalBlob = blob;
+    if (blob.size > 1024 * 1024) {
+      console.log('Compressing large image:', blob.size, 'bytes');
+      finalBlob = await compressImageWeb(blob);
+      console.log('Compressed to:', finalBlob.size, 'bytes');
+    }
+    
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = (reader.result as string).split(',')[1];
+        console.log('Web image conversion successful, base64 length:', base64.length);
+        resolve(base64);
+      };
+      reader.onerror = (error) => {
+        console.error('FileReader error:', error);
+        reject(error);
+      };
+      reader.readAsDataURL(finalBlob);
+    });
+  } else {
+    console.log('Using mobile implementation for image conversion');
+    // Mobile implementation using expo-file-system
+    try {
+      console.log('Starting image manipulation...');
+      // First, compress/resize the image for mobile
+      const manipulatedImage = await manipulateAsync(
+        imageUri,
+        [
+          { resize: { width: 1024 } } // Resize to max width of 1024px
+        ],
+        {
+          compress: 0.8,
+          format: SaveFormat.JPEG,
+        }
+      );
+      
+      console.log('Image manipulation successful, new URI:', manipulatedImage.uri);
+      console.log('Manipulated image dimensions:', manipulatedImage.width, 'x', manipulatedImage.height);
+      
+      // Convert to base64
+      console.log('Reading manipulated image as base64...');
+      const base64 = await FileSystem.readAsStringAsync(manipulatedImage.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      console.log('Mobile image conversion successful, base64 length:', base64.length);
+      return base64;
+    } catch (error) {
+      console.error('Error converting image to base64 on mobile:', error);
+      console.log('Attempting fallback: reading original image directly...');
+      
+      try {
+        // Fallback: try to read original image directly
+        const base64 = await FileSystem.readAsStringAsync(imageUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        console.log('Fallback successful, base64 length:', base64.length);
+        return base64;
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
+        throw new Error(`Failed to convert image to base64: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
   }
-  
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = (reader.result as string).split(',')[1];
-      resolve(base64);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(finalBlob);
-  });
 }
 
-async function compressImage(blob: Blob): Promise<Blob> {
+async function compressImageWeb(blob: Blob): Promise<Blob> {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;
