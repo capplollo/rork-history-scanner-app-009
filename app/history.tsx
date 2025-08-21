@@ -98,7 +98,7 @@ export default function HistoryScreen() {
     const formatPeriod = (period: string) => {
       if (!period) return '';
       // Remove "artistic period" and similar phrases, keep only dates/centuries
-      return period.replace(/artistic period/gi, '').replace(/\bperiod\b/gi, '').trim();
+      return period.replace(/artistic period/gi, '').replace(/period/gi, '').trim();
     };
 
     return (
@@ -146,7 +146,7 @@ export default function HistoryScreen() {
     const formatPeriod = (period: string) => {
       if (!period) return '';
       // Remove "artistic period" and similar phrases, keep only dates/centuries
-      return period.replace(/artistic period/gi, '').replace(/\bperiod\b/gi, '').trim();
+      return period.replace(/artistic period/gi, '').replace(/period/gi, '').trim();
     };
 
     return (

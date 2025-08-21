@@ -18,7 +18,7 @@ export const mockMonuments = [
     id: "2",
     name: "Taj Mahal",
     location: "Agra, India",
-    period: "17th century",
+    period: "1632-1653",
     description: "The Taj Mahal is an ivory-white marble mausoleum on the south bank of the Yamuna river. It was commissioned by the Mughal emperor Shah Jahan to house the tomb of his favorite wife, Mumtaz Mahal.",
     significance: "A UNESCO World Heritage Site and widely recognized as 'the jewel of Muslim art in India'. It is regarded by many as the best example of Mughal architecture and a symbol of India's rich history.",
     facts: [
@@ -32,8 +32,8 @@ export const mockMonuments = [
   {
     id: "3",
     name: "Great Wall of China",
-    location: "Beijing, China",
-    period: "7th century BC - 17th century AD",
+    location: "Northern China",
+    period: "7th century BC - 1644 AD",
     description: "The Great Wall of China is a series of fortifications made of stone, brick, tamped earth, wood, and other materials. It was built along the historical northern borders of China to protect against invasions.",
     significance: "The world's longest wall and biggest ancient architecture. It has been a UNESCO World Heritage Site since 1987 and represents one of the most impressive architectural feats in history.",
     facts: [
@@ -48,7 +48,7 @@ export const mockMonuments = [
     id: "4",
     name: "Machu Picchu",
     location: "Cusco, Peru",
-    period: "15th-16th century",
+    period: "1450-1572",
     description: "Machu Picchu is a 15th-century Inca citadel located in the Eastern Cordillera of southern Peru. Often referred to as the 'Lost City of the Incas', it is the most familiar icon of Inca civilization.",
     significance: "A UNESCO World Heritage Site and one of the New Seven Wonders of the World. It demonstrates the Inca's mastery of architecture and engineering in harmony with the natural landscape.",
     facts: [
@@ -63,7 +63,7 @@ export const mockMonuments = [
     id: "5",
     name: "Eiffel Tower",
     location: "Paris, France",
-    period: "1889",
+    period: "1887-1889",
     description: "The Eiffel Tower is a wrought-iron lattice tower on the Champ de Mars in Paris. Named after engineer Gustave Eiffel, it was built as the entrance arch for the 1889 World's Fair.",
     significance: "Global cultural icon of France and one of the most recognizable structures in the world. It is the most-visited paid monument in the world with millions of visitors annually.",
     facts: [
@@ -78,7 +78,7 @@ export const mockMonuments = [
     id: "6",
     name: "Pyramids of Giza",
     location: "Giza, Egypt",
-    period: "26th century BC",
+    period: "2580-2510 BC",
     description: "The Giza pyramid complex includes the Great Pyramid of Giza, the Pyramid of Khafre, and the Pyramid of Menkaure. They are the oldest and only remaining wonder of the ancient world.",
     significance: "Testament to ancient Egyptian civilization and engineering prowess. The Great Pyramid was the tallest man-made structure for over 3,800 years.",
     facts: [

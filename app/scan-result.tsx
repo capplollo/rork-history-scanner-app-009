@@ -637,7 +637,7 @@ export default function ScanResultScreen() {
               <View>
                 <Text style={styles.infoLabel}>Period</Text>
                 <Text style={styles.infoValue}>
-                  {monument.period ? monument.period.replace(/artistic period/gi, '').replace(/\bperiod\b/gi, '').trim() : ''}
+                  {monument.period ? monument.period.replace(/artistic period/gi, '').replace(/period/gi, '').trim() : ''}
                 </Text>
               </View>
             </View>
