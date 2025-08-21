@@ -17,7 +17,7 @@ import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, Che
 import { router } from "expo-router";
 import { useHistory } from "@/providers/HistoryProvider";
 import { mockMonuments } from "@/data/mockMonuments";
-import { detectArtwork, DetectionResult } from "@/services/monumentDetectionService";
+import { detectMonumentsAndArt, DetectionResult } from "@/services/monumentDetectionService";
 import { scanResultStore } from "@/services/scanResultStore";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -81,14 +81,14 @@ export default function ScannerScreen() {
     setAnalysisStatus("Preparing image...");
     
     try {
-      setAnalysisStatus("Analyzing artwork with AI...");
-      const detectionResult: DetectionResult = await detectArtwork(selectedImage, additionalInfo);
+      setAnalysisStatus("Analyzing monuments and art with AI...");
+      const detectionResult: DetectionResult = await detectMonumentsAndArt(selectedImage, additionalInfo);
       
       console.log('Detection result:', detectionResult);
       
       // Provide feedback based on the result
       if (detectionResult.isRecognized && detectionResult.confidence > 50) {
-        setAnalysisStatus("Artwork recognized! Finalizing...");
+        setAnalysisStatus("Monuments and art recognized! Finalizing...");
       } else if (detectionResult.confidence > 30) {
         setAnalysisStatus("Partial recognition, finalizing...");
       } else {
@@ -145,14 +145,14 @@ export default function ScannerScreen() {
       // Create a basic result instead of random mock data
       const scanResult = {
         id: Date.now().toString(),
-        name: "Unknown Artwork",
+        name: "Unknown Monuments and Art",
         location: "Unknown",
         period: "Unknown",
-        description: "Unable to analyze this artwork, monument, sculpture, or cultural landmark. The AI service may be temporarily unavailable or the image may not contain a recognizable piece.",
-        significance: "Analysis failed due to technical issues or unrecognized artwork.",
+        description: "Unable to analyze these monuments and art. The AI service may be temporarily unavailable or the image may not contain recognizable pieces.",
+        significance: "Analysis failed due to technical issues or unrecognized monuments and art.",
         facts: [
           "Please try again with a clearer photo",
-          "Ensure the artwork/monument is clearly visible in the image",
+          "Ensure the monuments and art are clearly visible in the image",
           "Check your internet connection",
           "Try adding more context in the additional info section"
         ],
@@ -243,7 +243,7 @@ export default function ScannerScreen() {
             {showAdditionalInfo && (
               <View style={styles.additionalInfoForm}>
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Artwork/Monument Name</Text>
+                  <Text style={styles.inputLabel}>Monuments and Art Name</Text>
                   <TextInput
                     style={styles.textInput}
                     placeholder="e.g., Mona Lisa, David, Eiffel Tower"
@@ -306,7 +306,7 @@ export default function ScannerScreen() {
             ) : (
               <>
                 <Sparkles size={20} color="#ffffff" />
-                <Text style={styles.analyzeButtonText}>Analyze Artwork (~15s)</Text>
+                <Text style={styles.analyzeButtonText}>Analyze Monuments and Art (~15s)</Text>
               </>
             )}
           </TouchableOpacity>

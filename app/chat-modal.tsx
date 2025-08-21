@@ -134,7 +134,7 @@ export default function ChatModalScreen() {
     return [
       "What are the most famous monuments in Rome?",
       "Tell me about ancient Egyptian architecture",
-      "What makes a monument historically significant?",
+      "What makes monuments and art historically significant?",
       "How do archaeologists study ancient monuments?",
     ];
   };
@@ -211,9 +211,9 @@ export default function ChatModalScreen() {
               <View style={styles.welcomeIconContainer}>
                 <Sparkles size={60} color="#4f46e5" />
               </View>
-              <Text style={styles.welcomeTitle}>Ask AI About This Monument</Text>
+              <Text style={styles.welcomeTitle}>Ask AI About These Monuments and Art</Text>
               <Text style={styles.welcomeText}>
-                Get detailed information, historical context, and interesting facts about this monument.
+                Get detailed information, historical context, and interesting facts about these monuments and art.
               </Text>
               
               {selectedMonument && (
@@ -257,7 +257,7 @@ export default function ChatModalScreen() {
             style={styles.textInput}
             value={inputText}
             onChangeText={setInputText}
-            placeholder="Ask about this monument..."
+            placeholder="Ask about these monuments and art..."
             placeholderTextColor="#9ca3af"
             multiline
             maxLength={1000}

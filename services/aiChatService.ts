@@ -24,10 +24,10 @@ export interface MonumentContext {
   significance: string;
   facts: string[];
   detailedDescription?: {
-    quickOverview: string;
+    keyTakeaways: string;
     inDepthContext: string;
     curiosities?: string;
-    keyTakeaways: string[];
+    keyTakeawaysList: string[];
   };
 }
 
@@ -41,20 +41,20 @@ export async function sendChatMessage(
     console.log('Monument context:', monumentContext?.name);
     
     // Build the context for the AI
-    let systemPrompt = `You are an expert AI assistant specializing in art, cultural heritage, monuments, and architectural history. You help users learn about artworks, monuments, sculptures, paintings, and cultural landmarks they have scanned and discovered.
+    let systemPrompt = `You are an expert AI assistant specializing in art, cultural heritage, monuments, and architectural history. You help users learn about monuments and art including sculptures, paintings, and cultural landmarks they have scanned and discovered.
 
 Your role is to:
-- Provide accurate, engaging information about artworks, monuments, sculptures, paintings, and cultural landmarks
+- Provide accurate, engaging information about monuments and art including sculptures, paintings, and cultural landmarks
 - Answer questions about art history, architecture, artistic techniques, and cultural significance
-- Share interesting facts and stories about artists, artworks, and historical contexts
+- Share interesting facts and stories about artists, monuments and art, and historical contexts
 - Help users understand the artistic, historical, and cultural importance of these pieces
 - Be conversational but informative
 - Keep responses concise but comprehensive (200-400 words typically)
 
-If a specific artwork or monument is being discussed, use the provided context to give personalized answers.`;
+If specific monuments and art are being discussed, use the provided context to give personalized answers.`;
 
     if (monumentContext) {
-      systemPrompt += `\n\nCurrent artwork/monument context:
+      systemPrompt += `\n\nCurrent monuments and art context:
 Name: ${monumentContext.name}
 Location: ${monumentContext.location}
 Period: ${monumentContext.period}
@@ -64,13 +64,13 @@ Facts: ${monumentContext.facts.join(', ')}
 
 ${monumentContext.detailedDescription ? `
 Detailed Information:
-Quick Overview: ${monumentContext.detailedDescription.quickOverview}
+Key Takeaways: ${monumentContext.detailedDescription.keyTakeaways}
 In-Depth Context: ${monumentContext.detailedDescription.inDepthContext}
 ${monumentContext.detailedDescription.curiosities ? `Curiosities: ${monumentContext.detailedDescription.curiosities}` : ''}
-Key Takeaways: ${monumentContext.detailedDescription.keyTakeaways.join(', ')}
+Key Takeaways List: ${monumentContext.detailedDescription.keyTakeawaysList.join(', ')}
 ` : ''}
 
-Focus your responses on this specific artwork or monument when relevant to the user's question.`;
+Focus your responses on these specific monuments and art when relevant to the user's question.`;
     }
 
     // Build conversation history for context
@@ -145,7 +145,7 @@ export async function generateChatTitle(
     const messages = [
       {
         role: 'user' as const,
-        content: `Generate a short, engaging title (3-6 words) for a chat conversation about ${monumentContext ? `the ${monumentContext.name} artwork/monument` : 'art and cultural heritage'}. The first message is: "${firstMessage}"
+        content: `Generate a short, engaging title (3-6 words) for a chat conversation about ${monumentContext ? `the ${monumentContext.name} monuments and art` : 'monuments and art heritage'}. The first message is: "${firstMessage}"
 
 Respond with ONLY the title, no quotes or additional text.`
       }
