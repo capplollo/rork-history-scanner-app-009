@@ -190,17 +190,31 @@ async function convertImageToBase64(imageUri: string): Promise<string> {
     });
   } else {
     console.log('Using mobile implementation for image conversion');
-    // Mobile implementation using expo-file-system
+    // Mobile implementation using expo-file-system with improved error handling
     try {
-      console.log('Starting image manipulation...');
-      // First, compress/resize the image for mobile
+      console.log('Starting image manipulation for mobile...');
+      
+      // Check if the image URI is valid
+      if (!imageUri || imageUri.trim().length === 0) {
+        throw new Error('Invalid image URI provided');
+      }
+      
+      // Get file info first to validate the image
+      const fileInfo = await FileSystem.getInfoAsync(imageUri);
+      if (!fileInfo.exists) {
+        throw new Error('Image file does not exist at the provided URI');
+      }
+      
+      console.log('Image file exists, size:', fileInfo.size, 'bytes');
+      
+      // First, compress/resize the image for mobile with more aggressive compression
       const manipulatedImage = await manipulateAsync(
         imageUri,
         [
-          { resize: { width: 1024 } } // Resize to max width of 1024px
+          { resize: { width: 800 } } // Smaller size for mobile to reduce processing load
         ],
         {
-          compress: 0.8,
+          compress: 0.7, // More aggressive compression for mobile
           format: SaveFormat.JPEG,
         }
       );
@@ -208,28 +222,67 @@ async function convertImageToBase64(imageUri: string): Promise<string> {
       console.log('Image manipulation successful, new URI:', manipulatedImage.uri);
       console.log('Manipulated image dimensions:', manipulatedImage.width, 'x', manipulatedImage.height);
       
+      // Verify the manipulated image exists
+      const manipulatedFileInfo = await FileSystem.getInfoAsync(manipulatedImage.uri);
+      if (!manipulatedFileInfo.exists) {
+        throw new Error('Manipulated image file was not created successfully');
+      }
+      
+      console.log('Manipulated image size:', manipulatedFileInfo.size, 'bytes');
+      
       // Convert to base64
       console.log('Reading manipulated image as base64...');
       const base64 = await FileSystem.readAsStringAsync(manipulatedImage.uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
       
+      // Validate base64 result
+      if (!base64 || base64.length === 0) {
+        throw new Error('Base64 conversion resulted in empty string');
+      }
+      
       console.log('Mobile image conversion successful, base64 length:', base64.length);
+      
+      // Clean up the temporary manipulated image
+      try {
+        await FileSystem.deleteAsync(manipulatedImage.uri, { idempotent: true });
+        console.log('Cleaned up temporary manipulated image');
+      } catch (cleanupError) {
+        console.warn('Failed to clean up temporary image:', cleanupError);
+      }
+      
       return base64;
     } catch (error) {
       console.error('Error converting image to base64 on mobile:', error);
       console.log('Attempting fallback: reading original image directly...');
       
       try {
-        // Fallback: try to read original image directly
+        // Fallback: try to read original image directly with validation
+        const fileInfo = await FileSystem.getInfoAsync(imageUri);
+        if (!fileInfo.exists) {
+          throw new Error('Original image file does not exist for fallback');
+        }
+        
+        console.log('Reading original image directly, size:', fileInfo.size, 'bytes');
+        
+        // Check if file is too large for direct reading
+        if (fileInfo.size && fileInfo.size > 5 * 1024 * 1024) { // 5MB limit
+          throw new Error('Image file too large for direct reading fallback');
+        }
+        
         const base64 = await FileSystem.readAsStringAsync(imageUri, {
           encoding: FileSystem.EncodingType.Base64,
         });
+        
+        if (!base64 || base64.length === 0) {
+          throw new Error('Fallback base64 conversion resulted in empty string');
+        }
+        
         console.log('Fallback successful, base64 length:', base64.length);
         return base64;
       } catch (fallbackError) {
         console.error('Fallback also failed:', fallbackError);
-        throw new Error(`Failed to convert image to base64: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        throw new Error(`Failed to convert image to base64: ${error instanceof Error ? error.message : 'Unknown error'}. Fallback error: ${fallbackError instanceof Error ? fallbackError.message : 'Unknown fallback error'}`);
       }
     }
   }

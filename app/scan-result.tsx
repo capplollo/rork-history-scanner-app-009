@@ -19,6 +19,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { mockMonuments } from "@/data/mockMonuments";
 import { HistoryItem, useHistory } from "@/providers/HistoryProvider";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { scanResultStore } from "@/services/scanResultStore";
 import { voiceService, VoiceOption } from "@/services/voiceService";
 import VoiceSettings from "@/components/VoiceSettings";
@@ -38,7 +39,7 @@ export default function ScanResultScreen() {
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption | null>(null);
   const [isReanalyzing, setIsReanalyzing] = useState<boolean>(false);
   const [showContextForm, setShowContextForm] = useState<boolean>(false);
-  const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
+  const [, setIsRegenerating] = useState<boolean>(false);
   const [contextInfo, setContextInfo] = useState<AdditionalInfo>({
     name: "",
     location: "",
@@ -211,12 +212,36 @@ export default function ScanResultScreen() {
         
         if (!loadedMonument) {
           console.error('❌ Failed to load monument data after all retries');
+          console.log('Attempting to get most recent scan from history...');
+          
           // Try to get the most recent scan from history as a last resort
           try {
-            // This would require accessing the history provider, but for now we'll show the error
-            console.log('Attempting to get most recent scan from history...');
-          } catch (error) {
-            console.error('Failed to get recent scan from history:', error);
+            const stored = await AsyncStorage.getItem('@monument_scanner_history');
+            if (stored) {
+              const historyItems = JSON.parse(stored);
+              if (historyItems && historyItems.length > 0) {
+                const mostRecent = historyItems[0];
+                if (mostRecent && mostRecent.name) {
+                  console.log('✅ Found recent scan in history:', mostRecent.name);
+                  loadedMonument = {
+                    id: mostRecent.id || 'history-fallback',
+                    name: mostRecent.name,
+                    location: mostRecent.location || 'Unknown Location',
+                    period: mostRecent.period || 'Unknown Period',
+                    description: 'This artwork was previously scanned. Content will be regenerated when you view details.',
+                    significance: 'Historical significance will be loaded when viewing details.',
+                    facts: ['Previously scanned artwork', 'Content available on demand'],
+                    image: mostRecent.image || '',
+                    scannedImage: mostRecent.scannedImage || mostRecent.image || '',
+                    scannedAt: mostRecent.scannedAt || new Date().toISOString(),
+                    confidence: mostRecent.confidence,
+                    isRecognized: mostRecent.isRecognized !== false,
+                  };
+                }
+              }
+            }
+          } catch (historyError) {
+            console.error('Failed to get recent scan from history:', historyError);
           }
         }
       }

@@ -39,15 +39,23 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
     
     try {
       if (user) {
-        // Load from Supabase with improved error handling
+        // Load from Supabase with improved error handling and timeout
         try {
-          // Simple query without abort controller to avoid AbortError issues
-          const { data, error } = await supabase
+          console.log('Loading history from Supabase for user:', user.id);
+          
+          // Add a timeout to prevent hanging requests
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 second timeout
+          });
+          
+          const queryPromise = supabase
             .from('scan_history')
             .select('id, monument_name, location, period, scanned_at, image_url, scanned_image_url, is_recognized, confidence')
             .eq('user_id', user.id)
             .order('scanned_at', { ascending: false })
             .limit(15);
+          
+          const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
           
           // Check if component was unmounted during the request
           if (isCancelled) {
@@ -57,17 +65,14 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           
           if (error) {
             console.error('Error loading history from Supabase:', error.message || 'Unknown error');
-            console.error('Supabase error details:', JSON.stringify({
-              message: error.message,
-              code: error.code,
-              details: error.details,
-              hint: error.hint,
-            }));
-            // Fallback to local storage
+            // Don't log full error details to reduce noise
+            console.warn('Falling back to local storage due to Supabase error');
             await loadFromLocalStorage();
           } else {
+            console.log('Successfully loaded', data?.length || 0, 'items from Supabase');
+            
             // Map Supabase data to HistoryItem format with minimal data for history cards
-            const mappedData = (data || []).map(item => {
+            const mappedData = (data || []).map((item: any) => {
               try {
                 return {
                   id: item.id || '',
@@ -95,10 +100,12 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             }
           }
         } catch (requestError: unknown) {
-          // Handle different types of errors
+          // Handle different types of errors more gracefully
           if (requestError instanceof Error) {
-            if (requestError.name === 'AbortError') {
+            if (requestError.name === 'AbortError' || requestError.message.includes('aborted')) {
               console.warn('Supabase query was cancelled, falling back to local storage');
+            } else if (requestError.message === 'Request timeout') {
+              console.warn('Supabase query timed out, falling back to local storage');
             } else {
               console.error('Supabase query failed:', requestError.message);
             }
@@ -112,6 +119,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
         }
       } else {
         // Load from local storage if not authenticated
+        console.log('User not authenticated, loading from local storage');
         await loadFromLocalStorage();
       }
     } catch (error) {
