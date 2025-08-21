@@ -26,39 +26,19 @@ export interface AdditionalInfo {
 
 export async function detectArtwork(imageUri: string, additionalInfo?: AdditionalInfo): Promise<DetectionResult> {
   try {
-    const { Platform } = await import('react-native');
     console.log('Starting artwork/monument detection for image:', imageUri);
-    console.log('Platform:', Platform.OS);
-    console.log('Additional info provided:', additionalInfo);
     
     // Convert image to base64 with compression
     const base64Image = await convertImageToBase64(imageUri);
     console.log('Image converted to base64, length:', base64Image.length);
     
-    // Validate base64 image
-    if (!base64Image || base64Image.length < 100) {
-      throw new Error('Invalid or empty base64 image data');
-    }
-    
     // Single comprehensive analysis - get everything in one call
     const result = await performComprehensiveAnalysis(base64Image, additionalInfo);
-    
-    console.log('Detection completed successfully:', {
-      name: result.artworkName,
-      confidence: result.confidence,
-      isRecognized: result.isRecognized
-    });
     
     return result;
     
   } catch (error) {
     console.error('Error detecting monument:', error);
-    console.error('Error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      imageUri,
-      additionalInfo
-    });
     
     // Return a proper "unknown" result instead of random mock data
     return {
@@ -107,116 +87,28 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
   ];
 
   console.log('Sending comprehensive analysis request to AI API...');
-  console.log('Request payload size:', JSON.stringify({ messages: messages }).length);
   
-  // Platform-specific timeout and error handling
-  const { Platform } = await import('react-native');
-  const isMobile = Platform.OS !== 'web';
-  const timeout = isMobile ? 90000 : 60000; // Longer timeout for mobile
-  
-  console.log(`Setting up request with ${timeout}ms timeout for ${Platform.OS}`);
-  
-  let controller: AbortController | undefined;
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-  
-  // Only use AbortController on web to avoid mobile issues
-  if (!isMobile) {
-    controller = new AbortController();
-    timeoutId = setTimeout(() => controller?.abort(), timeout);
-  }
-  
-  const requestOptions: RequestInit = {
+  const response = await fetch('https://toolkit.rork.com/text/llm/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'User-Agent': isMobile ? 'MonumentScanner-Mobile' : 'MonumentScanner-Web',
     },
     body: JSON.stringify({
       messages: messages
-    }),
-  };
-  
-  // Only add signal for web
-  if (controller) {
-    requestOptions.signal = controller.signal;
-  }
-  
-  let response: Response;
-  
-  try {
-    console.log('Making fetch request to AI API...');
-    response = await fetch('https://toolkit.rork.com/text/llm/', requestOptions);
-    
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    
-    console.log('AI API response received');
-    console.log('Response status:', response.status);
-    console.log('Response ok:', response.ok);
-    
-    if (!response.ok) {
-      let errorText = 'Unknown error';
-      try {
-        errorText = await response.text();
-      } catch (textError) {
-        console.warn('Could not read error response text:', textError);
-      }
-      
-      console.error('AI API error details:');
-      console.error('Status:', response.status, response.statusText);
-      console.error('Response body:', errorText);
-      
-      if (response.status === 413) {
-        throw new Error('Image too large for processing. Please try a smaller image.');
-      } else if (response.status === 429) {
-        throw new Error('Too many requests. Please wait a moment and try again.');
-      } else if (response.status >= 500) {
-        throw new Error('AI service is temporarily unavailable. Please try again later.');
-      } else if (response.status === 0 || response.status === 408) {
-        throw new Error('Network timeout. Please check your internet connection and try again.');
-      } else {
-        throw new Error(`AI service error: ${response.status} - ${errorText || response.statusText}`);
-      }
-    }
-  } catch (error) {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    
-    console.error('Fetch request failed:', error);
-    
-    if (error instanceof Error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timed out. Please try again with a smaller image or better internet connection.');
-      } else if (error.name === 'TypeError' && error.message.includes('Network request failed')) {
-        throw new Error('Network error. Please check your internet connection and try again.');
-      } else if (error.message.includes('timeout')) {
-        throw new Error('Request timed out. Please try again with a smaller image or better internet connection.');
-      }
-    }
-    
-    throw error;
+    })
+  });
+
+  console.log('AI API response status:', response.status);
+
+  if (!response.ok) {
+    console.error('AI API error:', response.status, response.statusText);
+    throw new Error(`AI service error: ${response.status}`);
   }
 
-  let data: any;
-  let content: string;
-  
-  try {
-    console.log('Parsing response JSON...');
-    data = await response.json();
-    console.log('Response data keys:', Object.keys(data));
-    
-    content = data.completion;
-    if (!content) {
-      console.error('No completion in response:', data);
-      throw new Error('No content in AI response');
-    }
-    
-    console.log('AI response content length:', content.length);
-  } catch (jsonError) {
-    console.error('Failed to parse JSON response:', jsonError);
-    throw new Error('Invalid JSON response from AI service');
+  const data = await response.json();
+  const content = data.completion;
+  if (!content) {
+    throw new Error('No content in AI response');
   }
 
   // Clean up the response and parse JSON
@@ -256,17 +148,6 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
 
 
 async function convertImageToBase64(imageUri: string): Promise<string> {
-  const { Platform } = await import('react-native');
-  
-  if (Platform.OS === 'web') {
-    return convertImageToBase64Web(imageUri);
-  } else {
-    return convertImageToBase64Mobile(imageUri);
-  }
-}
-
-// Web implementation using FileReader and Canvas
-async function convertImageToBase64Web(imageUri: string): Promise<string> {
   const response = await fetch(imageUri);
   const blob = await response.blob();
   
@@ -274,7 +155,7 @@ async function convertImageToBase64Web(imageUri: string): Promise<string> {
   let finalBlob = blob;
   if (blob.size > 1024 * 1024) {
     console.log('Compressing large image:', blob.size, 'bytes');
-    finalBlob = await compressImageWeb(blob);
+    finalBlob = await compressImage(blob);
     console.log('Compressed to:', finalBlob.size, 'bytes');
   }
   
@@ -289,136 +170,7 @@ async function convertImageToBase64Web(imageUri: string): Promise<string> {
   });
 }
 
-// Mobile implementation using expo-file-system
-async function convertImageToBase64Mobile(imageUri: string): Promise<string> {
-  console.log('Converting mobile image to base64:', imageUri);
-  console.log('Image URI type:', typeof imageUri);
-  console.log('Image URI starts with:', imageUri.substring(0, 50));
-  
-  // Validate URI format
-  if (!imageUri || typeof imageUri !== 'string') {
-    throw new Error('Invalid image URI provided');
-  }
-  
-  // Method 1: Try expo-file-system first
-  try {
-    const FileSystem = await import('expo-file-system');
-    console.log('Using expo-file-system for base64 conversion');
-    
-    // Check if file exists first
-    const fileInfo = await FileSystem.default.getInfoAsync(imageUri);
-    console.log('File info:', fileInfo);
-    
-    if (!fileInfo.exists) {
-      throw new Error('Image file does not exist at the provided URI');
-    }
-    
-    if (fileInfo.size === 0) {
-      throw new Error('Image file is empty');
-    }
-    
-    console.log('File size:', fileInfo.size, 'bytes');
-    
-    // For mobile, we'll read the file directly as base64
-    // expo-image-picker already provides optimized images
-    const base64 = await FileSystem.default.readAsStringAsync(imageUri, {
-      encoding: FileSystem.default.EncodingType.Base64,
-    });
-    
-    console.log('Mobile image converted to base64 using FileSystem, length:', base64.length);
-    
-    if (base64 && base64.length > 100) {
-      // Validate base64 format
-      if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64)) {
-        throw new Error('Invalid base64 format returned by FileSystem');
-      }
-      return base64;
-    } else {
-      throw new Error('FileSystem returned empty or invalid base64');
-    }
-  } catch (fileSystemError) {
-    console.error('expo-file-system conversion failed:', fileSystemError);
-    console.error('FileSystem error details:', {
-      name: fileSystemError instanceof Error ? fileSystemError.name : 'Unknown',
-      message: fileSystemError instanceof Error ? fileSystemError.message : String(fileSystemError),
-      stack: fileSystemError instanceof Error ? fileSystemError.stack : undefined
-    });
-  }
-  
-  // Method 2: Try fetch + arrayBuffer approach
-  try {
-    console.log('Trying fetch + arrayBuffer approach');
-    const response = await fetch(imageUri);
-    
-    if (!response.ok) {
-      throw new Error(`Fetch failed with status: ${response.status}`);
-    }
-    
-    const arrayBuffer = await response.arrayBuffer();
-    console.log('Fetched arrayBuffer, size:', arrayBuffer.byteLength);
-    
-    if (arrayBuffer.byteLength === 0) {
-      throw new Error('Empty arrayBuffer received');
-    }
-    
-    const bytes = new Uint8Array(arrayBuffer);
-    
-    // Use btoa if available (should be available in React Native)
-    if (typeof btoa !== 'undefined') {
-      console.log('Using btoa for base64 conversion');
-      let binary = '';
-      const chunkSize = 8192; // Process in chunks to avoid stack overflow
-      
-      for (let i = 0; i < bytes.length; i += chunkSize) {
-        const chunk = bytes.slice(i, i + chunkSize);
-        binary += String.fromCharCode.apply(null, Array.from(chunk));
-      }
-      
-      const base64 = btoa(binary);
-      console.log('Mobile image converted to base64 using btoa, length:', base64.length);
-      return base64;
-    } else {
-      throw new Error('btoa not available');
-    }
-  } catch (fetchError) {
-    console.error('Fetch + arrayBuffer approach failed:', fetchError);
-  }
-  
-  // Method 3: Manual base64 encoding as last resort
-  try {
-    console.log('Trying manual base64 encoding as last resort');
-    const response = await fetch(imageUri);
-    const arrayBuffer = await response.arrayBuffer();
-    const bytes = new Uint8Array(arrayBuffer);
-    
-    // Manual base64 encoding
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-    let result = '';
-    let i = 0;
-    
-    while (i < bytes.length) {
-      const a = bytes[i++];
-      const b = i < bytes.length ? bytes[i++] : 0;
-      const c = i < bytes.length ? bytes[i++] : 0;
-      
-      const bitmap = (a << 16) | (b << 8) | c;
-      
-      result += chars.charAt((bitmap >> 18) & 63);
-      result += chars.charAt((bitmap >> 12) & 63);
-      result += i - 2 < bytes.length ? chars.charAt((bitmap >> 6) & 63) : '=';
-      result += i - 1 < bytes.length ? chars.charAt(bitmap & 63) : '=';
-    }
-    
-    console.log('Mobile image converted to base64 using manual encoding, length:', result.length);
-    return result;
-  } catch (manualError) {
-    console.error('Manual base64 encoding also failed:', manualError);
-    throw new Error(`Failed to convert image to base64 on mobile platform. All methods failed. URI: ${imageUri}`);
-  }
-}
-
-// Web-only image compression
-async function compressImageWeb(blob: Blob): Promise<Blob> {
+async function compressImage(blob: Blob): Promise<Blob> {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;

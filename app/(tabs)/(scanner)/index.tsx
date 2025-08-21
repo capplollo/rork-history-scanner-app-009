@@ -48,9 +48,6 @@ export default function ScannerScreen() {
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
-      // Optimize for mobile processing
-      exif: false,
-      base64: false,
     });
 
     if (!result.canceled && result.assets[0]) {
@@ -70,9 +67,6 @@ export default function ScannerScreen() {
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
-      // Optimize for mobile processing
-      exif: false,
-      base64: false,
     });
 
     if (!result.canceled && result.assets[0]) {
@@ -88,20 +82,7 @@ export default function ScannerScreen() {
     
     try {
       setAnalysisStatus("Analyzing artwork with AI...");
-      
-      // Add additional debugging for mobile
-      const { Platform } = await import('react-native');
-      console.log('About to call detectArtwork on platform:', Platform.OS);
-      console.log('Image URI:', selectedImage);
-      console.log('Additional info:', additionalInfo);
-      
       const detectionResult: DetectionResult = await detectArtwork(selectedImage, additionalInfo);
-      
-      console.log('detectArtwork completed with result:', {
-        name: detectionResult.artworkName,
-        confidence: detectionResult.confidence,
-        isRecognized: detectionResult.isRecognized
-      });
       
       console.log('Detection result:', detectionResult);
       

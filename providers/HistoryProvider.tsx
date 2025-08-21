@@ -37,15 +37,34 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
   const loadHistory = useCallback(async () => {
     try {
       if (user) {
-        // Load from Supabase with simplified error handling
+        // Load from Supabase with improved timeout handling
+        let timeoutId: ReturnType<typeof setTimeout> | null = null;
+        let controller: AbortController | null = null;
+        
         try {
+          controller = new AbortController();
+          
+          // Set up timeout with proper cleanup
+          timeoutId = setTimeout(() => {
+            if (controller && !controller.signal.aborted) {
+              controller.abort();
+            }
+          }, 8000); // Reduced to 8 seconds
+          
           // Only fetch essential fields first for better performance
           const { data, error } = await supabase
             .from('scan_history')
             .select('id, monument_name, location, scanned_at, image_url, is_recognized, confidence')
             .eq('user_id', user.id)
             .order('scanned_at', { ascending: false })
-            .limit(15); // Reduced limit for better performance
+            .limit(15) // Further reduced limit
+            .abortSignal(controller.signal);
+          
+          // Clear timeout on successful completion
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+          }
           
           if (error) {
             console.error('Error loading history from Supabase:', error.message || 'Unknown error');
@@ -84,10 +103,19 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             setHistory(mappedData);
           }
         } catch (requestError: unknown) {
+          // Clean up timeout
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+          
           // Handle different types of errors
           if (requestError instanceof Error) {
-            console.error('Supabase query failed:', requestError.message);
-            console.error('Error details:', JSON.stringify(requestError));
+            if (requestError.name === 'AbortError') {
+              console.warn('Supabase query was cancelled (timeout or abort), falling back to local storage');
+            } else {
+              console.error('Supabase query failed:', requestError.message);
+              console.error('Error details:', JSON.stringify(requestError));
+            }
           } else {
             console.error('Unknown error during Supabase query:', requestError);
           }
@@ -147,12 +175,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           scanned_at: new Date(item.scannedAt).toISOString(),
           confidence: item.confidence || null,
           is_recognized: item.isRecognized || null,
-          detailed_description: item.detailedDescription ? {
-            quickOverview: item.detailedDescription.keyTakeaways,
-            inDepthContext: item.detailedDescription.inDepthContext,
-            curiosities: item.detailedDescription.curiosities,
-            keyTakeaways: item.detailedDescription.keyTakeawaysList,
-          } : null,
+          detailed_description: item.detailedDescription || null,
         });
       
       if (error) {
@@ -267,34 +290,25 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
       setHistory([]);
       
       if (user) {
-        // Clear from Supabase with better error handling
-        try {
-          const { error } = await supabase
-            .from('scan_history')
-            .delete()
-            .eq('user_id', user.id);
-          
-          if (error) {
-            console.error('Error clearing Supabase history:', error.message || 'Unknown error');
-            console.error('Supabase error details:', {
-              message: error.message,
-              code: error.code,
-              details: error.details,
-              hint: error.hint,
-            });
-          }
-        } catch (supabaseError) {
-          console.error('Failed to clear Supabase history:', supabaseError);
+        // Clear from Supabase
+        const { error } = await supabase
+          .from('scan_history')
+          .delete()
+          .eq('user_id', user.id);
+        
+        if (error) {
+          console.error('Error clearing Supabase history:', error.message || 'Unknown error');
+          console.error('Supabase error details:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint,
+          });
         }
       }
       
       // Also clear local storage
-      try {
-        await AsyncStorage.removeItem(HISTORY_STORAGE_KEY);
-        await AsyncStorage.removeItem(HISTORY_STORAGE_KEY + '_backup');
-      } catch (storageError) {
-        console.error('Failed to clear local storage:', storageError);
-      }
+      await AsyncStorage.removeItem(HISTORY_STORAGE_KEY);
     } catch (error) {
       console.error('Error clearing history:', error);
     }
