@@ -781,12 +781,12 @@ export default function ScanResultScreen() {
                   <Info size={20} color="#1e3a8a" />
                   <Text style={styles.sectionTitle}>Key Takeaways</Text>
                 </View>
-                {monument.detailedDescription.keyTakeawaysList?.map((takeaway: string, index: number) => (
+                {(monument.detailedDescription.keyTakeawaysList || []).map((takeaway: string, index: number) => (
                   <View key={index} style={styles.factItem}>
                     <Text style={styles.factBullet}>•</Text>
                     <Text style={styles.factText}>{takeaway}</Text>
                   </View>
-                )) || []}
+                ))}
               </View>
 
               <View style={styles.section}>
@@ -818,7 +818,7 @@ export default function ScanResultScreen() {
 
               <View style={styles.factsSection}>
                 <Text style={styles.sectionTitle}>Quick Facts</Text>
-                {monument.facts.map((fact: string, index: number) => (
+                {(monument.facts || []).map((fact: string, index: number) => (
                   <View key={index} style={styles.factItem}>
                     <Text style={styles.factBullet}>•</Text>
                     <Text style={styles.factText}>{fact}</Text>
