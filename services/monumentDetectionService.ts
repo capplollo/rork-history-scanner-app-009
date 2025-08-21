@@ -69,12 +69,7 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
   // Build a comprehensive prompt that gets all information in one call
   let analysisPrompt = `Analyze this image and identify any artwork, monument, sculpture, painting, or cultural landmark. Include paintings that depict buildings/landmarks (identify the PAINTING, not the depicted structure).
 
-IMPORTANT RECOGNITION GUIDELINES:
-- Be especially careful with sculptures as they are always difficult to spot the exact ones since subjects are often similar across different artworks
-- For sculptures, it's better to not recognize than to provide a wrong identification
-- Only identify sculptures with very high confidence if you are absolutely certain of the specific piece
-- The confidence returned should reflect your actual confidence in the recognition - be honest about uncertainty
-- Consider that many sculptures share similar themes, poses, or subjects but are different works entirely`;
+Consider that many sculptures share similar themes, poses, or subjects but are different works entirely. For sculptures, confidence should be 90% or higher for recognition. For other artworks, confidence should be 80% or higher.`;
   
   // Add context if provided
   if (additionalInfo && (additionalInfo.name || additionalInfo.location || additionalInfo.building || additionalInfo.notes)) {
