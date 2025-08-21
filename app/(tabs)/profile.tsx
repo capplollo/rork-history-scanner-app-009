@@ -161,28 +161,28 @@ export default function ProfileScreen() {
                 };
                 
                 return (
-                  <TouchableOpacity
-                    key={`${item.id}-${index}`}
-                    style={styles.historyCard}
-                    onPress={() => {
-                      const resultId = scanResultStore.store(item);
-                      router.push({
-                        pathname: "/scan-result" as any,
-                        params: { resultId: resultId },
-                      });
-                    }}
-                  >
-                    <Image source={{ uri: item.scannedImage }} style={styles.historyCardBackground} />
-                    <LinearGradient
-                      colors={['rgba(0,0,0,0.6)', 'rgba(0,0,0,0.3)', 'transparent']}
-                      style={styles.historyCardOverlay}
+                  <View key={`${item.id}-${index}`} style={styles.historyCardContainer}>
+                    <TouchableOpacity
+                      style={styles.historyCard}
+                      onPress={() => {
+                        const resultId = scanResultStore.store(item);
+                        router.push({
+                          pathname: "/scan-result" as any,
+                          params: { resultId: resultId },
+                        });
+                      }}
                     >
-                      <View style={styles.historyCardContent}>
-                        <Text style={styles.historyMonumentName} numberOfLines={2}>{item.name}</Text>
-                        <Text style={styles.historyPeriod} numberOfLines={1}>{item.period || formatDate(item.scannedAt)}</Text>
-                      </View>
-                    </LinearGradient>
-                  </TouchableOpacity>
+                      <Image source={{ uri: item.scannedImage }} style={styles.historyCardBackground} />
+                      <LinearGradient
+                        colors={['transparent', 'transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.8)']}
+                        style={styles.historyCardOverlay}
+                      />
+                    </TouchableOpacity>
+                    <View style={styles.historyCardInfo}>
+                      <Text style={styles.historyMonumentName} numberOfLines={2}>{item.name}</Text>
+                      <Text style={styles.historyPeriod} numberOfLines={1}>{item.period || formatDate(item.scannedAt)}</Text>
+                    </View>
+                  </View>
                 );
               })}
             </View>
@@ -407,8 +407,11 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 20,
   },
-  historyCard: {
+  historyCardContainer: {
     width: "48%",
+  },
+  historyCard: {
+    width: "100%",
     height: 200,
     borderRadius: 16,
     overflow: "hidden",
@@ -418,6 +421,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
     position: "relative",
+    marginBottom: 8,
   },
   historyCardBackground: {
     width: "100%",
@@ -427,42 +431,35 @@ const styles = StyleSheet.create({
   },
   historyCardOverlay: {
     position: "absolute",
-    top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
-    height: "60%",
-    justifyContent: "flex-end",
+    height: "40%",
   },
-  historyCardContent: {
-    padding: 16,
-    gap: 4,
+  historyCardInfo: {
+    paddingHorizontal: 4,
+    gap: 2,
   },
   historyMonumentName: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: "#ffffff",
-    lineHeight: 20,
-    textShadowColor: "rgba(0,0,0,0.5)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    color: "#2C3E50",
+    lineHeight: 18,
   },
   historyPeriod: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "rgba(255,255,255,0.9)",
+    color: "#64748b",
     fontStyle: "italic",
-    textShadowColor: "rgba(0,0,0,0.5)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
   historyInfoRow: {
     flexDirection: "row",
