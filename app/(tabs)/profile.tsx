@@ -174,14 +174,14 @@ export default function ProfileScreen() {
                     >
                       <Image source={{ uri: item.scannedImage }} style={styles.historyCardBackground} />
                       <LinearGradient
-                        colors={['transparent', 'transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.8)']}
+                        colors={['transparent', 'transparent', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.9)']}
                         style={styles.historyCardOverlay}
                       />
+                      <View style={styles.historyCardContent}>
+                        <Text style={styles.historyMonumentName} numberOfLines={2}>{item.name}</Text>
+                        <Text style={styles.historyPeriod} numberOfLines={1}>{item.period || formatDate(item.scannedAt)}</Text>
+                      </View>
                     </TouchableOpacity>
-                    <View style={styles.historyCardInfo}>
-                      <Text style={styles.historyMonumentName} numberOfLines={2}>{item.name}</Text>
-                      <Text style={styles.historyPeriod} numberOfLines={1}>{item.period || formatDate(item.scannedAt)}</Text>
-                    </View>
                   </View>
                 );
               })}
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
   },
   historyCard: {
     width: "100%",
-    height: 200,
+    height: 240,
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
@@ -421,7 +421,6 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
     position: "relative",
-    marginBottom: 8,
   },
   historyCardBackground: {
     width: "100%",
@@ -434,12 +433,17 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: "40%",
+    height: "50%",
   },
-  historyCardInfo: {
-    paddingHorizontal: 4,
-    gap: 2,
+  historyCardContent: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 12,
+    justifyContent: "flex-end",
   },
+
   historyMonumentName: {
     fontSize: 14,
     fontFamily: Platform.select({
@@ -448,8 +452,11 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: "#2C3E50",
+    color: "#ffffff",
     lineHeight: 18,
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   historyPeriod: {
     fontSize: 12,
@@ -458,8 +465,12 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: "rgba(255,255,255,0.9)",
     fontStyle: "italic",
+    marginTop: 2,
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   historyInfoRow: {
     flexDirection: "row",
