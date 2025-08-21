@@ -629,24 +629,7 @@ export default function ScanResultScreen() {
               <MapPin size={20} color="#1e3a8a" />
               <View>
                 <Text style={styles.infoLabel}>Location</Text>
-                <Text style={styles.infoValue}>
-                  {(() => {
-                    if (!monument.location) return '';
-                    // Extract city and state/country from location
-                    // Remove museum/gallery names and keep only city, state/country
-                    const location = monument.location
-                      .replace(/.*Museum.*?,\s*/gi, '') // Remove museum names
-                      .replace(/.*Gallery.*?,\s*/gi, '') // Remove gallery names
-                      .replace(/.*Church.*?,\s*/gi, '') // Remove church names
-                      .replace(/.*Cathedral.*?,\s*/gi, '') // Remove cathedral names
-                      .replace(/.*Palace.*?,\s*/gi, '') // Remove palace names
-                      .replace(/.*Castle.*?,\s*/gi, '') // Remove castle names
-                      .replace(/.*Basilica.*?,\s*/gi, '') // Remove basilica names
-                      .replace(/.*Temple.*?,\s*/gi, '') // Remove temple names
-                      .trim();
-                    return location || monument.location;
-                  })()}
-                </Text>
+                <Text style={styles.infoValue}>{monument.location}</Text>
               </View>
             </View>
             <View style={styles.infoCard}>
@@ -654,19 +637,7 @@ export default function ScanResultScreen() {
               <View>
                 <Text style={styles.infoLabel}>Period</Text>
                 <Text style={styles.infoValue}>
-                  {(() => {
-                    if (!monument.period) return '';
-                    // Extract only years/centuries from period, removing artist names and other text
-                    let period = monument.period
-                      .replace(/artistic period/gi, '') // Remove "artistic period"
-                      .replace(/\bperiod\b/gi, '') // Remove "period"
-                      .replace(/^[^,]*,\s*/, '') // Remove artist name before comma
-                      .replace(/^.*?\b(\d{1,2}th century)/i, '$1') // Extract century
-                      .replace(/^.*?(\d{4}[\s-]*\d{0,4})/i, '$1') // Extract years
-                      .replace(/^.*?(\d{1,4}\s*(?:BC|AD))/i, '$1') // Extract BC/AD dates
-                      .trim();
-                    return period || monument.period;
-                  })()}
+                  {monument.period ? monument.period.replace(/artistic period/gi, '').replace(/\bperiod\b/gi, '').trim() : ''}
                 </Text>
               </View>
             </View>

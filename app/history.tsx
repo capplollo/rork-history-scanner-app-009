@@ -94,36 +94,11 @@ export default function HistoryScreen() {
   };
 
   const renderGridItem = (item: any, index: number) => {
-    // Extract century/dates from period, removing "artistic period" text and artist names
+    // Extract century/dates from period, removing "artistic period" text
     const formatPeriod = (period: string) => {
       if (!period) return '';
-      // Extract only years/centuries from period, removing artist names and other text
-      let formatted = period
-        .replace(/artistic period/gi, '') // Remove "artistic period"
-        .replace(/\bperiod\b/gi, '') // Remove "period"
-        .replace(/^[^,]*,\s*/, '') // Remove artist name before comma
-        .replace(/^.*?\b(\d{1,2}th century)/i, '$1') // Extract century
-        .replace(/^.*?(\d{4}[\s-]*\d{0,4})/i, '$1') // Extract years
-        .replace(/^.*?(\d{1,4}\s*(?:BC|AD))/i, '$1') // Extract BC/AD dates
-        .trim();
-      return formatted || period;
-    };
-
-    // Format location to show only city and state/country
-    const formatLocation = (location: string) => {
-      if (!location) return '';
-      // Remove museum/gallery names and keep only city, state/country
-      const formatted = location
-        .replace(/.*Museum.*?,\s*/gi, '') // Remove museum names
-        .replace(/.*Gallery.*?,\s*/gi, '') // Remove gallery names
-        .replace(/.*Church.*?,\s*/gi, '') // Remove church names
-        .replace(/.*Cathedral.*?,\s*/gi, '') // Remove cathedral names
-        .replace(/.*Palace.*?,\s*/gi, '') // Remove palace names
-        .replace(/.*Castle.*?,\s*/gi, '') // Remove castle names
-        .replace(/.*Basilica.*?,\s*/gi, '') // Remove basilica names
-        .replace(/.*Temple.*?,\s*/gi, '') // Remove temple names
-        .trim();
-      return formatted || location;
+      // Remove "artistic period" and similar phrases, keep only dates/centuries
+      return period.replace(/artistic period/gi, '').replace(/\bperiod\b/gi, '').trim();
     };
 
     return (
@@ -146,7 +121,7 @@ export default function HistoryScreen() {
             <Text style={styles.instagramTitle} numberOfLines={2}>{item.name}</Text>
             <View style={styles.instagramLocation}>
               <MapPin size={14} color="#ffffff" />
-              <Text style={styles.instagramLocationText} numberOfLines={1}>{formatLocation(item.location)}</Text>
+              <Text style={styles.instagramLocationText} numberOfLines={1}>{item.location}</Text>
             </View>
             {formatPeriod(item.period) && (
               <Text style={styles.instagramPeriod}>{formatPeriod(item.period)}</Text>
@@ -167,36 +142,11 @@ export default function HistoryScreen() {
   };
 
   const renderListItem = (item: any, index: number) => {
-    // Extract century/dates from period, removing "artistic period" text and artist names
+    // Extract century/dates from period, removing "artistic period" text
     const formatPeriod = (period: string) => {
       if (!period) return '';
-      // Extract only years/centuries from period, removing artist names and other text
-      let formatted = period
-        .replace(/artistic period/gi, '') // Remove "artistic period"
-        .replace(/\bperiod\b/gi, '') // Remove "period"
-        .replace(/^[^,]*,\s*/, '') // Remove artist name before comma
-        .replace(/^.*?\b(\d{1,2}th century)/i, '$1') // Extract century
-        .replace(/^.*?(\d{4}[\s-]*\d{0,4})/i, '$1') // Extract years
-        .replace(/^.*?(\d{1,4}\s*(?:BC|AD))/i, '$1') // Extract BC/AD dates
-        .trim();
-      return formatted || period;
-    };
-
-    // Format location to show only city and state/country
-    const formatLocation = (location: string) => {
-      if (!location) return '';
-      // Remove museum/gallery names and keep only city, state/country
-      const formatted = location
-        .replace(/.*Museum.*?,\s*/gi, '') // Remove museum names
-        .replace(/.*Gallery.*?,\s*/gi, '') // Remove gallery names
-        .replace(/.*Church.*?,\s*/gi, '') // Remove church names
-        .replace(/.*Cathedral.*?,\s*/gi, '') // Remove cathedral names
-        .replace(/.*Palace.*?,\s*/gi, '') // Remove palace names
-        .replace(/.*Castle.*?,\s*/gi, '') // Remove castle names
-        .replace(/.*Basilica.*?,\s*/gi, '') // Remove basilica names
-        .replace(/.*Temple.*?,\s*/gi, '') // Remove temple names
-        .trim();
-      return formatted || location;
+      // Remove "artistic period" and similar phrases, keep only dates/centuries
+      return period.replace(/artistic period/gi, '').replace(/\bperiod\b/gi, '').trim();
     };
 
     return (
@@ -216,7 +166,7 @@ export default function HistoryScreen() {
           <Text style={styles.listCardTitle} numberOfLines={2}>{item.name}</Text>
           <View style={styles.listCardInfo}>
             <MapPin size={14} color="#8B4513" />
-            <Text style={styles.listCardLocation} numberOfLines={1}>{formatLocation(item.location)}</Text>
+            <Text style={styles.listCardLocation} numberOfLines={1}>{item.location}</Text>
           </View>
           <Text style={styles.listCardDescription} numberOfLines={2}>{item.description}</Text>
           {formatPeriod(item.period) && (
