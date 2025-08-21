@@ -732,40 +732,30 @@ export default function ScanResultScreen() {
             </View>
           </View>
           
-          {monument.scannedAt && (
-            <View style={styles.scanInfo}>
-              <Text style={styles.scanInfoText}>
-                Scanned on {new Date(monument.scannedAt).toLocaleDateString()}
-              </Text>
-            </View>
-          )}
+
 
           {/* Add Context Section - Always visible */}
           <View style={styles.addContextSection}>
-            <View style={styles.addContextHeader}>
-              <MessageCircle size={18} color="#8B4513" />
-              <Text style={styles.addContextTitle}>Is this recognition incorrect?</Text>
-            </View>
-            <Text style={styles.addContextDescription}>
-              Help us improve by providing additional context if the artwork identification seems wrong or incomplete.
-            </Text>
-            
             <TouchableOpacity 
               style={styles.addContextToggle} 
               onPress={() => setShowContextForm(!showContextForm)}
             >
               <Text style={styles.addContextToggleText}>
-                Add Context to Improve Recognition
+                Is this recognition incorrect?
               </Text>
               {showContextForm ? (
-                <ChevronUp size={18} color="#8B4513" />
+                <ChevronUp size={16} color="#6b7280" />
               ) : (
-                <ChevronDown size={18} color="#8B4513" />
+                <ChevronDown size={16} color="#6b7280" />
               )}
             </TouchableOpacity>
             
             {showContextForm && (
               <View style={styles.contextForm}>
+                <Text style={styles.contextFormDescription}>
+                  Help us improve by providing additional context if the artwork identification seems wrong or incomplete.
+                </Text>
+                
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Correct Artwork/Monument Name</Text>
                   <TextInput
@@ -1513,11 +1503,22 @@ const styles = StyleSheet.create({
     color: "#374151",
   },
   contextForm: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f9fafb",
     padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
     gap: 12,
+  },
+  contextFormDescription: {
+    fontSize: 13,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#6b7280",
+    lineHeight: 18,
+    marginBottom: 12,
   },
   inputGroup: {
     gap: 6,
@@ -1575,16 +1576,11 @@ const styles = StyleSheet.create({
   },
   addContextSection: {
     backgroundColor: "#ffffff",
-    margin: 20,
-    padding: 20,
-    borderRadius: 15,
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: "#e5e7eb",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
   },
   addContextHeader: {
     flexDirection: "row",
@@ -1617,13 +1613,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#F8F6F0",
+    backgroundColor: "#ffffff",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 8,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#8B4513",
   },
   addContextToggleText: {
     fontSize: 14,
@@ -1632,8 +1625,8 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "500",
-    color: "#8B4513",
+    fontWeight: "400",
+    color: "#6b7280",
   },
   submitContextButton: {
     flexDirection: "row",
