@@ -83,7 +83,7 @@ export default function LearnScreen() {
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Explore History</Text>
             <Text style={styles.headerSubtitle}>
-              Discover the stories behind the world's greatest monuments
+              Discover the stories behind the world's greatest monuments and art
             </Text>
             
             <View style={styles.searchContainer}>

@@ -75,7 +75,7 @@ export default function LoginScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
             <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to continue exploring monuments</Text>
+            <Text style={styles.subtitle}>Sign in to continue exploring monuments and art</Text>
           </View>
 
           <View style={styles.form}>

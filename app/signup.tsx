@@ -125,7 +125,7 @@ export default function SignUpScreen() {
 
           <View style={styles.header}>
             <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Join us to discover amazing monuments</Text>
+            <Text style={styles.subtitle}>Join us to discover amazing monuments and art</Text>
           </View>
 
           <View style={styles.form}>

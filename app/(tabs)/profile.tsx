@@ -83,7 +83,7 @@ export default function ProfileScreen() {
       label: "Discoveries", 
       value: history.length.toString(),
       icon: Camera,
-      description: "Monuments explored"
+      description: "Monuments and art explored"
     },
     { 
       label: "Destinations", 
@@ -146,7 +146,7 @@ export default function ProfileScreen() {
                 <Text style={styles.sectionTitle}>Your Discoveries</Text>
               </View>
               <Text style={styles.sectionSubtitle}>
-                {history.length} {history.length === 1 ? "monument" : "monuments"} explored
+                {history.length} {history.length === 1 ? "monument and art piece" : "monuments and art pieces"} explored
               </Text>
             </View>
             
