@@ -740,6 +740,99 @@ export default function ScanResultScreen() {
             </View>
           )}
 
+          {/* Add Context Section - Always visible */}
+          <View style={styles.addContextSection}>
+            <View style={styles.addContextHeader}>
+              <MessageCircle size={18} color="#8B4513" />
+              <Text style={styles.addContextTitle}>Is this recognition incorrect?</Text>
+            </View>
+            <Text style={styles.addContextDescription}>
+              Help us improve by providing additional context if the artwork identification seems wrong or incomplete.
+            </Text>
+            
+            <TouchableOpacity 
+              style={styles.addContextToggle} 
+              onPress={() => setShowContextForm(!showContextForm)}
+            >
+              <Text style={styles.addContextToggleText}>
+                Add Context to Improve Recognition
+              </Text>
+              {showContextForm ? (
+                <ChevronUp size={18} color="#8B4513" />
+              ) : (
+                <ChevronDown size={18} color="#8B4513" />
+              )}
+            </TouchableOpacity>
+            
+            {showContextForm && (
+              <View style={styles.contextForm}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Correct Artwork/Monument Name</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="e.g., Mona Lisa, David, Eiffel Tower"
+                    value={contextInfo.name}
+                    onChangeText={(text) => updateContextInfo('name', text)}
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+                
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Location</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="e.g., Paris, France or Central Park, NYC"
+                    value={contextInfo.location}
+                    onChangeText={(text) => updateContextInfo('location', text)}
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+                
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Building/Museum/Gallery</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="e.g., Louvre Museum, Uffizi Gallery, St. Peter's Basilica"
+                    value={contextInfo.building}
+                    onChangeText={(text) => updateContextInfo('building', text)}
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+                
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Additional Notes</Text>
+                  <TextInput
+                    style={[styles.textInput, styles.textInputMultiline]}
+                    placeholder="Any other details that might help..."
+                    value={contextInfo.notes}
+                    onChangeText={(text) => updateContextInfo('notes', text)}
+                    placeholderTextColor="#94a3b8"
+                    multiline
+                    numberOfLines={3}
+                  />
+                </View>
+                
+                <TouchableOpacity
+                  style={[styles.submitContextButton, isReanalyzing && styles.submitContextButtonDisabled]}
+                  onPress={handleReanalyze}
+                  disabled={isReanalyzing}
+                >
+                  {isReanalyzing ? (
+                    <>
+                      <ActivityIndicator color="#ffffff" size="small" />
+                      <Text style={styles.submitContextButtonText}>Analyzing...</Text>
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw size={18} color="#ffffff" />
+                      <Text style={styles.submitContextButtonText}>Re-analyze with Context</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
           {/* Only show content sections for recognized artworks */}
           {!isUnknownArtwork && (
             <>
@@ -1471,6 +1564,91 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   reanalyzeButtonText: {
+    color: "#ffffff",
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+  },
+  addContextSection: {
+    backgroundColor: "#ffffff",
+    margin: 20,
+    padding: 20,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  addContextHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
+  },
+  addContextTitle: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#8B4513",
+  },
+  addContextDescription: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#6b7280",
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  addContextToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#F8F6F0",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#8B4513",
+  },
+  addContextToggleText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#8B4513",
+  },
+  submitContextButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#8B4513",
+    paddingVertical: 14,
+    borderRadius: 8,
+    gap: 8,
+    marginTop: 8,
+  },
+  submitContextButtonDisabled: {
+    opacity: 0.7,
+  },
+  submitContextButtonText: {
     color: "#ffffff",
     fontSize: 15,
     fontFamily: Platform.select({
