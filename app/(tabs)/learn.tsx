@@ -5,10 +5,10 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
+  SafeAreaView,
   Image,
   Platform,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BookOpen, Clock, Globe, Award } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -73,15 +73,13 @@ const featuredArticles = [
 ];
 
 export default function LearnScreen() {
-  const insets = useSafeAreaInsets();
-  
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={["#2C3E50", "#34495E"]}
-        style={[styles.backgroundGradient, { paddingTop: insets.top }]}
-      >
-        <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <LinearGradient
+          colors={["#2C3E50", "#34495E"]}
+          style={styles.headerGradient}
+        >
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Explore History</Text>
             <Text style={styles.headerSubtitle}>
@@ -94,6 +92,7 @@ export default function LearnScreen() {
               </View>
             </View>
           </View>
+        </LinearGradient>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -147,49 +146,44 @@ export default function LearnScreen() {
           ))}
         </View>
 
-          <View style={styles.section}>
-            <TouchableOpacity style={styles.quizCard}>
-              <LinearGradient
-                colors={["#8B4513", "#A0522D"]}
-                style={styles.quizGradient}
-              >
-                <View style={styles.quizContent}>
-                  <Text style={styles.quizTitle}>Daily Challenge</Text>
-                  <Text style={styles.quizDescription}>
-                    Test your knowledge with today's historical quiz
-                  </Text>
-                  <View style={styles.quizButton}>
-                    <Text style={styles.quizButtonText}>Start Challenge</Text>
-                  </View>
+        <View style={styles.section}>
+          <TouchableOpacity style={styles.quizCard}>
+            <LinearGradient
+              colors={["#8B4513", "#A0522D"]}
+              style={styles.quizGradient}
+            >
+              <View style={styles.quizContent}>
+                <Text style={styles.quizTitle}>Daily Challenge</Text>
+                <Text style={styles.quizDescription}>
+                  Test your knowledge with today's historical quiz
+                </Text>
+                <View style={styles.quizButton}>
+                  <Text style={styles.quizButtonText}>Start Challenge</Text>
                 </View>
-                <View style={styles.quizIcon}>
-                  <Award size={40} color="rgba(255,255,255,0.3)" />
-                </View>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </LinearGradient>
-    </View>
+              </View>
+              <View style={styles.quizIcon}>
+                <Award size={40} color="rgba(255,255,255,0.3)" />
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#2C3E50",
+    backgroundColor: "#FEFEFE",
   },
-  backgroundGradient: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  headerContent: {
-    gap: 20,
+  headerGradient: {
     paddingTop: 20,
     paddingBottom: 30,
     paddingHorizontal: 20,
+  },
+  headerContent: {
+    gap: 20,
   },
   headerTitle: {
     fontSize: 28,
@@ -234,7 +228,6 @@ const styles = StyleSheet.create({
   section: {
     marginTop: 30,
     paddingHorizontal: 20,
-    backgroundColor: "#FEFEFE",
   },
   sectionHeader: {
     flexDirection: "row",
