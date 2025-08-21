@@ -734,7 +734,7 @@ export default function ScanResultScreen() {
           
 
 
-          {/* Add Context Section - Always visible */}
+          {/* Add Context Section - Always visible for all artworks */}
           <View style={styles.addContextSection}>
             <TouchableOpacity 
               style={styles.addContextToggle} 
@@ -744,9 +744,9 @@ export default function ScanResultScreen() {
                 Is this recognition incorrect?
               </Text>
               {showContextForm ? (
-                <ChevronUp size={16} color="#6b7280" />
+                <ChevronUp size={14} color="#9ca3af" />
               ) : (
-                <ChevronDown size={16} color="#6b7280" />
+                <ChevronDown size={14} color="#9ca3af" />
               )}
             </TouchableOpacity>
             
@@ -1576,7 +1576,6 @@ const styles = StyleSheet.create({
   },
   addContextSection: {
     backgroundColor: "#ffffff",
-    marginHorizontal: 20,
     marginBottom: 20,
     borderRadius: 8,
     borderWidth: 1,
@@ -1615,18 +1614,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "#ffffff",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8,
     borderRadius: 8,
   },
   addContextToggleText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "400",
-    color: "#6b7280",
+    color: "#9ca3af",
   },
   submitContextButton: {
     flexDirection: "row",
