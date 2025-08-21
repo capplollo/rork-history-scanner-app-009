@@ -148,6 +148,16 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
 
 
 async function convertImageToBase64(imageUri: string): Promise<string> {
+  const { Platform } = await import('react-native');
+  
+  if (Platform.OS === 'web') {
+    return convertImageToBase64Web(imageUri);
+  } else {
+    return convertImageToBase64Mobile(imageUri);
+  }
+}
+
+async function convertImageToBase64Web(imageUri: string): Promise<string> {
   const response = await fetch(imageUri);
   const blob = await response.blob();
   
@@ -155,7 +165,7 @@ async function convertImageToBase64(imageUri: string): Promise<string> {
   let finalBlob = blob;
   if (blob.size > 1024 * 1024) {
     console.log('Compressing large image:', blob.size, 'bytes');
-    finalBlob = await compressImage(blob);
+    finalBlob = await compressImageWeb(blob);
     console.log('Compressed to:', finalBlob.size, 'bytes');
   }
   
@@ -170,7 +180,66 @@ async function convertImageToBase64(imageUri: string): Promise<string> {
   });
 }
 
-async function compressImage(blob: Blob): Promise<Blob> {
+async function convertImageToBase64Mobile(imageUri: string): Promise<string> {
+  try {
+    const { manipulateAsync, SaveFormat } = await import('expo-image-manipulator');
+    
+    // First, get image info to check size
+    const { Image } = await import('react-native');
+    
+    return new Promise((resolve, reject) => {
+      Image.getSize(
+        imageUri,
+        async (width, height) => {
+          try {
+            // Calculate compression if image is large
+            const maxSize = 1024;
+            let compress = 0.8;
+            let resize = undefined;
+            
+            if (width > maxSize || height > maxSize) {
+              const ratio = Math.min(maxSize / width, maxSize / height);
+              resize = {
+                width: Math.round(width * ratio),
+                height: Math.round(height * ratio)
+              };
+              compress = 0.7;
+            }
+            
+            // Use expo-image-manipulator to process the image
+            const result = await manipulateAsync(
+              imageUri,
+              resize ? [{ resize }] : [],
+              {
+                compress,
+                format: SaveFormat.JPEG,
+                base64: true
+              }
+            );
+            
+            if (result.base64) {
+              resolve(result.base64);
+            } else {
+              reject(new Error('Failed to convert image to base64'));
+            }
+          } catch (error) {
+            console.error('Error processing image:', error);
+            reject(error);
+          }
+        },
+        (error) => {
+          console.error('Error getting image size:', error);
+          reject(error);
+        }
+      );
+    });
+  } catch (error) {
+    console.error('Error in convertImageToBase64Mobile:', error);
+    throw error;
+  }
+}
+
+async function compressImageWeb(blob: Blob): Promise<Blob> {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;
