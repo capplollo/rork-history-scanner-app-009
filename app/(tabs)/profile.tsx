@@ -5,11 +5,11 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
   Image,
   Alert,
   Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { 
   User, 
   MapPin, 
@@ -30,6 +30,7 @@ import { router } from "expo-router";
 export default function ProfileScreen() {
   const { history, clearHistory } = useHistory();
   const { user, signOut, loading } = useAuth();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -99,12 +100,12 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <LinearGradient
-          colors={["#2C3E50", "#34495E"]}
-          style={styles.headerGradient}
-        >
+    <View style={styles.container}>
+      <LinearGradient
+        colors={["#2C3E50", "#34495E"]}
+        style={[styles.backgroundGradient, { paddingTop: insets.top }]}
+      >
+        <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
           <View style={styles.profileSection}>
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
@@ -119,7 +120,6 @@ export default function ProfileScreen() {
             
             <Text style={styles.userSubtitle}>Cultural Explorer</Text>
           </View>
-        </LinearGradient>
 
         <View style={styles.statsContainer}>
           {stats.map((stat, index) => {
@@ -227,31 +227,36 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {history.length > 0 && (
-          <TouchableOpacity 
-            style={styles.clearButton}
-            onPress={clearHistory}
-          >
-            <Text style={styles.clearButtonText}>Clear Discovery History</Text>
-          </TouchableOpacity>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+          {history.length > 0 && (
+            <TouchableOpacity 
+              style={styles.clearButton}
+              onPress={clearHistory}
+            >
+              <Text style={styles.clearButtonText}>Clear Discovery History</Text>
+            </TouchableOpacity>
+          )}
+        </ScrollView>
+      </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FEFEFE",
+    backgroundColor: "#2C3E50",
   },
-  headerGradient: {
-    paddingTop: 30,
-    paddingBottom: 40,
-    paddingHorizontal: 20,
+  backgroundGradient: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
   },
   profileSection: {
     alignItems: "center",
+    paddingTop: 30,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
   },
   avatarContainer: {
     position: "relative",
@@ -321,6 +326,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: -20,
     gap: 12,
+    backgroundColor: "#FEFEFE",
   },
   statCard: {
     flex: 1,
@@ -378,6 +384,7 @@ const styles = StyleSheet.create({
   section: {
     marginTop: 30,
     paddingHorizontal: 20,
+    backgroundColor: "#FEFEFE",
   },
   sectionHeader: {
     marginBottom: 20,

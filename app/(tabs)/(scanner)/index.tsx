@@ -12,6 +12,8 @@ import {
   Dimensions,
   TextInput,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info } from "lucide-react-native";
 import { router } from "expo-router";
@@ -34,6 +36,7 @@ export default function ScannerScreen() {
     notes: "",
   });
   const { addToHistory } = useHistory();
+  const insets = useSafeAreaInsets();
 
   const pickImageFromGallery = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -213,7 +216,12 @@ export default function ScannerScreen() {
 
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={["#2C3E50", "#34495E"]}
+        style={[styles.backgroundGradient, { paddingTop: insets.top }]}
+      >
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
       {selectedImage ? (
         <View style={styles.imagePreviewContainer}>
           <Image source={{ uri: selectedImage }} style={styles.previewImage} />
@@ -343,7 +351,9 @@ export default function ScannerScreen() {
           </View>
         </View>
       )}
-    </ScrollView>
+        </ScrollView>
+      </LinearGradient>
+    </View>
   );
 }
 
@@ -351,6 +361,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#2C3E50",
+  },
+  backgroundGradient: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
   },
   contentContainer: {
     flexGrow: 1,
