@@ -41,10 +41,6 @@ export class VoiceService {
   private audioPermissionsGranted: boolean = false;
   private currentSound: Audio.Sound | null = null;
   private isCurrentlyPlaying: boolean = false;
-  private audioQueue: Audio.Sound[] = [];
-  private currentChunkIndex: number = 0;
-  private totalChunks: number = 0;
-  private isStopped: boolean = false;
 
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
@@ -271,7 +267,6 @@ export class VoiceService {
     onStart?: () => void;
     onDone?: () => void;
     onError?: (error: string) => void;
-    onProgress?: (progress: number) => void;
   }): Promise<void> {
     if (!text.trim()) {
       callbacks?.onError?.('No text provided');
@@ -286,14 +281,9 @@ export class VoiceService {
     }
 
     try {
-      // Check if we should use ElevenLabs with chunking for long texts
+      // Check if we should use ElevenLabs
       if (voice.provider === 'elevenlabs' && this.isElevenLabsConfigured && this.audioPermissionsGranted) {
-        // Use chunking for texts longer than 500 characters to improve performance
-        if (text.length > 500) {
-          await this.speakWithElevenLabsChunked(text, voice, options, callbacks);
-        } else {
-          await this.speakWithElevenLabs(text, voice, options, callbacks);
-        }
+        await this.speakWithElevenLabs(text, voice, options, callbacks);
       } else {
         // Fall back to built-in TTS if ElevenLabs is not available or permissions denied
         if (voice.provider === 'elevenlabs' && (!this.audioPermissionsGranted || !this.isElevenLabsConfigured)) {
@@ -350,247 +340,6 @@ export class VoiceService {
     return builtInVoices.find(voice => 
       voice.language.startsWith('en')
     ) || builtInVoices[0];
-  }
-
-  private async speakWithElevenLabsChunked(
-    text: string, 
-    voice: VoiceOption, 
-    options: VoiceOptions,
-    callbacks?: {
-      onStart?: () => void;
-      onDone?: () => void;
-      onError?: (error: string) => void;
-      onProgress?: (progress: number) => void;
-    }
-  ): Promise<void> {
-    try {
-      console.log('🎤 Using ElevenLabs TTS with chunking for better performance...');
-      
-      if (!ELEVENLABS_API_KEY) {
-        throw new Error('ElevenLabs API key not configured');
-      }
-
-      // Reset state
-      this.isStopped = false;
-      this.currentChunkIndex = 0;
-      
-      // Split text into chunks for better performance
-      const chunks = this.splitTextIntoChunks(text, 800); // Smaller chunks for faster processing
-      this.totalChunks = chunks.length;
-      
-      console.log(`📝 Split text into ${chunks.length} chunks for streaming playback`);
-      
-      // Clear any existing audio queue
-      await this.clearAudioQueue();
-      
-      callbacks?.onStart?.();
-      
-      // Process chunks in parallel but play sequentially
-      const audioPromises = chunks.map((chunk, index) => 
-        this.generateAudioForChunk(chunk, voice, index)
-      );
-      
-      // Start generating all chunks in parallel
-      const audioResults = await Promise.allSettled(audioPromises);
-      
-      // Filter successful results
-      const successfulAudio = audioResults
-        .map((result, index) => ({ result, index }))
-        .filter(({ result }) => result.status === 'fulfilled')
-        .map(({ result, index }) => ({ 
-          audio: (result as PromiseFulfilledResult<ArrayBuffer>).value, 
-          index 
-        }))
-        .sort((a, b) => a.index - b.index); // Ensure correct order
-      
-      if (successfulAudio.length === 0) {
-        throw new Error('Failed to generate any audio chunks');
-      }
-      
-      console.log(`✅ Generated ${successfulAudio.length}/${chunks.length} audio chunks`);
-      
-      // Play chunks sequentially
-      await this.playAudioChunksSequentially(successfulAudio.map(item => item.audio), options, callbacks);
-      
-    } catch (error) {
-      console.error('ElevenLabs chunked TTS error:', error);
-      
-      // Fall back to built-in TTS on error
-      console.log('🔄 Falling back to built-in TTS due to chunking error...');
-      const fallbackVoice = this.getBestVoice();
-      if (fallbackVoice && fallbackVoice.provider === 'expo-speech') {
-        await this.speakWithExpoSpeech(text, fallbackVoice, options, callbacks);
-      } else {
-        callbacks?.onError?.(error instanceof Error ? error.message : 'ElevenLabs chunking error');
-      }
-    }
-  }
-
-  private splitTextIntoChunks(text: string, maxChunkSize: number): string[] {
-    const sentences = text.split(/(?<=[.!?])\s+/);
-    const chunks: string[] = [];
-    let currentChunk = '';
-    
-    for (const sentence of sentences) {
-      // If adding this sentence would exceed the limit, start a new chunk
-      if (currentChunk.length + sentence.length > maxChunkSize && currentChunk.length > 0) {
-        chunks.push(currentChunk.trim());
-        currentChunk = sentence;
-      } else {
-        currentChunk += (currentChunk ? ' ' : '') + sentence;
-      }
-    }
-    
-    // Add the last chunk if it has content
-    if (currentChunk.trim()) {
-      chunks.push(currentChunk.trim());
-    }
-    
-    // If no sentences were found, split by character count
-    if (chunks.length === 0) {
-      for (let i = 0; i < text.length; i += maxChunkSize) {
-        chunks.push(text.slice(i, i + maxChunkSize));
-      }
-    }
-    
-    return chunks;
-  }
-
-  private async generateAudioForChunk(chunk: string, voice: VoiceOption, index: number): Promise<ArrayBuffer> {
-    const apiKey: string = ELEVENLABS_API_KEY!;
-    
-    console.log(`🔄 Generating audio for chunk ${index + 1} (${chunk.length} chars)`);
-    
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice.identifier}`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'audio/mpeg',
-        'Content-Type': 'application/json',
-        'xi-api-key': apiKey,
-      },
-      body: JSON.stringify({
-        text: chunk,
-        model_id: 'eleven_monolingual_v1',
-        voice_settings: {
-          stability: 0.6,
-          similarity_boost: 0.8,
-          style: 0.2,
-          use_speaker_boost: true
-        },
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error(`ElevenLabs API error for chunk ${index}:`, error);
-      throw new Error(`ElevenLabs API error: ${error}`);
-    }
-
-    console.log(`✅ Generated audio for chunk ${index + 1}`);
-    return await response.arrayBuffer();
-  }
-
-  private async playAudioChunksSequentially(
-    audioChunks: ArrayBuffer[], 
-    options: VoiceOptions,
-    callbacks?: {
-      onStart?: () => void;
-      onDone?: () => void;
-      onError?: (error: string) => void;
-      onProgress?: (progress: number) => void;
-    }
-  ): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        let currentIndex = 0;
-        
-        const playNextChunk = async () => {
-          if (this.isStopped || currentIndex >= audioChunks.length) {
-            callbacks?.onDone?.();
-            resolve();
-            return;
-          }
-          
-          try {
-            const audioArrayBuffer = audioChunks[currentIndex];
-            const audioBase64 = this.arrayBufferToBase64(audioArrayBuffer);
-            const audioUri = `data:audio/mpeg;base64,${audioBase64}`;
-            
-            // Stop any existing sound
-            if (this.currentSound) {
-              await this.currentSound.unloadAsync();
-              this.currentSound = null;
-            }
-            
-            const { sound } = await Audio.Sound.createAsync(
-              { uri: audioUri },
-              { shouldPlay: true, volume: options.volume || 1.0 }
-            );
-            
-            this.currentSound = sound;
-            this.isCurrentlyPlaying = true;
-            this.currentChunkIndex = currentIndex;
-            
-            // Update progress
-            const progress = (currentIndex + 1) / audioChunks.length;
-            callbacks?.onProgress?.(progress);
-            
-            console.log(`🎵 Playing chunk ${currentIndex + 1}/${audioChunks.length}`);
-            
-            // Set up playback status listener
-            sound.setOnPlaybackStatusUpdate((status) => {
-              if (status.isLoaded) {
-                if (status.didJustFinish) {
-                  this.currentSound = null;
-                  sound.unloadAsync();
-                  
-                  // Move to next chunk
-                  currentIndex++;
-                  setTimeout(() => playNextChunk(), 100); // Small delay between chunks
-                }
-              }
-            });
-            
-          } catch (chunkError) {
-            console.error(`❌ Error playing chunk ${currentIndex}:`, chunkError);
-            // Try to continue with next chunk
-            currentIndex++;
-            setTimeout(() => playNextChunk(), 100);
-          }
-        };
-        
-        // Start playing the first chunk
-        await playNextChunk();
-        
-      } catch (error) {
-        console.error('❌ Error in sequential playback:', error);
-        callbacks?.onError?.(error instanceof Error ? error.message : 'Playback error');
-        reject(error);
-      }
-    });
-  }
-
-  private async clearAudioQueue(): Promise<void> {
-    // Stop current sound
-    if (this.currentSound) {
-      try {
-        await this.currentSound.stopAsync();
-        await this.currentSound.unloadAsync();
-      } catch (error) {
-        console.warn('Error stopping current sound:', error);
-      }
-      this.currentSound = null;
-    }
-    
-    // Clear any queued sounds
-    for (const sound of this.audioQueue) {
-      try {
-        await sound.unloadAsync();
-      } catch (error) {
-        console.warn('Error unloading queued sound:', error);
-      }
-    }
-    this.audioQueue = [];
   }
 
   private async speakWithElevenLabs(
@@ -770,26 +519,23 @@ export class VoiceService {
 
   async stop(): Promise<void> {
     try {
-      // Set stop flag to prevent new chunks from playing
-      this.isStopped = true;
-      
       // Stop expo-speech
       await Speech.stop();
       
-      // Clear audio queue and stop current playback
-      await this.clearAudioQueue();
+      // Stop and cleanup ElevenLabs audio if playing
+      if (this.currentSound) {
+        await this.currentSound.stopAsync();
+        await this.currentSound.unloadAsync();
+        this.currentSound = null;
+      }
       
       this.isCurrentlyPlaying = false;
-      this.currentChunkIndex = 0;
-      this.totalChunks = 0;
-      
       console.log('✅ Voice service stopped successfully');
     } catch (error) {
       console.error('Error stopping voice service:', error);
       // Reset state even if there's an error
       this.currentSound = null;
       this.isCurrentlyPlaying = false;
-      this.isStopped = true;
     }
   }
 
@@ -854,46 +600,32 @@ export class VoiceService {
     return this.isCurrentlyPlaying;
   }
   
-  // Get current playback progress for chunked audio
-  getPlaybackProgress(): { current: number; total: number; percentage: number } {
-    if (this.totalChunks === 0) {
-      return { current: 0, total: 0, percentage: 0 };
-    }
-    
-    const percentage = (this.currentChunkIndex + 1) / this.totalChunks;
-    return {
-      current: this.currentChunkIndex + 1,
-      total: this.totalChunks,
-      percentage: Math.round(percentage * 100)
-    };
-  }
-  
   // Force cleanup - useful for navigation cleanup
   async forceCleanup(): Promise<void> {
     try {
       console.log('🧹 Force cleaning up voice service...');
       
-      // Set stop flag
-      this.isStopped = true;
-      
       // Stop all speech
       await Speech.stop();
       
-      // Clear audio queue and current sound
-      await this.clearAudioQueue();
+      // Clean up ElevenLabs audio
+      if (this.currentSound) {
+        try {
+          await this.currentSound.stopAsync();
+          await this.currentSound.unloadAsync();
+        } catch (error) {
+          console.warn('Error cleaning up sound:', error);
+        }
+        this.currentSound = null;
+      }
       
       this.isCurrentlyPlaying = false;
-      this.currentChunkIndex = 0;
-      this.totalChunks = 0;
-      
       console.log('✅ Voice service force cleanup completed');
     } catch (error) {
       console.error('Error during force cleanup:', error);
       // Reset state regardless of errors
       this.currentSound = null;
       this.isCurrentlyPlaying = false;
-      this.isStopped = true;
-      this.audioQueue = [];
     }
   }
 }
