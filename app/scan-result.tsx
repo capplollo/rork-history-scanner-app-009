@@ -740,139 +740,149 @@ export default function ScanResultScreen() {
             </View>
           )}
 
-          {/* Voice Narrator - Only show when artwork is identified and has content */}
-          {monument && monument.name && (
-            <View style={styles.narratorSection}>
-              <Text style={styles.narratorTitle}>Voice narration</Text>
-              <View style={styles.narratorControls}>
-                <TouchableOpacity 
-                  style={[styles.narratorButton, isPlaying && styles.narratorButtonActive]} 
-                  onPress={handlePlayPause}
-                >
-                  {isPlaying ? (
-                    isPaused ? (
-                      <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
-                    ) : (
-                      <Pause size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
-                    )
-                  ) : (
-                    <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
-                  )}
-                  <Text style={[styles.narratorButtonText, isPlaying && styles.narratorButtonTextActive]}>
-                    {isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Play'}
-                  </Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  style={styles.stopButton} 
-                  onPress={handleStop}
-                >
-                  <VolumeX size={18} color="#6b7280" />
-                  <Text style={styles.stopButtonText}>Stop</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-
-          {monument.detailedDescription ? (
+          {/* Only show content sections for recognized artworks */}
+          {!isUnknownArtwork && (
             <>
-              <View style={styles.factsSection}>
-                <View style={styles.sectionHeader}>
-                  <Info size={20} color="#1e3a8a" />
-                  <Text style={styles.sectionTitle}>Key Takeaways</Text>
-                </View>
-                {(monument.detailedDescription.keyTakeawaysList || []).map((takeaway: string, index: number) => (
-                  <View key={index} style={styles.factItem}>
-                    <Text style={styles.factBullet}>•</Text>
-                    <Text style={styles.factText}>{takeaway}</Text>
+              {/* Voice Narrator - Only show when artwork is identified and has content */}
+              {monument && monument.name && (
+                <View style={styles.narratorSection}>
+                  <Text style={styles.narratorTitle}>Voice narration</Text>
+                  <View style={styles.narratorControls}>
+                    <TouchableOpacity 
+                      style={[styles.narratorButton, isPlaying && styles.narratorButtonActive]} 
+                      onPress={handlePlayPause}
+                    >
+                      {isPlaying ? (
+                        isPaused ? (
+                          <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
+                        ) : (
+                          <Pause size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
+                        )
+                      ) : (
+                        <Volume2 size={20} color={isPlaying ? "#ffffff" : "#4f46e5"} />
+                      )}
+                      <Text style={[styles.narratorButtonText, isPlaying && styles.narratorButtonTextActive]}>
+                        {isPlaying ? (isPaused ? 'Resume' : 'Pause') : 'Play'}
+                      </Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                      style={styles.stopButton} 
+                      onPress={handleStop}
+                    >
+                      <VolumeX size={18} color="#6b7280" />
+                      <Text style={styles.stopButtonText}>Stop</Text>
+                    </TouchableOpacity>
                   </View>
-                ))}
-              </View>
-
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>In-Depth Context</Text>
-                <FormattedText style={styles.inDepthContext}>{monument.detailedDescription.inDepthContext}</FormattedText>
-              </View>
-
-              {monument.detailedDescription.curiosities && (
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Curiosities</Text>
-                  <FormattedText style={styles.curiosities}>{monument.detailedDescription.curiosities}</FormattedText>
                 </View>
               )}
-            </>
-          ) : (
-            <>
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <Info size={20} color="#1e3a8a" />
-                  <Text style={styles.sectionTitle}>About</Text>
-                </View>
-                <Text style={styles.description}>{monument.description}</Text>
-              </View>
 
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Historical Significance</Text>
-                <Text style={styles.significance}>{monument.significance}</Text>
-              </View>
-
-              <View style={styles.factsSection}>
-                <Text style={styles.sectionTitle}>Quick Facts</Text>
-                {(monument.facts || []).map((fact: string, index: number) => (
-                  <View key={index} style={styles.factItem}>
-                    <Text style={styles.factBullet}>•</Text>
-                    <Text style={styles.factText}>{fact}</Text>
+              {monument.detailedDescription ? (
+                <>
+                  <View style={styles.factsSection}>
+                    <View style={styles.sectionHeader}>
+                      <Info size={20} color="#1e3a8a" />
+                      <Text style={styles.sectionTitle}>Key Takeaways</Text>
+                    </View>
+                    {(monument.detailedDescription.keyTakeawaysList || []).map((takeaway: string, index: number) => (
+                      <View key={index} style={styles.factItem}>
+                        <Text style={styles.factBullet}>•</Text>
+                        <Text style={styles.factText}>{takeaway}</Text>
+                      </View>
+                    ))}
                   </View>
-                ))}
-              </View>
+
+                  <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>In-Depth Context</Text>
+                    <FormattedText style={styles.inDepthContext}>{monument.detailedDescription.inDepthContext}</FormattedText>
+                  </View>
+
+                  {monument.detailedDescription.curiosities && (
+                    <View style={styles.section}>
+                      <Text style={styles.sectionTitle}>Curiosities</Text>
+                      <FormattedText style={styles.curiosities}>{monument.detailedDescription.curiosities}</FormattedText>
+                    </View>
+                  )}
+                </>
+              ) : (
+                <>
+                  <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                      <Info size={20} color="#1e3a8a" />
+                      <Text style={styles.sectionTitle}>About</Text>
+                    </View>
+                    <Text style={styles.description}>{monument.description}</Text>
+                  </View>
+
+                  <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Historical Significance</Text>
+                    <Text style={styles.significance}>{monument.significance}</Text>
+                  </View>
+
+                  <View style={styles.factsSection}>
+                    <Text style={styles.sectionTitle}>Quick Facts</Text>
+                    {(monument.facts || []).map((fact: string, index: number) => (
+                      <View key={index} style={styles.factItem}>
+                        <Text style={styles.factBullet}>•</Text>
+                        <Text style={styles.factText}>{fact}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </>
+              )}
             </>
           )}
 
 
 
-          <TouchableOpacity 
-            style={styles.chatButton}
-            onPress={() => {
-              try {
-                // Navigate to chat modal with monument context
-                // Use minimal params to avoid URL size limits
-                router.push({
-                  pathname: "/chat-modal" as any,
-                  params: { 
-                    monumentId: monument.id,
-                    monumentName: monument.name.substring(0, 50) // Further limit name length
+          {/* Only show chat and share buttons for recognized artworks */}
+          {!isUnknownArtwork && (
+            <>
+              <TouchableOpacity 
+                style={styles.chatButton}
+                onPress={() => {
+                  try {
+                    // Navigate to chat modal with monument context
+                    // Use minimal params to avoid URL size limits
+                    router.push({
+                      pathname: "/chat-modal" as any,
+                      params: { 
+                        monumentId: monument.id,
+                        monumentName: monument.name.substring(0, 50) // Further limit name length
+                      }
+                    });
+                  } catch (error) {
+                    console.error('Chat navigation error:', error);
+                    // Fallback navigation without params
+                    try {
+                      router.push("/chat-modal" as any);
+                    } catch (fallbackError) {
+                      console.error('Fallback navigation also failed:', fallbackError);
+                      Alert.alert('Navigation Error', 'Unable to open chat. Please try again.');
+                    }
                   }
-                });
-              } catch (error) {
-                console.error('Chat navigation error:', error);
-                // Fallback navigation without params
-                try {
-                  router.push("/chat-modal" as any);
-                } catch (fallbackError) {
-                  console.error('Fallback navigation also failed:', fallbackError);
-                  Alert.alert('Navigation Error', 'Unable to open chat. Please try again.');
-                }
-              }
-            }}
-          >
-            <LinearGradient
-              colors={["#8B4513", "#A0522D"]}
-              style={styles.chatGradient}
-            >
-              <MessageCircle size={24} color="#ffffff" />
-              <Text style={styles.chatButtonText}>Ask AI About This Artwork</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+                }}
+              >
+                <LinearGradient
+                  colors={["#8B4513", "#A0522D"]}
+                  style={styles.chatGradient}
+                >
+                  <MessageCircle size={24} color="#ffffff" />
+                  <Text style={styles.chatButtonText}>Ask AI About This Artwork</Text>
+                </LinearGradient>
+              </TouchableOpacity>
 
-          <TouchableOpacity style={styles.shareButton}>
-            <LinearGradient
-              colors={["#2C3E50", "#34495E"]}
-              style={styles.shareGradient}
-            >
-              <Share2 size={20} color="#ffffff" />
-              <Text style={styles.shareButtonText}>Share Discovery</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+              <TouchableOpacity style={styles.shareButton}>
+                <LinearGradient
+                  colors={["#2C3E50", "#34495E"]}
+                  style={styles.shareGradient}
+                >
+                  <Share2 size={20} color="#ffffff" />
+                  <Text style={styles.shareButtonText}>Share Discovery</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </ScrollView>
       
