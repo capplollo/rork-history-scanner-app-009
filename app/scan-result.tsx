@@ -34,6 +34,7 @@ export default function ScanResultScreen() {
   const navigation = useNavigation();
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [playbackProgress, setPlaybackProgress] = useState<{ current: number; total: number; percentage: number }>({ current: 0, total: 0, percentage: 0 });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showVoiceSettings, setShowVoiceSettings] = useState<boolean>(false);
   const [selectedVoice, setSelectedVoice] = useState<VoiceOption | null>(null);
@@ -379,16 +380,19 @@ export default function ScanResultScreen() {
             console.log('✅ Speech started successfully');
             setIsPlaying(true);
             setIsPaused(false);
+            setPlaybackProgress({ current: 0, total: 0, percentage: 0 });
           },
           onDone: () => {
             console.log('✅ Speech completed successfully');
             setIsPlaying(false);
             setIsPaused(false);
+            setPlaybackProgress({ current: 0, total: 0, percentage: 0 });
           },
           onError: (error: string) => {
             console.error('❌ Speech error:', error);
             setIsPlaying(false);
             setIsPaused(false);
+            setPlaybackProgress({ current: 0, total: 0, percentage: 0 });
             
             // Show user-friendly error message
             let errorMessage = 'Voice narration encountered an issue.';
@@ -405,6 +409,12 @@ export default function ScanResultScreen() {
             Alert.alert('Voice Narration Notice', errorMessage, [
               { text: 'OK', style: 'default' }
             ]);
+          },
+          onProgress: (progress: number) => {
+            // Update progress from voice service
+            const currentProgress = voiceService.getPlaybackProgress();
+            setPlaybackProgress(currentProgress);
+            console.log(`🎵 Playback progress: ${currentProgress.current}/${currentProgress.total} (${currentProgress.percentage}%)`);
           }
         });
       }
@@ -489,6 +499,7 @@ export default function ScanResultScreen() {
       await voiceService.stop();
       setIsPlaying(false);
       setIsPaused(false);
+      setPlaybackProgress({ current: 0, total: 0, percentage: 0 });
     } catch {
       // Silently handle stop errors
     }
@@ -830,6 +841,24 @@ export default function ScanResultScreen() {
               {monument && monument.name && (
                 <View style={styles.narratorSection}>
                   <Text style={styles.narratorTitle}>Voice narration</Text>
+                  
+                  {/* Progress indicator for chunked playback */}
+                  {isPlaying && playbackProgress.total > 1 && (
+                    <View style={styles.progressContainer}>
+                      <View style={styles.progressBar}>
+                        <View 
+                          style={[
+                            styles.progressFill, 
+                            { width: `${playbackProgress.percentage}%` }
+                          ]} 
+                        />
+                      </View>
+                      <Text style={styles.progressText}>
+                        Segment {playbackProgress.current} of {playbackProgress.total} ({playbackProgress.percentage}%)
+                      </Text>
+                    </View>
+                  )}
+                  
                   <View style={styles.narratorControls}>
                     <TouchableOpacity 
                       style={[styles.narratorButton, isPlaying && styles.narratorButtonActive]} 
@@ -857,6 +886,14 @@ export default function ScanResultScreen() {
                       <Text style={styles.stopButtonText}>Stop</Text>
                     </TouchableOpacity>
                   </View>
+                  
+                  {/* Show loading indicator when generating audio chunks */}
+                  {isPlaying && playbackProgress.total === 0 && (
+                    <View style={styles.loadingAudioContainer}>
+                      <ActivityIndicator size="small" color="#8B4513" />
+                      <Text style={styles.loadingAudioText}>Preparing audio segments...</Text>
+                    </View>
+                  )}
                 </View>
               )}
 
@@ -1437,6 +1474,49 @@ const styles = StyleSheet.create({
   },
   playingIndicator: {
     fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#8B4513",
+    fontStyle: "italic",
+  },
+  progressContainer: {
+    marginBottom: 15,
+  },
+  progressBar: {
+    height: 4,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 2,
+    overflow: "hidden",
+    marginBottom: 8,
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#8B4513",
+    borderRadius: 2,
+  },
+  progressText: {
+    fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#6b7280",
+    textAlign: "center",
+    fontStyle: "italic",
+  },
+  loadingAudioContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 12,
+    gap: 8,
+  },
+  loadingAudioText: {
+    fontSize: 13,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
