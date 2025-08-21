@@ -24,7 +24,6 @@ import { useHistory } from "@/providers/HistoryProvider";
 import { router } from "expo-router";
 import { scanResultStore } from "@/services/scanResultStore";
 import { LinearGradient } from "expo-linear-gradient";
-import SocialShareCard from "@/components/SocialShareCard";
 
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 60) / 2; // 2 columns with padding
@@ -36,8 +35,6 @@ export default function HistoryScreen() {
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'location'>('date');
   const [selectedCountry, setSelectedCountry] = useState<string>('all');
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-  const [shareModalVisible, setShareModalVisible] = useState(false);
-  const [selectedShareItem, setSelectedShareItem] = useState<any>(null);
 
   // Extract unique countries from history
   const availableCountries = useMemo(() => {
@@ -159,8 +156,7 @@ export default function HistoryScreen() {
             style={styles.instagramShareButton}
             onPress={(e) => {
               e.stopPropagation();
-              setSelectedShareItem(item);
-              setShareModalVisible(true);
+              // TODO: Implement share functionality
             }}
           >
             <Share2 size={18} color="#ffffff" />
@@ -234,8 +230,7 @@ export default function HistoryScreen() {
             style={styles.listActionButton}
             onPress={(e) => {
               e.stopPropagation();
-              setSelectedShareItem(item);
-              setShareModalVisible(true);
+              // TODO: Implement share functionality
             }}
           >
             <Share2 size={18} color="#8B4513" />
@@ -372,18 +367,6 @@ export default function HistoryScreen() {
           </View>
         )}
       </ScrollView>
-      
-      {/* Social Share Modal */}
-      {selectedShareItem && (
-        <SocialShareCard
-          item={selectedShareItem}
-          visible={shareModalVisible}
-          onClose={() => {
-            setShareModalVisible(false);
-            setSelectedShareItem(null);
-          }}
-        />
-      )}
     </SafeAreaView>
   );
 }
