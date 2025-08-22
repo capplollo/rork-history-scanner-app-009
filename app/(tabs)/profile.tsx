@@ -190,7 +190,6 @@ export default function ProfileScreen() {
                             historyItemId: item.id,
                             monumentName: item.name,
                             location: item.location,
-                            country: item.country || '',
                             period: item.period,
                             scannedImage: item.scannedImage,
                             regenerate: 'true' // Flag to indicate content should be regenerated

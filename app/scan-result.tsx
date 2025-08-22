@@ -23,13 +23,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { scanResultStore } from "@/services/scanResultStore";
 import { voiceService, VoiceOption } from "@/services/voiceService";
 import VoiceSettings from "@/components/VoiceSettings";
-import { detectMonumentsAndArt, generateHistoryContent, AdditionalInfo } from "@/services/monumentDetectionService";
+import { detectMonumentsAndArt, AdditionalInfo } from "@/services/monumentDetectionService";
 import FormattedText from "@/components/FormattedText";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 export default function ScanResultScreen() {
-  const { monumentId, scanData, resultId, historyItemId, monumentName, location, country, period, scannedImage, regenerate } = useLocalSearchParams();
+  const { monumentId, scanData, resultId, historyItemId, monumentName, location, period, scannedImage, regenerate } = useLocalSearchParams();
   const { addToHistory } = useHistory();
   const navigation = useNavigation();
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -109,7 +109,6 @@ export default function ScanResultScreen() {
             id: (historyItemId as string) || 'history-item',
             name: monumentName as string,
             location: (location as string) || '',
-            country: (country as string) || undefined,
             period: (period as string) || '',
             description: '', // Will be regenerated
             significance: '', // Will be regenerated
@@ -122,54 +121,50 @@ export default function ScanResultScreen() {
             detailedDescription: undefined, // Will be regenerated
           };
           
-          // Regenerate content using stored data (faster than image recognition)
-          try {
-            console.log('🔄 Starting fast content regeneration using stored data...');
-            console.log('Using data:', {
-              name: basicMonument.name,
-              location: basicMonument.location,
-              country: basicMonument.country,
-              period: basicMonument.period
-            });
-            
-            const detectionResult = await generateHistoryContent(
-              basicMonument.name,
-              basicMonument.location,
-              basicMonument.country,
-              basicMonument.period
-            );
-            
-            console.log('🔍 Fast regeneration result:', {
-              name: detectionResult.artworkName,
-              confidence: detectionResult.confidence,
-              hasDetailedDescription: !!detectionResult.detailedDescription,
-              inDepthContextLength: detectionResult.detailedDescription?.inDepthContext?.length || 0
-            });
-            
-            // Update the monument with regenerated content
-            loadedMonument = {
-              ...basicMonument,
-              description: detectionResult.description,
-              significance: detectionResult.significance,
-              facts: detectionResult.facts,
-              confidence: detectionResult.confidence,
-              isRecognized: detectionResult.isRecognized,
-              detailedDescription: detectionResult.detailedDescription,
-            };
-            
-            console.log('✅ Fast content regenerated successfully for:', monumentName);
-            console.log('📝 Detailed description available:', !!loadedMonument.detailedDescription);
-            if (loadedMonument.detailedDescription?.inDepthContext) {
-              console.log('📄 In-depth context length:', loadedMonument.detailedDescription.inDepthContext.length);
-              console.log('📄 In-depth context preview:', loadedMonument.detailedDescription.inDepthContext.substring(0, 200) + '...');
+          // Regenerate content via API using the same comprehensive analysis as first-time scans
+          if (basicMonument.scannedImage) {
+            try {
+              console.log('🔄 Starting content regeneration with same prompt as first-time scan...');
+              console.log('Image URI for regeneration:', basicMonument.scannedImage.substring(0, 100) + '...');
+              
+              const detectionResult = await detectMonumentsAndArt(basicMonument.scannedImage);
+              
+              console.log('🔍 Regeneration result:', {
+                name: detectionResult.artworkName,
+                confidence: detectionResult.confidence,
+                hasDetailedDescription: !!detectionResult.detailedDescription,
+                inDepthContextLength: detectionResult.detailedDescription?.inDepthContext?.length || 0
+              });
+              
+              // Update the monument with regenerated content
+              loadedMonument = {
+                ...basicMonument,
+                description: detectionResult.description,
+                significance: detectionResult.significance,
+                facts: detectionResult.facts,
+                confidence: detectionResult.confidence,
+                isRecognized: detectionResult.isRecognized,
+                detailedDescription: detectionResult.detailedDescription,
+              };
+              
+              console.log('✅ Content regenerated successfully for:', monumentName);
+              console.log('📝 Detailed description available:', !!loadedMonument.detailedDescription);
+              if (loadedMonument.detailedDescription?.inDepthContext) {
+                console.log('📄 In-depth context length:', loadedMonument.detailedDescription.inDepthContext.length);
+                console.log('📄 In-depth context preview:', loadedMonument.detailedDescription.inDepthContext.substring(0, 200) + '...');
+              }
+            } catch (regenerationError) {
+              console.error('❌ Failed to regenerate content:', regenerationError);
+              console.error('❌ Regeneration error details:', {
+                message: regenerationError instanceof Error ? regenerationError.message : 'Unknown error',
+                stack: regenerationError instanceof Error ? regenerationError.stack : undefined
+              });
+              // Use basic monument data as fallback
+              loadedMonument = basicMonument;
             }
-          } catch (regenerationError) {
-            console.error('❌ Failed to regenerate content:', regenerationError);
-            console.error('❌ Regeneration error details:', {
-              message: regenerationError instanceof Error ? regenerationError.message : 'Unknown error',
-              stack: regenerationError instanceof Error ? regenerationError.stack : undefined
-            });
-            // Use basic monument data as fallback
+          } else {
+            console.warn('⚠️ No image available for regeneration, using basic data');
+            // No image available, use basic data
             loadedMonument = basicMonument;
           }
         } catch (error) {
@@ -276,7 +271,7 @@ export default function ScanResultScreen() {
     };
     
     loadMonumentData();
-  }, [resultId, scanData, monumentId, regenerate, monumentName, location, country, period, scannedImage, historyItemId]);
+  }, [resultId, scanData, monumentId, regenerate, monumentName, location, period, scannedImage, historyItemId]);
   
 
 
