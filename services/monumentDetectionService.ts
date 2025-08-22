@@ -140,16 +140,14 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
   cleanContent = cleanContent
     // Remove ALL control characters except newlines and tabs
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '')
+    // Fix escaped quotes that break JSON parsing
+    .replace(/\\"/g, '"')
     // Fix unescaped newlines within JSON strings - more comprehensive
     .replace(/"([^"]*?)\n+([^"]*?)"/g, '"$1 $2"')
     // Fix unescaped tabs within JSON strings
     .replace(/"([^"]*?)\t+([^"]*?)"/g, '"$1 $2"')
     // Fix unescaped carriage returns within JSON strings
     .replace(/"([^"]*?)\r+([^"]*?)"/g, '"$1 $2"')
-    // Fix double escaped quotes
-    .replace(/\\\\"/g, '\\"')
-    // Fix unescaped quotes within strings (but not at string boundaries)
-    .replace(/"([^"]*?)"([^":,}\]\s]*?)"([^"]*?)"/g, '"$1\\"$2\\"$3"')
     // Remove any trailing commas before closing braces/brackets
     .replace(/,\s*([}\]])/g, '$1')
     // Fix any double commas
@@ -198,12 +196,12 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
         extractedJson = extractedJson
           // Remove any remaining control characters
           .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '')
+          // Fix escaped quotes that break JSON parsing
+          .replace(/\\"/g, '"')
           // Fix malformed strings by ensuring proper escaping
           .replace(/"([^"\\]*)\\n([^"\\]*)"/g, '"$1\\n$2"')
           .replace(/"([^"\\]*)\\t([^"\\]*)"/g, '"$1\\t$2"')
           .replace(/"([^"\\]*)\\r([^"\\]*)"/g, '"$1\\r$2"')
-          // Fix unescaped quotes within strings
-          .replace(/"([^"]*?)"([^":,}\]]*?)"([^"]*?)"/g, '"$1\\"$2\\"$3"')
           // Remove any trailing commas before closing braces/brackets
           .replace(/,\s*([}\]])/g, '$1')
           // Fix any double commas

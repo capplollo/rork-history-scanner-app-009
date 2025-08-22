@@ -26,7 +26,7 @@ export class SupabaseHistoryService {
         location: scanData.location,
         country: scanData.country,
         period: scanData.period,
-        image: scanData.image,
+        image: scanData.scannedImage || scanData.image, // Use scannedImage if available, fallback to image
         scanned_at: scanData.scannedAt,
       };
 
@@ -160,6 +160,7 @@ export class SupabaseHistoryService {
       if (updates.country) updateData.country = updates.country;
       if (updates.period) updateData.period = updates.period;
       if (updates.image) updateData.image = updates.image;
+      if (updates.scannedImage) updateData.image = updates.scannedImage; // Map scannedImage to image column
 
       const { error } = await supabase
         .from('scan_history')
