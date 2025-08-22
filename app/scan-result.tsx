@@ -826,8 +826,8 @@ export default function ScanResultScreen() {
                       <Info size={20} color="#1e3a8a" />
                       <Text style={styles.sectionTitle}>Key Takeaways</Text>
                     </View>
-                    {monument.detailedDescription.keyTakeawaysList && monument.detailedDescription.keyTakeawaysList.length > 0 ? (
-                      monument.detailedDescription.keyTakeawaysList.map((takeaway: string, index: number) => (
+                    {Array.isArray(monument.detailedDescription.keyTakeaways) ? (
+                      monument.detailedDescription.keyTakeaways.map((takeaway: string, index: number) => (
                         <View key={index} style={styles.factItem}>
                           <Text style={styles.factBullet}>•</Text>
                           <Text style={styles.factText}>{takeaway}</Text>
