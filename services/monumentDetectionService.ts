@@ -124,17 +124,31 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
     throw new Error('No content in AI response');
   }
 
-  // Clean up the response and parse JSON
-  let cleanContent = content.trim()
-    .replace(/```json\s*/g, '')
-    .replace(/```\s*/g, '')
-    .replace(/`/g, '');
+  // Clean up the response and parse JSON with better error handling
+  let cleanContent = content.trim();
+  
+  // Remove markdown code blocks
+  cleanContent = cleanContent.replace(/```json\s*/g, '').replace(/```\s*/g, '').replace(/`/g, '');
+  
+  // Remove any control characters that might break JSON parsing
+  cleanContent = cleanContent.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
   
   // Try to extract JSON from the content if it's mixed with other text
   const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
   if (jsonMatch) {
     cleanContent = jsonMatch[0];
   }
+  
+  // Additional cleanup for common JSON issues
+  cleanContent = cleanContent
+    .replace(/\\n/g, '\n')  // Fix escaped newlines
+    .replace(/\\t/g, '\t')  // Fix escaped tabs
+    .replace(/\\r/g, '\r')  // Fix escaped carriage returns
+    .replace(/\\"/g, '"')  // Fix escaped quotes
+    .replace(/\\'/g, "'")   // Fix escaped single quotes
+    .replace(/\\\\/g, '\\'); // Fix escaped backslashes
+
+  console.log('Cleaned content for JSON parsing:', cleanContent.substring(0, 200) + '...');
 
   try {
     const result = JSON.parse(cleanContent) as DetectionResult;
@@ -152,7 +166,50 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
     return result;
   } catch (parseError) {
     console.error('Failed to parse AI response as JSON:', parseError);
-    throw new Error('Invalid JSON response from AI');
+    console.error('Raw AI response:', content);
+    console.error('Cleaned content that failed to parse:', cleanContent);
+    
+    // Try one more time with even more aggressive cleaning
+    try {
+      // Remove everything before the first { and after the last }
+      const startIndex = cleanContent.indexOf('{');
+      const endIndex = cleanContent.lastIndexOf('}');
+      
+      if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+        const extractedJson = cleanContent.substring(startIndex, endIndex + 1);
+        console.log('Attempting to parse extracted JSON:', extractedJson.substring(0, 200) + '...');
+        
+        const result = JSON.parse(extractedJson) as DetectionResult;
+        console.log('Successfully parsed JSON on second attempt');
+        
+        // Validate and set defaults for detailed description if missing
+        if (result.isRecognized && result.confidence > 75 && !result.detailedDescription) {
+          result.detailedDescription = {
+            keyTakeaways: result.description,
+            inDepthContext: `**${result.artworkName}** is significant ${result.period} monuments and art located in ${result.location}. This piece represents important cultural heritage and artistic achievement of its era. The work showcases the artistic techniques and cultural values of its time period, reflecting the historical context and artistic movements of the period. The creation involved specific materials and techniques characteristic of the era, and its preservation allows us to understand the cultural and artistic priorities of the time.`,
+            curiosities: "No widely known curiosities are associated with these monuments and art.",
+            keyTakeawaysList: result.facts.slice(0, 5)
+          };
+        }
+        
+        return result;
+      }
+    } catch (secondParseError) {
+      console.error('Second JSON parse attempt also failed:', secondParseError);
+    }
+    
+    // If all parsing attempts fail, return a fallback result
+    console.log('All JSON parsing attempts failed, returning fallback result');
+    return {
+      artworkName: 'Unknown Monuments and Art',
+      confidence: 0,
+      location: 'Unknown',
+      period: 'Unknown',
+      description: 'Unable to identify these monuments and art due to response parsing issues. Please try taking another photo.',
+      significance: 'Analysis failed due to technical issues with the response format.',
+      facts: ['Please try again with a different photo', 'Ensure good lighting and clear view of the monuments and art', 'Check your internet connection'],
+      isRecognized: false,
+    };
   }
 }
 
