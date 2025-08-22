@@ -15,7 +15,6 @@ export interface DetectionResult {
     keyTakeaways: string;
     inDepthContext: string;
     curiosities?: string;
-    keyTakeawaysList: string[];
   };
 }
 
@@ -81,7 +80,7 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
     analysisPrompt += `]`;
   }
   
-  analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond in this exact JSON format:\n{\n  "artworkName": "Name or 'Unknown Monuments and Art'",\n  "confidence": 85,\n  "location": "Actual location",\n  "period": "Year(s) or century format (e.g., '1503', '15th century', '1800s', '12th-13th century') or 'Unknown'",\n  "isRecognized": true/false,\n  "detailedDescription": {\n    "keyTakeaways": "Summary of the most important pieces of information (approximately 500 characters)",\n    "inDepthContext": "Write exactly 3 paragraphs (1400-3000 characters total). Separate paragraphs with double line breaks only - NO paragraph titles or labels. Use **bold** highlights for key terms, names, dates, and important details. Be specific and interesting. Avoid generalizations.\n\nFirst paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context.\n\nSecond paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features.\n\nThird paragraph: Discuss cultural impact, significance over the years, notable events or stories associated with the monuments and art and more.",\n    "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with these monuments and art.'",\n    "keyTakeawaysList": ["Four main points summarizing the in-depth context"]\n  }\n}\n\nIMPORTANT: If not recognized with high confidence (confidence < 80), omit the entire detailedDescription object.`;
+  analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond in this exact JSON format:\n{\n  "artworkName": "Name or 'Unknown Monuments and Art'",\n  "confidence": 85,\n  "location": "Actual location",\n  "period": "Year(s) or century format (e.g., '1503', '15th century', '1800s', '12th-13th century') or 'Unknown'",\n  "isRecognized": true/false,\n  "detailedDescription": {\n    "keyTakeaways": "Summary of the most important pieces of information (approximately 500 characters)",\n    "inDepthContext": "Write exactly 3 paragraphs (1400-3000 characters total). Separate paragraphs with double line breaks only - NO paragraph titles or labels. Use **bold** highlights for key terms, names, dates, and important details. Be specific and interesting. Avoid generalizations.\n\nFirst paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context.\n\nSecond paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features.\n\nThird paragraph: Discuss cultural impact, significance over the years, notable events or stories associated with the monuments and art and more.",\n    "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"\n  }\n}\n\nIMPORTANT: If not recognized with high confidence (confidence < 80), omit the entire detailedDescription object.`;
 
   const messages = [
     {
@@ -162,8 +161,7 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
       result.detailedDescription = {
         keyTakeaways: result.description,
         inDepthContext: `**${result.artworkName}** is significant ${result.period} monuments and art located in ${result.location}. This piece represents important cultural heritage and artistic achievement of its era. The work showcases the artistic techniques and cultural values of its time period, reflecting the historical context and artistic movements of the period. The creation involved specific materials and techniques characteristic of the era, and its preservation allows us to understand the cultural and artistic priorities of the time.`,
-        curiosities: "No widely known curiosities are associated with these monuments and art.",
-        keyTakeawaysList: result.facts.slice(0, 5)
+        curiosities: "No widely known curiosities are associated with these monuments and art."
       };
     }
     
@@ -210,8 +208,7 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
           result.detailedDescription = {
             keyTakeaways: result.description,
             inDepthContext: `**${result.artworkName}** is significant ${result.period} monuments and art located in ${result.location}. This piece represents important cultural heritage and artistic achievement of its era. The work showcases the artistic techniques and cultural values of its time period, reflecting the historical context and artistic movements of the period. The creation involved specific materials and techniques characteristic of the era, and its preservation allows us to understand the cultural and artistic priorities of the time.`,
-            curiosities: "No widely known curiosities are associated with these monuments and art.",
-            keyTakeawaysList: result.facts.slice(0, 5)
+            curiosities: "No widely known curiosities are associated with these monuments and art."
           };
         }
         
@@ -279,13 +276,7 @@ function attemptManualJsonReconstruction(content: string): DetectionResult | nul
         result.detailedDescription = {
           keyTakeaways: keyTakeawaysMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"'),
           inDepthContext: inDepthContextMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"'),
-          curiosities: curiositiesMatch ? curiositiesMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : "No widely known curiosities are associated with these monuments and art.",
-          keyTakeawaysList: [
-            `${result.artworkName} is from ${result.period}`,
-            `Located in ${result.location}`,
-            `Confidence level: ${result.confidence}%`,
-            "Represents important cultural heritage"
-          ]
+          curiosities: curiositiesMatch ? curiositiesMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : "No widely known curiosities are associated with these monuments and art."
         };
       }
       

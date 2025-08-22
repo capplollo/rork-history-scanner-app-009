@@ -27,7 +27,6 @@ export interface MonumentContext {
     keyTakeaways: string;
     inDepthContext: string;
     curiosities?: string;
-    keyTakeawaysList: string[];
   };
 }
 
@@ -67,7 +66,6 @@ Detailed Information:
 Key Takeaways: ${monumentContext.detailedDescription.keyTakeaways}
 In-Depth Context: ${monumentContext.detailedDescription.inDepthContext}
 ${monumentContext.detailedDescription.curiosities ? `Curiosities: ${monumentContext.detailedDescription.curiosities}` : ''}
-Key Takeaways List: ${monumentContext.detailedDescription.keyTakeawaysList.join(', ')}
 ` : ''}
 
 Focus your responses on these specific monuments and art when relevant to the user's question.`;
