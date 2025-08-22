@@ -4,23 +4,12 @@ import { HistoryItem } from '@/providers/HistoryProvider';
 export interface SupabaseScanHistory {
   id?: string;
   user_id: string;
-  monument_name: string;
+  name: string;
   location?: string;
+  country?: string;
   period?: string;
-  description?: string;
-  significance?: string;
-  facts?: string[];
-  image_url?: string;
-  scanned_image_url?: string;
+  image?: string;
   scanned_at: string;
-  confidence?: number;
-  is_recognized?: boolean;
-  detailed_description?: {
-    keyTakeaways?: string;
-    inDepthContext?: string;
-    curiosities?: string;
-    keyTakeawaysList?: string[];
-  };
   created_at?: string;
   updated_at?: string;
 }
@@ -33,23 +22,12 @@ export class SupabaseHistoryService {
       
       const supabaseScanData: Omit<SupabaseScanHistory, 'id' | 'created_at' | 'updated_at'> = {
         user_id: userId,
-        monument_name: scanData.name,
+        name: scanData.name,
         location: scanData.location,
+        country: scanData.country,
         period: scanData.period,
-        description: scanData.description,
-        significance: scanData.significance,
-        facts: scanData.facts,
-        image_url: scanData.image,
-        scanned_image_url: scanData.scannedImage,
+        image: scanData.image,
         scanned_at: scanData.scannedAt,
-        confidence: scanData.confidence,
-        is_recognized: scanData.isRecognized,
-        detailed_description: scanData.detailedDescription ? {
-          keyTakeaways: scanData.detailedDescription.keyTakeaways,
-          inDepthContext: scanData.detailedDescription.inDepthContext,
-          curiosities: scanData.detailedDescription.curiosities,
-          keyTakeawaysList: scanData.detailedDescription.keyTakeawaysList,
-        } : undefined,
       };
 
       const { data, error } = await supabase
@@ -90,7 +68,7 @@ export class SupabaseHistoryService {
       // Simple query without abort controller to avoid AbortError issues
       const { data, error } = await supabase
         .from('scan_history')
-        .select('id, monument_name, location, scanned_at, image_url, is_recognized, confidence, period, description, significance, facts, detailed_description')
+        .select('id, name, location, country, period, image, scanned_at')
         .eq('user_id', userId)
         .order('scanned_at', { ascending: false })
         .limit(limit);
@@ -108,23 +86,20 @@ export class SupabaseHistoryService {
       // Convert Supabase data to HistoryItem format
       const scans: HistoryItem[] = (data || []).map((item: any) => ({
         id: item.id || '',
-        name: item.monument_name || '',
+        name: item.name || '',
         location: item.location || '',
+        country: item.country || '',
         period: item.period || '',
-        description: item.description || '',
-        significance: item.significance || '',
-        facts: Array.isArray(item.facts) ? item.facts : [],
-        image: item.image_url || '',
-        scannedImage: item.scanned_image_url || '',
+        image: item.image || '',
         scannedAt: item.scanned_at || new Date().toISOString(),
-        confidence: item.confidence,
-        isRecognized: item.is_recognized,
-        detailedDescription: item.detailed_description ? {
-          keyTakeaways: item.detailed_description.keyTakeaways || '',
-          inDepthContext: item.detailed_description.inDepthContext || '',
-          curiosities: item.detailed_description.curiosities,
-          keyTakeawaysList: Array.isArray(item.detailed_description.keyTakeawaysList) ? item.detailed_description.keyTakeawaysList : [],
-        } : undefined,
+        // Default values for fields not stored in Supabase anymore
+        description: '',
+        significance: '',
+        facts: [],
+        scannedImage: '',
+        confidence: undefined,
+        isRecognized: undefined,
+        detailedDescription: undefined,
       }));
 
       console.log('✅ Fetched', scans.length, 'scans from Supabase');
@@ -180,24 +155,11 @@ export class SupabaseHistoryService {
       
       const updateData: Partial<SupabaseScanHistory> = {};
       
-      if (updates.name) updateData.monument_name = updates.name;
+      if (updates.name) updateData.name = updates.name;
       if (updates.location) updateData.location = updates.location;
+      if (updates.country) updateData.country = updates.country;
       if (updates.period) updateData.period = updates.period;
-      if (updates.description) updateData.description = updates.description;
-      if (updates.significance) updateData.significance = updates.significance;
-      if (updates.facts) updateData.facts = updates.facts;
-      if (updates.image) updateData.image_url = updates.image;
-      if (updates.scannedImage) updateData.scanned_image_url = updates.scannedImage;
-      if (updates.confidence !== undefined) updateData.confidence = updates.confidence;
-      if (updates.isRecognized !== undefined) updateData.is_recognized = updates.isRecognized;
-      if (updates.detailedDescription) {
-        updateData.detailed_description = {
-          keyTakeaways: updates.detailedDescription.keyTakeaways,
-          inDepthContext: updates.detailedDescription.inDepthContext,
-          curiosities: updates.detailedDescription.curiosities,
-          keyTakeawaysList: updates.detailedDescription.keyTakeawaysList,
-        };
-      }
+      if (updates.image) updateData.image = updates.image;
 
       const { error } = await supabase
         .from('scan_history')
@@ -230,8 +192,6 @@ export class SupabaseHistoryService {
   // Get scan statistics for a user
   static async getUserStats(userId: string): Promise<{ 
     totalScans: number; 
-    recognizedScans: number; 
-    averageConfidence: number; 
     error?: string 
   }> {
     try {
@@ -240,7 +200,7 @@ export class SupabaseHistoryService {
       // Simple query without abort controller to avoid AbortError issues
       const { data, error } = await supabase
         .from('scan_history')
-        .select('confidence, is_recognized')
+        .select('id')
         .eq('user_id', userId);
 
       if (error) {
@@ -250,25 +210,19 @@ export class SupabaseHistoryService {
           code: error.code,
           details: error.details,
         }));
-        return { totalScans: 0, recognizedScans: 0, averageConfidence: 0, error: error.message };
+        return { totalScans: 0, error: error.message };
       }
 
       const totalScans = data?.length || 0;
-      const recognizedScans = data?.filter((scan: any) => scan.is_recognized).length || 0;
-      const averageConfidence = totalScans > 0 
-        ? (data?.reduce((sum: number, scan: any) => sum + (scan.confidence || 0), 0) || 0) / totalScans 
-        : 0;
 
-      console.log('✅ User stats calculated:', { totalScans, recognizedScans, averageConfidence });
-      return { totalScans, recognizedScans, averageConfidence };
+      console.log('✅ User stats calculated:', { totalScans });
+      return { totalScans };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Unexpected error fetching user stats:', errorMessage);
       console.error('Full error details:', error);
       return { 
         totalScans: 0, 
-        recognizedScans: 0, 
-        averageConfidence: 0, 
         error: errorMessage
       };
     }

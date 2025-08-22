@@ -8,6 +8,7 @@ export interface HistoryItem {
   id: string;
   name: string;
   location: string;
+  country?: string;
   period: string;
   description: string;
   significance: string;
@@ -52,7 +53,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           // Reduce initial limit to 8 items for faster loading
           const queryPromise = supabase
             .from('scan_history')
-            .select('id, monument_name, location, period, scanned_at, image_url, scanned_image_url, is_recognized, confidence')
+            .select('id, name, location, country, period, scanned_at, image, is_recognized, confidence')
             .eq('user_id', user.id)
             .order('scanned_at', { ascending: false })
             .limit(8);
@@ -78,14 +79,15 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
               try {
                 return {
                   id: item.id || '',
-                  name: item.monument_name || '',
+                  name: item.name || '',
                   location: item.location || '',
+                  country: item.country || '',
                   period: item.period || '', // Keep period for display
                   description: '', // Will be regenerated via API when needed
                   significance: '', // Will be regenerated via API when needed
                   facts: [], // Will be regenerated via API when needed
-                  image: item.image_url || '',
-                  scannedImage: item.scanned_image_url || '', // Keep for history card display
+                  image: item.image || '',
+                  scannedImage: '', // Not stored in simplified schema
                   scannedAt: item.scanned_at ? new Date(item.scanned_at).toISOString() : new Date().toISOString(),
                   confidence: typeof item.confidence === 'number' ? item.confidence : undefined,
                   isRecognized: typeof item.is_recognized === 'boolean' ? item.is_recognized : undefined,
@@ -190,16 +192,12 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
         .from('scan_history')
         .insert({
           user_id: user.id,
-          monument_name: item.name,
+          name: item.name,
           location: item.location,
+          country: item.country,
           period: item.period,
-          image_url: item.image,
-          scanned_image_url: item.scannedImage, // Keep for history card display
+          image: item.image,
           scanned_at: new Date(item.scannedAt).toISOString(),
-          confidence: item.confidence || null,
-          is_recognized: item.isRecognized || null,
-          // Don't save description, significance, facts, or detailed_description
-          // These will be regenerated via API when needed
         });
       
       if (error) {
@@ -294,12 +292,10 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             id: item.id,
             name: item.name,
             location: item.location,
+            country: item.country,
             period: item.period,
             image: item.image,
-            scannedImage: item.scannedImage,
             scannedAt: item.scannedAt,
-            confidence: item.confidence,
-            isRecognized: item.isRecognized,
           }];
           try {
             await AsyncStorage.setItem(HISTORY_STORAGE_KEY + '_backup', JSON.stringify(minimalBackup));
