@@ -130,23 +130,27 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
   // Remove markdown code blocks
   cleanContent = cleanContent.replace(/```json\s*/g, '').replace(/```\s*/g, '').replace(/`/g, '');
   
-  // Remove any control characters that might break JSON parsing
-  cleanContent = cleanContent.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
-  
   // Try to extract JSON from the content if it's mixed with other text
   const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
   if (jsonMatch) {
     cleanContent = jsonMatch[0];
   }
   
-  // Additional cleanup for common JSON issues
+  // More aggressive control character removal - remove ALL control characters except newlines and tabs
+  cleanContent = cleanContent.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+  
+  // Fix common JSON string issues in the content
   cleanContent = cleanContent
-    .replace(/\\n/g, '\n')  // Fix escaped newlines
-    .replace(/\\t/g, '\t')  // Fix escaped tabs
-    .replace(/\\r/g, '\r')  // Fix escaped carriage returns
-    .replace(/\\"/g, '"')  // Fix escaped quotes
-    .replace(/\\'/g, "'")   // Fix escaped single quotes
-    .replace(/\\\\/g, '\\'); // Fix escaped backslashes
+    // Fix unescaped newlines within JSON strings
+    .replace(/"([^"]*?)\n([^"]*?)"/g, '"$1\\n$2"')
+    // Fix unescaped tabs within JSON strings  
+    .replace(/"([^"]*?)\t([^"]*?)"/g, '"$1\\t$2"')
+    // Fix unescaped carriage returns within JSON strings
+    .replace(/"([^"]*?)\r([^"]*?)"/g, '"$1\\r$2"')
+    // Fix double escaped quotes
+    .replace(/\\\\"/g, '\\"')
+    // Fix any remaining problematic characters in strings
+    .replace(/"([^"]*?)[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]([^"]*?)"/g, '"$1$2"');
 
   console.log('Cleaned content for JSON parsing:', cleanContent.substring(0, 200) + '...');
 
@@ -176,8 +180,27 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
       const endIndex = cleanContent.lastIndexOf('}');
       
       if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-        const extractedJson = cleanContent.substring(startIndex, endIndex + 1);
-        console.log('Attempting to parse extracted JSON:', extractedJson.substring(0, 200) + '...');
+        let extractedJson = cleanContent.substring(startIndex, endIndex + 1);
+        
+        // Additional aggressive cleaning for the extracted JSON
+        extractedJson = extractedJson
+          // Remove any remaining control characters
+          .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '')
+          // Fix malformed strings by ensuring proper escaping
+          .replace(/"([^"\\]*)\\n([^"\\]*)"/g, '"$1\\n$2"')
+          .replace(/"([^"\\]*)\\t([^"\\]*)"/g, '"$1\\t$2"')
+          .replace(/"([^"\\]*)\\r([^"\\]*)"/g, '"$1\\r$2"')
+          // Fix unescaped quotes within strings
+          .replace(/"([^"]*?)"([^":,}\]]*?)"([^"]*?)"/g, '"$1\\"$2\\"$3"')
+          // Remove any trailing commas before closing braces/brackets
+          .replace(/,\s*([}\]])/g, '$1')
+          // Fix any double commas
+          .replace(/,,+/g, ',')
+          // Ensure proper spacing around colons and commas
+          .replace(/:\s*([^\s])/g, ': $1')
+          .replace(/,\s*([^\s])/g, ', $1');
+        
+        console.log('Attempting to parse aggressively cleaned JSON:', extractedJson.substring(0, 200) + '...');
         
         const result = JSON.parse(extractedJson) as DetectionResult;
         console.log('Successfully parsed JSON on second attempt');
@@ -196,6 +219,18 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
       }
     } catch (secondParseError) {
       console.error('Second JSON parse attempt also failed:', secondParseError);
+      
+      // Final attempt: try to manually reconstruct basic JSON structure
+      try {
+        console.log('Attempting manual JSON reconstruction...');
+        const reconstructedResult = attemptManualJsonReconstruction(content);
+        if (reconstructedResult) {
+          console.log('Manual reconstruction successful');
+          return reconstructedResult;
+        }
+      } catch (reconstructionError) {
+        console.error('Manual reconstruction failed:', reconstructionError);
+      }
     }
     
     // If all parsing attempts fail, return a fallback result
@@ -213,9 +248,56 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
   }
 }
 
-
-
-
+function attemptManualJsonReconstruction(content: string): DetectionResult | null {
+  try {
+    // Extract key information using regex patterns
+    const artworkNameMatch = content.match(/"artworkName"\s*:\s*"([^"]+)"/i);
+    const confidenceMatch = content.match(/"confidence"\s*:\s*(\d+)/i);
+    const locationMatch = content.match(/"location"\s*:\s*"([^"]+)"/i);
+    const periodMatch = content.match(/"period"\s*:\s*"([^"]+)"/i);
+    const isRecognizedMatch = content.match(/"isRecognized"\s*:\s*(true|false)/i);
+    
+    // Extract detailed description parts
+    const keyTakeawaysMatch = content.match(/"keyTakeaways"\s*:\s*"([^"]+(?:\\.[^"]*)*)"/i);
+    const inDepthContextMatch = content.match(/"inDepthContext"\s*:\s*"([^"]+(?:\\.[^"]*)*)"/i);
+    const curiositiesMatch = content.match(/"curiosities"\s*:\s*"([^"]+(?:\\.[^"]*)*)"/i);
+    
+    if (artworkNameMatch && confidenceMatch && locationMatch && periodMatch && isRecognizedMatch) {
+      const result: DetectionResult = {
+        artworkName: artworkNameMatch[1],
+        confidence: parseInt(confidenceMatch[1]),
+        location: locationMatch[1],
+        period: periodMatch[1],
+        description: `${artworkNameMatch[1]} is located in ${locationMatch[1]} and dates from ${periodMatch[1]}.`,
+        significance: `This monuments and art represents important cultural heritage from ${periodMatch[1]}.`,
+        facts: [`Located in ${locationMatch[1]}`, `Period: ${periodMatch[1]}`, `Confidence: ${confidenceMatch[1]}%`],
+        isRecognized: isRecognizedMatch[1].toLowerCase() === 'true'
+      };
+      
+      // Add detailed description if available and recognized
+      if (result.isRecognized && result.confidence > 75 && keyTakeawaysMatch && inDepthContextMatch) {
+        result.detailedDescription = {
+          keyTakeaways: keyTakeawaysMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"'),
+          inDepthContext: inDepthContextMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"'),
+          curiosities: curiositiesMatch ? curiositiesMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : "No widely known curiosities are associated with these monuments and art.",
+          keyTakeawaysList: [
+            `${result.artworkName} is from ${result.period}`,
+            `Located in ${result.location}`,
+            `Confidence level: ${result.confidence}%`,
+            "Represents important cultural heritage"
+          ]
+        };
+      }
+      
+      return result;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Manual reconstruction error:', error);
+    return null;
+  }
+}
 
 async function convertImageToBase64(imageUri: string): Promise<string> {
   console.log('convertImageToBase64 called with:', { imageUri: imageUri?.substring(0, 100) + '...', platform: Platform.OS });
