@@ -121,10 +121,20 @@ export default function ScanResultScreen() {
             detailedDescription: undefined, // Will be regenerated
           };
           
-          // Regenerate content via API
+          // Regenerate content via API using the same comprehensive analysis as first-time scans
           if (basicMonument.scannedImage) {
             try {
+              console.log('🔄 Starting content regeneration with same prompt as first-time scan...');
+              console.log('Image URI for regeneration:', basicMonument.scannedImage.substring(0, 100) + '...');
+              
               const detectionResult = await detectMonumentsAndArt(basicMonument.scannedImage);
+              
+              console.log('🔍 Regeneration result:', {
+                name: detectionResult.artworkName,
+                confidence: detectionResult.confidence,
+                hasDetailedDescription: !!detectionResult.detailedDescription,
+                inDepthContextLength: detectionResult.detailedDescription?.inDepthContext?.length || 0
+              });
               
               // Update the monument with regenerated content
               loadedMonument = {
@@ -138,12 +148,22 @@ export default function ScanResultScreen() {
               };
               
               console.log('✅ Content regenerated successfully for:', monumentName);
+              console.log('📝 Detailed description available:', !!loadedMonument.detailedDescription);
+              if (loadedMonument.detailedDescription?.inDepthContext) {
+                console.log('📄 In-depth context length:', loadedMonument.detailedDescription.inDepthContext.length);
+                console.log('📄 In-depth context preview:', loadedMonument.detailedDescription.inDepthContext.substring(0, 200) + '...');
+              }
             } catch (regenerationError) {
               console.error('❌ Failed to regenerate content:', regenerationError);
+              console.error('❌ Regeneration error details:', {
+                message: regenerationError instanceof Error ? regenerationError.message : 'Unknown error',
+                stack: regenerationError instanceof Error ? regenerationError.stack : undefined
+              });
               // Use basic monument data as fallback
               loadedMonument = basicMonument;
             }
           } else {
+            console.warn('⚠️ No image available for regeneration, using basic data');
             // No image available, use basic data
             loadedMonument = basicMonument;
           }
