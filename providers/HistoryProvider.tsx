@@ -22,7 +22,7 @@ export interface HistoryItem {
     keyTakeaways: string;
     inDepthContext: string;
     curiosities?: string;
-    keyTakeawaysList: string[];
+    keyTakeawaysList?: string[];
   };
 }
 

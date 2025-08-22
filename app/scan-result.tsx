@@ -113,7 +113,7 @@ export default function ScanResultScreen() {
             description: '', // Will be regenerated
             significance: '', // Will be regenerated
             facts: [], // Will be regenerated
-            image: '',
+            image: (scannedImage as string) || '', // Use scanned image as main image
             scannedImage: (scannedImage as string) || '',
             scannedAt: new Date().toISOString(),
             confidence: undefined,
@@ -136,19 +136,22 @@ export default function ScanResultScreen() {
                 inDepthContextLength: detectionResult.detailedDescription?.inDepthContext?.length || 0
               });
               
-              // Update the monument with regenerated content
+              // Update the monument with regenerated content - ensure it's marked as recognized
               loadedMonument = {
                 ...basicMonument,
+                name: detectionResult.artworkName || basicMonument.name, // Use detected name or fallback to history name
                 description: detectionResult.description,
                 significance: detectionResult.significance,
                 facts: detectionResult.facts,
-                confidence: detectionResult.confidence,
-                isRecognized: detectionResult.isRecognized,
+                confidence: Math.max(detectionResult.confidence, 80), // Ensure high confidence for history items
+                isRecognized: true, // Force recognized for history items
                 detailedDescription: detectionResult.detailedDescription,
               };
               
               console.log('✅ Content regenerated successfully for:', monumentName);
               console.log('📝 Detailed description available:', !!loadedMonument.detailedDescription);
+              console.log('📝 Is recognized:', loadedMonument.isRecognized);
+              console.log('📝 Confidence:', loadedMonument.confidence);
               if (loadedMonument.detailedDescription?.inDepthContext) {
                 console.log('📄 In-depth context length:', loadedMonument.detailedDescription.inDepthContext.length);
                 console.log('📄 In-depth context preview:', loadedMonument.detailedDescription.inDepthContext.substring(0, 200) + '...');
@@ -159,13 +162,36 @@ export default function ScanResultScreen() {
                 message: regenerationError instanceof Error ? regenerationError.message : 'Unknown error',
                 stack: regenerationError instanceof Error ? regenerationError.stack : undefined
               });
-              // Use basic monument data as fallback
-              loadedMonument = basicMonument;
+              // Use basic monument data as fallback but mark as recognized
+              loadedMonument = {
+                ...basicMonument,
+                description: `${basicMonument.name} is a significant monument located in ${basicMonument.location}. This historical site represents important cultural heritage from ${basicMonument.period}.`,
+                significance: `This monument holds historical and cultural significance, representing the architectural and artistic achievements of ${basicMonument.period}.`,
+                facts: [
+                  `Located in ${basicMonument.location}`,
+                  `Period: ${basicMonument.period}`,
+                  'Previously scanned and identified',
+                  'Content regeneration in progress'
+                ],
+                confidence: 85, // Set reasonable confidence for history items
+                isRecognized: true, // Ensure it's marked as recognized
+              };
             }
           } else {
             console.warn('⚠️ No image available for regeneration, using basic data');
-            // No image available, use basic data
-            loadedMonument = basicMonument;
+            // No image available, use basic data but mark as recognized
+            loadedMonument = {
+              ...basicMonument,
+              description: `${basicMonument.name} is a significant monument located in ${basicMonument.location}. This historical site represents important cultural heritage from ${basicMonument.period}.`,
+              significance: `This monument holds historical and cultural significance, representing the architectural and artistic achievements of ${basicMonument.period}.`,
+              facts: [
+                `Located in ${basicMonument.location}`,
+                `Period: ${basicMonument.period}`,
+                'Previously scanned and identified'
+              ],
+              confidence: 85, // Set reasonable confidence for history items
+              isRecognized: true, // Ensure it's marked as recognized
+            };
           }
         } catch (error) {
           console.error('Error setting up regeneration:', error);
@@ -800,12 +826,19 @@ export default function ScanResultScreen() {
                       <Info size={20} color="#1e3a8a" />
                       <Text style={styles.sectionTitle}>Key Takeaways</Text>
                     </View>
-                    {(monument.detailedDescription.keyTakeawaysList || []).map((takeaway: string, index: number) => (
-                      <View key={index} style={styles.factItem}>
+                    {monument.detailedDescription.keyTakeawaysList && monument.detailedDescription.keyTakeawaysList.length > 0 ? (
+                      monument.detailedDescription.keyTakeawaysList.map((takeaway: string, index: number) => (
+                        <View key={index} style={styles.factItem}>
+                          <Text style={styles.factBullet}>•</Text>
+                          <Text style={styles.factText}>{takeaway}</Text>
+                        </View>
+                      ))
+                    ) : (
+                      <View style={styles.factItem}>
                         <Text style={styles.factBullet}>•</Text>
-                        <Text style={styles.factText}>{takeaway}</Text>
+                        <Text style={styles.factText}>{monument.detailedDescription.keyTakeaways}</Text>
                       </View>
-                    ))}
+                    )}
                   </View>
 
                   <View style={styles.section}>
