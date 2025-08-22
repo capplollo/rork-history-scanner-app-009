@@ -26,6 +26,162 @@ export interface AdditionalInfo {
   notes: string;
 }
 
+export async function generateHistoryContent(name: string, location: string, country?: string, period?: string): Promise<DetectionResult> {
+  try {
+    console.log('Generating content for history item:', { name, location, country, period });
+    
+    // Build a prompt that uses stored data instead of image recognition
+    const analysisPrompt = `Generate detailed information about the monuments and art called "${name}" located in ${location}${country ? `, ${country}` : ''}${period ? ` from the ${period}` : ''}.
+
+Provide comprehensive information about these monuments and art including historical context, artistic significance, and cultural importance. Use the same detailed format as if analyzing from an image.
+
+Respond in this exact JSON format:
+{
+  "artworkName": "${name}",
+  "confidence": 95,
+  "location": "${location}${country ? `, ${country}` : ''}",
+  "period": "${period || 'Historical period'}",
+  "isRecognized": true,
+  "detailedDescription": {
+    "keyTakeaways": "Summary of the most important pieces of information (approximately 500 characters)",
+    "inDepthContext": "Write exactly 3 paragraphs (1400-3000 characters total). Separate paragraphs with double line breaks only - NO paragraph titles or labels. Use **bold** highlights for key terms, names, dates, and important details. Be specific and interesting. Avoid generalizations.\n\nFirst paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context.\n\nSecond paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features.\n\nThird paragraph: Discuss cultural impact, significance over the years, notable events or stories associated with the monuments and art and more.",
+    "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with these monuments and art.'",
+    "keyTakeawaysList": ["Four main points summarizing the in-depth context"]
+  }
+}`;
+
+    const messages = [
+      {
+        role: 'user' as const,
+        content: analysisPrompt
+      }
+    ];
+
+    console.log('Sending history content generation request to AI API...');
+    
+    const response = await fetch('https://toolkit.rork.com/text/llm/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages: messages
+      })
+    });
+
+    console.log('AI API response status:', response.status);
+
+    if (!response.ok) {
+      console.error('AI API error:', response.status, response.statusText);
+      throw new Error(`AI service error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.completion;
+    if (!content) {
+      throw new Error('No content in AI response');
+    }
+
+    // Clean up the response and parse JSON with better error handling
+    let cleanContent = content.trim();
+    
+    // Remove markdown code blocks
+    cleanContent = cleanContent.replace(/```json\s*/g, '').replace(/```\s*/g, '').replace(/`/g, '');
+    
+    // Remove any control characters that might break JSON parsing
+    cleanContent = cleanContent.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+    
+    // Try to extract JSON from the content if it's mixed with other text
+    const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanContent = jsonMatch[0];
+    }
+    
+    // Additional cleanup for common JSON issues
+    cleanContent = cleanContent
+      .replace(/\\n/g, '\n')  // Fix escaped newlines
+      .replace(/\\t/g, '\t')  // Fix escaped tabs
+      .replace(/\\r/g, '\r')  // Fix escaped carriage returns
+      .replace(/\\"/g, '"')  // Fix escaped quotes
+      .replace(/\\'/g, "'")   // Fix escaped single quotes
+      .replace(/\\\\/g, '\\'); // Fix escaped backslashes
+
+    console.log('Cleaned content for JSON parsing:', cleanContent.substring(0, 200) + '...');
+
+    try {
+      const result = JSON.parse(cleanContent) as DetectionResult;
+      
+      // Ensure we have the basic required fields with fallbacks
+      const finalResult: DetectionResult = {
+        artworkName: result.artworkName || name,
+        confidence: result.confidence || 95,
+        location: result.location || location,
+        period: result.period || period || 'Historical period',
+        description: result.description || `${name} is significant monuments and art located in ${location}.`,
+        significance: result.significance || `These monuments and art represent important cultural heritage.`,
+        facts: result.facts || [`Located in ${location}`, `Historical significance`, `Cultural importance`],
+        isRecognized: true, // Always true for history items
+        detailedDescription: result.detailedDescription
+      };
+      
+      console.log('✅ History content generated successfully for:', name);
+      return finalResult;
+    } catch (parseError) {
+      console.error('Failed to parse AI response as JSON:', parseError);
+      console.error('Raw AI response:', content);
+      console.error('Cleaned content that failed to parse:', cleanContent);
+      
+      // Return fallback result with basic information
+      return {
+        artworkName: name,
+        confidence: 95,
+        location: location,
+        period: period || 'Historical period',
+        description: `${name} is significant monuments and art located in ${location}. This piece represents important cultural heritage and artistic achievement.`,
+        significance: `These monuments and art hold cultural and historical significance in ${location}.`,
+        facts: [
+          `Located in ${location}`,
+          period ? `From the ${period}` : 'Historical significance',
+          'Important cultural heritage',
+          'Artistic and historical value'
+        ],
+        isRecognized: true,
+        detailedDescription: {
+          keyTakeaways: `${name} represents significant cultural heritage located in ${location}.`,
+          inDepthContext: `**${name}** is significant monuments and art located in ${location}. This piece represents important cultural heritage and artistic achievement of its era. The work showcases the artistic techniques and cultural values of its time period, reflecting the historical context and artistic movements of the period.\n\nThe creation involved specific materials and techniques characteristic of the era, and its preservation allows us to understand the cultural and artistic priorities of the time. The architectural or artistic elements demonstrate the skill and vision of its creators.\n\nToday, these monuments and art continue to serve as important cultural landmarks, attracting visitors and scholars who seek to understand the rich heritage they represent. Their significance extends beyond their physical presence to embody the cultural identity and historical narrative of the region.`,
+          curiosities: "No widely known curiosities are associated with these monuments and art.",
+          keyTakeawaysList: [
+            `Located in ${location}`,
+            period ? `From the ${period}` : 'Historical significance',
+            'Cultural heritage importance',
+            'Artistic and architectural value'
+          ]
+        }
+      };
+    }
+    
+  } catch (error) {
+    console.error('Error generating history content:', error);
+    
+    // Return a basic fallback result
+    return {
+      artworkName: name,
+      confidence: 95,
+      location: location,
+      period: period || 'Historical period',
+      description: `${name} is significant monuments and art located in ${location}. This piece represents important cultural heritage and artistic achievement.`,
+      significance: `These monuments and art hold cultural and historical significance in ${location}.`,
+      facts: [
+        `Located in ${location}`,
+        period ? `From the ${period}` : 'Historical significance',
+        'Important cultural heritage',
+        'Artistic and historical value'
+      ],
+      isRecognized: true,
+    };
+  }
+}
+
 export async function detectMonumentsAndArt(imageUri: string, additionalInfo?: AdditionalInfo): Promise<DetectionResult> {
   try {
     console.log('Starting monuments and art detection for image:', imageUri);
