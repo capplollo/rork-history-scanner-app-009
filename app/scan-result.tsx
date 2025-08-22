@@ -650,7 +650,7 @@ export default function ScanResultScreen() {
               We couldn&apos;t identify these monuments and art with confidence. Add more context below to help improve the identification, then try analyzing again.
             </Text>
             
-            <TouchableOpacity 
+<TouchableOpacity 
               style={styles.contextToggle} 
               onPress={() => setShowContextForm(!showContextForm)}
             >
@@ -714,7 +714,7 @@ export default function ScanResultScreen() {
               </View>
             )}
             
-            <TouchableOpacity
+<TouchableOpacity
               style={[styles.reanalyzeButton, isReanalyzing && styles.reanalyzeButtonDisabled]}
               onPress={handleReanalyze}
               disabled={isReanalyzing}
@@ -722,12 +722,12 @@ export default function ScanResultScreen() {
               {isReanalyzing ? (
                 <>
                   <ActivityIndicator color="#ffffff" size="small" />
-                  <Text style={styles.reanalyzeButtonText}>Analyzing...</Text>
+                  <Text style={styles.reanalyzeButtonText}>Analyzing with Context...</Text>
                 </>
               ) : (
                 <>
                   <RefreshCw size={20} color="#ffffff" />
-                  <Text style={styles.reanalyzeButtonText}>Analyze Again</Text>
+                  <Text style={styles.reanalyzeButtonText}>Analyze Again with Context</Text>
                 </>
               )}
             </TouchableOpacity>
@@ -754,94 +754,7 @@ export default function ScanResultScreen() {
           
 
 
-          {/* Add Context Section - Always visible for all monuments and art */}
-          <View style={styles.addContextSection}>
-            <TouchableOpacity 
-              style={styles.addContextToggle} 
-              onPress={() => setShowContextForm(!showContextForm)}
-            >
-              <Text style={styles.addContextToggleText}>
-                Is this recognition incorrect?
-              </Text>
-              {showContextForm ? (
-                <ChevronUp size={14} color="#9ca3af" />
-              ) : (
-                <ChevronDown size={14} color="#9ca3af" />
-              )}
-            </TouchableOpacity>
-            
-            {showContextForm && (
-              <View style={styles.contextForm}>
-                <Text style={styles.contextFormDescription}>
-                  Help us improve by providing additional context if the monuments and art identification seems wrong or incomplete.
-                </Text>
-                
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Correct Monuments and Art Name</Text>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="e.g., Mona Lisa, David, Eiffel Tower"
-                    value={contextInfo.name}
-                    onChangeText={(text) => updateContextInfo('name', text)}
-                    placeholderTextColor="#94a3b8"
-                  />
-                </View>
-                
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Location</Text>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="e.g., Paris, France or Central Park, NYC"
-                    value={contextInfo.location}
-                    onChangeText={(text) => updateContextInfo('location', text)}
-                    placeholderTextColor="#94a3b8"
-                  />
-                </View>
-                
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Building/Museum/Gallery</Text>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="e.g., Louvre Museum, Uffizi Gallery, St. Peter's Basilica"
-                    value={contextInfo.building}
-                    onChangeText={(text) => updateContextInfo('building', text)}
-                    placeholderTextColor="#94a3b8"
-                  />
-                </View>
-                
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Additional Notes</Text>
-                  <TextInput
-                    style={[styles.textInput, styles.textInputMultiline]}
-                    placeholder="Any other details that might help..."
-                    value={contextInfo.notes}
-                    onChangeText={(text) => updateContextInfo('notes', text)}
-                    placeholderTextColor="#94a3b8"
-                    multiline
-                    numberOfLines={3}
-                  />
-                </View>
-                
-                <TouchableOpacity
-                  style={[styles.submitContextButton, isReanalyzing && styles.submitContextButtonDisabled]}
-                  onPress={handleReanalyze}
-                  disabled={isReanalyzing}
-                >
-                  {isReanalyzing ? (
-                    <>
-                      <ActivityIndicator color="#ffffff" size="small" />
-                      <Text style={styles.submitContextButtonText}>Analyzing...</Text>
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw size={18} color="#ffffff" />
-                      <Text style={styles.submitContextButtonText}>Re-analyze with Context</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
+
 
           {/* Only show content sections for recognized monuments and art */}
           {!isUnknownArtwork && (
