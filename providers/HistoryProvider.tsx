@@ -33,27 +33,29 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
   const { user } = useAuth();
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   const loadHistory = useCallback(async () => {
     let isCancelled = false;
     
     try {
       if (user) {
-        // Load from Supabase with improved error handling and timeout
+        // Load from Supabase with improved error handling and faster timeout
         try {
           console.log('Loading history from Supabase for user:', user.id);
           
-          // Add a timeout to prevent hanging requests
+          // Reduce timeout to 5 seconds for faster fallback
           const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 second timeout
+            setTimeout(() => reject(new Error('Request timeout')), 5000); // 5 second timeout
           });
           
+          // Reduce initial limit to 8 items for faster loading
           const queryPromise = supabase
             .from('scan_history')
             .select('id, monument_name, location, period, scanned_at, image_url, scanned_image_url, is_recognized, confidence')
             .eq('user_id', user.id)
             .order('scanned_at', { ascending: false })
-            .limit(15);
+            .limit(8);
           
           const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
           
@@ -97,6 +99,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             
             if (!isCancelled) {
               setHistory(mappedData);
+              setHasLoadedOnce(true);
             }
           }
         } catch (requestError: unknown) {
@@ -141,19 +144,25 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
   }, [user]);
 
   useEffect(() => {
-    const cleanup = loadHistory();
-    
-    // Return cleanup function for useEffect
-    return () => {
-      if (cleanup && typeof cleanup.then === 'function') {
-        cleanup.then(cleanupFn => {
-          if (typeof cleanupFn === 'function') {
-            cleanupFn();
-          }
-        });
-      }
-    };
-  }, [loadHistory]);
+    // Only load if we haven't loaded before or user changed
+    if (!hasLoadedOnce || (user && history.length === 0)) {
+      const cleanup = loadHistory();
+      
+      // Return cleanup function for useEffect
+      return () => {
+        if (cleanup && typeof cleanup.then === 'function') {
+          cleanup.then(cleanupFn => {
+            if (typeof cleanupFn === 'function') {
+              cleanupFn();
+            }
+          });
+        }
+      };
+    } else {
+      // If we already have data, don't show loading
+      setIsLoading(false);
+    }
+  }, [loadHistory, hasLoadedOnce, user, history.length]);
 
   const loadFromLocalStorage = async () => {
     try {
@@ -162,6 +171,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
         const parsed = JSON.parse(stored);
         // Limit local storage to prevent quota issues
         setHistory(parsed.slice(0, LOCAL_STORAGE_LIMIT));
+        setHasLoadedOnce(true);
       }
     } catch (error) {
       console.error("Error loading from local storage:", error);
@@ -354,5 +364,6 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
     addToHistory,
     clearHistory,
     getStorageInfo,
-  }), [history, isLoading, addToHistory, clearHistory, getStorageInfo]);
+    hasLoadedOnce,
+  }), [history, isLoading, addToHistory, clearHistory, getStorageInfo, hasLoadedOnce]);
 });

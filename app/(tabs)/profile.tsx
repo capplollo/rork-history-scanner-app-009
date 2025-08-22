@@ -28,7 +28,7 @@ import { router } from "expo-router";
 
 
 export default function ProfileScreen() {
-  const { history, clearHistory } = useHistory();
+  const { history, clearHistory, isLoading: historyLoading } = useHistory();
   const { user, signOut, loading } = useAuth();
 
   useEffect(() => {
@@ -138,18 +138,36 @@ export default function ProfileScreen() {
         </View>
 
         {/* History Section */}
-        {history.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <View style={styles.sectionTitleContainer}>
-                <Clock size={20} color="#8B4513" />
-                <Text style={styles.sectionTitle}>Your Discoveries</Text>
-              </View>
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionTitleContainer}>
+              <Clock size={20} color="#8B4513" />
+              <Text style={styles.sectionTitle}>Your Discoveries</Text>
+            </View>
+            {historyLoading ? (
+              <Text style={styles.sectionSubtitle}>Loading history...</Text>
+            ) : (
               <Text style={styles.sectionSubtitle}>
                 {history.length} {history.length === 1 ? "monument and art piece" : "monuments and art pieces"} explored
               </Text>
+            )}
+          </View>
+          
+          {historyLoading ? (
+            <View style={styles.loadingContainer}>
+              <View style={styles.loadingGrid}>
+                {[1, 2, 3, 4].map((_, index) => (
+                  <View key={index} style={styles.loadingCard}>
+                    <View style={styles.loadingCardBackground} />
+                    <View style={styles.loadingCardContent}>
+                      <View style={styles.loadingText} />
+                      <View style={styles.loadingTextSmall} />
+                    </View>
+                  </View>
+                ))}
+              </View>
             </View>
-            
+          ) : history.length > 0 ? (
             <View style={styles.historyGrid}>
               {history.slice(0, 6).map((item, index) => {
                 const formatDate = (dateString: string) => {
@@ -193,15 +211,21 @@ export default function ProfileScreen() {
                 );
               })}
             </View>
-            
-            {history.length > 6 && (
-              <TouchableOpacity style={styles.viewAllButton}>
-                <Text style={styles.viewAllButtonText}>View All Discoveries</Text>
-                <ChevronRight size={16} color="#8B4513" />
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
+          ) : (
+            <View style={styles.emptyHistoryContainer}>
+              <Camera size={48} color="#cbd5e1" />
+              <Text style={styles.emptyHistoryText}>No discoveries yet</Text>
+              <Text style={styles.emptyHistorySubtext}>Start scanning monuments and art to build your collection</Text>
+            </View>
+          )}
+          
+          {!historyLoading && history.length > 6 && (
+            <TouchableOpacity style={styles.viewAllButton}>
+              <Text style={styles.viewAllButtonText}>View All Discoveries</Text>
+              <ChevronRight size={16} color="#8B4513" />
+            </TouchableOpacity>
+          )}
+        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Settings</Text>
@@ -227,7 +251,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {history.length > 0 && (
+        {!historyLoading && history.length > 0 && (
           <TouchableOpacity 
             style={styles.clearButton}
             onPress={clearHistory}
@@ -585,5 +609,75 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
+  },
+  loadingContainer: {
+    marginBottom: 20,
+  },
+  loadingGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  loadingCard: {
+    width: "48%",
+    height: 240,
+    borderRadius: 16,
+    backgroundColor: "#f8f9fa",
+    overflow: "hidden",
+    position: "relative",
+  },
+  loadingCardBackground: {
+    width: "100%",
+    height: "70%",
+    backgroundColor: "#e9ecef",
+    opacity: 0.6,
+  },
+  loadingCardContent: {
+    position: "absolute",
+    bottom: 12,
+    left: 12,
+    right: 12,
+    gap: 6,
+  },
+  loadingText: {
+    height: 16,
+    backgroundColor: "#dee2e6",
+    borderRadius: 4,
+    opacity: 0.7,
+  },
+  loadingTextSmall: {
+    height: 12,
+    width: "60%",
+    backgroundColor: "#dee2e6",
+    borderRadius: 4,
+    opacity: 0.5,
+  },
+  emptyHistoryContainer: {
+    alignItems: "center",
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  emptyHistoryText: {
+    fontSize: 18,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#64748b",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyHistorySubtext: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#94a3b8",
+    textAlign: "center",
+    lineHeight: 20,
   },
 });
