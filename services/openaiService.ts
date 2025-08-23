@@ -1,7 +1,5 @@
 
 
-import Constants from 'expo-constants';
-
 interface OpenAIMessage {
   role: 'system' | 'user' | 'assistant';
   content: string | {
@@ -21,40 +19,16 @@ interface OpenAIResponse {
   }[];
 }
 
-// Use only the hardcoded API key for Rork environment to avoid caching issues - UPDATED
+// Use ONLY the hardcoded API key - no environment variables, no fallbacks
 const OPENAI_API_KEY = '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';
 
-// Debug logging
-console.log('🔍 Environment Debug:');
-console.log('Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY:', Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY ? 'SET' : 'NOT SET');
-console.log('process.env.EXPO_PUBLIC_OPENAI_API_KEY:', process.env.EXPO_PUBLIC_OPENAI_API_KEY ? 'SET' : 'NOT SET');
-console.log('Final OPENAI_API_KEY:', OPENAI_API_KEY ? 'SET' : 'NOT SET');
-console.log('Constants.expoConfig?.extra keys:', Object.keys(Constants.expoConfig?.extra || {}));
-console.log('Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY length:', Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY?.length || 0);
-console.log('Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY starts with:', Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY?.substring(0, 20) || 'NOT SET');
-console.log('🔑 API Key Debug:');
-console.log('API Key length:', OPENAI_API_KEY?.length || 0);
-console.log('API Key starts with:', OPENAI_API_KEY?.substring(0, 20) || 'NOT SET');
-console.log('API Key ends with:', OPENAI_API_KEY?.substring(OPENAI_API_KEY?.length - 10) || 'NOT SET');
-
-if (!OPENAI_API_KEY) {
-  console.warn('OpenAI API key not found. Please set EXPO_PUBLIC_OPENAI_API_KEY in your .env file.');
-}
-
 export async function callOpenAI(messages: OpenAIMessage[]): Promise<string> {
-  if (!OPENAI_API_KEY) {
-    throw new Error('OpenAI API key not configured. Please add EXPO_PUBLIC_OPENAI_API_KEY to your .env file.');
-  }
-
   try {
-    console.log('🔑 API Key Check in callOpenAI:');
-console.log('API Key length:', OPENAI_API_KEY.length);
-console.log('API Key starts with:', OPENAI_API_KEY.substring(0, 20));
-console.log('API Key ends with:', OPENAI_API_KEY.substring(OPENAI_API_KEY.length - 10));
-console.log('🔑 FULL API Key being used:', OPENAI_API_KEY);
+    console.log('🔑 Using hardcoded API key for OpenAI call');
+    console.log('🔑 API Key starts with:', OPENAI_API_KEY.substring(0, 20));
+    console.log('🔑 API Key ends with:', OPENAI_API_KEY.substring(OPENAI_API_KEY.length - 10));
     
     console.log('Sending request to OpenAI API...');
-    console.log('Messages:', JSON.stringify(messages, null, 2));
     
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -80,7 +54,7 @@ console.log('🔑 FULL API Key being used:', OPENAI_API_KEY);
       console.error('Response body:', errorText);
       
       if (response.status === 401) {
-        throw new Error('Invalid OpenAI API key. Please check your EXPO_PUBLIC_OPENAI_API_KEY.');
+        throw new Error('Invalid OpenAI API key. The hardcoded key may be expired or invalid.');
       } else if (response.status === 429) {
         throw new Error('OpenAI API rate limit exceeded. Please try again later.');
       } else if (response.status === 500) {
