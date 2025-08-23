@@ -14,13 +14,10 @@ import {
 import { 
   User, 
   MapPin, 
-  Calendar,
   Settings,
   LogOut,
-  ChevronRight,
   Camera,
   Globe,
-  Clock,
   X
 } from "lucide-react-native";
 import { useHistory } from "@/providers/HistoryProvider";
@@ -107,25 +104,24 @@ export default function ProfileScreen() {
           colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
-          <TouchableOpacity 
-            style={styles.settingsButton}
-            onPress={() => setShowSettings(true)}
-          >
-            <Settings size={24} color="#ffffff" />
-          </TouchableOpacity>
           <View style={styles.profileSection}>
-            <View style={styles.avatarContainer}>
-              <View style={styles.avatar}>
-                <User size={40} color="#4f46e5" />
+            <View style={styles.profileRow}>
+              <View style={styles.avatarContainer}>
+                <View style={styles.avatar}>
+                  <User size={32} color="#4f46e5" />
+                </View>
               </View>
-              <TouchableOpacity style={styles.editAvatarButton}>
-                <Camera size={16} color="#ffffff" />
+              <View style={styles.profileInfo}>
+                <Text style={styles.userName}>{user.user_metadata?.full_name || 'Explorer'}</Text>
+                <Text style={styles.userEmail}>{user.email}</Text>
+              </View>
+              <TouchableOpacity 
+                style={styles.settingsButton}
+                onPress={() => setShowSettings(true)}
+              >
+                <Settings size={20} color="#ffffff" />
               </TouchableOpacity>
             </View>
-            <Text style={styles.userName}>{user.user_metadata?.full_name || 'Explorer'}</Text>
-            <Text style={styles.userEmail}>{user.email}</Text>
-            
-            <Text style={styles.userSubtitle}>Cultural Explorer</Text>
           </View>
         </LinearGradient>
 
@@ -133,33 +129,17 @@ export default function ProfileScreen() {
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <View key={index} style={styles.statCard}>
-                <View style={styles.statIconContainer}>
-                  <Icon size={16} color="#8B4513" />
-                </View>
-                <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
+              <View key={index} style={styles.statBadge}>
+                <Icon size={12} color="#8B4513" />
+                <Text style={styles.statBadgeValue}>{stat.value}</Text>
+                <Text style={styles.statBadgeLabel}>{stat.label}</Text>
               </View>
             );
           })}
         </View>
 
-        {/* History Section */}
+        {/* All Discoveries Section */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleContainer}>
-              <Clock size={20} color="#8B4513" />
-              <Text style={styles.sectionTitle}>Your Discoveries</Text>
-            </View>
-            {historyLoading ? (
-              <Text style={styles.sectionSubtitle}>Loading history...</Text>
-            ) : (
-              <Text style={styles.sectionSubtitle}>
-                {history.length} {history.length === 1 ? "monument and art piece" : "monuments and art pieces"} explored
-              </Text>
-            )}
-          </View>
-          
           {historyLoading ? (
             <View style={styles.loadingContainer}>
               <View style={styles.loadingGrid}>
@@ -176,7 +156,7 @@ export default function ProfileScreen() {
             </View>
           ) : history.length > 0 ? (
             <View style={styles.historyGrid}>
-              {history.slice(0, 6).map((item, index) => {
+              {history.map((item, index) => {
                 const formatDate = (dateString: string) => {
                   const date = new Date(dateString);
                   return date.toLocaleDateString("en-US", {
@@ -224,16 +204,6 @@ export default function ProfileScreen() {
               <Text style={styles.emptyHistoryText}>No discoveries yet</Text>
               <Text style={styles.emptyHistorySubtext}>Start scanning monuments and art to build your collection</Text>
             </View>
-          )}
-          
-          {!historyLoading && history.length > 6 && (
-            <TouchableOpacity 
-              style={styles.viewAllButton}
-              onPress={() => router.push('/history')}
-            >
-              <Text style={styles.viewAllButtonText}>View All Discoveries</Text>
-              <ChevronRight size={16} color="#8B4513" />
-            </TouchableOpacity>
           )}
         </View>
 
@@ -292,7 +262,7 @@ export default function ProfileScreen() {
                       </View>
                       <Text style={styles.menuItemText}>{item.label}</Text>
                     </View>
-                    <ChevronRight size={20} color="#cbd5e1" />
+                    <View style={{ width: 20, height: 20 }} />
                   </TouchableOpacity>
                 );
               })}
@@ -310,107 +280,80 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEFEFE",
   },
   headerGradient: {
-    paddingTop: 30,
-    paddingBottom: 40,
+    paddingTop: 20,
+    paddingBottom: 30,
     paddingHorizontal: 20,
   },
   profileSection: {
+    flex: 1,
+  },
+  profileRow: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: 16,
   },
   avatarContainer: {
     position: "relative",
-    marginBottom: 16,
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: "#ffffff",
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  editAvatarButton: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: "#f59e0b",
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 3,
-    borderColor: "#ffffff",
+  profileInfo: {
+    flex: 1,
   },
   userName: {
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "400",
+    fontWeight: "600",
     color: "#ffffff",
-    marginBottom: 4,
+    marginBottom: 2,
   },
   userEmail: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontStyle: "italic",
-    color: "rgba(255,255,255,0.9)",
-    marginBottom: 20,
-  },
-  userSubtitle: {
-    fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontStyle: "italic",
     color: "rgba(255,255,255,0.8)",
-    marginTop: 8,
   },
 
   statsContainer: {
     flexDirection: "row",
     paddingHorizontal: 20,
-    marginTop: -20,
-    gap: 12,
+    marginTop: -15,
+    gap: 8,
   },
-  statCard: {
-    flex: 1,
+  statBadge: {
     backgroundColor: "#ffffff",
-    padding: 16,
-    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    flexDirection: "row",
     alignItems: "center",
+    gap: 6,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-    gap: 6,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  statIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#f8f4f0",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 2,
-  },
-  statValue: {
-    fontSize: 20,
+  statBadgeValue: {
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -419,8 +362,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#2C3E50",
   },
-  statLabel: {
-    fontSize: 13,
+  statBadgeLabel: {
+    fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -428,40 +371,10 @@ const styles = StyleSheet.create({
     }),
     color: "#64748b",
     fontWeight: "500",
-    textAlign: "center",
   },
   section: {
-    marginTop: 30,
+    marginTop: 20,
     paddingHorizontal: 20,
-  },
-  sectionHeader: {
-    marginBottom: 20,
-  },
-  sectionTitleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 4,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-    color: "#2C3E50",
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#64748b",
-    fontStyle: "italic",
   },
   historyGrid: {
     flexDirection: "row",
@@ -684,16 +597,12 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   settingsButton: {
-    position: "absolute",
-    top: 20,
-    right: 20,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 1,
   },
   modalContainer: {
     flex: 1,
