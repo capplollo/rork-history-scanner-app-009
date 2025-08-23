@@ -1,5 +1,3 @@
-import { callOpenAIWithHistory, callOpenAIText } from './openaiService';
-
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -73,16 +71,62 @@ ${monumentContext.detailedDescription.curiosities ? `Curiosities: ${monumentCont
 Focus your responses on these specific monuments and art when relevant to the user's question.`;
     }
 
-    console.log('Sending request to OpenAI API...');
+    // Build conversation history for context
+    let conversationHistory = '';
+    if (chatHistory.length > 0) {
+      const recentMessages = chatHistory.slice(-6); // Keep last 6 messages for context
+      conversationHistory = '\n\nRecent conversation:\n' + 
+        recentMessages.map(msg => `${msg.role}: ${msg.content}`).join('\n');
+    }
+
+    const messages = [
+      {
+        role: 'user' as const,
+        content: `${systemPrompt}${conversationHistory}\n\nUser question: ${message}`
+      }
+    ];
+
+    console.log('Sending request to Rork AI API...');
+    console.log('Chat request payload:', JSON.stringify({ messages: messages }, null, 2));
     
-    // Convert to the format expected by our OpenAI service
-    const conversationHistory = chatHistory.slice(-6).map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }));
+    const response = await fetch('https://toolkit.rork.com/text/llm/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages: messages
+      })
+    });
+
+    console.log('Chat API response status:', response.status);
+    console.log('Chat API response headers:', Object.fromEntries(response.headers.entries()));
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Chat AI API error details:');
+      console.error('Status:', response.status, response.statusText);
+      console.error('Response body:', errorText);
+      console.error('Request was:', JSON.stringify({ messages: messages }, null, 2));
+      
+      // Provide more specific error messages
+      if (response.status === 500) {
+        throw new Error('AI chat service is temporarily unavailable. Please try again in a few moments.');
+      } else if (response.status === 429) {
+        throw new Error('Too many chat requests. Please wait a moment and try again.');
+      } else {
+        throw new Error(`AI API error: ${response.status} ${response.statusText}`);
+      }
+    }
+
+    const data = await response.json();
+    console.log('AI response received:', data);
     
-    const content = await callOpenAIWithHistory(systemPrompt, message, conversationHistory);
-    
+    const content = data.completion;
+    if (!content) {
+      throw new Error('No content in AI response');
+    }
+
     return content.trim();
     
   } catch (error) {
@@ -96,14 +140,52 @@ export async function generateChatTitle(
   monumentContext?: MonumentContext
 ): Promise<string> {
   try {
-    console.log('Sending chat title generation request to OpenAI API...');
-    
-    const prompt = `Generate a short, engaging title (3-6 words) for a chat conversation about ${monumentContext ? `the ${monumentContext.name} monuments and art` : 'monuments and art heritage'}. The first message is: "${firstMessage}"
+    const messages = [
+      {
+        role: 'user' as const,
+        content: `Generate a short, engaging title (3-6 words) for a chat conversation about ${monumentContext ? `the ${monumentContext.name} monuments and art` : 'monuments and art heritage'}. The first message is: "${firstMessage}"
 
-Respond with ONLY the title, no quotes or additional text.`;
+Respond with ONLY the title, no quotes or additional text.`
+      }
+    ];
+
+    console.log('Sending chat title generation request to AI API...');
+    console.log('Title generation request payload:', JSON.stringify({ messages: messages }, null, 2));
     
-    const content = await callOpenAIText(prompt);
+    const response = await fetch('https://toolkit.rork.com/text/llm/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        messages: messages
+      })
+    });
+
+    console.log('Title generation API response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Title generation AI API error details:');
+      console.error('Status:', response.status, response.statusText);
+      console.error('Response body:', errorText);
+      
+      if (response.status === 500) {
+        throw new Error('AI service is temporarily unavailable for title generation.');
+      } else if (response.status === 429) {
+        throw new Error('Too many requests for title generation. Please wait a moment.');
+      } else {
+        throw new Error(`AI API error: ${response.status} ${response.statusText}`);
+      }
+    }
+
+    const data = await response.json();
+    const content = data.completion;
     
+    if (!content) {
+      throw new Error('No content in AI response');
+    }
+
     return content.trim().replace(/"/g, '');
     
   } catch (error) {
