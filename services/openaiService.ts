@@ -47,6 +47,11 @@ export async function callOpenAI(messages: OpenAIMessage[]): Promise<string> {
   }
 
   try {
+    console.log('🔑 API Key Check in callOpenAI:');
+    console.log('API Key length:', OPENAI_API_KEY.length);
+    console.log('API Key starts with:', OPENAI_API_KEY.substring(0, 20));
+    console.log('API Key ends with:', OPENAI_API_KEY.substring(OPENAI_API_KEY.length - 10));
+    
     console.log('Sending request to OpenAI API...');
     console.log('Messages:', JSON.stringify(messages, null, 2));
     
