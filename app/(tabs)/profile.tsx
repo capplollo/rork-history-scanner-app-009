@@ -112,23 +112,7 @@ export default function ProfileScreen() {
     { icon: LogOut, label: "Sign Out", action: handleSignOut },
   ];
 
-  // Test sign out function for debugging
-  const testSignOut = async () => {
-    try {
-      console.log('Test sign out triggered');
-      const { error } = await signOut();
-      if (error) {
-        console.error('Test sign out error:', error);
-        Alert.alert('Error', 'Test sign out failed: ' + error.message);
-      } else {
-        console.log('Test sign out successful');
-        Alert.alert('Success', 'Sign out successful!');
-      }
-    } catch (err) {
-      console.error('Test sign out unexpected error:', err);
-      Alert.alert('Error', 'Test sign out unexpected error');
-    }
-  };
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -156,14 +140,7 @@ export default function ProfileScreen() {
             <Text style={styles.userEmail}>{user.email}</Text>
             
             <Text style={styles.userSubtitle}>Cultural Explorer</Text>
-            
-            {/* Test Sign Out Button */}
-            <TouchableOpacity 
-              style={styles.testSignOutButton}
-              onPress={testSignOut}
-            >
-              <Text style={styles.testSignOutText}>TEST SIGN OUT</Text>
-            </TouchableOpacity>
+
           </View>
         </LinearGradient>
 
@@ -332,17 +309,7 @@ export default function ProfileScreen() {
                   </TouchableOpacity>
                 );
               })}
-              
-              {/* Test sign out button directly in modal */}
-              <TouchableOpacity
-                style={styles.testSignOutButton}
-                onPress={() => {
-                  console.log('🔐 Test sign out button in modal pressed');
-                  testSignOut();
-                }}
-              >
-                <Text style={styles.testSignOutText}>TEST SIGN OUT IN MODAL</Text>
-              </TouchableOpacity>
+
             </View>
           </View>
         </SafeAreaView>
@@ -427,19 +394,7 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.8)",
     marginTop: 8,
   },
-  testSignOutButton: {
-    backgroundColor: '#ef4444',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  testSignOutText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
+
   statsContainer: {
     flexDirection: "row",
     paddingHorizontal: 20,
