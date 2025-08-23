@@ -44,6 +44,13 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
       setLoading(true);
       console.log('Starting signup process for:', email);
       
+      // Get the current URL for redirect
+      const redirectUrl = typeof window !== 'undefined' 
+        ? `${window.location.origin}/email-confirmation`
+        : 'exp://localhost:8081/--/email-confirmation';
+      
+      console.log('Using redirect URL:', redirectUrl);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -51,6 +58,7 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
           data: {
             full_name: fullName || '',
           },
+          emailRedirectTo: redirectUrl,
         },
       });
 
@@ -61,6 +69,7 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
 
       if (data.user) {
         console.log('User created successfully, ID:', data.user.id);
+        console.log('Email confirmation required:', !data.user.email_confirmed_at);
         console.log('Profile will be created automatically by database trigger');
         
         // Wait a moment for the trigger to complete

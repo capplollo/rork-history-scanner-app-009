@@ -188,11 +188,24 @@ WHERE trigger_schema = 'public'
 AND event_object_table IN ('profiles', 'scan_history', 'users');
 
 -- =====================================================
--- 8. SUCCESS MESSAGE
+-- 8. EMAIL CONFIRMATION CONFIGURATION
+-- =====================================================
+
+-- Note: The following settings need to be configured in Supabase Dashboard:
+-- 1. Go to Authentication > Settings
+-- 2. Enable "Enable email confirmations"
+-- 3. Set "Site URL" to your app's URL (e.g., https://your-app.com)
+-- 4. Add redirect URLs in "Redirect URLs" section:
+--    - https://your-app.com/email-confirmation
+--    - exp://localhost:8081/--/email-confirmation (for development)
+-- 5. Configure email templates if needed
+
+-- =====================================================
+-- 9. SUCCESS MESSAGE
 -- =====================================================
 
 -- Display success message
-DO $$
+DO $
 BEGIN
     RAISE NOTICE '✅ COMPLETE RESET SUCCESSFUL!';
     RAISE NOTICE '📋 Created tables: profiles, scan_history';
@@ -205,5 +218,12 @@ BEGIN
     RAISE NOTICE '   - History: name, location, country, period, uploaded_picture';
     RAISE NOTICE '   - Detailed scan results generated on-demand via AI API';
     RAISE NOTICE '';
+    RAISE NOTICE '📧 IMPORTANT: Configure email confirmation in Supabase Dashboard:';
+    RAISE NOTICE '   1. Go to Authentication > Settings';
+    RAISE NOTICE '   2. Enable "Enable email confirmations"';
+    RAISE NOTICE '   3. Set Site URL and Redirect URLs';
+    RAISE NOTICE '   4. Add: https://your-app.com/email-confirmation';
+    RAISE NOTICE '   5. Add: exp://localhost:8081/--/email-confirmation';
+    RAISE NOTICE '';
     RAISE NOTICE '⚠️  All previous data has been permanently deleted!';
-END $$;
+END $;
