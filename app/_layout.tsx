@@ -59,7 +59,11 @@ function AuthGuard() {
     if (targetPath && targetPath !== lastRedirectRef.current) {
       console.log('Redirecting to:', targetPath);
       lastRedirectRef.current = targetPath;
-      router.replace(targetPath);
+      
+      // Use a small delay to ensure state is properly updated
+      setTimeout(() => {
+        router.replace(targetPath);
+      }, 100);
     }
   }, [user, session, loading, currentPath, router]);
 
