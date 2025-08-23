@@ -159,21 +159,21 @@ export default function ProfileScreen() {
                 <Settings size={16} color="#ffffff" />
               </TouchableOpacity>
             </View>
+            
+            <View style={styles.statsContainer}>
+              {stats.map((stat, index) => {
+                const Icon = stat.icon;
+                return (
+                  <View key={index} style={styles.statBadge}>
+                    <Icon size={14} color="#8B4513" />
+                    <Text style={styles.statBadgeValue}>{stat.value}</Text>
+                    <Text style={styles.statBadgeLabel}>{stat.label}</Text>
+                  </View>
+                );
+              })}
+            </View>
           </View>
         </LinearGradient>
-
-        <View style={styles.statsContainer}>
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <View key={index} style={styles.statBadge}>
-                <Icon size={10} color="#8B4513" />
-                <Text style={styles.statBadgeValue}>{stat.value}</Text>
-                <Text style={styles.statBadgeLabel}>{stat.label}</Text>
-              </View>
-            );
-          })}
-        </View>
 
         {/* Filter Section */}
         <View style={styles.filterSection}>
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   },
   headerGradient: {
     paddingTop: 20,
-    paddingBottom: 30,
+    paddingBottom: 40,
     paddingHorizontal: 20,
   },
   profileSection: {
@@ -457,43 +457,39 @@ const styles = StyleSheet.create({
 
   statsContainer: {
     flexDirection: "row",
-    paddingHorizontal: 20,
-    marginTop: -15,
-    gap: 8,
+    marginTop: 24,
+    gap: 12,
     justifyContent: "center",
   },
   statBadge: {
-    backgroundColor: "#ffffff",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   statBadgeValue: {
-    fontSize: 12,
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "600",
-    color: "#2C3E50",
+    fontWeight: "700",
+    color: "#ffffff",
   },
   statBadgeLabel: {
-    fontSize: 10,
+    fontSize: 13,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: "rgba(255, 255, 255, 0.9)",
     fontWeight: "500",
   },
   section: {
