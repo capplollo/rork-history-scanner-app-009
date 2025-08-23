@@ -27,7 +27,7 @@ import {
 import { useHistory } from '@/providers/HistoryProvider';
 import { scanResultStore } from '@/services/scanResultStore';
 import { detectMonumentsAndArt } from '@/services/monumentDetectionService';
-import { speakText, stopSpeaking } from '@/services/voiceService';
+// import { speakText, stopSpeaking } from '@/services/voiceService';
 import SocialShareCard from '@/components/SocialShareCard';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -224,14 +224,8 @@ export default function ScanResultScreen() {
   };
 
   const handleVoiceToggle = async () => {
-    if (isSpeaking) {
-      await stopSpeaking();
-      setIsSpeakingState(false);
-    } else {
-      const textToRead = `${monument.name}. Located in ${monument.location}, ${monument.country}. From the ${monument.period} period.`;
-      await speakText(textToRead);
-      setIsSpeakingState(true);
-    }
+    // Voice functionality disabled in simplified version
+    console.log('Voice toggle - not implemented in simplified version');
   };
 
   const handleShare = () => {
@@ -252,7 +246,7 @@ export default function ScanResultScreen() {
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>No monument data available</Text>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Go Back</Text>
+          <Text style={styles.errorText}>Go Back</Text>
         </TouchableOpacity>
       </View>
     );
@@ -287,7 +281,13 @@ export default function ScanResultScreen() {
       >
         {/* Hero Image */}
         <View style={styles.heroSection}>
-          <Image source={{ uri: monument.image }} style={styles.monumentImage} />
+          <Image 
+            source={{ uri: monument.scannedImage || monument.image || 'https://via.placeholder.com/400x300?text=No+Image' }} 
+            style={styles.monumentImage} 
+            onError={(error) => {
+              console.log('Image load error:', error.nativeEvent.error);
+            }}
+          />
           
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.8)']}

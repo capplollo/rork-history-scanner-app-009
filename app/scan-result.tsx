@@ -234,6 +234,10 @@ export default function ScanResultScreen() {
               if (retrievedMonument && retrievedMonument.name) {
                 loadedMonument = retrievedMonument;
                 console.log('✅ Retrieved monument from store:', loadedMonument.name);
+                console.log('🖼️ Image URLs from store:', {
+                  image: loadedMonument.image ? loadedMonument.image.substring(0, 100) + '...' : 'empty',
+                  scannedImage: loadedMonument.scannedImage ? loadedMonument.scannedImage.substring(0, 100) + '...' : 'empty'
+                });
                 break;
               } else {
                 console.warn(`No valid monument found for resultId: ${resultId} (attempt ${retryCount + 1})`);
@@ -678,7 +682,13 @@ export default function ScanResultScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          <Image source={{ uri: monument.scannedImage || monument.image }} style={styles.monumentImage} />
+          <Image 
+            source={{ uri: monument.scannedImage || monument.image || 'https://via.placeholder.com/400x300?text=No+Image' }} 
+            style={styles.monumentImage} 
+            onError={(error) => {
+              console.log('Image load error:', error.nativeEvent.error);
+            }}
+          />
           <LinearGradient
             colors={["transparent", "rgba(0,0,0,0.8)"]}
             style={styles.imageOverlay}

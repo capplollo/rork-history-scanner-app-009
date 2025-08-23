@@ -96,6 +96,8 @@ export default function ScannerScreen() {
       }
       
       // Create a scan result from the AI detection
+      console.log('🖼️ Scanner - Selected image URI:', selectedImage ? selectedImage.substring(0, 100) + '...' : 'null');
+      
       const scanResult = {
         id: Date.now().toString(),
         name: detectionResult.artworkName,
@@ -112,6 +114,11 @@ export default function ScannerScreen() {
         isRecognized: detectionResult.isRecognized,
         detailedDescription: detectionResult.detailedDescription,
       };
+      
+      console.log('🖼️ Scanner - Created scan result with images:', {
+        image: scanResult.image ? scanResult.image.substring(0, 100) + '...' : 'empty',
+        scannedImage: scanResult.scannedImage ? scanResult.scannedImage.substring(0, 100) + '...' : 'empty'
+      });
       
       // Only add to history if monument is recognized
       if (scanResult.isRecognized && scanResult.confidence && scanResult.confidence > 50) {

@@ -125,13 +125,21 @@ class ScanResultStore {
     // Remove or limit image data that might be too large
     if (optimized.image && optimized.image.startsWith('data:')) {
       // If it's a base64 image, remove it to prevent size issues
+      console.log('🖼️ Removing base64 image data to prevent size issues');
       optimized.image = '';
     }
     
     if (optimized.scannedImage && optimized.scannedImage.startsWith('data:')) {
       // If it's a base64 image, remove it to prevent size issues
+      console.log('🖼️ Removing base64 scannedImage data to prevent size issues');
       optimized.scannedImage = '';
     }
+    
+    // Log image URLs for debugging
+    console.log('🖼️ Image URLs after optimization:', {
+      image: optimized.image ? optimized.image.substring(0, 100) + '...' : 'empty',
+      scannedImage: optimized.scannedImage ? optimized.scannedImage.substring(0, 100) + '...' : 'empty'
+    });
     
     return optimized;
   }
@@ -194,6 +202,15 @@ class ScanResultStore {
   }
   
   createEmergencyResult(result: HistoryItem): HistoryItem {
+    // Try to preserve image URLs even in emergency mode if they're not too long
+    const preserveImage = result.image && result.image.length < 200 && !result.image.startsWith('data:');
+    const preserveScannedImage = result.scannedImage && result.scannedImage.length < 200 && !result.scannedImage.startsWith('data:');
+    
+    console.log('🆘 Emergency result - preserving images:', {
+      image: preserveImage ? 'yes' : 'no',
+      scannedImage: preserveScannedImage ? 'yes' : 'no'
+    });
+    
     return {
       id: result.id,
       name: result.name.substring(0, 100),
@@ -202,8 +219,8 @@ class ScanResultStore {
       description: result.description.substring(0, 200) + '...',
       significance: result.significance.substring(0, 200) + '...',
       facts: result.facts.slice(0, 3).map(fact => fact.substring(0, 80) + '...'),
-      image: '', // Remove images in emergency mode
-      scannedImage: '',
+      image: preserveImage ? result.image : '',
+      scannedImage: preserveScannedImage ? result.scannedImage : '',
       scannedAt: result.scannedAt,
       confidence: result.confidence,
       isRecognized: result.isRecognized,
