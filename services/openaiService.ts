@@ -21,7 +21,7 @@ interface OpenAIResponse {
   }[];
 }
 
-// Use only the hardcoded API key for Rork environment to avoid caching issues
+// Use only the hardcoded API key for Rork environment to avoid caching issues - UPDATED
 const OPENAI_API_KEY = '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';
 
 // Debug logging
@@ -48,9 +48,10 @@ export async function callOpenAI(messages: OpenAIMessage[]): Promise<string> {
 
   try {
     console.log('🔑 API Key Check in callOpenAI:');
-    console.log('API Key length:', OPENAI_API_KEY.length);
-    console.log('API Key starts with:', OPENAI_API_KEY.substring(0, 20));
-    console.log('API Key ends with:', OPENAI_API_KEY.substring(OPENAI_API_KEY.length - 10));
+console.log('API Key length:', OPENAI_API_KEY.length);
+console.log('API Key starts with:', OPENAI_API_KEY.substring(0, 20));
+console.log('API Key ends with:', OPENAI_API_KEY.substring(OPENAI_API_KEY.length - 10));
+console.log('🔑 FULL API Key being used:', OPENAI_API_KEY);
     
     console.log('Sending request to OpenAI API...');
     console.log('Messages:', JSON.stringify(messages, null, 2));
