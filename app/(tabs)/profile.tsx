@@ -10,6 +10,7 @@ import {
   Alert,
   Platform,
   Modal,
+  TextInput,
 } from "react-native";
 import { 
   User, 
@@ -18,7 +19,10 @@ import {
   LogOut,
   Camera,
   Globe,
-  X
+  X,
+  Filter,
+  Search,
+  ChevronDown
 } from "lucide-react-native";
 import { useHistory } from "@/providers/HistoryProvider";
 import { useAuth } from "@/providers/AuthProvider";
@@ -30,6 +34,10 @@ export default function ProfileScreen() {
   const { history, clearHistory, isLoading: historyLoading } = useHistory();
   const { user, signOut, loading } = useAuth();
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [searchText, setSearchText] = useState<string>("");
+  const [selectedCountry, setSelectedCountry] = useState<string>("");
+  const [showCountryPicker, setShowCountryPicker] = useState<boolean>(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -78,6 +86,35 @@ export default function ProfileScreen() {
     return countries.size;
   }, [history]);
 
+  const allCountries = useMemo(() => {
+    const countries = new Set<string>();
+    history.forEach(item => {
+      if (item.country) {
+        countries.add(item.country);
+      } else if (item.location) {
+        const parts = item.location.split(',');
+        const country = parts[parts.length - 1].trim();
+        if (country) {
+          countries.add(country);
+        }
+      }
+    });
+    return Array.from(countries).sort();
+  }, [history]);
+
+  const filteredHistory = useMemo(() => {
+    return history.filter(item => {
+      const matchesSearch = searchText === "" || 
+        item.name.toLowerCase().includes(searchText.toLowerCase());
+      
+      const matchesCountry = selectedCountry === "" || 
+        item.country === selectedCountry || 
+        (item.location && item.location.includes(selectedCountry));
+      
+      return matchesSearch && matchesCountry;
+    });
+  }, [history, searchText, selectedCountry]);
+
   const stats = [
     { 
       label: "Discoveries", 
@@ -85,7 +122,7 @@ export default function ProfileScreen() {
       icon: Camera
     },
     { 
-      label: "Destinations", 
+      label: "Countries", 
       value: visitedCountries.toString(),
       icon: Globe
     },
@@ -108,7 +145,7 @@ export default function ProfileScreen() {
             <View style={styles.profileRow}>
               <View style={styles.avatarContainer}>
                 <View style={styles.avatar}>
-                  <User size={32} color="#4f46e5" />
+                  <User size={24} color="#4f46e5" />
                 </View>
               </View>
               <View style={styles.profileInfo}>
@@ -119,7 +156,7 @@ export default function ProfileScreen() {
                 style={styles.settingsButton}
                 onPress={() => setShowSettings(true)}
               >
-                <Settings size={20} color="#ffffff" />
+                <Settings size={16} color="#ffffff" />
               </TouchableOpacity>
             </View>
           </View>
@@ -130,13 +167,49 @@ export default function ProfileScreen() {
             const Icon = stat.icon;
             return (
               <View key={index} style={styles.statBadge}>
-                <Icon size={12} color="#8B4513" />
+                <Icon size={10} color="#8B4513" />
                 <Text style={styles.statBadgeValue}>{stat.value}</Text>
                 <Text style={styles.statBadgeLabel}>{stat.label}</Text>
               </View>
             );
           })}
         </View>
+
+        {/* Filter Section */}
+        <View style={styles.filterSection}>
+          <TouchableOpacity 
+            style={styles.filterButton}
+            onPress={() => setShowFilters(!showFilters)}
+          >
+            <Filter size={16} color="#64748b" />
+            <Text style={styles.filterButtonText}>Filter</Text>
+          </TouchableOpacity>
+        </View>
+
+        {showFilters && (
+          <View style={styles.filtersContainer}>
+            <View style={styles.searchContainer}>
+              <Search size={16} color="#94a3b8" />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search by name..."
+                value={searchText}
+                onChangeText={setSearchText}
+                placeholderTextColor="#94a3b8"
+              />
+            </View>
+            
+            <TouchableOpacity 
+              style={styles.countryPicker}
+              onPress={() => setShowCountryPicker(true)}
+            >
+              <Text style={styles.countryPickerText}>
+                {selectedCountry || "All Countries"}
+              </Text>
+              <ChevronDown size={16} color="#64748b" />
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* All Discoveries Section */}
         <View style={styles.section}>
@@ -156,7 +229,7 @@ export default function ProfileScreen() {
             </View>
           ) : history.length > 0 ? (
             <View style={styles.historyGrid}>
-              {history.map((item, index) => {
+              {filteredHistory.map((item, index) => {
                 const formatDate = (dateString: string) => {
                   const date = new Date(dateString);
                   return date.toLocaleDateString("en-US", {
@@ -197,6 +270,12 @@ export default function ProfileScreen() {
                   </View>
                 );
               })}
+            </View>
+          ) : filteredHistory.length === 0 && history.length > 0 ? (
+            <View style={styles.emptyHistoryContainer}>
+              <Search size={48} color="#cbd5e1" />
+              <Text style={styles.emptyHistoryText}>No matches found</Text>
+              <Text style={styles.emptyHistorySubtext}>Try adjusting your search or filter criteria</Text>
             </View>
           ) : (
             <View style={styles.emptyHistoryContainer}>
@@ -270,6 +349,50 @@ export default function ProfileScreen() {
           </View>
         </SafeAreaView>
       </Modal>
+
+      {/* Country Picker Modal */}
+      <Modal
+        visible={showCountryPicker}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowCountryPicker(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Select Country</Text>
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setShowCountryPicker(false)}
+            >
+              <X size={24} color="#64748b" />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.countryOption}
+              onPress={() => {
+                setSelectedCountry("");
+                setShowCountryPicker(false);
+              }}
+            >
+              <Text style={[styles.countryOptionText, selectedCountry === "" && styles.selectedCountryText]}>All Countries</Text>
+            </TouchableOpacity>
+            {allCountries.map((country, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.countryOption}
+                onPress={() => {
+                  setSelectedCountry(country);
+                  setShowCountryPicker(false);
+                }}
+              >
+                <Text style={[styles.countryOptionText, selectedCountry === country && styles.selectedCountryText]}>{country}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -296,9 +419,9 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: "#ffffff",
     justifyContent: "center",
     alignItems: "center",
@@ -312,7 +435,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userName: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -337,15 +460,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: -15,
     gap: 8,
+    justifyContent: "center",
   },
   statBadge: {
     backgroundColor: "#ffffff",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -353,7 +477,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   statBadgeValue: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -363,7 +487,7 @@ const styles = StyleSheet.create({
     color: "#2C3E50",
   },
   statBadgeLabel: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -597,9 +721,9 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   settingsButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -668,5 +792,96 @@ const styles = StyleSheet.create({
     color: "#94a3b8",
     textAlign: "center",
     lineHeight: 20,
+  },
+  filterSection: {
+    paddingHorizontal: 20,
+    marginTop: 20,
+    alignItems: "center",
+  },
+  filterButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f8f9fa",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "#e9ecef",
+  },
+  filterButtonText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#64748b",
+    fontWeight: "500",
+  },
+  filtersContainer: {
+    paddingHorizontal: 20,
+    marginTop: 12,
+    gap: 12,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f8f9fa",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "#e9ecef",
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#2C3E50",
+  },
+  countryPicker: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#f8f9fa",
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e9ecef",
+  },
+  countryPickerText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#2C3E50",
+  },
+  countryOption: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+  },
+  countryOptionText: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#2C3E50",
+  },
+  selectedCountryText: {
+    color: "#4f46e5",
+    fontWeight: "600",
   },
 });
