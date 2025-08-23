@@ -86,7 +86,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
                   significance: '', // Will be regenerated via API when needed
                   facts: [], // Will be regenerated via API when needed
                   image: item.uploaded_picture || '',
-                  scannedImage: '', // Not stored in simplified schema
+                  scannedImage: item.uploaded_picture || '', // Use the same image URL for regeneration
                   scannedAt: item.scanned_at ? new Date(item.scanned_at).toISOString() : new Date().toISOString(),
                   confidence: undefined, // Will be regenerated via API when needed
                   isRecognized: undefined, // Will be regenerated via API when needed
