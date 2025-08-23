@@ -21,7 +21,7 @@ interface OpenAIResponse {
   }[];
 }
 
-const OPENAI_API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY || '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';
+const OPENAI_API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY;
 
 // Debug logging
 console.log('🔍 Environment Debug:');
