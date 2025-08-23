@@ -1,4 +1,4 @@
-
+import Constants from 'expo-constants';
 
 interface OpenAIMessage {
   role: 'system' | 'user' | 'assistant';
@@ -19,26 +19,26 @@ interface OpenAIResponse {
   }[];
 }
 
-// Use the API key from environment variables
-const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+const OPENAI_API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY;
 
 if (!OPENAI_API_KEY) {
-  throw new Error('OpenAI API key not configured. Please add EXPO_PUBLIC_OPENAI_API_KEY to your .env file.');
+  console.warn('OpenAI API key not found. Please set EXPO_PUBLIC_OPENAI_API_KEY in your .env file.');
 }
 
 export async function callOpenAI(messages: OpenAIMessage[]): Promise<string> {
+  if (!OPENAI_API_KEY) {
+    throw new Error('OpenAI API key not configured. Please add EXPO_PUBLIC_OPENAI_API_KEY to your .env file.');
+  }
+
   try {
-    console.log('🔑 Using environment API key for OpenAI call');
-    console.log('🔑 API Key starts with:', OPENAI_API_KEY!.substring(0, 20));
-    console.log('🔑 API Key ends with:', OPENAI_API_KEY!.substring(OPENAI_API_KEY!.length - 10));
-    
     console.log('Sending request to OpenAI API...');
+    console.log('Messages:', JSON.stringify(messages, null, 2));
     
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY!}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: 'gpt-4o', // Using GPT-4 Omni for vision capabilities
@@ -58,7 +58,7 @@ export async function callOpenAI(messages: OpenAIMessage[]): Promise<string> {
       console.error('Response body:', errorText);
       
       if (response.status === 401) {
-        throw new Error('Invalid OpenAI API key. The hardcoded key may be expired or invalid.');
+        throw new Error('Invalid OpenAI API key. Please check your EXPO_PUBLIC_OPENAI_API_KEY.');
       } else if (response.status === 429) {
         throw new Error('OpenAI API rate limit exceeded. Please try again later.');
       } else if (response.status === 500) {

@@ -1,9 +1,7 @@
 import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
-
-// Import the direct API service
-import { callOpenAIWithImage } from './openaiDirect';
+import { callOpenAIWithImage } from './openaiService';
 
 export interface DetectionResult {
   artworkName: string;
@@ -87,10 +85,7 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
   
   analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond in this exact JSON format (NO markdown, NO code blocks, PURE JSON only):\n{\n  "artworkName": "Name or 'Unknown Monuments and Art'",\n  "confidence": 85,\n  "location": "City only (e.g., 'Paris', 'Rome', 'Florence')",\n  "country": "Country only (e.g., 'France', 'Italy', 'Spain')",\n  "period": "Year(s) or century format (e.g., '1503', '15th century', '1800s', '12th-13th century') or 'Unknown'",\n  "description": "Brief description",\n  "significance": "Cultural significance",\n  "facts": ["Fact 1", "Fact 2", "Fact 3"],\n  "isRecognized": true,\n  "detailedDescription": {\n    "keyTakeaways": [\n      "First key takeaway bullet point",\n      "Second key takeaway bullet point",\n      "Third key takeaway bullet point",\n      "Fourth key takeaway bullet point"\n    ],\n    "inDepthContext": "Write exactly 3 paragraphs (1400-3000 characters total). Separate paragraphs with double line breaks only - NO paragraph titles or labels. Use **bold** highlights for key terms, names, dates, and important details. Be specific and interesting. Avoid generalizations. First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context. Second paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features. Third paragraph: Discuss cultural impact, significance over the years, notable events or stories associated with the monuments and art and more.",\n    "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"\n  }\n}\n\nIMPORTANT: \n- If not recognized with high confidence, set isRecognized to false and provide generic information.`;
 
-    console.log('Sending comprehensive analysis request to OpenAI API...');
-  
-  // CALL OPENAI API DIRECTLY
-  console.log('🔑 DIRECT API CALL - Using secure API key');
+  console.log('Sending comprehensive analysis request to OpenAI API...');
   
   const content = await callOpenAIWithImage(analysisPrompt, base64Image);
 

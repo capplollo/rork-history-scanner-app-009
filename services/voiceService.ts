@@ -27,10 +27,8 @@ export interface VoiceProvider {
   isConfigured: boolean;
 }
 
-import Constants from 'expo-constants';
-
 // ElevenLabs configuration - using environment variables
-const ELEVENLABS_API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_ELEVENLABS_API_KEY || process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY;
+const ELEVENLABS_API_KEY = process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY;
 const ELEVENLABS_VOICES = [
   { id: 'zNsotODqUhvbJ5wMG7Ei', name: 'Charles - Mature narrator', language: 'en-US', gender: 'male', quality: 'premium' },
 ];
