@@ -111,6 +111,24 @@ export default function ProfileScreen() {
     { icon: LogOut, label: "Sign Out", action: handleSignOut },
   ];
 
+  // Test sign out function for debugging
+  const testSignOut = async () => {
+    try {
+      console.log('Test sign out triggered');
+      const { error } = await signOut();
+      if (error) {
+        console.error('Test sign out error:', error);
+        Alert.alert('Error', 'Test sign out failed: ' + error.message);
+      } else {
+        console.log('Test sign out successful');
+        Alert.alert('Success', 'Sign out successful!');
+      }
+    } catch (err) {
+      console.error('Test sign out unexpected error:', err);
+      Alert.alert('Error', 'Test sign out unexpected error');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -137,6 +155,14 @@ export default function ProfileScreen() {
             <Text style={styles.userEmail}>{user.email}</Text>
             
             <Text style={styles.userSubtitle}>Cultural Explorer</Text>
+            
+            {/* Test Sign Out Button */}
+            <TouchableOpacity 
+              style={styles.testSignOutButton}
+              onPress={testSignOut}
+            >
+              <Text style={styles.testSignOutText}>TEST SIGN OUT</Text>
+            </TouchableOpacity>
           </View>
         </LinearGradient>
 
@@ -379,6 +405,19 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     color: "rgba(255,255,255,0.8)",
     marginTop: 8,
+  },
+  testSignOutButton: {
+    backgroundColor: '#ef4444',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  testSignOutText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   statsContainer: {
     flexDirection: "row",
