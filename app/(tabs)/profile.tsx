@@ -52,14 +52,16 @@ export default function ProfileScreen() {
           onPress: async () => {
             try {
               console.log('Starting sign out process...');
+              setShowSettings(false); // Close modal first
+              
               const { error } = await signOut();
               if (error) {
                 console.error('Sign out error:', error);
                 Alert.alert('Error', 'Failed to sign out: ' + error.message);
               } else {
-                console.log('Sign out successful, redirecting to login...');
-                setShowSettings(false);
-                router.replace('/login');
+                console.log('Sign out successful');
+                // Don't manually navigate - let AuthGuard handle it
+                // The AuthGuard will detect the user is null and redirect to login
               }
             } catch (err) {
               console.error('Unexpected sign out error:', err);
