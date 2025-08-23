@@ -2,8 +2,8 @@ import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 
-// HARDCODED API KEY DIRECTLY IN THIS FILE
-const OPENAI_API_KEY = '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';
+// Backend API server URL
+const BACKEND_API_URL = 'http://localhost:3001';
 
 export interface DetectionResult {
   artworkName: string;
@@ -87,70 +87,51 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
   
   analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond in this exact JSON format (NO markdown, NO code blocks, PURE JSON only):\n{\n  "artworkName": "Name or 'Unknown Monuments and Art'",\n  "confidence": 85,\n  "location": "City only (e.g., 'Paris', 'Rome', 'Florence')",\n  "country": "Country only (e.g., 'France', 'Italy', 'Spain')",\n  "period": "Year(s) or century format (e.g., '1503', '15th century', '1800s', '12th-13th century') or 'Unknown'",\n  "description": "Brief description",\n  "significance": "Cultural significance",\n  "facts": ["Fact 1", "Fact 2", "Fact 3"],\n  "isRecognized": true,\n  "detailedDescription": {\n    "keyTakeaways": [\n      "First key takeaway bullet point",\n      "Second key takeaway bullet point",\n      "Third key takeaway bullet point",\n      "Fourth key takeaway bullet point"\n    ],\n    "inDepthContext": "Write exactly 3 paragraphs (1400-3000 characters total). Separate paragraphs with double line breaks only - NO paragraph titles or labels. Use **bold** highlights for key terms, names, dates, and important details. Be specific and interesting. Avoid generalizations. First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context. Second paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features. Third paragraph: Discuss cultural impact, significance over the years, notable events or stories associated with the monuments and art and more.",\n    "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"\n  }\n}\n\nIMPORTANT: \n- If not recognized with high confidence, set isRecognized to false and provide generic information.`;
 
-  console.log('Sending comprehensive analysis request to OpenAI API...');
+  console.log('Sending comprehensive analysis request to backend API...');
   
-  // DIRECT API CALL WITH HARDCODED KEY
-  console.log('🔑 DIRECT API CALL - Using hardcoded API key');
-  console.log('🔑 API Key starts with:', OPENAI_API_KEY.substring(0, 20));
-  console.log('🔑 API Key ends with:', OPENAI_API_KEY.substring(OPENAI_API_KEY.length - 10));
+  // CALL BACKEND API SERVER
+  console.log('🔑 BACKEND API CALL - Using secure server-side API key');
+  console.log('🔑 Backend URL:', BACKEND_API_URL);
   
-  const messages = [
-    {
-      role: 'user',
-      content: [
-        {
-          type: 'text',
-          text: analysisPrompt
-        },
-        {
-          type: 'image_url',
-          image_url: {
-            url: `data:image/jpeg;base64,${base64Image}`
-          }
-        }
-      ]
-    }
-  ];
-
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const response = await fetch(`${BACKEND_API_URL}/api/openai/analyze-image`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
+      prompt: analysisPrompt,
+      base64Image: base64Image,
       model: 'gpt-4o',
-      messages: messages,
       max_tokens: 4000,
       temperature: 0.7,
     })
   });
 
-  console.log('OpenAI API response status:', response.status);
+  console.log('Backend API response status:', response.status);
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('OpenAI API error details:');
+    console.error('Backend API error details:');
     console.error('Status:', response.status, response.statusText);
     console.error('Response body:', errorText);
     
     if (response.status === 401) {
-      throw new Error('Invalid OpenAI API key. The hardcoded key may be expired or invalid.');
+      throw new Error('Backend API: Invalid OpenAI API key on server.');
     } else if (response.status === 429) {
-      throw new Error('OpenAI API rate limit exceeded. Please try again later.');
+      throw new Error('Backend API: Rate limit exceeded. Please try again later.');
     } else if (response.status === 500) {
-      throw new Error('OpenAI service is temporarily unavailable. Please try again in a few moments.');
+      throw new Error('Backend API: Server error. Please try again in a few moments.');
     } else {
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+      throw new Error(`Backend API error: ${response.status} ${response.statusText}`);
     }
   }
 
   const data = await response.json();
-  console.log('OpenAI response received successfully');
+  console.log('Backend API response received successfully');
   
   const content = data.choices?.[0]?.message?.content;
   if (!content) {
-    throw new Error('No content in OpenAI response');
+    throw new Error('No content in backend API response');
   }
 
   // Clean up the response and parse JSON with better error handling
