@@ -1,5 +1,7 @@
 
 
+import Constants from 'expo-constants';
+
 interface OpenAIMessage {
   role: 'system' | 'user' | 'assistant';
   content: string | {
@@ -19,7 +21,7 @@ interface OpenAIResponse {
   }[];
 }
 
-const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+const OPENAI_API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY;
 
 if (!OPENAI_API_KEY) {
   console.warn('OpenAI API key not found. Please set EXPO_PUBLIC_OPENAI_API_KEY in your .env file.');
