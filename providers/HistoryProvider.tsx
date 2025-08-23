@@ -170,8 +170,24 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
       const stored = await AsyncStorage.getItem(HISTORY_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Limit local storage to prevent quota issues
-        setHistory(parsed.slice(0, LOCAL_STORAGE_LIMIT));
+        // Ensure all items have required fields for HistoryItem interface
+        const completeHistory = parsed.slice(0, LOCAL_STORAGE_LIMIT).map((item: any) => ({
+          id: item.id || '',
+          name: item.name || '',
+          location: item.location || '',
+          country: item.country || '',
+          period: item.period || '',
+          description: item.description || '',
+          significance: item.significance || '',
+          facts: item.facts || [],
+          image: item.image || '',
+          scannedImage: item.scannedImage || item.image || '',
+          scannedAt: item.scannedAt || new Date().toISOString(),
+          confidence: item.confidence,
+          isRecognized: item.isRecognized,
+          detailedDescription: item.detailedDescription,
+        }));
+        setHistory(completeHistory);
         setHasLoadedOnce(true);
       }
     } catch (error) {
@@ -228,7 +244,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
         scannedAt: item.scannedAt,
         // Only store essential data locally
         image: item.image?.length > 1000 ? '' : item.image, // Skip large images
-        scannedImage: '', // Don't store scanned images locally
+        scannedImage: item.scannedImage?.length > 1000 ? '' : item.scannedImage, // Keep scanned images if not too large
       }));
       
       const dataString = JSON.stringify(minimalHistory);
@@ -298,7 +314,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             description: '',
             significance: '',
             facts: [],
-            scannedImage: '',
+            scannedImage: item.scannedImage,
           }];
           try {
             await AsyncStorage.setItem(HISTORY_STORAGE_KEY + '_backup', JSON.stringify(minimalBackup));
