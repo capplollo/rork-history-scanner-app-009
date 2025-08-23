@@ -774,23 +774,84 @@ export default function ScanResultScreen() {
           </View>
         )}
 
-        <View style={styles.content}>
+        {/* Blue Info Section */}
+        <LinearGradient
+          colors={["#2C3E50", "#34495E"]}
+          style={styles.blueInfoSection}
+        >
           <View style={styles.infoCards}>
             <View style={styles.infoCard}>
-              <MapPin size={20} color="#1e3a8a" />
+              <MapPin size={20} color="#ffffff" />
               <View>
                 <Text style={styles.infoLabel}>Location</Text>
                 <Text style={styles.infoValue}>{monument.location}, {monument.country}</Text>
               </View>
             </View>
             <View style={styles.infoCard}>
-              <Calendar size={20} color="#1e3a8a" />
+              <Calendar size={20} color="#ffffff" />
               <View>
                 <Text style={styles.infoLabel}>Period</Text>
                 <Text style={styles.infoValue}>{monument.period}</Text>
               </View>
             </View>
           </View>
+          
+          {/* Context Reanalysis Section */}
+          <View style={styles.contextReanalysisSection}>
+            <TouchableOpacity 
+              style={styles.contextToggleBlue} 
+              onPress={() => setShowContextForm(!showContextForm)}
+            >
+              <Text style={styles.contextToggleTextBlue}>
+                Is this recognition incorrect?
+              </Text>
+              {showContextForm ? (
+                <ChevronUp size={16} color="rgba(255, 255, 255, 0.8)" />
+              ) : (
+                <ChevronDown size={16} color="rgba(255, 255, 255, 0.8)" />
+              )}
+            </TouchableOpacity>
+            
+            {showContextForm && (
+              <View style={styles.contextFormBlue}>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.contextDescriptionBlue}>
+                    Add any details that might help identify this monument or artwork - name, location, museum, period, or any other relevant information.
+                  </Text>
+                  <TextInput
+                    style={[styles.textInputBlue, styles.textInputMultiline]}
+                    placeholder="e.g., Mona Lisa at the Louvre Museum in Paris, or David sculpture by Michelangelo in Florence, or any other details..."
+                    value={contextInfo.context}
+                    onChangeText={updateContextInfo}
+                    placeholderTextColor="rgba(255, 255, 255, 0.6)"
+                    multiline
+                    numberOfLines={4}
+                  />
+                </View>
+                
+                <TouchableOpacity
+                  style={[styles.reanalyzeButtonBlue, isReanalyzing && styles.reanalyzeButtonDisabled]}
+                  onPress={handleReanalyze}
+                  disabled={isReanalyzing}
+                >
+                  {isReanalyzing ? (
+                    <>
+                      <ActivityIndicator color="#2C3E50" size="small" />
+                      <Text style={styles.reanalyzeButtonTextBlue}>Analyzing with Context...</Text>
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw size={18} color="#2C3E50" />
+                      <Text style={styles.reanalyzeButtonTextBlue}>Analyze Again with Context</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </LinearGradient>
+
+        <View style={styles.content}>
           
 
 
@@ -1098,24 +1159,25 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
   },
+  blueInfoSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 25,
+  },
   infoCards: {
     flexDirection: "row",
     gap: 15,
-    marginBottom: 25,
+    marginBottom: 20,
   },
   infoCard: {
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "#ffffff",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     padding: 15,
     borderRadius: 12,
     gap: 12,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   infoLabel: {
     fontSize: 12,
@@ -1124,7 +1186,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#6b7280",
+    color: "rgba(255, 255, 255, 0.8)",
     marginBottom: 2,
   },
   infoValue: {
@@ -1135,7 +1197,86 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
+    color: "#ffffff",
+  },
+  contextReanalysisSection: {
+    marginTop: 5,
+  },
+  contextToggleBlue: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  contextToggleTextBlue: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "rgba(255, 255, 255, 0.9)",
+  },
+  contextFormBlue: {
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    padding: 16,
+    borderRadius: 8,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+  },
+  contextDescriptionBlue: {
+    fontSize: 13,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "rgba(255, 255, 255, 0.8)",
+    lineHeight: 18,
+    marginBottom: 8,
+  },
+  textInputBlue: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#ffffff",
+  },
+  reanalyzeButtonBlue: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    paddingVertical: 12,
+    borderRadius: 8,
+    gap: 8,
+    marginTop: 8,
+  },
+  reanalyzeButtonTextBlue: {
     color: "#2C3E50",
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
   },
   section: {
     marginBottom: 25,
