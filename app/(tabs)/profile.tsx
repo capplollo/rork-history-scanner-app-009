@@ -22,12 +22,15 @@ import {
   X,
   Filter,
   Search,
-  ChevronDown
+  ChevronDown,
+  ImageIcon
 } from "lucide-react-native";
 import { useHistory } from "@/providers/HistoryProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import * as ImagePicker from 'expo-image-picker';
+import { supabase } from '@/lib/supabase';
 
 
 export default function ProfileScreen() {
@@ -38,12 +41,37 @@ export default function ProfileScreen() {
   const [searchText, setSearchText] = useState<string>("");
   const [selectedCountry, setSelectedCountry] = useState<string>("");
   const [showCountryPicker, setShowCountryPicker] = useState<boolean>(false);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState<boolean>(false);
 
   useEffect(() => {
     if (!loading && !user) {
       router.replace('/login');
     }
   }, [user, loading]);
+
+  // Load profile picture from Supabase
+  useEffect(() => {
+    const loadProfilePicture = async () => {
+      if (user) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('profile_picture')
+            .eq('id', user.id)
+            .single();
+          
+          if (data?.profile_picture) {
+            setProfilePicture(data.profile_picture);
+          }
+        } catch (error) {
+          console.log('Error loading profile picture:', error);
+        }
+      }
+    };
+    
+    loadProfilePicture();
+  }, [user]);
 
   const handleSignOut = async () => {
     try {
@@ -62,6 +90,123 @@ export default function ProfileScreen() {
     } catch (err) {
       console.error('🔐 Unexpected sign out error:', err);
       Alert.alert('Error', 'An unexpected error occurred during sign out');
+    }
+  };
+
+  const handleImagePicker = async () => {
+    try {
+      // Request permission
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please grant permission to access your photo library.');
+        return;
+      }
+
+      // Show action sheet for camera or library
+      Alert.alert(
+        'Select Profile Picture',
+        'Choose how you want to select your profile picture',
+        [
+          {
+            text: 'Camera',
+            onPress: () => openCamera(),
+          },
+          {
+            text: 'Photo Library',
+            onPress: () => openImageLibrary(),
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ]
+      );
+    } catch (error) {
+      console.error('Error requesting permissions:', error);
+      Alert.alert('Error', 'Failed to request permissions');
+    }
+  };
+
+  const openCamera = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please grant permission to access your camera.');
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        await uploadProfilePicture(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error opening camera:', error);
+      Alert.alert('Error', 'Failed to open camera');
+    }
+  };
+
+  const openImageLibrary = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        await uploadProfilePicture(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error opening image library:', error);
+      Alert.alert('Error', 'Failed to open image library');
+    }
+  };
+
+  const uploadProfilePicture = async (imageUri: string) => {
+    if (!user) return;
+    
+    try {
+      setUploadingImage(true);
+      
+      // For now, we'll store the image as base64 in the database
+      // In a production app, you'd want to upload to Supabase Storage
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64data = reader.result as string;
+        
+        // Update profile in Supabase
+        const { error } = await supabase
+          .from('profiles')
+          .update({ profile_picture: base64data })
+          .eq('id', user.id);
+        
+        if (error) {
+          console.error('Error updating profile picture:', error);
+          Alert.alert('Error', 'Failed to update profile picture');
+        } else {
+          setProfilePicture(base64data);
+          Alert.alert('Success', 'Profile picture updated successfully!');
+        }
+        
+        setUploadingImage(false);
+      };
+      
+      reader.readAsDataURL(blob);
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      Alert.alert('Error', 'Failed to upload profile picture');
+      setUploadingImage(false);
     }
   };
 
@@ -143,11 +288,30 @@ export default function ProfileScreen() {
         >
           <View style={styles.profileSection}>
             <View style={styles.profileRow}>
-              <View style={styles.avatarContainer}>
+              <TouchableOpacity 
+                style={styles.avatarContainer}
+                onPress={handleImagePicker}
+                disabled={uploadingImage}
+              >
                 <View style={styles.avatar}>
-                  <User size={28} color="#4f46e5" />
+                  {profilePicture ? (
+                    <Image 
+                      source={{ uri: profilePicture }} 
+                      style={styles.avatarImage}
+                    />
+                  ) : (
+                    <User size={28} color="#4f46e5" />
+                  )}
+                  {uploadingImage && (
+                    <View style={styles.avatarOverlay}>
+                      <Text style={styles.uploadingText}>...</Text>
+                    </View>
+                  )}
                 </View>
-              </View>
+                <View style={styles.cameraIcon}>
+                  <Camera size={12} color="#ffffff" />
+                </View>
+              </TouchableOpacity>
               <View style={styles.profileInfo}>
                 <Text style={styles.userName}>{user.user_metadata?.full_name || 'Explorer'}</Text>
                 <Text style={styles.userEmail}>{user.email}</Text>
@@ -433,6 +597,41 @@ const styles = StyleSheet.create({
     elevation: 4,
     borderWidth: 3,
     borderColor: "rgba(255, 255, 255, 0.3)",
+    overflow: "hidden",
+  },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 28,
+  },
+  avatarOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 28,
+  },
+  uploadingText: {
+    color: "#ffffff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  cameraIcon: {
+    position: "absolute",
+    bottom: -2,
+    right: -2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#4f46e5",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#ffffff",
   },
   profileInfo: {
     flex: 1,
