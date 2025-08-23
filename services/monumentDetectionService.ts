@@ -5,7 +5,8 @@ import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 export interface DetectionResult {
   artworkName: string;
   confidence: number;
-  location: string;
+  location: string; // City only
+  country: string; // Country only
   period: string;
   description: string;
   significance: string;
@@ -80,7 +81,7 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
     analysisPrompt += `\n\nWith this context provided, you should:\n1. STRONGLY prioritize monuments and art that match this location\n2. If the visual matches reasonably well with something from this location, increase confidence significantly\n3. Use the provided name if it matches what you observe in the image\n4. Consider the building/context information as key identifying factors`;
   }
   
-  analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond in this exact JSON format (NO markdown, NO code blocks, PURE JSON only):\n{\n  "artworkName": "Name or 'Unknown Monuments and Art'",\n  "confidence": 85,\n  "location": "Actual location",\n  "period": "Year(s) or century format (e.g., '1503', '15th century', '1800s', '12th-13th century') or 'Unknown'",\n  "description": "Brief description",\n  "significance": "Cultural significance",\n  "facts": ["Fact 1", "Fact 2", "Fact 3"],\n  "isRecognized": true,\n  "detailedDescription": {\n    "keyTakeaways": [\n      "First key takeaway bullet point",\n      "Second key takeaway bullet point",\n      "Third key takeaway bullet point",\n      "Fourth key takeaway bullet point"\n    ],\n    "inDepthContext": "Write exactly 3 paragraphs (1400-3000 characters total). Separate paragraphs with double line breaks only - NO paragraph titles or labels. Use **bold** highlights for key terms, names, dates, and important details. Be specific and interesting. Avoid generalizations. First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context. Second paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features. Third paragraph: Discuss cultural impact, significance over the years, notable events or stories associated with the monuments and art and more.",\n    "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"\n  }\n}\n\nIMPORTANT: \n- If not recognized with high confidence (confidence < 80), omit the entire detailedDescription object\n- Return ONLY valid JSON, no markdown formatting\n- Ensure all strings are properly escaped\n- keyTakeaways must be exactly 4 bullet points as an array`;
+  analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond in this exact JSON format (NO markdown, NO code blocks, PURE JSON only):\n{\n  "artworkName": "Name or 'Unknown Monuments and Art'",\n  "confidence": 85,\n  "location": "City only (e.g., 'Paris', 'Rome', 'Florence')",\n  "country": "Country only (e.g., 'France', 'Italy', 'Spain')",\n  "period": "Year(s) or century format (e.g., '1503', '15th century', '1800s', '12th-13th century') or 'Unknown'",\n  "description": "Brief description",\n  "significance": "Cultural significance",\n  "facts": ["Fact 1", "Fact 2", "Fact 3"],\n  "isRecognized": true,\n  "detailedDescription": {\n    "keyTakeaways": [\n      "First key takeaway bullet point",\n      "Second key takeaway bullet point",\n      "Third key takeaway bullet point",\n      "Fourth key takeaway bullet point"\n    ],\n    "inDepthContext": "Write exactly 3 paragraphs (1400-3000 characters total). Separate paragraphs with double line breaks only - NO paragraph titles or labels. Use **bold** highlights for key terms, names, dates, and important details. Be specific and interesting. Avoid generalizations. First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context. Second paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features. Third paragraph: Discuss cultural impact, significance over the years, notable events or stories associated with the monuments and art and more.",\n    "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"\n  }\n}\n\nIMPORTANT: \n- If not recognized with high confidence (confidence < 80), omit the entire detailedDescription object\n- Return ONLY valid JSON, no markdown formatting\n- Ensure all strings are properly escaped\n- keyTakeaways must be exactly 4 bullet points as an array\n- location should contain ONLY the city name\n- country should contain ONLY the country name`;
 
   const messages = [
     {
@@ -282,6 +283,7 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
       artworkName: 'Unknown Monuments and Art',
       confidence: 0,
       location: 'Unknown',
+      country: 'Unknown',
       period: 'Unknown',
       description: 'Unable to identify these monuments and art due to response parsing issues. Please try taking another photo.',
       significance: 'Analysis failed due to technical issues with the response format.',
@@ -297,6 +299,7 @@ function attemptManualJsonReconstruction(content: string): DetectionResult | nul
     const artworkNameMatch = content.match(/"artworkName"\s*:\s*"([^"]+)"/i);
     const confidenceMatch = content.match(/"confidence"\s*:\s*(\d+)/i);
     const locationMatch = content.match(/"location"\s*:\s*"([^"]+)"/i);
+    const countryMatch = content.match(/"country"\s*:\s*"([^"]+)"/i);
     const periodMatch = content.match(/"period"\s*:\s*"([^"]+)"/i);
     const isRecognizedMatch = content.match(/"isRecognized"\s*:\s*(true|false)/i);
     
@@ -310,10 +313,11 @@ function attemptManualJsonReconstruction(content: string): DetectionResult | nul
         artworkName: artworkNameMatch[1],
         confidence: parseInt(confidenceMatch[1]),
         location: locationMatch[1],
+        country: countryMatch ? countryMatch[1] : 'Unknown',
         period: periodMatch[1],
-        description: `${artworkNameMatch[1]} is located in ${locationMatch[1]} and dates from ${periodMatch[1]}.`,
+        description: `${artworkNameMatch[1]} is located in ${locationMatch[1]}, ${countryMatch ? countryMatch[1] : 'Unknown'} and dates from ${periodMatch[1]}.`,
         significance: `This monuments and art represents important cultural heritage from ${periodMatch[1]}.`,
-        facts: [`Located in ${locationMatch[1]}`, `Period: ${periodMatch[1]}`, `Confidence: ${confidenceMatch[1]}%`],
+        facts: [`Located in ${locationMatch[1]}, ${countryMatch ? countryMatch[1] : 'Unknown'}`, `Period: ${periodMatch[1]}`, `Confidence: ${confidenceMatch[1]}%`],
         isRecognized: isRecognizedMatch[1].toLowerCase() === 'true'
       };
       

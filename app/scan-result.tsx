@@ -803,7 +803,7 @@ export default function ScanResultScreen() {
               <MapPin size={20} color="#1e3a8a" />
               <View>
                 <Text style={styles.infoLabel}>Location</Text>
-                <Text style={styles.infoValue}>{monument.location}</Text>
+                <Text style={styles.infoValue}>{monument.location}, {monument.country}</Text>
               </View>
             </View>
             <View style={styles.infoCard}>
