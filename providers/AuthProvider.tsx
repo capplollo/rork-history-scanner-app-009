@@ -61,7 +61,27 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
 
       if (data.user) {
         console.log('User created successfully, ID:', data.user.id);
-        console.log('Profile will be created automatically by database trigger');
+        
+        // Try to create profile manually if trigger fails
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              email: data.user.email || email,
+              full_name: fullName || null,
+            });
+          
+          if (profileError) {
+            console.log('Profile creation via trigger or manual insert failed:', profileError);
+            // Don't fail signup if profile creation fails - user can still use the app
+          } else {
+            console.log('Profile created successfully');
+          }
+        } catch (profileError) {
+          console.log('Manual profile creation failed:', profileError);
+          // Don't fail signup - profile can be created later
+        }
       }
 
       return { error: null };
