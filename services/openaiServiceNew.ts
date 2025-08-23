@@ -18,7 +18,7 @@ interface OpenAIResponse {
 }
 
 // NEW FILE - Using ONLY the hardcoded API key
-const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY_HERE';
+const OPENAI_API_KEY = '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';
 
 export async function callOpenAI(messages: OpenAIMessage[]): Promise<string> {
   try {
