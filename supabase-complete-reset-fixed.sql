@@ -10,7 +10,6 @@
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 DROP TRIGGER IF EXISTS handle_profiles_updated_at ON public.profiles;
 DROP TRIGGER IF EXISTS handle_scan_history_updated_at ON public.scan_history;
-DROP TRIGGER IF EXISTS handle_chat_sessions_updated_at ON public.chat_sessions;
 
 -- Drop all existing functions
 DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
@@ -18,7 +17,6 @@ DROP FUNCTION IF EXISTS public.handle_updated_at() CASCADE;
 DROP FUNCTION IF EXISTS generate_customer_id() CASCADE;
 
 -- Drop all existing tables and their data
-DROP TABLE IF EXISTS public.chat_sessions CASCADE;
 DROP TABLE IF EXISTS public.scan_history CASCADE;
 DROP TABLE IF EXISTS public.profiles CASCADE;
 
@@ -204,26 +202,5 @@ AND event_object_table IN ('profiles', 'scan_history', 'users');
 -- 9. SUCCESS MESSAGE
 -- =====================================================
 
--- Display success message
-DO $$
-BEGIN
-    RAISE NOTICE '✅ COMPLETE RESET SUCCESSFUL!';
-    RAISE NOTICE '📋 Created tables: profiles, scan_history';
-    RAISE NOTICE '🔒 Row Level Security enabled on all tables';
-    RAISE NOTICE '⚡ Triggers and functions created';
-    RAISE NOTICE '📊 Performance indexes created';
-    RAISE NOTICE '';
-    RAISE NOTICE '🎯 Schema optimized for minimal data storage:';
-    RAISE NOTICE '   - Profiles: email, name, customer_id, profile_picture';
-    RAISE NOTICE '   - History: name, location, country, period, uploaded_picture';
-    RAISE NOTICE '   - Detailed scan results generated on-demand via AI API';
-    RAISE NOTICE '';
-    RAISE NOTICE '📧 IMPORTANT: Configure email confirmation in Supabase Dashboard:';
-    RAISE NOTICE '   1. Go to Authentication > Settings';
-    RAISE NOTICE '   2. Enable "Enable email confirmations"';
-    RAISE NOTICE '   3. Set Site URL and Redirect URLs';
-    RAISE NOTICE '   4. Add: https://your-app.com/email-confirmation';
-    RAISE NOTICE '   5. Add: exp://localhost:8081/--/email-confirmation';
-    RAISE NOTICE '';
-    RAISE NOTICE '⚠️  All previous data has been permanently deleted!';
-END $$;
+-- Success message
+SELECT '✅ COMPLETE RESET SUCCESSFUL! Created tables: profiles, scan_history' as status;
