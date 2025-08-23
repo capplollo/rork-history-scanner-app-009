@@ -27,7 +27,7 @@ import {
 import { useHistory } from '@/providers/HistoryProvider';
 import { scanResultStore } from '@/services/scanResultStore';
 import { detectMonumentsAndArt } from '@/services/monumentDetectionService';
-import { voiceService } from '@/services/voiceService';
+import { speakText, stopSpeaking } from '@/services/voiceService';
 import SocialShareCard from '@/components/SocialShareCard';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -225,11 +225,11 @@ export default function ScanResultScreen() {
 
   const handleVoiceToggle = async () => {
     if (isSpeaking) {
-      await voiceService.stop();
+      await stopSpeaking();
       setIsSpeakingState(false);
     } else {
       const textToRead = `${monument.name}. Located in ${monument.location}, ${monument.country}. From the ${monument.period} period.`;
-      await voiceService.speak(textToRead);
+      await speakText(textToRead);
       setIsSpeakingState(true);
     }
   };
