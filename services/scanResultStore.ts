@@ -8,7 +8,7 @@ class ScanResultStore {
     const id = `scan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     try {
-      console.log('Storing scan result with ID:', id);
+      console.log('Storing simplified scan result with ID:', id);
       console.log('Original result name:', result.name);
       
       // Validate the result before storing
@@ -60,15 +60,10 @@ class ScanResultStore {
           id: result.id || 'unknown',
           name: result.name || 'Unknown Monument',
           location: result.location || 'Unknown Location',
+          country: result.country || 'Unknown Country',
           period: result.period || 'Unknown Period',
-          description: 'Monument information available',
-          significance: 'Historical significance',
-          facts: ['This monument has historical importance'],
           image: '',
-          scannedImage: '',
           scannedAt: result.scannedAt || new Date().toISOString(),
-          confidence: result.confidence || 50,
-          isRecognized: result.isRecognized || false,
         };
         this.results.set(id, minimalResult);
         console.log('Stored minimal fallback result');
@@ -81,56 +76,30 @@ class ScanResultStore {
   }
   
   private optimizeForStorage(result: HistoryItem): HistoryItem {
-    // Create a deep copy and aggressively limit content to prevent browser history issues
+    // Create a deep copy and optimize for simplified structure
     const optimized = JSON.parse(JSON.stringify(result));
     
-    // Truncate descriptions more aggressively
-    if (optimized.description && optimized.description.length > 1000) {
-      optimized.description = optimized.description.substring(0, 1000) + '...';
+    // Truncate text fields if they're too long
+    if (optimized.name && optimized.name.length > 200) {
+      optimized.name = optimized.name.substring(0, 200) + '...';
     }
     
-    if (optimized.significance && optimized.significance.length > 1000) {
-      optimized.significance = optimized.significance.substring(0, 1000) + '...';
+    if (optimized.location && optimized.location.length > 100) {
+      optimized.location = optimized.location.substring(0, 100) + '...';
     }
     
-    // Limit detailed description content more aggressively
-    if (optimized.detailedDescription) {
-      if (optimized.detailedDescription.quickOverview && optimized.detailedDescription.quickOverview.length > 600) {
-        optimized.detailedDescription.quickOverview = optimized.detailedDescription.quickOverview.substring(0, 600) + '...';
-      }
-      
-      if (optimized.detailedDescription.inDepthContext && optimized.detailedDescription.inDepthContext.length > 2000) {
-        optimized.detailedDescription.inDepthContext = optimized.detailedDescription.inDepthContext.substring(0, 2000) + '...';
-      }
-      
-      if (optimized.detailedDescription.curiosities && optimized.detailedDescription.curiosities.length > 800) {
-        optimized.detailedDescription.curiosities = optimized.detailedDescription.curiosities.substring(0, 800) + '...';
-      }
-      
-      // Limit keyTakeaways array and individual items
-      if (optimized.detailedDescription.keyTakeaways && Array.isArray(optimized.detailedDescription.keyTakeaways)) {
-        optimized.detailedDescription.keyTakeaways = optimized.detailedDescription.keyTakeaways
-          .slice(0, 5)
-          .map((item: string) => item.length > 150 ? item.substring(0, 150) + '...' : item);
-      }
+    if (optimized.country && optimized.country.length > 50) {
+      optimized.country = optimized.country.substring(0, 50) + '...';
     }
     
-    // Limit facts array and individual facts
-    if (optimized.facts && Array.isArray(optimized.facts)) {
-      optimized.facts = optimized.facts
-        .slice(0, 8)
-        .map((fact: string) => fact.length > 120 ? fact.substring(0, 120) + '...' : fact);
+    if (optimized.period && optimized.period.length > 50) {
+      optimized.period = optimized.period.substring(0, 50) + '...';
     }
     
     // Remove or limit image data that might be too large
     if (optimized.image && optimized.image.startsWith('data:')) {
       // If it's a base64 image, remove it to prevent size issues
       optimized.image = '';
-    }
-    
-    if (optimized.scannedImage && optimized.scannedImage.startsWith('data:')) {
-      // If it's a base64 image, remove it to prevent size issues
-      optimized.scannedImage = '';
     }
     
     return optimized;
@@ -198,15 +167,10 @@ class ScanResultStore {
       id: result.id,
       name: result.name.substring(0, 100),
       location: result.location.substring(0, 50),
+      country: result.country.substring(0, 30),
       period: result.period.substring(0, 30),
-      description: result.description.substring(0, 200) + '...',
-      significance: result.significance.substring(0, 200) + '...',
-      facts: result.facts.slice(0, 3).map(fact => fact.substring(0, 80) + '...'),
       image: '', // Remove images in emergency mode
-      scannedImage: '',
       scannedAt: result.scannedAt,
-      confidence: result.confidence,
-      isRecognized: result.isRecognized,
     };
   }
 

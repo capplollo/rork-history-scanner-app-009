@@ -250,7 +250,7 @@ export default function SocialShareCard({ item, visible, onClose }: SocialShareC
           >
             <View style={styles.shareCard}>
               <Image 
-                source={{ uri: item.scannedImage || item.image }} 
+                source={{ uri: item.image }} 
                 style={styles.cardImage}
                 resizeMode="cover"
               />
