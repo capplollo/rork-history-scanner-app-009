@@ -93,19 +93,20 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
   console.log('🔑 BACKEND API CALL - Using secure server-side API key');
   console.log('🔑 Backend URL:', BACKEND_API_URL);
   
-  const response = await fetch(`${BACKEND_API_URL}/api/openai/analyze-image`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      prompt: analysisPrompt,
-      base64Image: base64Image,
-      model: 'gpt-4o',
-      max_tokens: 4000,
-      temperature: 0.7,
-    })
-  });
+  try {
+    const response = await fetch(`${BACKEND_API_URL}/api/openai/analyze-image`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt: analysisPrompt,
+        base64Image: base64Image,
+        model: 'gpt-4o',
+        max_tokens: 4000,
+        temperature: 0.7,
+      })
+    });
 
   console.log('Backend API response status:', response.status);
 
@@ -126,12 +127,21 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
     }
   }
 
-  const data = await response.json();
-  console.log('Backend API response received successfully');
-  
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) {
-    throw new Error('No content in backend API response');
+    const data = await response.json();
+    console.log('Backend API response received successfully');
+    
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error('No content in backend API response');
+    }
+  } catch (fetchError) {
+    console.error('Backend API connection error:', fetchError);
+    
+    if (fetchError.message.includes('Load failed') || fetchError.message.includes('NetworkError') || fetchError.message.includes('fetch')) {
+      throw new Error('Cannot connect to backend API server. Please make sure the backend server is running on http://localhost:3001. Run "cd backend && npm start" to start the server.');
+    }
+    
+    throw fetchError;
   }
 
   // Clean up the response and parse JSON with better error handling
