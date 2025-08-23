@@ -1,7 +1,9 @@
 import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
-import { callOpenAIWithImage } from './aiService';
+
+// HARDCODED API KEY DIRECTLY IN THIS FILE
+const OPENAI_API_KEY = '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';
 
 export interface DetectionResult {
   artworkName: string;
@@ -87,7 +89,69 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
 
   console.log('Sending comprehensive analysis request to OpenAI API...');
   
-  const content = await callOpenAIWithImage(analysisPrompt, base64Image);
+  // DIRECT API CALL WITH HARDCODED KEY
+  console.log('🔑 DIRECT API CALL - Using hardcoded API key');
+  console.log('🔑 API Key starts with:', OPENAI_API_KEY.substring(0, 20));
+  console.log('🔑 API Key ends with:', OPENAI_API_KEY.substring(OPENAI_API_KEY.length - 10));
+  
+  const messages = [
+    {
+      role: 'user',
+      content: [
+        {
+          type: 'text',
+          text: analysisPrompt
+        },
+        {
+          type: 'image_url',
+          image_url: {
+            url: `data:image/jpeg;base64,${base64Image}`
+          }
+        }
+      ]
+    }
+  ];
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      messages: messages,
+      max_tokens: 4000,
+      temperature: 0.7,
+    })
+  });
+
+  console.log('OpenAI API response status:', response.status);
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('OpenAI API error details:');
+    console.error('Status:', response.status, response.statusText);
+    console.error('Response body:', errorText);
+    
+    if (response.status === 401) {
+      throw new Error('Invalid OpenAI API key. The hardcoded key may be expired or invalid.');
+    } else if (response.status === 429) {
+      throw new Error('OpenAI API rate limit exceeded. Please try again later.');
+    } else if (response.status === 500) {
+      throw new Error('OpenAI service is temporarily unavailable. Please try again in a few moments.');
+    } else {
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+    }
+  }
+
+  const data = await response.json();
+  console.log('OpenAI response received successfully');
+  
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) {
+    throw new Error('No content in OpenAI response');
+  }
 
   // Clean up the response and parse JSON with better error handling
   let cleanContent = content.trim();
