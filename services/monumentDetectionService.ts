@@ -20,10 +20,7 @@ export interface DetectionResult {
 }
 
 export interface AdditionalInfo {
-  name: string;
-  location: string;
-  building: string;
-  notes: string;
+  context: string;
 }
 
 export async function detectMonumentsAndArt(imageUri: string, additionalInfo?: AdditionalInfo): Promise<DetectionResult> {
@@ -73,13 +70,8 @@ async function performComprehensiveAnalysis(base64Image: string, additionalInfo?
 Consider that many sculptures share similar themes, poses, or subjects but are different works entirely. For sculptures, confidence should be 90% or higher for recognition. For other monuments and art, confidence should be 80% or higher.`;
   
   // Add context if provided - give HEAVY weight to user context
-  if (additionalInfo && (additionalInfo.name || additionalInfo.location || additionalInfo.building || additionalInfo.notes)) {
-    analysisPrompt += `\n\n**CRITICAL USER CONTEXT - PRIORITIZE THIS INFORMATION HEAVILY:**`;
-    if (additionalInfo.name) analysisPrompt += `\n- Monument/Art Name: "${additionalInfo.name}" (Use this name if it matches what you see in the image)`;
-    if (additionalInfo.location) analysisPrompt += `\n- Location: "${additionalInfo.location}" (This location context is EXTREMELY IMPORTANT - if the image could plausibly be from this location, strongly favor monuments/art from this area)`;
-    if (additionalInfo.building) analysisPrompt += `\n- Building/Context: "${additionalInfo.building}" (Consider this building context when identifying)`;
-    if (additionalInfo.notes) analysisPrompt += `\n- Additional Notes: "${additionalInfo.notes}" (Important context clues)`;
-    analysisPrompt += `\n\nWith this context provided, you should:\n1. STRONGLY prioritize monuments and art that match this location\n2. If the visual matches reasonably well with something from this location, increase confidence significantly\n3. Use the provided name if it matches what you observe in the image\n4. Consider the building/context information as key identifying factors`;
+  if (additionalInfo && additionalInfo.context && additionalInfo.context.trim()) {
+    analysisPrompt += `\n\n**CRITICAL USER CONTEXT - PRIORITIZE THIS INFORMATION HEAVILY:**\n"${additionalInfo.context}"\n\nWith this context provided, you should:\n1. Use this information to help identify the monument/artwork\n2. If the visual matches reasonably well with the provided context, increase confidence significantly\n3. Consider all details in the context as important identifying factors\n4. The context may include name, location, building, period, or any other relevant details`;
   }
   
   analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond in this exact JSON format (NO markdown, NO code blocks, PURE JSON only):\n{\n  "artworkName": "Name or 'Unknown Monuments and Art'",\n  "confidence": 85,\n  "location": "City only (e.g., 'Paris', 'Rome', 'Florence')",\n  "country": "Country only (e.g., 'France', 'Italy', 'Spain')",\n  "period": "Year(s) or century format (e.g., '1503', '15th century', '1800s', '12th-13th century') or 'Unknown'",\n  "description": "Brief description",\n  "significance": "Cultural significance",\n  "facts": ["Fact 1", "Fact 2", "Fact 3"],\n  "isRecognized": true,\n  "detailedDescription": {\n    "keyTakeaways": [\n      "First key takeaway bullet point",\n      "Second key takeaway bullet point",\n      "Third key takeaway bullet point",\n      "Fourth key takeaway bullet point"\n    ],\n    "inDepthContext": "Write exactly 3 paragraphs (1400-3000 characters total). Separate paragraphs with double line breaks only - NO paragraph titles or labels. Use **bold** highlights for key terms, names, dates, and important details. Be specific and interesting. Avoid generalizations. First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context. Second paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features. Third paragraph: Discuss cultural impact, significance over the years, notable events or stories associated with the monuments and art and more.",\n    "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"\n  }\n}\n\nIMPORTANT: \n- If not recognized with high confidence (confidence < 80), omit the entire detailedDescription object\n- Return ONLY valid JSON, no markdown formatting\n- Ensure all strings are properly escaped\n- keyTakeaways must be exactly 4 bullet points as an array\n- location should contain ONLY the city name\n- country should contain ONLY the country name`;

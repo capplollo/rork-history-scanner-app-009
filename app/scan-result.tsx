@@ -43,10 +43,7 @@ export default function ScanResultScreen() {
   const [showContextForm, setShowContextForm] = useState<boolean>(false);
   const [, setIsRegenerating] = useState<boolean>(false);
   const [contextInfo, setContextInfo] = useState<AdditionalInfo>({
-    name: "",
-    location: "",
-    building: "",
-    notes: "",
+    context: "",
   });
   
   // Cleanup speech when component unmounts or when navigating away
@@ -554,8 +551,8 @@ export default function ScanResultScreen() {
     }
   };
 
-  const updateContextInfo = (field: keyof AdditionalInfo, value: string) => {
-    setContextInfo(prev => ({ ...prev, [field]: value }));
+  const updateContextInfo = (value: string) => {
+    setContextInfo({ context: value });
   };
 
   const handleStop = async () => {
@@ -740,48 +737,18 @@ export default function ScanResultScreen() {
             {showContextForm && (
               <View style={styles.contextForm}>
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Monuments and Art Name</Text>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="e.g., Mona Lisa, David, Eiffel Tower"
-                    value={contextInfo.name}
-                    onChangeText={(text) => updateContextInfo('name', text)}
-                    placeholderTextColor="#94a3b8"
-                  />
-                </View>
-                
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Location</Text>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="e.g., Paris, France or Central Park, NYC"
-                    value={contextInfo.location}
-                    onChangeText={(text) => updateContextInfo('location', text)}
-                    placeholderTextColor="#94a3b8"
-                  />
-                </View>
-                
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Building/Museum/Gallery</Text>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="e.g., Louvre Museum, Uffizi Gallery, St. Peter's Basilica"
-                    value={contextInfo.building}
-                    onChangeText={(text) => updateContextInfo('building', text)}
-                    placeholderTextColor="#94a3b8"
-                  />
-                </View>
-                
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Additional Notes</Text>
+                  <Text style={styles.inputLabel}>Context Information</Text>
+                  <Text style={styles.contextDescription}>
+                    Add any details that might help identify this monument or artwork - name, location, museum, period, or any other relevant information.
+                  </Text>
                   <TextInput
                     style={[styles.textInput, styles.textInputMultiline]}
-                    placeholder="Any other details that might help..."
-                    value={contextInfo.notes}
-                    onChangeText={(text) => updateContextInfo('notes', text)}
+                    placeholder="e.g., Mona Lisa at the Louvre Museum in Paris, or David sculpture by Michelangelo in Florence, or any other details..."
+                    value={contextInfo.context}
+                    onChangeText={updateContextInfo}
                     placeholderTextColor="#94a3b8"
                     multiline
-                    numberOfLines={3}
+                    numberOfLines={4}
                   />
                 </View>
               </View>
@@ -1521,6 +1488,17 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#e5e7eb",
     gap: 12,
+  },
+  contextDescription: {
+    fontSize: 13,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#6b7280",
+    lineHeight: 18,
+    marginBottom: 8,
   },
   contextFormDescription: {
     fontSize: 13,
