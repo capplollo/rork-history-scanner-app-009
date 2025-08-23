@@ -1,45 +1,35 @@
 import { supabase } from '@/lib/supabase';
 import { HistoryItem } from '@/providers/HistoryProvider';
 
+// Simplified interface for minimal data storage
 export interface SupabaseScanHistory {
   id?: string;
   user_id: string;
-  monument_name: string;
+  name: string;
   location?: string;
+  country?: string;
   period?: string;
-  description?: string;
-  significance?: string;
-  facts?: string[];
-  image_url?: string;
-  scanned_image_url?: string;
+  uploaded_picture?: string;
   scanned_at: string;
-  confidence?: number;
-  is_recognized?: boolean;
-  detailed_description?: any;
   created_at?: string;
   updated_at?: string;
 }
 
 export class SupabaseHistoryService {
-  // Save a scan to Supabase
+  // Save minimal scan data to Supabase (only for history cards)
   static async saveScan(userId: string, scanData: HistoryItem): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log('Saving scan to Supabase for user:', userId);
+      console.log('Saving minimal scan data to Supabase for user:', userId);
       
+      // Only save minimal data needed for history cards
       const supabaseScanData: Omit<SupabaseScanHistory, 'id' | 'created_at' | 'updated_at'> = {
         user_id: userId,
-        monument_name: scanData.name,
+        name: scanData.name,
         location: scanData.location,
+        country: scanData.country || '',
         period: scanData.period,
-        description: scanData.description,
-        significance: scanData.significance,
-        facts: scanData.facts,
-        image_url: scanData.image,
-        scanned_image_url: scanData.scannedImage,
+        uploaded_picture: scanData.image,
         scanned_at: scanData.scannedAt,
-        confidence: scanData.confidence,
-        is_recognized: scanData.isRecognized,
-        detailed_description: scanData.detailedDescription,
       };
 
       const { data, error } = await supabase
@@ -59,7 +49,7 @@ export class SupabaseHistoryService {
         return { success: false, error: error.message };
       }
 
-      console.log('✅ Scan saved successfully to Supabase:', data.id);
+      console.log('✅ Minimal scan data saved successfully to Supabase:', data.id);
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -72,15 +62,14 @@ export class SupabaseHistoryService {
     }
   }
 
-  // Get all scans for a user with pagination
+  // Get all scans for a user with pagination (minimal data for history cards)
   static async getUserScans(userId: string, limit: number = 20): Promise<{ scans: HistoryItem[]; error?: string }> {
     try {
-      console.log('Fetching scans from Supabase for user:', userId, 'with limit:', limit);
+      console.log('Fetching minimal scan data from Supabase for user:', userId, 'with limit:', limit);
       
-      // Simple query without abort controller to avoid AbortError issues
       const { data, error } = await supabase
         .from('scan_history')
-        .select('id, monument_name, location, period, description, significance, facts, image_url, scanned_image_url, scanned_at, confidence, is_recognized, detailed_description')
+        .select('id, name, location, country, period, uploaded_picture, scanned_at')
         .eq('user_id', userId)
         .order('scanned_at', { ascending: false })
         .limit(limit);
@@ -95,25 +84,26 @@ export class SupabaseHistoryService {
         return { scans: [], error: error.message };
       }
 
-      // Convert Supabase data to HistoryItem format
+      // Convert Supabase data to HistoryItem format (minimal data for cards)
       const scans: HistoryItem[] = (data || []).map((item: any) => ({
         id: item.id || '',
-        name: item.monument_name || '',
+        name: item.name || '',
         location: item.location || '',
-        country: '', // Not stored in current schema
+        country: item.country || '',
         period: item.period || '',
-        image: item.image_url || '',
-        scannedImage: item.scanned_image_url || '',
+        image: item.uploaded_picture || '',
+        scannedImage: '', // Not stored in simplified schema
         scannedAt: item.scanned_at || new Date().toISOString(),
-        description: item.description || '',
-        significance: item.significance || '',
-        facts: item.facts || [],
-        confidence: item.confidence,
-        isRecognized: item.is_recognized,
-        detailedDescription: item.detailed_description,
+        // These will be generated on-demand when user clicks on history card
+        description: '',
+        significance: '',
+        facts: [],
+        confidence: undefined,
+        isRecognized: undefined,
+        detailedDescription: undefined,
       }));
 
-      console.log('✅ Fetched', scans.length, 'scans from Supabase');
+      console.log('✅ Fetched', scans.length, 'minimal scan records from Supabase');
       return { scans };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -159,24 +149,19 @@ export class SupabaseHistoryService {
     }
   }
 
-  // Update a scan
+  // Update a scan (minimal data only)
   static async updateScan(scanId: string, updates: Partial<HistoryItem>): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log('Updating scan in Supabase:', scanId);
+      console.log('Updating minimal scan data in Supabase:', scanId);
       
       const updateData: Partial<SupabaseScanHistory> = {};
       
-      if (updates.name) updateData.monument_name = updates.name;
+      // Only update fields that are stored in simplified schema
+      if (updates.name) updateData.name = updates.name;
       if (updates.location) updateData.location = updates.location;
+      if (updates.country) updateData.country = updates.country;
       if (updates.period) updateData.period = updates.period;
-      if (updates.description) updateData.description = updates.description;
-      if (updates.significance) updateData.significance = updates.significance;
-      if (updates.facts) updateData.facts = updates.facts;
-      if (updates.image) updateData.image_url = updates.image;
-      if (updates.scannedImage) updateData.scanned_image_url = updates.scannedImage;
-      if (updates.confidence !== undefined) updateData.confidence = updates.confidence;
-      if (updates.isRecognized !== undefined) updateData.is_recognized = updates.isRecognized;
-      if (updates.detailedDescription) updateData.detailed_description = updates.detailedDescription;
+      if (updates.image) updateData.uploaded_picture = updates.image;
 
       const { error } = await supabase
         .from('scan_history')
@@ -193,7 +178,7 @@ export class SupabaseHistoryService {
         return { success: false, error: error.message };
       }
 
-      console.log('✅ Scan updated successfully in Supabase');
+      console.log('✅ Minimal scan data updated successfully in Supabase');
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -214,7 +199,6 @@ export class SupabaseHistoryService {
     try {
       console.log('Fetching user stats from Supabase for user:', userId);
       
-      // Simple query without abort controller to avoid AbortError issues
       const { data, error } = await supabase
         .from('scan_history')
         .select('id')
@@ -240,6 +224,54 @@ export class SupabaseHistoryService {
       console.error('Full error details:', error);
       return { 
         totalScans: 0, 
+        error: errorMessage
+      };
+    }
+  }
+
+  // Get full scan details by regenerating them via AI API
+  static async getFullScanDetails(scanId: string, name: string, location: string, country: string, period: string, imageUrl: string): Promise<{ scanDetails: HistoryItem | null; error?: string }> {
+    try {
+      console.log('Regenerating full scan details for:', name);
+      
+      // Import the detection service to regenerate details
+      const { detectMonumentsAndArt } = await import('./monumentDetectionService');
+      
+      // Use the stored information as additional context for better recognition
+      const additionalInfo = {
+        name,
+        location,
+        building: '',
+        notes: `Previously identified as ${name} from ${location}, ${country} (${period})`
+      };
+      
+      // Regenerate the full details using AI
+      const detectionResult = await detectMonumentsAndArt(imageUrl, additionalInfo);
+      
+      const fullScanDetails: HistoryItem = {
+        id: scanId,
+        name: detectionResult.artworkName,
+        location: detectionResult.location,
+        country,
+        period: detectionResult.period,
+        image: imageUrl,
+        scannedImage: '',
+        scannedAt: new Date().toISOString(),
+        description: detectionResult.description,
+        significance: detectionResult.significance,
+        facts: detectionResult.facts,
+        confidence: detectionResult.confidence,
+        isRecognized: detectionResult.isRecognized,
+        detailedDescription: detectionResult.detailedDescription,
+      };
+      
+      console.log('✅ Full scan details regenerated successfully');
+      return { scanDetails: fullScanDetails };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Error regenerating scan details:', errorMessage);
+      return { 
+        scanDetails: null, 
         error: errorMessage
       };
     }
