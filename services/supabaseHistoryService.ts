@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
-import { HistoryItem } from '@/providers/HistoryProvider-simplified';
+import { HistoryItem } from '@/providers/HistoryProvider';
 
-// Simplified interface matching the new database schema with country field
+// Simplified interface for minimal data storage
 export interface SupabaseScanHistory {
   id?: string;
   user_id: string;
@@ -9,24 +9,26 @@ export interface SupabaseScanHistory {
   location?: string;
   country?: string;
   period?: string;
-  image?: string;
+  uploaded_picture?: string;
   scanned_at: string;
   created_at?: string;
+  updated_at?: string;
 }
 
 export class SupabaseHistoryService {
-  // Save a scan to Supabase - only essential data including country
+  // Save minimal scan data to Supabase (only for history cards)
   static async saveScan(userId: string, scanData: HistoryItem): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log('Saving simplified scan to Supabase for user:', userId);
+      console.log('Saving minimal scan data to Supabase for user:', userId);
       
-      const supabaseScanData: Omit<SupabaseScanHistory, 'id' | 'created_at'> = {
+      // Only save minimal data needed for history cards
+      const supabaseScanData: Omit<SupabaseScanHistory, 'id' | 'created_at' | 'updated_at'> = {
         user_id: userId,
         name: scanData.name,
         location: scanData.location,
-        country: scanData.country,
+        country: scanData.country || '',
         period: scanData.period,
-        image: scanData.image,
+        uploaded_picture: scanData.image,
         scanned_at: scanData.scannedAt,
       };
 
@@ -38,14 +40,21 @@ export class SupabaseHistoryService {
 
       if (error) {
         console.error('Error saving scan to Supabase:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
         return { success: false, error: error.message };
       }
 
-      console.log('✅ Simplified scan saved successfully to Supabase:', data.id);
+      console.log('✅ Minimal scan data saved successfully to Supabase:', data.id);
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Unexpected error saving scan:', errorMessage);
+      console.error('Full error details:', error);
       return { 
         success: false, 
         error: errorMessage
@@ -53,39 +62,53 @@ export class SupabaseHistoryService {
     }
   }
 
-  // Get all scans for a user - simplified data only including country
+  // Get all scans for a user with pagination (minimal data for history cards)
   static async getUserScans(userId: string, limit: number = 20): Promise<{ scans: HistoryItem[]; error?: string }> {
     try {
-      console.log('Fetching simplified scans from Supabase for user:', userId, 'with limit:', limit);
+      console.log('Fetching minimal scan data from Supabase for user:', userId, 'with limit:', limit);
       
       const { data, error } = await supabase
         .from('scan_history')
-        .select('id, name, location, country, period, image, scanned_at')
+        .select('id, name, location, country, period, uploaded_picture, scanned_at')
         .eq('user_id', userId)
         .order('scanned_at', { ascending: false })
         .limit(limit);
 
       if (error) {
         console.error('Error fetching scans from Supabase:', error.message || 'Unknown error');
+        console.error('Supabase error details:', JSON.stringify({
+          message: error.message,
+          code: error.code,
+          details: error.details,
+        }));
         return { scans: [], error: error.message };
       }
 
-      // Convert Supabase data to simplified HistoryItem format
+      // Convert Supabase data to HistoryItem format (minimal data for cards)
       const scans: HistoryItem[] = (data || []).map((item: any) => ({
         id: item.id || '',
         name: item.name || '',
         location: item.location || '',
         country: item.country || '',
         period: item.period || '',
-        image: item.image || '',
+        image: item.uploaded_picture || '',
+        scannedImage: '', // Not stored in simplified schema
         scannedAt: item.scanned_at || new Date().toISOString(),
+        // These will be generated on-demand when user clicks on history card
+        description: '',
+        significance: '',
+        facts: [],
+        confidence: undefined,
+        isRecognized: undefined,
+        detailedDescription: undefined,
       }));
 
-      console.log('✅ Fetched', scans.length, 'simplified scans from Supabase');
+      console.log('✅ Fetched', scans.length, 'minimal scan records from Supabase');
       return { scans };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Unexpected error fetching scans:', errorMessage);
+      console.error('Full error details:', error);
       return { 
         scans: [], 
         error: errorMessage
@@ -105,6 +128,11 @@ export class SupabaseHistoryService {
 
       if (error) {
         console.error('Error deleting scan from Supabase:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+        });
         return { success: false, error: error.message };
       }
 
@@ -113,6 +141,7 @@ export class SupabaseHistoryService {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Unexpected error deleting scan:', errorMessage);
+      console.error('Full error details:', error);
       return { 
         success: false, 
         error: errorMessage
@@ -120,18 +149,19 @@ export class SupabaseHistoryService {
     }
   }
 
-  // Update a scan - simplified fields only including country
+  // Update a scan (minimal data only)
   static async updateScan(scanId: string, updates: Partial<HistoryItem>): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log('Updating simplified scan in Supabase:', scanId);
+      console.log('Updating minimal scan data in Supabase:', scanId);
       
       const updateData: Partial<SupabaseScanHistory> = {};
       
+      // Only update fields that are stored in simplified schema
       if (updates.name) updateData.name = updates.name;
       if (updates.location) updateData.location = updates.location;
       if (updates.country) updateData.country = updates.country;
       if (updates.period) updateData.period = updates.period;
-      if (updates.image) updateData.image = updates.image;
+      if (updates.image) updateData.uploaded_picture = updates.image;
 
       const { error } = await supabase
         .from('scan_history')
@@ -140,14 +170,20 @@ export class SupabaseHistoryService {
 
       if (error) {
         console.error('Error updating scan in Supabase:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+        });
         return { success: false, error: error.message };
       }
 
-      console.log('✅ Simplified scan updated successfully in Supabase');
+      console.log('✅ Minimal scan data updated successfully in Supabase');
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Unexpected error updating scan:', errorMessage);
+      console.error('Full error details:', error);
       return { 
         success: false, 
         error: errorMessage
@@ -170,6 +206,11 @@ export class SupabaseHistoryService {
 
       if (error) {
         console.error('Error fetching user stats from Supabase:', error.message || 'Unknown error');
+        console.error('Supabase error details:', JSON.stringify({
+          message: error.message,
+          code: error.code,
+          details: error.details,
+        }));
         return { totalScans: 0, error: error.message };
       }
 
@@ -180,6 +221,7 @@ export class SupabaseHistoryService {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Unexpected error fetching user stats:', errorMessage);
+      console.error('Full error details:', error);
       return { 
         totalScans: 0, 
         error: errorMessage
@@ -187,31 +229,49 @@ export class SupabaseHistoryService {
     }
   }
 
-  // Get user profile with customer ID
-  static async getUserProfile(userId: string): Promise<{ 
-    customerId?: string; 
-    error?: string 
-  }> {
+  // Get full scan details by regenerating them via AI API
+  static async getFullScanDetails(scanId: string, name: string, location: string, country: string, period: string, imageUrl: string): Promise<{ scanDetails: HistoryItem | null; error?: string }> {
     try {
-      console.log('Fetching user profile from Supabase for user:', userId);
+      console.log('Regenerating full scan details for:', name);
       
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('customer_id')
-        .eq('user_id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user profile from Supabase:', error.message || 'Unknown error');
-        return { error: error.message };
-      }
-
-      console.log('✅ User profile fetched:', { customerId: data?.customer_id });
-      return { customerId: data?.customer_id };
+      // Import the detection service to regenerate details
+      const { detectMonumentsAndArt } = await import('./monumentDetectionService');
+      
+      // Use the stored information as additional context for better recognition
+      const additionalInfo = {
+        name,
+        location,
+        building: '',
+        notes: `Previously identified as ${name} from ${location}, ${country} (${period})`
+      };
+      
+      // Regenerate the full details using AI
+      const detectionResult = await detectMonumentsAndArt(imageUrl, additionalInfo);
+      
+      const fullScanDetails: HistoryItem = {
+        id: scanId,
+        name: detectionResult.artworkName,
+        location: detectionResult.location,
+        country,
+        period: detectionResult.period,
+        image: imageUrl,
+        scannedImage: '',
+        scannedAt: new Date().toISOString(),
+        description: detectionResult.description,
+        significance: detectionResult.significance,
+        facts: detectionResult.facts,
+        confidence: detectionResult.confidence,
+        isRecognized: detectionResult.isRecognized,
+        detailedDescription: detectionResult.detailedDescription,
+      };
+      
+      console.log('✅ Full scan details regenerated successfully');
+      return { scanDetails: fullScanDetails };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      console.error('Unexpected error fetching user profile:', errorMessage);
+      console.error('Error regenerating scan details:', errorMessage);
       return { 
+        scanDetails: null, 
         error: errorMessage
       };
     }

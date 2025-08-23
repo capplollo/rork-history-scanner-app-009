@@ -4,20 +4,30 @@ import createContextHook from "@nkzw/create-context-hook";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "./AuthProvider";
 
-// Simplified HistoryItem interface - only essential fields including country
 export interface HistoryItem {
   id: string;
   name: string;
   location: string;
-  country: string;
+  country?: string;
   period: string;
+  description: string;
+  significance: string;
+  facts: string[];
   image: string;
+  scannedImage: string;
   scannedAt: string;
+  confidence?: number;
+  isRecognized?: boolean;
+  detailedDescription?: {
+    keyTakeaways: string[];
+    inDepthContext: string;
+    curiosities?: string;
+  };
 }
 
 const HISTORY_STORAGE_KEY = "@monument_scanner_history";
-const LOCAL_STORAGE_LIMIT = 10; // Increased limit for simplified data
-const EMERGENCY_LIMIT = 3; // Emergency fallback
+const LOCAL_STORAGE_LIMIT = 3; // Very small limit for local storage to prevent quota issues
+const EMERGENCY_LIMIT = 1; // Emergency fallback
 
 export const [HistoryProvider, useHistory] = createContextHook(() => {
   const { user } = useAuth();
@@ -30,16 +40,24 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
     
     try {
       if (user) {
-        // Load from Supabase with simplified data structure
+        // Load from Supabase with improved error handling and faster timeout
         try {
-          console.log('Loading simplified history from Supabase for user:', user.id);
+          console.log('Loading history from Supabase for user:', user.id);
           
-          const { data, error } = await supabase
+          // Reduce timeout to 5 seconds for faster fallback
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Request timeout')), 5000); // 5 second timeout
+          });
+          
+          // Use simplified schema fields
+          const queryPromise = supabase
             .from('scan_history')
-            .select('id, name, location, country, period, image, scanned_at')
+            .select('id, name, location, country, period, uploaded_picture, scanned_at')
             .eq('user_id', user.id)
             .order('scanned_at', { ascending: false })
-            .limit(20);
+            .limit(8);
+          
+          const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
           
           // Check if component was unmounted during the request
           if (isCancelled) {
@@ -49,12 +67,13 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           
           if (error) {
             console.error('Error loading history from Supabase:', error.message || 'Unknown error');
+            // Don't log full error details to reduce noise
             console.warn('Falling back to local storage due to Supabase error');
             await loadFromLocalStorage();
           } else {
-            console.log('Successfully loaded', data?.length || 0, 'simplified items from Supabase');
+            console.log('Successfully loaded', data?.length || 0, 'items from Supabase');
             
-            // Map Supabase data to simplified HistoryItem format
+            // Map Supabase data to HistoryItem format with minimal data for history cards
             const mappedData = (data || []).map((item: any) => {
               try {
                 return {
@@ -63,8 +82,15 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
                   location: item.location || '',
                   country: item.country || '',
                   period: item.period || '',
-                  image: item.image || '',
+                  description: '', // Will be regenerated via API when needed
+                  significance: '', // Will be regenerated via API when needed
+                  facts: [], // Will be regenerated via API when needed
+                  image: item.uploaded_picture || '',
+                  scannedImage: '', // Not stored in simplified schema
                   scannedAt: item.scanned_at ? new Date(item.scanned_at).toISOString() : new Date().toISOString(),
+                  confidence: undefined, // Will be regenerated via API when needed
+                  isRecognized: undefined, // Will be regenerated via API when needed
+                  detailedDescription: undefined, // Will be regenerated via API when needed
                 };
               } catch (mappingError) {
                 console.error('Error mapping history item:', mappingError, item);
@@ -78,7 +104,19 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             }
           }
         } catch (requestError: unknown) {
-          console.error('Supabase query failed:', requestError);
+          // Handle different types of errors more gracefully
+          if (requestError instanceof Error) {
+            if (requestError.name === 'AbortError' || requestError.message.includes('aborted')) {
+              console.warn('Supabase query was cancelled, falling back to local storage');
+            } else if (requestError.message === 'Request timeout') {
+              console.warn('Supabase query timed out, falling back to local storage');
+            } else {
+              console.error('Supabase query failed:', requestError.message);
+            }
+          } else {
+            console.error('Unknown error during Supabase query:', requestError);
+          }
+          
           if (!isCancelled) {
             await loadFromLocalStorage();
           }
@@ -142,11 +180,13 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
     }
   };
 
+
+
   const saveToSupabase = useCallback(async (item: HistoryItem) => {
     if (!user) return false;
     
     try {
-      // Save simplified data to Supabase - only essential fields including country
+      // Only save minimal data to Supabase using simplified schema
       const { error } = await supabase
         .from('scan_history')
         .insert({
@@ -155,47 +195,54 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           location: item.location,
           country: item.country,
           period: item.period,
-          image: item.image,
+          uploaded_picture: item.image,
           scanned_at: new Date(item.scannedAt).toISOString(),
         });
       
       if (error) {
         console.error('Error saving to Supabase:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
         return false;
       }
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Error saving to Supabase:', errorMessage);
+      console.error('Full error details:', error);
       return false;
     }
   }, [user]);
 
   const saveToLocalStorage = useCallback(async (newHistory: HistoryItem[]) => {
     try {
-      // Create a simplified version of history items to save space
-      const simplifiedHistory = newHistory.slice(0, LOCAL_STORAGE_LIMIT).map(item => ({
+      // Create a minimal version of history items to save space
+      const minimalHistory = newHistory.slice(0, LOCAL_STORAGE_LIMIT).map(item => ({
         id: item.id,
         name: item.name,
         location: item.location,
-        country: item.country,
-        period: item.period,
-        image: item.image?.length > 1000 ? '' : item.image, // Skip large images
         scannedAt: item.scannedAt,
+        // Only store essential data locally
+        image: item.image?.length > 1000 ? '' : item.image, // Skip large images
+        scannedImage: '', // Don't store scanned images locally
       }));
       
-      const dataString = JSON.stringify(simplifiedHistory);
+      const dataString = JSON.stringify(minimalHistory);
       
       // Check if data is too large (rough estimate)
       if (dataString.length > 50000) { // 50KB limit
         console.warn('Data too large for local storage, using emergency limit');
-        const emergencyHistory = simplifiedHistory.slice(0, EMERGENCY_LIMIT);
+        const emergencyHistory = minimalHistory.slice(0, EMERGENCY_LIMIT);
         await AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(emergencyHistory));
         return emergencyHistory;
       }
       
       await AsyncStorage.setItem(HISTORY_STORAGE_KEY, dataString);
-      return simplifiedHistory;
+      return minimalHistory;
     } catch (error: any) {
       if (error?.name === 'QuotaExceededError' || error?.message?.includes('quota') || error?.message?.includes('storage')) {
         console.warn('Storage quota exceeded, attempting emergency save');
@@ -204,17 +251,15 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           await AsyncStorage.clear();
           
           if (newHistory.length > 0) {
-            // Save only the most recent items with minimal data
-            const emergencyItems = newHistory.slice(0, EMERGENCY_LIMIT).map(item => ({
-              id: item.id,
-              name: item.name,
-              location: item.location,
-              country: item.country,
-              scannedAt: item.scannedAt,
-            }));
-            await AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(emergencyItems));
+            // Save only the most recent item with minimal data
+            const emergencyItem = {
+              id: newHistory[0].id,
+              name: newHistory[0].name,
+              scannedAt: newHistory[0].scannedAt,
+            };
+            await AsyncStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify([emergencyItem]));
             console.log('Emergency save successful');
-            return emergencyItems;
+            return [emergencyItem as any];
           }
         } catch (emergencyError) {
           console.error('Emergency save failed:', emergencyError);
@@ -234,15 +279,15 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
       setHistory(newHistory);
       
       if (user) {
-        // Save simplified data to Supabase for history cards only
+        // Save minimal data to Supabase for history cards only
         const supabaseSuccess = await saveToSupabase(item);
         if (!supabaseSuccess) {
           console.warn('Supabase save failed, using local storage fallback');
           await saveToLocalStorage(newHistory);
         } else {
-          console.log('✅ Simplified history data saved to Supabase for card display');
-          // Also save simplified data locally as backup
-          const simplifiedBackup = [{
+          console.log('✅ Minimal history data saved to Supabase for card display');
+          // Also save minimal data locally as backup
+          const minimalBackup = [{
             id: item.id,
             name: item.name,
             location: item.location,
@@ -250,15 +295,19 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             period: item.period,
             image: item.image,
             scannedAt: item.scannedAt,
+            description: '',
+            significance: '',
+            facts: [],
+            scannedImage: '',
           }];
           try {
-            await AsyncStorage.setItem(HISTORY_STORAGE_KEY + '_backup', JSON.stringify(simplifiedBackup));
+            await AsyncStorage.setItem(HISTORY_STORAGE_KEY + '_backup', JSON.stringify(minimalBackup));
           } catch (backupError) {
             console.warn('Backup save failed, but Supabase save was successful:', backupError);
           }
         }
       } else {
-        // Save simplified data to local storage if not authenticated
+        // Save minimal data to local storage if not authenticated
         await saveToLocalStorage(newHistory);
       }
     } catch (error) {
@@ -279,6 +328,12 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
         
         if (error) {
           console.error('Error clearing Supabase history:', error.message || 'Unknown error');
+          console.error('Supabase error details:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint,
+          });
         }
       }
       

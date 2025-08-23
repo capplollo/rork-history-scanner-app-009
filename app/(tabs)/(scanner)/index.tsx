@@ -87,23 +87,24 @@ export default function ScannerScreen() {
       console.log('Detection result:', detectionResult);
       
       // Provide feedback based on the result
-      if (detectionResult.artworkName && detectionResult.artworkName !== 'Unknown Monuments and Art') {
+      if (detectionResult.isRecognized && detectionResult.confidence > 50) {
         setAnalysisStatus("Monuments and art recognized! Finalizing...");
+      } else if (detectionResult.confidence > 30) {
+        setAnalysisStatus("Partial recognition, finalizing...");
       } else {
         setAnalysisStatus("Processing results...");
       }
       
-      // Create a full detailed scan result for display
+      // Create a scan result from the AI detection
       const scanResult = {
         id: Date.now().toString(),
         name: detectionResult.artworkName,
         location: detectionResult.location,
-        country: detectionResult.country,
         period: detectionResult.period,
         description: detectionResult.description,
         significance: detectionResult.significance,
         facts: detectionResult.facts,
-        image: selectedImage,
+        image: selectedImage, // Use the scanned image as the main image
         scannedImage: selectedImage,
         scannedAt: new Date().toISOString(),
         confidence: detectionResult.confidence,
@@ -111,19 +112,9 @@ export default function ScannerScreen() {
         detailedDescription: detectionResult.detailedDescription,
       };
       
-      // Add to history if we have valid data (only simplified version gets stored in database)
-      if (scanResult.name && scanResult.name !== 'Unknown Monuments and Art') {
-        // Create simplified version for database storage
-        const simplifiedForHistory = {
-          id: scanResult.id,
-          name: scanResult.name,
-          location: scanResult.location,
-          country: scanResult.country,
-          period: scanResult.period,
-          image: scanResult.image,
-          scannedAt: scanResult.scannedAt,
-        };
-        await addToHistory(simplifiedForHistory);
+      // Only add to history if monument is recognized
+      if (scanResult.isRecognized && scanResult.confidence && scanResult.confidence > 50) {
+        await addToHistory(scanResult);
       }
       setIsAnalyzing(false);
       setAnalysisStatus("");
@@ -156,7 +147,6 @@ export default function ScannerScreen() {
         id: Date.now().toString(),
         name: "Unknown Monuments and Art",
         location: "Unknown",
-        country: "Unknown",
         period: "Unknown",
         description: "Unable to analyze these monuments and art. The AI service may be temporarily unavailable or the image may not contain recognizable pieces.",
         significance: "Analysis failed due to technical issues or unrecognized monuments and art.",
@@ -173,8 +163,10 @@ export default function ScannerScreen() {
         isRecognized: false,
       };
       
-      // Don't add unknown results to history
-      // Only add to history if we have valid data
+      // Only add to history if monument is recognized
+      if (scanResult.isRecognized && scanResult.confidence && scanResult.confidence > 50) {
+        await addToHistory(scanResult);
+      }
       setIsAnalyzing(false);
       setAnalysisStatus("");
       setSelectedImage(null);

@@ -24,6 +24,7 @@ import { scanResultStore } from "@/services/scanResultStore";
 import { voiceService, VoiceOption } from "@/services/voiceService";
 import VoiceSettings from "@/components/VoiceSettings";
 import { detectMonumentsAndArt, AdditionalInfo } from "@/services/monumentDetectionService";
+import { SupabaseHistoryService } from "@/services/supabaseHistoryService";
 import FormattedText from "@/components/FormattedText";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -104,97 +105,72 @@ export default function ScanResultScreen() {
         setIsRegenerating(true);
         
         try {
-          // Create a basic monument object with available data
-          const basicMonument: HistoryItem = {
-            id: (historyItemId as string) || 'history-item',
-            name: monumentName as string,
-            location: (location as string) || '',
-            period: (period as string) || '',
-            description: '', // Will be regenerated
-            significance: '', // Will be regenerated
-            facts: [], // Will be regenerated
-            image: (scannedImage as string) || '', // Use scanned image as main image
-            scannedImage: (scannedImage as string) || '',
-            scannedAt: new Date().toISOString(),
-            confidence: undefined,
-            isRecognized: true, // Assume recognized since it's in history
-            detailedDescription: undefined, // Will be regenerated
-          };
+          // Use the new Supabase service to regenerate full details
+          const { scanDetails, error } = await SupabaseHistoryService.getFullScanDetails(
+            (historyItemId as string) || 'history-item',
+            monumentName as string,
+            (location as string) || '',
+            '', // country - not available in params
+            (period as string) || '',
+            (scannedImage as string) || ''
+          );
           
-          // Regenerate content via API using the same comprehensive analysis as first-time scans
-          if (basicMonument.scannedImage) {
-            try {
-              console.log('🔄 Starting content regeneration with same prompt as first-time scan...');
-              console.log('Image URI for regeneration:', basicMonument.scannedImage.substring(0, 100) + '...');
-              
-              const detectionResult = await detectMonumentsAndArt(basicMonument.scannedImage);
-              
-              console.log('🔍 Regeneration result:', {
-                name: detectionResult.artworkName,
-                confidence: detectionResult.confidence,
-                hasDetailedDescription: !!detectionResult.detailedDescription,
-                inDepthContextLength: detectionResult.detailedDescription?.inDepthContext?.length || 0
-              });
-              
-              // Update the monument with regenerated content - ensure it's marked as recognized
-              loadedMonument = {
-                ...basicMonument,
-                name: detectionResult.artworkName || basicMonument.name, // Use detected name or fallback to history name
-                description: detectionResult.description,
-                significance: detectionResult.significance,
-                facts: detectionResult.facts,
-                confidence: Math.max(detectionResult.confidence, 80), // Ensure high confidence for history items
-                isRecognized: true, // Force recognized for history items
-                detailedDescription: detectionResult.detailedDescription,
-              };
-              
-              console.log('✅ Content regenerated successfully for:', monumentName);
-              console.log('📝 Detailed description available:', !!loadedMonument.detailedDescription);
-              console.log('📝 Is recognized:', loadedMonument.isRecognized);
-              console.log('📝 Confidence:', loadedMonument.confidence);
-              if (loadedMonument.detailedDescription?.inDepthContext) {
-                console.log('📄 In-depth context length:', loadedMonument.detailedDescription.inDepthContext.length);
-                console.log('📄 In-depth context preview:', loadedMonument.detailedDescription.inDepthContext.substring(0, 200) + '...');
-              }
-            } catch (regenerationError) {
-              console.error('❌ Failed to regenerate content:', regenerationError);
-              console.error('❌ Regeneration error details:', {
-                message: regenerationError instanceof Error ? regenerationError.message : 'Unknown error',
-                stack: regenerationError instanceof Error ? regenerationError.stack : undefined
-              });
-              // Use basic monument data as fallback but mark as recognized
-              loadedMonument = {
-                ...basicMonument,
-                description: `${basicMonument.name} is a significant monument located in ${basicMonument.location}. This historical site represents important cultural heritage from ${basicMonument.period}.`,
-                significance: `This monument holds historical and cultural significance, representing the architectural and artistic achievements of ${basicMonument.period}.`,
-                facts: [
-                  `Located in ${basicMonument.location}`,
-                  `Period: ${basicMonument.period}`,
-                  'Previously scanned and identified',
-                  'Content regeneration in progress'
-                ],
-                confidence: 85, // Set reasonable confidence for history items
-                isRecognized: true, // Ensure it's marked as recognized
-              };
-            }
+          if (scanDetails && !error) {
+            console.log('✅ Content regenerated successfully via Supabase service:', scanDetails.name);
+            console.log('📝 Detailed description available:', !!scanDetails.detailedDescription);
+            console.log('📝 Is recognized:', scanDetails.isRecognized);
+            console.log('📝 Confidence:', scanDetails.confidence);
+            
+            loadedMonument = scanDetails;
           } else {
-            console.warn('⚠️ No image available for regeneration, using basic data');
-            // No image available, use basic data but mark as recognized
+            console.error('❌ Failed to regenerate content via Supabase service:', error);
+            
+            // Fallback to basic monument data
             loadedMonument = {
-              ...basicMonument,
-              description: `${basicMonument.name} is a significant monument located in ${basicMonument.location}. This historical site represents important cultural heritage from ${basicMonument.period}.`,
-              significance: `This monument holds historical and cultural significance, representing the architectural and artistic achievements of ${basicMonument.period}.`,
+              id: (historyItemId as string) || 'history-item',
+              name: monumentName as string,
+              location: (location as string) || '',
+              country: '',
+              period: (period as string) || '',
+              description: `${monumentName} is a significant monument located in ${location}. This historical site represents important cultural heritage from ${period}.`,
+              significance: `This monument holds historical and cultural significance, representing the architectural and artistic achievements of ${period}.`,
               facts: [
-                `Located in ${basicMonument.location}`,
-                `Period: ${basicMonument.period}`,
-                'Previously scanned and identified'
+                `Located in ${location}`,
+                `Period: ${period}`,
+                'Previously scanned and identified',
+                'Content regeneration failed - please try again'
               ],
-              confidence: 85, // Set reasonable confidence for history items
-              isRecognized: true, // Ensure it's marked as recognized
+              image: (scannedImage as string) || '',
+              scannedImage: (scannedImage as string) || '',
+              scannedAt: new Date().toISOString(),
+              confidence: 85,
+              isRecognized: true,
             };
           }
         } catch (error) {
-          console.error('Error setting up regeneration:', error);
+          console.error('Error during content regeneration:', error);
+          
+          // Fallback to basic monument data
+          loadedMonument = {
+            id: (historyItemId as string) || 'history-item',
+            name: monumentName as string,
+            location: (location as string) || '',
+            country: '',
+            period: (period as string) || '',
+            description: `${monumentName} is a significant monument located in ${location}. This historical site represents important cultural heritage from ${period}.`,
+            significance: `This monument holds historical and cultural significance, representing the architectural and artistic achievements of ${period}.`,
+            facts: [
+              `Located in ${location}`,
+              `Period: ${period}`,
+              'Previously scanned and identified',
+              'Content regeneration failed - please try again'
+            ],
+            image: (scannedImage as string) || '',
+            scannedImage: (scannedImage as string) || '',
+            scannedAt: new Date().toISOString(),
+            confidence: 85,
+            isRecognized: true,
+          };
         } finally {
           setIsRegenerating(false);
         }
