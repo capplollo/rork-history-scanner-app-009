@@ -56,6 +56,7 @@ export async function detectMonumentsAndArt(imageUri: string, additionalInfo?: A
       artworkName: 'Unknown Monuments and Art',
       confidence: 0,
       location: 'Unknown',
+      country: 'Unknown',
       period: 'Unknown',
       description: 'Unable to identify these monuments and art. Please try taking a clearer photo or ensure the subject is clearly visible.',
       significance: 'Monuments and art detection failed due to technical issues.',
@@ -105,6 +106,7 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
       messages: messages
