@@ -21,7 +21,14 @@ interface OpenAIResponse {
   }[];
 }
 
-const OPENAI_API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+const OPENAI_API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY || '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';
+
+// Debug logging
+console.log('🔍 Environment Debug:');
+console.log('Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY:', Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY ? 'SET' : 'NOT SET');
+console.log('process.env.EXPO_PUBLIC_OPENAI_API_KEY:', process.env.EXPO_PUBLIC_OPENAI_API_KEY ? 'SET' : 'NOT SET');
+console.log('Final OPENAI_API_KEY:', OPENAI_API_KEY ? 'SET' : 'NOT SET');
+console.log('Constants.expoConfig?.extra keys:', Object.keys(Constants.expoConfig?.extra || {}));
 
 if (!OPENAI_API_KEY) {
   console.warn('OpenAI API key not found. Please set EXPO_PUBLIC_OPENAI_API_KEY in your .env file.');
