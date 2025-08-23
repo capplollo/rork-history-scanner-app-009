@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
 // OpenAI API key (stored securely on server)
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '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';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'YOUR_OPENAI_API_KEY_HERE';
 
 // Health check endpoint
 app.get('/health', (req, res) => {
