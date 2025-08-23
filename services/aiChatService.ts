@@ -1,4 +1,4 @@
-import { callOpenAIWithHistory, callOpenAIText } from './openaiServiceNew';
+import { callOpenAIWithHistory, callOpenAIText } from './aiService';
 
 export interface ChatMessage {
   id: string;

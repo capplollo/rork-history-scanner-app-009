@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
-import { callOpenAIWithImage } from './openaiServiceNew';
+import { callOpenAIWithImage } from './aiService';
 
 export interface DetectionResult {
   artworkName: string;
