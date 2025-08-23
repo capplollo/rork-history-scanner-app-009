@@ -21,7 +21,8 @@ interface OpenAIResponse {
   }[];
 }
 
-const OPENAI_API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY || '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';
+// Temporary hardcoded API key for testing
+const OPENAI_API_KEY = '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';
 
 // Debug logging
 console.log('🔍 Environment Debug:');
@@ -31,6 +32,10 @@ console.log('Final OPENAI_API_KEY:', OPENAI_API_KEY ? 'SET' : 'NOT SET');
 console.log('Constants.expoConfig?.extra keys:', Object.keys(Constants.expoConfig?.extra || {}));
 console.log('Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY length:', Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY?.length || 0);
 console.log('Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY starts with:', Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY?.substring(0, 20) || 'NOT SET');
+console.log('🔑 API Key Debug:');
+console.log('API Key length:', OPENAI_API_KEY.length);
+console.log('API Key starts with:', OPENAI_API_KEY.substring(0, 20));
+console.log('API Key ends with:', OPENAI_API_KEY.substring(OPENAI_API_KEY.length - 10));
 
 if (!OPENAI_API_KEY) {
   console.warn('OpenAI API key not found. Please set EXPO_PUBLIC_OPENAI_API_KEY in your .env file.');
