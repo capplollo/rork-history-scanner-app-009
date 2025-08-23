@@ -41,37 +41,23 @@ export default function ProfileScreen() {
   }, [user, loading]);
 
   const handleSignOut = async () => {
-    console.log('🔐 Settings sign out button pressed');
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Sign Out',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              console.log('🔐 Starting sign out process from settings...');
-              setShowSettings(false); // Close modal first
-              
-              const { error } = await signOut();
-              if (error) {
-                console.error('🔐 Sign out error:', error);
-                Alert.alert('Error', 'Failed to sign out: ' + error.message);
-              } else {
-                console.log('🔐 Sign out successful from settings');
-                // Don't manually navigate - let AuthGuard handle it
-                // The AuthGuard will detect the user is null and redirect to login
-              }
-            } catch (err) {
-              console.error('🔐 Unexpected sign out error:', err);
-              Alert.alert('Error', 'An unexpected error occurred during sign out');
-            }
-          },
-        },
-      ]
-    );
+    try {
+      console.log('🔐 Settings sign out button pressed');
+      setShowSettings(false); // Close modal first
+      
+      const { error } = await signOut();
+      if (error) {
+        console.error('🔐 Sign out error:', error);
+        Alert.alert('Error', 'Failed to sign out: ' + error.message);
+      } else {
+        console.log('🔐 Sign out successful from settings');
+        // Don't manually navigate - let AuthGuard handle it
+        // The AuthGuard will detect the user is null and redirect to login
+      }
+    } catch (err) {
+      console.error('🔐 Unexpected sign out error:', err);
+      Alert.alert('Error', 'An unexpected error occurred during sign out');
+    }
   };
 
   if (!user) {
