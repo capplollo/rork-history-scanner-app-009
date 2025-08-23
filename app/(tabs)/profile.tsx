@@ -138,21 +138,15 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <LinearGradient
-          colors={["#667eea", "#764ba2", "#f093fb"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+          colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
           <View style={styles.profileSection}>
             <View style={styles.profileRow}>
               <View style={styles.avatarContainer}>
-                <LinearGradient
-                  colors={["#ffffff", "#f8fafc"]}
-                  style={styles.avatar}
-                >
-                  <User size={28} color="#667eea" />
-                </LinearGradient>
-                <View style={styles.avatarGlow} />
+                <View style={styles.avatar}>
+                  <User size={24} color="#4f46e5" />
+                </View>
               </View>
               <View style={styles.profileInfo}>
                 <Text style={styles.userName}>{user.user_metadata?.full_name || 'Explorer'}</Text>
@@ -162,7 +156,7 @@ export default function ProfileScreen() {
                 style={styles.settingsButton}
                 onPress={() => setShowSettings(true)}
               >
-                <Settings size={18} color="#ffffff" />
+                <Settings size={16} color="#ffffff" />
               </TouchableOpacity>
             </View>
             
@@ -171,13 +165,9 @@ export default function ProfileScreen() {
                 const Icon = stat.icon;
                 return (
                   <View key={index} style={styles.statBadge}>
-                    <View style={styles.statIconContainer}>
-                      <Icon size={18} color="#667eea" />
-                    </View>
-                    <View style={styles.statTextContainer}>
-                      <Text style={styles.statBadgeValue}>{stat.value}</Text>
-                      <Text style={styles.statBadgeLabel}>{stat.label}</Text>
-                    </View>
+                    <Icon size={14} color="#8B4513" />
+                    <Text style={styles.statBadgeValue}>{stat.value}</Text>
+                    <Text style={styles.statBadgeLabel}>{stat.label}</Text>
                   </View>
                 );
               })}
@@ -413,16 +403,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEFEFE",
   },
   headerGradient: {
-    paddingTop: 24,
-    paddingBottom: 48,
-    paddingHorizontal: 24,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    shadowColor: "#667eea",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 12,
+    paddingTop: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
   },
   profileSection: {
     flex: 1,
@@ -434,37 +417,63 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     position: "relative",
-    marginRight: 4,
   },
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#ffffff",
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
-    borderWidth: 3,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-  },
-  avatarGlow: {
-    position: "absolute",
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    top: -4,
-    left: -4,
-    zIndex: -1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   profileInfo: {
     flex: 1,
   },
   userName: {
-    fontSize: 22,
+    fontSize: 18,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "600",
+    color: "#ffffff",
+    marginBottom: 2,
+  },
+  userEmail: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "rgba(255,255,255,0.8)",
+  },
+
+  statsContainer: {
+    flexDirection: "row",
+    marginTop: 24,
+    gap: 12,
+    justifyContent: "center",
+  },
+  statBadge: {
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  statBadgeValue: {
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -472,89 +481,16 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "700",
     color: "#ffffff",
-    marginBottom: 4,
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
-    letterSpacing: 0.5,
-  },
-  userEmail: {
-    fontSize: 15,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "rgba(255,255,255,0.85)",
-    fontWeight: "400",
-    letterSpacing: 0.3,
-  },
-
-  statsContainer: {
-    flexDirection: "row",
-    marginTop: 32,
-    gap: 16,
-    justifyContent: "center",
-  },
-  statBadge: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 24,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    shadowColor: "rgba(0, 0, 0, 0.1)",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 4,
-    elevation: 3,
-    minWidth: 120,
-  },
-  statIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "rgba(0, 0, 0, 0.1)",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  statTextContainer: {
-    alignItems: "center",
-    flex: 1,
-  },
-  statBadgeValue: {
-    fontSize: 20,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "800",
-    color: "#ffffff",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-    letterSpacing: 0.5,
   },
   statBadgeLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "rgba(255, 255, 255, 0.95)",
-    fontWeight: "600",
-    marginTop: 2,
-    letterSpacing: 0.3,
+    color: "rgba(255, 255, 255, 0.9)",
+    fontWeight: "500",
   },
   section: {
     marginTop: 20,
@@ -781,19 +717,12 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   settingsButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    shadowColor: "rgba(0, 0, 0, 0.1)",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 3,
-    elevation: 2,
   },
   modalContainer: {
     flex: 1,
