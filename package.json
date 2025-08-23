@@ -3,7 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start",
+    "start": "bunx rork start -p fydvtqcj1upvf8jg2d6lf --tunnel",
     "start-web": "bunx rork start -p fydvtqcj1upvf8jg2d6lf --web --tunnel",
     "start-web-dev": "DEBUG=expo* bunx rork start -p fydvtqcj1upvf8jg2d6lf --web --tunnel",
     "lint": "expo lint"
