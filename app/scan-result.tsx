@@ -12,6 +12,7 @@ import {
   Alert,
   TextInput,
   ActivityIndicator,
+  AppState,
 } from "react-native";
 import { useLocalSearchParams, router, useNavigation } from "expo-router";
 import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle, Volume2, VolumeX, Pause, RefreshCw, ChevronDown, ChevronUp } from "lucide-react-native";
@@ -88,8 +89,6 @@ export default function ScanResultScreen() {
       }
     };
     
-    // Import AppState if not already imported
-    const { AppState } = require('react-native');
     const subscription = AppState.addEventListener('change', handleAppStateChange);
     
     return () => {
