@@ -51,6 +51,7 @@ export default function ScanResultScreen() {
   // Cleanup speech when component unmounts or when navigating away
   useEffect(() => {
     return () => {
+      console.log('🧹 Component unmounting - cleaning up voice service');
       // Force cleanup of voice service when component unmounts
       voiceService.forceCleanup().catch(error => {
         console.error('Error during voice cleanup:', error);
@@ -66,9 +67,42 @@ export default function ScanResultScreen() {
   // Additional cleanup when navigation focus changes
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
+      console.log('🧹 Navigation beforeRemove - stopping voice service');
       // Stop voice when navigating away
       voiceService.forceCleanup().catch(error => {
         console.error('Error during navigation voice cleanup:', error);
+      });
+    });
+    
+    return unsubscribe;
+  }, [navigation]);
+  
+  // Additional cleanup when app goes to background
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'background' || nextAppState === 'inactive') {
+        console.log('🧹 App going to background - stopping voice service');
+        voiceService.forceCleanup().catch(error => {
+          console.error('Error during app state change voice cleanup:', error);
+        });
+      }
+    };
+    
+    // Import AppState if not already imported
+    const { AppState } = require('react-native');
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
+  
+  // Additional cleanup when component loses focus
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      console.log('🧹 Component losing focus - stopping voice service');
+      voiceService.forceCleanup().catch(error => {
+        console.error('Error during blur voice cleanup:', error);
       });
     });
     
@@ -523,16 +557,29 @@ export default function ScanResultScreen() {
 
   const handleStop = async () => {
     try {
+      console.log('🛑 User manually stopped voice narration');
       await voiceService.stop();
       setIsPlaying(false);
       setIsPaused(false);
-    } catch {
-      // Silently handle stop errors
+    } catch (error) {
+      console.error('Error stopping voice:', error);
+      // Force cleanup even if stop fails
+      try {
+        await voiceService.forceCleanup();
+      } catch (cleanupError) {
+        console.error('Error during force cleanup:', cleanupError);
+      }
+      setIsPlaying(false);
+      setIsPaused(false);
     }
   };
 
-  const handleGoBack = () => {
+  const handleGoBack = async () => {
     try {
+      // Stop voice before navigating away
+      console.log('🧹 Going back - stopping voice service');
+      await voiceService.forceCleanup();
+      
       // Check if we can go back in the navigation stack
       if (navigation.canGoBack()) {
         router.back();

@@ -41,6 +41,7 @@ export default function ProfileScreen() {
   }, [user, loading]);
 
   const handleSignOut = async () => {
+    console.log('🔐 Settings sign out button pressed');
     Alert.alert(
       'Sign Out',
       'Are you sure you want to sign out?',
@@ -51,20 +52,20 @@ export default function ProfileScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              console.log('Starting sign out process...');
+              console.log('🔐 Starting sign out process from settings...');
               setShowSettings(false); // Close modal first
               
               const { error } = await signOut();
               if (error) {
-                console.error('Sign out error:', error);
+                console.error('🔐 Sign out error:', error);
                 Alert.alert('Error', 'Failed to sign out: ' + error.message);
               } else {
-                console.log('Sign out successful');
+                console.log('🔐 Sign out successful from settings');
                 // Don't manually navigate - let AuthGuard handle it
                 // The AuthGuard will detect the user is null and redirect to login
               }
             } catch (err) {
-              console.error('Unexpected sign out error:', err);
+              console.error('🔐 Unexpected sign out error:', err);
               Alert.alert('Error', 'An unexpected error occurred during sign out');
             }
           },
@@ -289,14 +290,20 @@ export default function ProfileScreen() {
         visible={showSettings}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={() => setShowSettings(false)}
+        onRequestClose={() => {
+          console.log('🔐 Modal onRequestClose triggered');
+          setShowSettings(false);
+        }}
       >
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Settings</Text>
             <TouchableOpacity 
               style={styles.closeButton}
-              onPress={() => setShowSettings(false)}
+              onPress={() => {
+                console.log('🔐 Close button pressed');
+                setShowSettings(false);
+              }}
             >
               <X size={24} color="#64748b" />
             </TouchableOpacity>
@@ -310,7 +317,10 @@ export default function ProfileScreen() {
                   <TouchableOpacity
                     key={index}
                     style={styles.menuItem}
-                    onPress={item.action}
+                    onPress={() => {
+                      console.log('🔐 Menu item pressed:', item.label);
+                      item.action();
+                    }}
                   >
                     <View style={styles.menuItemLeft}>
                       <View style={styles.menuIconContainer}>
@@ -322,6 +332,17 @@ export default function ProfileScreen() {
                   </TouchableOpacity>
                 );
               })}
+              
+              {/* Test sign out button directly in modal */}
+              <TouchableOpacity
+                style={styles.testSignOutButton}
+                onPress={() => {
+                  console.log('🔐 Test sign out button in modal pressed');
+                  testSignOut();
+                }}
+              >
+                <Text style={styles.testSignOutText}>TEST SIGN OUT IN MODAL</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </SafeAreaView>
@@ -778,6 +799,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 20,
+    backgroundColor: '#ffffff',
   },
   emptyHistoryContainer: {
     alignItems: "center",
