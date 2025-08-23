@@ -63,22 +63,66 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
       });
 
       if (error) {
-        console.error('Auth signup error:', error);
+        console.error('Auth signup error:', {
+          message: error.message,
+          status: error.status,
+          name: error.name,
+          details: JSON.stringify(error, null, 2)
+        });
         return { error };
       }
 
       if (data.user) {
-        console.log('User created successfully, ID:', data.user.id);
-        console.log('Email confirmation required:', !data.user.email_confirmed_at);
-        console.log('Profile will be created automatically by database trigger');
+        console.log('User created successfully:', {
+          id: data.user.id,
+          email: data.user.email,
+          emailConfirmed: !!data.user.email_confirmed_at,
+          createdAt: data.user.created_at
+        });
         
-        // Wait a moment for the trigger to complete
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Check if profile was created by trigger
+        try {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('id, customer_id')
+            .eq('id', data.user.id)
+            .single();
+            
+          if (profileError) {
+            console.warn('Profile not found immediately after signup:', profileError.message);
+            // Wait a bit longer for the trigger to complete
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Try again
+            const { data: retryProfile, error: retryError } = await supabase
+              .from('profiles')
+              .select('id, customer_id')
+              .eq('id', data.user.id)
+              .single();
+              
+            if (retryError) {
+              console.error('Profile creation failed even after retry:', retryError);
+              // The trigger might have failed, but we still return success
+              // The user can still sign up, profile creation can be handled later
+            } else {
+              console.log('Profile created successfully on retry:', retryProfile);
+            }
+          } else {
+            console.log('Profile created successfully:', profile);
+          }
+        } catch (profileCheckError) {
+          console.warn('Error checking profile creation:', profileCheckError);
+          // Don't fail the signup process if we can't check the profile
+        }
       }
 
       return { error: null };
     } catch (error) {
-      console.error('Signup error:', error instanceof Error ? error.message : String(error));
+      console.error('Unexpected signup error:', {
+        message: error instanceof Error ? error.message : String(error),
+        type: typeof error,
+        stack: error instanceof Error ? error.stack : undefined
+      });
       return { error: error as AuthError };
     } finally {
       setLoading(false);

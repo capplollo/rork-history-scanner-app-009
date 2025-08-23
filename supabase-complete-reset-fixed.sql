@@ -101,13 +101,27 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO public.profiles (id, email, full_name, customer_id)
-    VALUES (
-        NEW.id, 
-        NEW.email, 
-        COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-        generate_customer_id()
-    );
+    -- Log the trigger execution for debugging
+    RAISE LOG 'Creating profile for user: %', NEW.id;
+    
+    -- Insert the profile with error handling
+    BEGIN
+        INSERT INTO public.profiles (id, email, full_name, customer_id)
+        VALUES (
+            NEW.id, 
+            NEW.email, 
+            COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+            generate_customer_id()
+        );
+        
+        RAISE LOG 'Profile created successfully for user: %', NEW.id;
+    EXCEPTION
+        WHEN OTHERS THEN
+            RAISE LOG 'Error creating profile for user %: %', NEW.id, SQLERRM;
+            -- Re-raise the exception to prevent user creation if profile creation fails
+            RAISE;
+    END;
+    
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
