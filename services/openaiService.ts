@@ -21,7 +21,8 @@ interface OpenAIResponse {
   }[];
 }
 
-const OPENAI_API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+// Temporary hardcoded API key for Rork environment
+const OPENAI_API_KEY = Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY || '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';
 
 // Debug logging
 console.log('🔍 Environment Debug:');
