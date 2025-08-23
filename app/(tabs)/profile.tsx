@@ -67,7 +67,9 @@ export default function ProfileScreen() {
   const visitedCountries = useMemo(() => {
     const countries = new Set<string>();
     history.forEach(item => {
-      if (item.location) {
+      if (item.country) {
+        countries.add(item.country);
+      } else if (item.location) {
         // Extract country from location string (assuming format like "City, Country" or "Country")
         const parts = item.location.split(',');
         const country = parts[parts.length - 1].trim();
@@ -83,14 +85,12 @@ export default function ProfileScreen() {
     { 
       label: "Discoveries", 
       value: history.length.toString(),
-      icon: Camera,
-      description: "Monuments and art explored"
+      icon: Camera
     },
     { 
       label: "Destinations", 
       value: visitedCountries.toString(),
-      icon: Globe,
-      description: "Countries visited"
+      icon: Globe
     },
   ];
 
@@ -135,11 +135,10 @@ export default function ProfileScreen() {
             return (
               <View key={index} style={styles.statCard}>
                 <View style={styles.statIconContainer}>
-                  <Icon size={24} color="#8B4513" />
+                  <Icon size={16} color="#8B4513" />
                 </View>
                 <Text style={styles.statValue}>{stat.value}</Text>
                 <Text style={styles.statLabel}>{stat.label}</Text>
-                <Text style={styles.statDescription}>{stat.description}</Text>
               </View>
             );
           })}
@@ -388,27 +387,27 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     backgroundColor: "#ffffff",
-    padding: 20,
-    borderRadius: 16,
+    padding: 16,
+    borderRadius: 12,
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-    gap: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+    gap: 6,
   },
   statIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: "#f8f4f0",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: 2,
   },
   statValue: {
-    fontSize: 28,
+    fontSize: 20,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -418,24 +417,14 @@ const styles = StyleSheet.create({
     color: "#2C3E50",
   },
   statLabel: {
-    fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#2C3E50",
-    fontWeight: "500",
-  },
-  statDescription: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     color: "#64748b",
-    fontWeight: "400",
+    fontWeight: "500",
     textAlign: "center",
   },
   section: {
