@@ -227,7 +227,10 @@ export default function ProfileScreen() {
           )}
           
           {!historyLoading && history.length > 6 && (
-            <TouchableOpacity style={styles.viewAllButton}>
+            <TouchableOpacity 
+              style={styles.viewAllButton}
+              onPress={() => router.push('/(tabs)/history')}
+            >
               <Text style={styles.viewAllButtonText}>View All Discoveries</Text>
               <ChevronRight size={16} color="#8B4513" />
             </TouchableOpacity>
