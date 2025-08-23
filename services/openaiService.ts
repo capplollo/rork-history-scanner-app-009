@@ -32,9 +32,9 @@ console.log('Constants.expoConfig?.extra keys:', Object.keys(Constants.expoConfi
 console.log('Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY length:', Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY?.length || 0);
 console.log('Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY starts with:', Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENAI_API_KEY?.substring(0, 20) || 'NOT SET');
 console.log('🔑 API Key Debug:');
-console.log('API Key length:', OPENAI_API_KEY.length);
-console.log('API Key starts with:', OPENAI_API_KEY.substring(0, 20));
-console.log('API Key ends with:', OPENAI_API_KEY.substring(OPENAI_API_KEY.length - 10));
+console.log('API Key length:', OPENAI_API_KEY?.length || 0);
+console.log('API Key starts with:', OPENAI_API_KEY?.substring(0, 20) || 'NOT SET');
+console.log('API Key ends with:', OPENAI_API_KEY?.substring(OPENAI_API_KEY?.length - 10) || 'NOT SET');
 
 if (!OPENAI_API_KEY) {
   console.warn('OpenAI API key not found. Please set EXPO_PUBLIC_OPENAI_API_KEY in your .env file.');
