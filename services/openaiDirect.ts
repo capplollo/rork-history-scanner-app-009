@@ -1,5 +1,9 @@
 // DIRECT OPENAI SERVICE - Fresh file to bypass caching
-const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY_HERE';
+const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+
+if (!OPENAI_API_KEY) {
+  throw new Error('OpenAI API key not configured. Please add EXPO_PUBLIC_OPENAI_API_KEY to your .env file.');
+}
 
 interface OpenAIMessage {
   role: 'system' | 'user' | 'assistant';
@@ -23,8 +27,8 @@ interface OpenAIResponse {
 export async function callOpenAI(messages: OpenAIMessage[]): Promise<string> {
   try {
     console.log('🔑 DIRECT SERVICE - Using fresh API key');
-    console.log('🔑 API Key starts with:', OPENAI_API_KEY.substring(0, 20));
-    console.log('🔑 API Key ends with:', OPENAI_API_KEY.substring(OPENAI_API_KEY.length - 10));
+    console.log('🔑 API Key starts with:', OPENAI_API_KEY!.substring(0, 20));
+    console.log('🔑 API Key ends with:', OPENAI_API_KEY!.substring(OPENAI_API_KEY!.length - 10));
     
     console.log('Sending request to OpenAI API...');
     
@@ -32,7 +36,7 @@ export async function callOpenAI(messages: OpenAIMessage[]): Promise<string> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY!}`,
       },
       body: JSON.stringify({
         model: 'gpt-4o',
