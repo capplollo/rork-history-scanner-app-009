@@ -122,23 +122,25 @@ class ScanResultStore {
         .map((fact: string) => fact.length > 120 ? fact.substring(0, 120) + '...' : fact);
     }
     
-    // Remove or limit image data that might be too large
-    if (optimized.image && optimized.image.startsWith('data:')) {
-      // If it's a base64 image, remove it to prevent size issues
-      console.log('🖼️ Removing base64 image data to prevent size issues');
+    // Only remove base64 image data that might be too large, preserve file URIs
+    if (optimized.image && optimized.image.startsWith('data:image/') && optimized.image.length > 10000) {
+      // Only remove very large base64 images to prevent size issues
+      console.log('🖼️ Removing large base64 image data to prevent size issues');
       optimized.image = '';
     }
     
-    if (optimized.scannedImage && optimized.scannedImage.startsWith('data:')) {
-      // If it's a base64 image, remove it to prevent size issues
-      console.log('🖼️ Removing base64 scannedImage data to prevent size issues');
+    if (optimized.scannedImage && optimized.scannedImage.startsWith('data:image/') && optimized.scannedImage.length > 10000) {
+      // Only remove very large base64 scannedImage data to prevent size issues
+      console.log('🖼️ Removing large base64 scannedImage data to prevent size issues');
       optimized.scannedImage = '';
     }
     
     // Log image URLs for debugging
     console.log('🖼️ Image URLs after optimization:', {
       image: optimized.image ? optimized.image.substring(0, 100) + '...' : 'empty',
-      scannedImage: optimized.scannedImage ? optimized.scannedImage.substring(0, 100) + '...' : 'empty'
+      scannedImage: optimized.scannedImage ? optimized.scannedImage.substring(0, 100) + '...' : 'empty',
+      imageType: optimized.image ? (optimized.image.startsWith('data:') ? 'base64' : 'file-uri') : 'empty',
+      scannedImageType: optimized.scannedImage ? (optimized.scannedImage.startsWith('data:') ? 'base64' : 'file-uri') : 'empty'
     });
     
     return optimized;
