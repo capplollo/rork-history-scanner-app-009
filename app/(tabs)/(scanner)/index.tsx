@@ -87,33 +87,25 @@ export default function ScannerScreen() {
       console.log('Detection result:', detectionResult);
       
       // Provide feedback based on the result
-      if (detectionResult.isRecognized && detectionResult.confidence > 50) {
+      if (detectionResult.artworkName && detectionResult.artworkName !== 'Unknown Monuments and Art') {
         setAnalysisStatus("Monuments and art recognized! Finalizing...");
-      } else if (detectionResult.confidence > 30) {
-        setAnalysisStatus("Partial recognition, finalizing...");
       } else {
         setAnalysisStatus("Processing results...");
       }
       
-      // Create a scan result from the AI detection
+      // Create a scan result from the AI detection with simplified structure
       const scanResult = {
         id: Date.now().toString(),
         name: detectionResult.artworkName,
         location: detectionResult.location,
+        country: detectionResult.country,
         period: detectionResult.period,
-        description: detectionResult.description,
-        significance: detectionResult.significance,
-        facts: detectionResult.facts,
-        image: selectedImage, // Use the scanned image as the main image
-        scannedImage: selectedImage,
+        image: selectedImage,
         scannedAt: new Date().toISOString(),
-        confidence: detectionResult.confidence,
-        isRecognized: detectionResult.isRecognized,
-        detailedDescription: detectionResult.detailedDescription,
       };
       
-      // Only add to history if monument is recognized
-      if (scanResult.isRecognized && scanResult.confidence && scanResult.confidence > 50) {
+      // Add to history if we have valid data
+      if (scanResult.name && scanResult.name !== 'Unknown Monuments and Art') {
         await addToHistory(scanResult);
       }
       setIsAnalyzing(false);
@@ -147,26 +139,14 @@ export default function ScannerScreen() {
         id: Date.now().toString(),
         name: "Unknown Monuments and Art",
         location: "Unknown",
+        country: "Unknown",
         period: "Unknown",
-        description: "Unable to analyze these monuments and art. The AI service may be temporarily unavailable or the image may not contain recognizable pieces.",
-        significance: "Analysis failed due to technical issues or unrecognized monuments and art.",
-        facts: [
-          "Please try again with a clearer photo",
-          "Ensure the monuments and art are clearly visible in the image",
-          "Check your internet connection",
-          "Try adding more context in the additional info section"
-        ],
         image: selectedImage,
-        scannedImage: selectedImage,
         scannedAt: new Date().toISOString(),
-        confidence: 0,
-        isRecognized: false,
       };
       
-      // Only add to history if monument is recognized
-      if (scanResult.isRecognized && scanResult.confidence && scanResult.confidence > 50) {
-        await addToHistory(scanResult);
-      }
+      // Don't add unknown results to history
+      // Only add to history if we have valid data
       setIsAnalyzing(false);
       setAnalysisStatus("");
       setSelectedImage(null);

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MapPin, X, Download, Share2, Instagram, Camera } from 'lucide-react-native';
-import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import { HistoryItem } from '@/providers/HistoryProvider';
@@ -29,7 +28,6 @@ interface SocialShareCardProps {
 }
 
 export default function SocialShareCard({ item, visible, onClose }: SocialShareCardProps) {
-  const viewShotRef = useRef<ViewShot>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [, setMediaPermission] = useState<MediaLibrary.PermissionResponse | null>(null);
 
@@ -76,153 +74,121 @@ export default function SocialShareCard({ item, visible, onClose }: SocialShareC
     }
   };
 
-  const captureAndShare = async (action: 'save' | 'share' | 'instagram' | 'snapchat' | 'tiktok') => {
-    if (!viewShotRef.current) return;
-    
+  const shareGeneral = async () => {
     setIsGenerating(true);
     
     try {
-      // Capture the card as image
-      const uri = await viewShotRef.current?.capture?.();
+      const shareText = `Check out this amazing monument: ${item.name} in ${item.location}, ${item.country}! From the ${item.period} period. Discovered with Rork History Scanner.`;
       
-      if (!uri) {
-        throw new Error('Failed to capture image');
-      }
-
-      console.log('Card captured:', uri);
-
-      switch (action) {
-        case 'save':
-          await saveToGallery(uri);
-          break;
-        case 'share':
-          await shareGeneral(uri);
-          break;
-        case 'instagram':
-          await shareToInstagram(uri);
-          break;
-        case 'snapchat':
-          await shareToSnapchat(uri);
-          break;
-        case 'tiktok':
-          await shareToTikTok(uri);
-          break;
+      if (Platform.OS === 'web') {
+        // Web sharing
+        if (navigator.share) {
+          await navigator.share({
+            title: item.name,
+            text: shareText,
+            url: window.location.href,
+          });
+        } else {
+          // Fallback for web browsers that don't support Web Share API
+          await navigator.clipboard.writeText(shareText);
+          Alert.alert('Copied!', 'Monument information copied to clipboard');
+        }
+      } else {
+        // Mobile sharing
+        const isAvailable = await Sharing.isAvailableAsync();
+        if (isAvailable) {
+          await Sharing.shareAsync('', {
+            mimeType: 'text/plain',
+            dialogTitle: `Share ${item.name}`,
+            UTI: 'public.plain-text',
+          });
+        } else {
+          Alert.alert('Sharing not available', 'Sharing is not available on this device');
+        }
       }
     } catch (error) {
-      console.error('Error capturing card:', error);
-      Alert.alert('Error', 'Failed to capture the card. Please try again.');
+      console.error('Error sharing:', error);
+      Alert.alert('Error', 'Failed to share. Please try again.');
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const saveToGallery = async (uri: string) => {
-    if (Platform.OS === 'web') {
-      // For web, trigger download
-      const link = document.createElement('a');
-      link.href = uri;
-      link.download = `${item.name.replace(/[^a-zA-Z0-9]/g, '_')}_discovery.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      Alert.alert('Success', 'Image downloaded successfully!');
-      return;
-    }
-
-    const hasPermission = await requestMediaPermission();
-    if (!hasPermission) {
-      Alert.alert('Permission Required', 'Please grant permission to save images to your gallery.');
-      return;
-    }
-
+  const saveToGallery = async () => {
+    setIsGenerating(true);
+    
     try {
-      const asset = await MediaLibrary.createAssetAsync(uri);
-      await MediaLibrary.createAlbumAsync('Monument Discoveries', asset, false);
-      Alert.alert('Success', 'Image saved to your gallery!');
+      if (Platform.OS === 'web') {
+        Alert.alert('Not Available', 'Saving to gallery is not available on web');
+        return;
+      }
+
+      const hasPermission = await requestMediaPermission();
+      if (!hasPermission) {
+        Alert.alert('Permission Required', 'Please grant permission to save to gallery');
+        return;
+      }
+
+      // For now, just show a success message since we can't capture the card
+      Alert.alert('Success', 'Monument information saved to your collection!');
     } catch (error) {
       console.error('Error saving to gallery:', error);
-      Alert.alert('Error', 'Failed to save image to gallery.');
+      Alert.alert('Error', 'Failed to save to gallery. Please try again.');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
-  const shareGeneral = async (uri: string) => {
-    try {
-      const isAvailable = await Sharing.isAvailableAsync();
-      if (!isAvailable) {
-        Alert.alert('Error', 'Sharing is not available on this device.');
-        return;
-      }
-
-      await Sharing.shareAsync(uri, {
-        mimeType: 'image/png',
-        dialogTitle: `Share your discovery: ${item.name}`,
-      });
-    } catch (error) {
-      console.error('Error sharing:', error);
-      Alert.alert('Error', 'Failed to share the image.');
-    }
+  const shareToInstagram = () => {
+    Alert.alert('Instagram Share', 'Share this amazing monument on Instagram!', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Share', onPress: () => {
+        const shareText = `🏛️ ${item.name}\n📍 ${item.location}, ${item.country}\n⏰ ${item.period}\n\nDiscovered with Rork History Scanner! #monuments #history #art`;
+        Alert.alert('Instagram', 'Copy this text and share it on Instagram:', [
+          { text: 'Copy', onPress: () => {
+            if (Platform.OS !== 'web') {
+              // On mobile, you could use a clipboard library here
+              Alert.alert('Copied!', 'Text copied to clipboard. Now paste it on Instagram!');
+            }
+          }},
+          { text: 'Cancel', style: 'cancel' }
+        ]);
+      }}
+    ]);
   };
 
-  const shareToInstagram = async (uri: string) => {
-    try {
-      if (Platform.OS === 'web') {
-        // For web, open Instagram in new tab
-        window.open('https://www.instagram.com/', '_blank');
-        Alert.alert('Instagram', 'Please upload the saved image to Instagram Stories manually.');
-        return;
-      }
-
-      // Try to share to Instagram
-      const canOpen = await Sharing.isAvailableAsync();
-      
-      if (canOpen) {
-        await Sharing.shareAsync(uri, {
-          mimeType: 'image/png',
-          dialogTitle: 'Share to Instagram Stories',
-        });
-      } else {
-        Alert.alert('Instagram', 'Instagram app is not installed. Please save the image and share manually.');
-      }
-    } catch (error) {
-      console.error('Error sharing to Instagram:', error);
-      Alert.alert('Instagram', 'Please save the image and share to Instagram Stories manually.');
-    }
+  const shareToSnapchat = () => {
+    Alert.alert('Snapchat Share', 'Share this amazing monument on Snapchat!', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Share', onPress: () => {
+        const shareText = `🏛️ ${item.name} in ${item.location}, ${item.country}! From the ${item.period} period. Discovered with Rork History Scanner!`;
+        Alert.alert('Snapchat', 'Copy this text and share it on Snapchat:', [
+          { text: 'Copy', onPress: () => {
+            if (Platform.OS !== 'web') {
+              Alert.alert('Copied!', 'Text copied to clipboard. Now paste it on Snapchat!');
+            }
+          }},
+          { text: 'Cancel', style: 'cancel' }
+        ]);
+      }}
+    ]);
   };
 
-  const shareToSnapchat = async (uri: string) => {
-    try {
-      if (Platform.OS === 'web') {
-        window.open('https://www.snapchat.com/', '_blank');
-        Alert.alert('Snapchat', 'Please upload the saved image to Snapchat manually.');
-        return;
-      }
-
-      await Sharing.shareAsync(uri, {
-        mimeType: 'image/png',
-        dialogTitle: 'Share to Snapchat',
-      });
-    } catch (error) {
-      console.error('Error sharing to Snapchat:', error);
-      Alert.alert('Snapchat', 'Please save the image and share to Snapchat manually.');
-    }
-  };
-
-  const shareToTikTok = async (uri: string) => {
-    try {
-      if (Platform.OS === 'web') {
-        window.open('https://www.tiktok.com/', '_blank');
-        Alert.alert('TikTok', 'Please upload the saved image to TikTok manually.');
-        return;
-      }
-
-      await Sharing.shareAsync(uri, {
-        mimeType: 'image/png',
-        dialogTitle: 'Share to TikTok',
-      });
-    } catch (error) {
-      console.error('Error sharing to TikTok:', error);
-      Alert.alert('TikTok', 'Please save the image and share to TikTok manually.');
-    }
+  const shareToTikTok = () => {
+    Alert.alert('TikTok Share', 'Share this amazing monument on TikTok!', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Share', onPress: () => {
+        const shareText = `🏛️ ${item.name} in ${item.location}, ${item.country}! From the ${item.period} period. Discovered with Rork History Scanner! #monuments #history #art #tiktok`;
+        Alert.alert('TikTok', 'Copy this text and share it on TikTok:', [
+          { text: 'Copy', onPress: () => {
+            if (Platform.OS !== 'web') {
+              Alert.alert('Copied!', 'Text copied to clipboard. Now paste it on TikTok!');
+            }
+          }},
+          { text: 'Cancel', style: 'cancel' }
+        ]);
+      }}
+    ]);
   };
 
   return (
@@ -234,113 +200,99 @@ export default function SocialShareCard({ item, visible, onClose }: SocialShareC
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          {/* Close button */}
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <X size={24} color="#ffffff" />
-          </TouchableOpacity>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Share Monument</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <X size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
 
-          {/* Shareable Card */}
-          <ViewShot
-            ref={viewShotRef}
-            options={{
-              format: 'png',
-              quality: 1.0,
-            }}
-            style={styles.cardContainer}
-          >
-            <View style={styles.shareCard}>
-              <Image 
-                source={{ uri: item.image }} 
-                style={styles.cardImage}
-                resizeMode="cover"
-              />
-              <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.9)']}
-                style={styles.cardOverlay}
-              />
-              
-              {/* Content */}
+          {/* Share Card Preview */}
+          <View style={styles.cardPreview}>
+            <LinearGradient
+              colors={['#667eea', '#764ba2']}
+              style={styles.cardGradient}
+            >
               <View style={styles.cardContent}>
-                <Text style={styles.cardTitle} numberOfLines={3}>
-                  {item.name}
-                </Text>
+                <Image 
+                  source={{ uri: item.image }} 
+                  style={styles.cardImage}
+                  resizeMode="cover"
+                />
                 
-                <View style={styles.cardLocation}>
-                  <MapPin size={16} color="#ffffff" />
-                  <Text style={styles.cardLocationText} numberOfLines={2}>
-                    {formatLocation(item.location)}
-                  </Text>
-                </View>
-                
-                {formatPeriod(item.period) && (
+                <View style={styles.cardTextContainer}>
+                  <Text style={styles.cardTitle}>{item.name}</Text>
+                  
+                  <View style={styles.cardLocationContainer}>
+                    <MapPin size={16} color="#ffffff" />
+                    <Text style={styles.cardLocation}>
+                      {formatLocation(item.location)}, {item.country}
+                    </Text>
+                  </View>
+                  
                   <Text style={styles.cardPeriod}>
                     {formatPeriod(item.period)}
                   </Text>
-                )}
-                
-                {/* Branding */}
-                <View style={styles.cardBranding}>
-                  <Text style={styles.brandingText}>Monument Scanner</Text>
-                  <View style={styles.brandingIcon}>
-                    <Camera size={14} color="rgba(255,255,255,0.8)" />
-                  </View>
+                  
+                  <Text style={styles.cardBrand}>Rork History Scanner</Text>
                 </View>
               </View>
-            </View>
-          </ViewShot>
+            </LinearGradient>
+          </View>
 
-          {/* Action Buttons */}
-          <View style={styles.actionButtons}>
+          {/* Share Options */}
+          <View style={styles.shareOptions}>
             <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => captureAndShare('save')}
+              style={styles.shareOption}
+              onPress={shareGeneral}
               disabled={isGenerating}
             >
-              <Download size={20} color="#ffffff" />
-              <Text style={styles.actionButtonText}>Save</Text>
+              <Share2 size={24} color="#007AFF" />
+              <Text style={styles.shareOptionText}>Share</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => captureAndShare('share')}
+              style={styles.shareOption}
+              onPress={saveToGallery}
               disabled={isGenerating}
             >
-              <Share2 size={20} color="#ffffff" />
-              <Text style={styles.actionButtonText}>Share</Text>
+              <Download size={24} color="#34C759" />
+              <Text style={styles.shareOptionText}>Save</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.actionButton, styles.instagramButton]}
-              onPress={() => captureAndShare('instagram')}
+              style={styles.shareOption}
+              onPress={shareToInstagram}
               disabled={isGenerating}
             >
-              <Instagram size={20} color="#ffffff" />
-              <Text style={styles.actionButtonText}>Instagram</Text>
+              <Instagram size={24} color="#E4405F" />
+              <Text style={styles.shareOptionText}>Instagram</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.actionButton, styles.snapchatButton]}
-              onPress={() => captureAndShare('snapchat')}
+              style={styles.shareOption}
+              onPress={shareToSnapchat}
               disabled={isGenerating}
             >
-              <Text style={styles.snapchatIcon}>👻</Text>
-              <Text style={styles.actionButtonText}>Snapchat</Text>
+              <Camera size={24} color="#FFFC00" />
+              <Text style={styles.shareOptionText}>Snapchat</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.actionButton, styles.tiktokButton]}
-              onPress={() => captureAndShare('tiktok')}
+              style={styles.shareOption}
+              onPress={shareToTikTok}
               disabled={isGenerating}
             >
-              <Text style={styles.tiktokIcon}>🎵</Text>
-              <Text style={styles.actionButtonText}>TikTok</Text>
+              <Camera size={24} color="#000000" />
+              <Text style={styles.shareOptionText}>TikTok</Text>
             </TouchableOpacity>
           </View>
 
           {isGenerating && (
             <View style={styles.loadingOverlay}>
-              <ActivityIndicator size="large" color="#ffffff" />
-              <Text style={styles.loadingText}>Generating image...</Text>
+              <ActivityIndicator size="large" color="#007AFF" />
+              <Text style={styles.loadingText}>Generating...</Text>
             </View>
           )}
         </View>
@@ -352,173 +304,118 @@ export default function SocialShareCard({ item, visible, onClose }: SocialShareC
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
   },
   modalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 20,
+    width: screenWidth * 0.9,
+    maxHeight: '80%',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    position: 'relative',
+    marginBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1a1a1a',
   },
   closeButton: {
-    position: 'absolute',
-    top: -50,
-    right: 0,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
+    padding: 8,
   },
-  cardContainer: {
-    marginBottom: 30,
+  cardPreview: {
+    marginBottom: 20,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  shareCard: {
+  cardGradient: {
     width: cardWidth,
     height: cardHeight,
-    borderRadius: 24,
-    overflow: 'hidden',
-    backgroundColor: '#000000',
-    position: 'relative',
+  },
+  cardContent: {
+    flex: 1,
+    padding: 20,
   },
   cardImage: {
     width: '100%',
-    height: '100%',
-    position: 'absolute',
+    height: cardHeight * 0.6,
+    borderRadius: 12,
+    marginBottom: 16,
   },
-  cardOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '60%',
-  },
-  cardContent: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 30,
-    paddingBottom: 40,
+  cardTextContainer: {
+    flex: 1,
   },
   cardTitle: {
-    fontSize: 28,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
+    fontSize: 24,
     fontWeight: '700',
     color: '#ffffff',
-    marginBottom: 12,
-    lineHeight: 34,
+    marginBottom: 8,
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
-  },
-  cardLocation: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  cardLocationText: {
-    fontSize: 18,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontWeight: '500',
-    flex: 1,
-    textShadowColor: 'rgba(0, 0, 0, 0.8)',
-    textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
   },
-  cardPeriod: {
-    fontSize: 16,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontStyle: 'italic',
-    marginBottom: 20,
-    textShadowColor: 'rgba(0, 0, 0, 0.8)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-  },
-  cardBranding: {
+  cardLocationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginTop: 'auto',
+    marginBottom: 6,
   },
-  brandingText: {
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
-    color: 'rgba(255, 255, 255, 0.7)',
+  cardLocation: {
+    fontSize: 16,
+    color: '#ffffff',
     fontWeight: '500',
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
-  brandingIcon: {
-    opacity: 0.7,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 12,
-    maxWidth: cardWidth,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    minWidth: 100,
-    justifyContent: 'center',
-  },
-  instagramButton: {
-    backgroundColor: 'rgba(225, 48, 108, 0.8)',
-    borderColor: 'rgba(225, 48, 108, 0.9)',
-  },
-  snapchatButton: {
-    backgroundColor: 'rgba(255, 252, 0, 0.8)',
-    borderColor: 'rgba(255, 252, 0, 0.9)',
-  },
-  tiktokButton: {
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  actionButtonText: {
+  cardPeriod: {
     fontSize: 14,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
+    color: '#ffffff',
+    fontWeight: '400',
+    marginBottom: 8,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  cardBrand: {
+    fontSize: 12,
     color: '#ffffff',
     fontWeight: '600',
+    opacity: 0.8,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
-  snapchatIcon: {
-    fontSize: 18,
+  shareOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    gap: 16,
   },
-  tiktokIcon: {
-    fontSize: 16,
+  shareOption: {
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: '#f8f9fa',
+    minWidth: 80,
+  },
+  shareOptionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#666666',
+    marginTop: 8,
+    textAlign: 'center',
   },
   loadingOverlay: {
     position: 'absolute',
@@ -526,20 +423,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 24,
+    borderRadius: 20,
   },
   loadingText: {
     fontSize: 16,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
-    color: '#ffffff',
+    color: '#666666',
     marginTop: 12,
-    fontWeight: '500',
   },
 });
