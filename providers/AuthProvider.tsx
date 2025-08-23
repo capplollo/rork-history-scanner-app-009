@@ -49,7 +49,7 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
         password,
         options: {
           data: {
-            full_name: fullName,
+            full_name: fullName || '',
           },
         },
       });
@@ -62,6 +62,9 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
       if (data.user) {
         console.log('User created successfully, ID:', data.user.id);
         console.log('Profile will be created automatically by database trigger');
+        
+        // Wait a moment for the trigger to complete
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
       return { error: null };
