@@ -93,20 +93,37 @@ export default function ScannerScreen() {
         setAnalysisStatus("Processing results...");
       }
       
-      // Create a scan result from the AI detection with simplified structure
+      // Create a full detailed scan result for display
       const scanResult = {
         id: Date.now().toString(),
         name: detectionResult.artworkName,
         location: detectionResult.location,
         country: detectionResult.country,
         period: detectionResult.period,
+        description: detectionResult.description,
+        significance: detectionResult.significance,
+        facts: detectionResult.facts,
         image: selectedImage,
+        scannedImage: selectedImage,
         scannedAt: new Date().toISOString(),
+        confidence: detectionResult.confidence,
+        isRecognized: detectionResult.isRecognized,
+        detailedDescription: detectionResult.detailedDescription,
       };
       
-      // Add to history if we have valid data
+      // Add to history if we have valid data (only simplified version gets stored in database)
       if (scanResult.name && scanResult.name !== 'Unknown Monuments and Art') {
-        await addToHistory(scanResult);
+        // Create simplified version for database storage
+        const simplifiedForHistory = {
+          id: scanResult.id,
+          name: scanResult.name,
+          location: scanResult.location,
+          country: scanResult.country,
+          period: scanResult.period,
+          image: scanResult.image,
+          scannedAt: scanResult.scannedAt,
+        };
+        await addToHistory(simplifiedForHistory);
       }
       setIsAnalyzing(false);
       setAnalysisStatus("");
@@ -141,8 +158,19 @@ export default function ScannerScreen() {
         location: "Unknown",
         country: "Unknown",
         period: "Unknown",
+        description: "Unable to analyze these monuments and art. The AI service may be temporarily unavailable or the image may not contain recognizable pieces.",
+        significance: "Analysis failed due to technical issues or unrecognized monuments and art.",
+        facts: [
+          "Please try again with a clearer photo",
+          "Ensure the monuments and art are clearly visible in the image",
+          "Check your internet connection",
+          "Try adding more context in the additional info section"
+        ],
         image: selectedImage,
+        scannedImage: selectedImage,
         scannedAt: new Date().toISOString(),
+        confidence: 0,
+        isRecognized: false,
       };
       
       // Don't add unknown results to history

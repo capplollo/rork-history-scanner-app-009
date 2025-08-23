@@ -1,14 +1,29 @@
 import { HistoryItem } from '@/providers/HistoryProvider';
 
+// Extended interface for full scan results with all details
+export interface DetailedHistoryItem extends HistoryItem {
+  description?: string;
+  significance?: string;
+  facts?: string[];
+  confidence?: number;
+  isRecognized?: boolean;
+  detailedDescription?: {
+    keyTakeaways: string[];
+    inDepthContext: string;
+    curiosities?: string;
+  };
+  scannedImage?: string;
+}
+
 // Simple in-memory store for scan results to avoid URL parameter size limits
 class ScanResultStore {
-  private results: Map<string, HistoryItem> = new Map();
+  private results: Map<string, DetailedHistoryItem> = new Map();
   
-  store(result: HistoryItem): string {
+  store(result: DetailedHistoryItem): string {
     const id = `scan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     try {
-      console.log('Storing simplified scan result with ID:', id);
+      console.log('Storing detailed scan result with ID:', id);
       console.log('Original result name:', result.name);
       
       // Validate the result before storing
@@ -62,8 +77,14 @@ class ScanResultStore {
           location: result.location || 'Unknown Location',
           country: result.country || 'Unknown Country',
           period: result.period || 'Unknown Period',
+          description: result.description || 'Monument information available',
+          significance: result.significance || 'Historical significance',
+          facts: result.facts || ['This monument has historical importance'],
           image: '',
+          scannedImage: '',
           scannedAt: result.scannedAt || new Date().toISOString(),
+          confidence: result.confidence || 50,
+          isRecognized: result.isRecognized || false,
         };
         this.results.set(id, minimalResult);
         console.log('Stored minimal fallback result');
@@ -75,8 +96,8 @@ class ScanResultStore {
     }
   }
   
-  private optimizeForStorage(result: HistoryItem): HistoryItem {
-    // Create a deep copy and optimize for simplified structure
+  private optimizeForStorage(result: DetailedHistoryItem): DetailedHistoryItem {
+    // Create a deep copy and optimize for storage
     const optimized = JSON.parse(JSON.stringify(result));
     
     // Truncate text fields if they're too long
@@ -96,16 +117,58 @@ class ScanResultStore {
       optimized.period = optimized.period.substring(0, 50) + '...';
     }
     
+    if (optimized.description && optimized.description.length > 500) {
+      optimized.description = optimized.description.substring(0, 500) + '...';
+    }
+    
+    if (optimized.significance && optimized.significance.length > 500) {
+      optimized.significance = optimized.significance.substring(0, 500) + '...';
+    }
+    
+    // Limit facts array
+    if (optimized.facts && Array.isArray(optimized.facts)) {
+      optimized.facts = optimized.facts
+        .slice(0, 8)
+        .map((fact: string) => fact.length > 120 ? fact.substring(0, 120) + '...' : fact);
+    }
+    
+    // Limit detailed description content
+    if (optimized.detailedDescription) {
+      if (optimized.detailedDescription.quickOverview && optimized.detailedDescription.quickOverview.length > 600) {
+        optimized.detailedDescription.quickOverview = optimized.detailedDescription.quickOverview.substring(0, 600) + '...';
+      }
+      
+      if (optimized.detailedDescription.inDepthContext && optimized.detailedDescription.inDepthContext.length > 2000) {
+        optimized.detailedDescription.inDepthContext = optimized.detailedDescription.inDepthContext.substring(0, 2000) + '...';
+      }
+      
+      if (optimized.detailedDescription.curiosities && optimized.detailedDescription.curiosities.length > 800) {
+        optimized.detailedDescription.curiosities = optimized.detailedDescription.curiosities.substring(0, 800) + '...';
+      }
+      
+      // Limit keyTakeaways array and individual items
+      if (optimized.detailedDescription.keyTakeaways && Array.isArray(optimized.detailedDescription.keyTakeaways)) {
+        optimized.detailedDescription.keyTakeaways = optimized.detailedDescription.keyTakeaways
+          .slice(0, 5)
+          .map((item: string) => item.length > 150 ? item.substring(0, 150) + '...' : item);
+      }
+    }
+    
     // Remove or limit image data that might be too large
     if (optimized.image && optimized.image.startsWith('data:')) {
       // If it's a base64 image, remove it to prevent size issues
       optimized.image = '';
     }
     
+    if (optimized.scannedImage && optimized.scannedImage.startsWith('data:')) {
+      // If it's a base64 image, remove it to prevent size issues
+      optimized.scannedImage = '';
+    }
+    
     return optimized;
   }
   
-  retrieve(id: string): HistoryItem | null {
+  retrieve(id: string): DetailedHistoryItem | null {
     try {
       console.log('Retrieving scan result with ID:', id);
       console.log('Available IDs in store:', Array.from(this.results.keys()));
@@ -126,7 +189,7 @@ class ScanResultStore {
     }
   }
   
-  update(id: string, result: HistoryItem): boolean {
+  update(id: string, result: DetailedHistoryItem): boolean {
     try {
       console.log('Updating scan result with ID:', id);
       
@@ -162,15 +225,21 @@ class ScanResultStore {
     this.results.clear();
   }
   
-  createEmergencyResult(result: HistoryItem): HistoryItem {
+  createEmergencyResult(result: DetailedHistoryItem): DetailedHistoryItem {
     return {
       id: result.id,
       name: result.name.substring(0, 100),
       location: result.location.substring(0, 50),
       country: result.country.substring(0, 30),
       period: result.period.substring(0, 30),
+      description: result.description ? result.description.substring(0, 200) + '...' : 'Description available',
+      significance: result.significance ? result.significance.substring(0, 200) + '...' : 'Historical significance',
+      facts: result.facts ? result.facts.slice(0, 3).map(fact => fact.substring(0, 80) + '...') : ['Historical importance'],
       image: '', // Remove images in emergency mode
+      scannedImage: '',
       scannedAt: result.scannedAt,
+      confidence: result.confidence,
+      isRecognized: result.isRecognized,
     };
   }
 

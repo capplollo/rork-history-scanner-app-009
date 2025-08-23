@@ -2,14 +2,22 @@ import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 
-// Simplified interface matching the new data structure
+// Full detailed interface for scan result display
 export interface DetectionResult {
   artworkName: string;
   confidence: number;
   location: string;
   country: string;
   period: string;
+  description: string;
+  significance: string;
+  facts: string[];
   isRecognized: boolean;
+  detailedDescription?: {
+    keyTakeaways: string[];
+    inDepthContext: string;
+    curiosities?: string;
+  };
 }
 
 export interface AdditionalInfo {
@@ -51,6 +59,9 @@ export async function detectMonumentsAndArt(imageUri: string, additionalInfo?: A
       location: 'Unknown',
       country: 'Unknown',
       period: 'Unknown',
+      description: 'Unable to identify these monuments and art. Please try taking a clearer photo or ensure the subject is clearly visible.',
+      significance: 'Monuments and art detection failed due to technical issues.',
+      facts: ['Please try again with a different photo', 'Ensure good lighting and clear view of the monuments and art', 'Check your internet connection'],
       isRecognized: false,
     };
   }
@@ -72,7 +83,7 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
     analysisPrompt += `\n\nWith this context provided, you should:\n1. STRONGLY prioritize monuments and art that match this location\n2. If the visual matches reasonably well with something from this location, increase confidence significantly\n3. Use the provided name if it matches what you observe in the image\n4. Consider the building/context information as key identifying factors`;
   }
   
-  analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location and country, not user's location unless they match.\n\nRespond in this exact JSON format:\n{\n  "artworkName": "Name or 'Unknown Monuments and Art'",\n  "confidence": 85,\n  "location": "City, State/Province",\n  "country": "Country name",\n  "period": "Year(s) or century format (e.g., '1503', '15th century', '1800s', '12th-13th century') or 'Unknown'",\n  "isRecognized": true/false\n}\n\nIMPORTANT: Keep the JSON response simple and clean. Avoid any special characters or formatting that could break JSON parsing.`;
+  analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location and country, not user's location unless they match.\n\nRespond in this exact JSON format:\n{\n  "artworkName": "Name or 'Unknown Monuments and Art'",\n  "confidence": 85,\n  "location": "City, State/Province",\n  "country": "Country name",\n  "period": "Year(s) or century format (e.g., '1503', '15th century', '1800s', '12th-13th century') or 'Unknown'",\n  "description": "Brief description of the monument or artwork",\n  "significance": "Historical significance and importance",\n  "facts": ["Fact 1", "Fact 2", "Fact 3", "Fact 4"],\n  "isRecognized": true/false,\n  "detailedDescription": {\n    "keyTakeaways": ["Key point 1", "Key point 2", "Key point 3", "Key point 4"],\n    "inDepthContext": "Detailed historical context and analysis (3 paragraphs)",\n    "curiosities": "Interesting facts and curiosities"\n  }\n}\n\nIMPORTANT: If not recognized with high confidence (confidence < 80), omit the detailedDescription object. Keep the JSON response clean and properly formatted.`;
 
   const messages = [
     {
@@ -100,7 +111,7 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
       body: JSON.stringify({
         model: 'gpt-4o',
         messages,
-        max_tokens: 1000,
+        max_tokens: 2000,
         temperature: 0.1
       })
     });
@@ -134,6 +145,24 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
         throw new Error('Missing required fields in AI response');
       }
       
+      // Set defaults for missing fields
+      if (!result.description) {
+        result.description = `${result.artworkName} is a significant monument or artwork located in ${result.location}, ${result.country}.`;
+      }
+      
+      if (!result.significance) {
+        result.significance = `This ${result.period} monument or artwork represents important cultural heritage and historical significance.`;
+      }
+      
+      if (!result.facts || result.facts.length === 0) {
+        result.facts = [
+          `Located in ${result.location}, ${result.country}`,
+          `Created during the ${result.period} period`,
+          `Represents important cultural heritage`,
+          `Showcases artistic techniques of its era`
+        ];
+      }
+      
       return result;
       
     } catch (parseError) {
@@ -161,6 +190,9 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
       location: 'Unknown',
       country: 'Unknown',
       period: 'Unknown',
+      description: 'Unable to identify these monuments and art due to response parsing issues. Please try taking another photo.',
+      significance: 'Analysis failed due to technical issues with the response format.',
+      facts: ['Please try again with a different photo', 'Ensure good lighting and clear view of the monuments and art', 'Check your internet connection'],
       isRecognized: false,
     };
     
@@ -178,16 +210,26 @@ function attemptManualExtraction(content: string): DetectionResult | null {
     const locationMatch = content.match(/"location"\s*:\s*"([^"]+)"/i);
     const countryMatch = content.match(/"country"\s*:\s*"([^"]+)"/i);
     const periodMatch = content.match(/"period"\s*:\s*"([^"]+)"/i);
+    const descriptionMatch = content.match(/"description"\s*:\s*"([^"]+)"/i);
+    const significanceMatch = content.match(/"significance"\s*:\s*"([^"]+)"/i);
     const isRecognizedMatch = content.match(/"isRecognized"\s*:\s*(true|false)/i);
     
-    if (artworkNameMatch && confidenceMatch && locationMatch && countryMatch && periodMatch && isRecognizedMatch) {
+    if (artworkNameMatch && confidenceMatch && locationMatch && countryMatch && periodMatch) {
       const result: DetectionResult = {
         artworkName: artworkNameMatch[1],
         confidence: parseInt(confidenceMatch[1]),
         location: locationMatch[1],
         country: countryMatch[1],
         period: periodMatch[1],
-        isRecognized: isRecognizedMatch[1].toLowerCase() === 'true'
+        description: descriptionMatch ? descriptionMatch[1] : `${artworkNameMatch[1]} is located in ${locationMatch[1]}, ${countryMatch[1]}.`,
+        significance: significanceMatch ? significanceMatch[1] : `This ${periodMatch[1]} monument represents important cultural heritage.`,
+        facts: [
+          `Located in ${locationMatch[1]}, ${countryMatch[1]}`,
+          `Period: ${periodMatch[1]}`,
+          `Confidence: ${confidenceMatch[1]}%`,
+          `Represents important cultural heritage`
+        ],
+        isRecognized: isRecognizedMatch ? isRecognizedMatch[1].toLowerCase() === 'true' : false
       };
       
       return result;
