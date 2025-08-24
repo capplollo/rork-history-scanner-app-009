@@ -122,17 +122,29 @@ export default function RootLayout() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
+        console.log('Initializing app...');
         // Clean up storage on app start to prevent quota issues
         await cleanupLocalStorage();
         console.log('Storage cleanup completed');
       } catch (error) {
         console.error('Storage cleanup failed:', error);
+        // Don't let storage cleanup failure prevent app from starting
       } finally {
-        SplashScreen.hideAsync();
+        console.log('Hiding splash screen...');
+        await SplashScreen.hideAsync();
+        console.log('App initialization complete');
       }
     };
     
-    initializeApp();
+    // Add a timeout to ensure splash screen is hidden even if cleanup fails
+    const timeoutId = setTimeout(() => {
+      console.log('Timeout reached, hiding splash screen...');
+      SplashScreen.hideAsync();
+    }, 3000);
+    
+    initializeApp().finally(() => {
+      clearTimeout(timeoutId);
+    });
   }, []);
 
   return (
