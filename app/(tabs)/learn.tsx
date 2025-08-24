@@ -8,9 +8,12 @@ import {
   SafeAreaView,
   Image,
   Platform,
+  FlatList,
 } from "react-native";
-import { BookOpen, Clock, Globe, Award } from "lucide-react-native";
+import { BookOpen, Clock, Globe, Award, Palette } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import { artisticStyles } from "@/data/artisticStyles";
 
 const learningCategories = [
   {
@@ -93,6 +96,41 @@ export default function LearnScreen() {
             </View>
           </View>
         </LinearGradient>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Artistic Styles</Text>
+            <TouchableOpacity>
+              <Text style={styles.seeAllText}>Explore all</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <FlatList
+            data={artisticStyles}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.stylesContainer}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.styleCard}
+                onPress={() => router.push(`/artistic-style/${item.id}`)}
+              >
+                <Image source={{ uri: item.image }} style={styles.styleImage} />
+                <LinearGradient
+                  colors={item.gradient}
+                  style={styles.styleOverlay}
+                >
+                  <View style={styles.styleContent}>
+                    <Palette size={20} color="#ffffff" />
+                    <Text style={styles.styleTitle}>{item.title}</Text>
+                    <Text style={styles.stylePeriod}>{item.period}</Text>
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item) => item.id}
+          />
+        </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -403,5 +441,56 @@ const styles = StyleSheet.create({
   },
   quizIcon: {
     marginLeft: 16,
+  },
+  stylesContainer: {
+    paddingRight: 20,
+  },
+  styleCard: {
+    width: 200,
+    height: 140,
+    borderRadius: 16,
+    overflow: "hidden",
+    marginRight: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  styleImage: {
+    width: "100%",
+    height: "100%",
+  },
+  styleOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "100%",
+    justifyContent: "flex-end",
+    padding: 16,
+  },
+  styleContent: {
+    gap: 4,
+  },
+  styleTitle: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "600",
+    color: "#ffffff",
+  },
+  stylePeriod: {
+    fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.9)",
   },
 });
