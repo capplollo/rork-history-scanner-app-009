@@ -1,7 +1,7 @@
 import createContextHook from '@nkzw/create-context-hook';
 import { supabase } from '@/lib/supabase';
 import { User, Session, AuthError } from '@supabase/supabase-js';
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 interface AuthState {
   user: User | null;
@@ -18,68 +18,25 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const loadingRef = useRef<boolean>(true);
 
   useEffect(() => {
-    let mounted = true;
-    
-    // Get initial session with timeout
-    const initializeAuth = async () => {
-      try {
-        console.log('AuthProvider: Initializing auth...');
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('AuthProvider: Error getting session:', error);
-        }
-        
-        if (mounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
-          setLoading(false);
-          loadingRef.current = false;
-          console.log('AuthProvider: Initial auth state set', { hasSession: !!session, hasUser: !!session?.user });
-        }
-      } catch (error) {
-        console.error('AuthProvider: Failed to initialize auth:', error);
-        if (mounted) {
-          setSession(null);
-          setUser(null);
-          setLoading(false);
-          loadingRef.current = false;
-        }
-      }
-    };
-    
-    // Set a timeout to ensure loading state doesn't persist indefinitely
-    const timeoutId = setTimeout(() => {
-      if (mounted && loadingRef.current) {
-        console.warn('AuthProvider: Auth initialization timeout, setting loading to false');
-        setLoading(false);
-        loadingRef.current = false;
-      }
-    }, 5000);
-    
-    initializeAuth();
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('AuthProvider: Auth state changed', { event: _event, hasSession: !!session });
-      if (mounted) {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-        loadingRef.current = false;
-      }
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
     });
 
-    return () => {
-      mounted = false;
-      clearTimeout(timeoutId);
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const signUp = useCallback(async (email: string, password: string, fullName?: string) => {
