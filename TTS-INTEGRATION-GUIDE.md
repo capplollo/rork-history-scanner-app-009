@@ -53,7 +53,7 @@ This guide shows you how to integrate external Text-to-Speech services for more 
 import { externalVoiceService } from '@/services/externalVoiceService';
 
 // Configure OpenAI TTS
-externalVoiceService.configureProvider('OpenAI TTS', process.env.EXPO_PUBLIC_OPENAI_API_KEY!);
+externalVoiceService.configureProvider('OpenAI TTS', 'your-openai-api-key-here');
 ```
 
 ### Step 3: Use in Voice Settings
@@ -103,22 +103,22 @@ npm install @azure/ai-speech
 Add to your `.env` file:
 ```env
 # OpenAI
-EXPO_PUBLIC_OPENAI_API_KEY=your_actual_openai_api_key_here
+OPENAI_API_KEY=your-openai-key
 
 # ElevenLabs
-EXPO_PUBLIC_ELEVENLABS_API_KEY=your_actual_elevenlabs_api_key_here
+ELEVENLABS_API_KEY=your-elevenlabs-key
 
 # Amazon Polly
-AWS_ACCESS_KEY_ID=your_actual_aws_access_key_here
-AWS_SECRET_ACCESS_KEY=your_actual_aws_secret_key_here
+AWS_ACCESS_KEY_ID=your-aws-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret
 
 # Google Cloud
-GOOGLE_CLOUD_PROJECT_ID=your_actual_project_id_here
-GOOGLE_CLOUD_PRIVATE_KEY=your_actual_private_key_here
+GOOGLE_CLOUD_PROJECT_ID=your-project-id
+GOOGLE_CLOUD_PRIVATE_KEY=your-private-key
 
 # Azure
-AZURE_SPEECH_KEY=your_actual_azure_key_here
-AZURE_SPEECH_REGION=your_actual_region_here
+AZURE_SPEECH_KEY=your-azure-key
+AZURE_SPEECH_REGION=your-region
 ```
 
 ### 3. Configure Providers
@@ -127,8 +127,8 @@ AZURE_SPEECH_REGION=your_actual_region_here
 import { externalVoiceService } from '@/services/externalVoiceService';
 
 // Configure multiple providers
-externalVoiceService.configureProvider('OpenAI TTS', process.env.EXPO_PUBLIC_OPENAI_API_KEY!);
-externalVoiceService.configureProvider('ElevenLabs', process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY!);
+externalVoiceService.configureProvider('OpenAI TTS', process.env.OPENAI_API_KEY!);
+externalVoiceService.configureProvider('ElevenLabs', process.env.ELEVENLABS_API_KEY!);
 ```
 
 ## 🎯 Recommended Setup

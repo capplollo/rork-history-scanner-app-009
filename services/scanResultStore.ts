@@ -122,38 +122,16 @@ class ScanResultStore {
         .map((fact: string) => fact.length > 120 ? fact.substring(0, 120) + '...' : fact);
     }
     
-    // Handle image data optimization - preserve file URIs, remove large base64 images
-    if (optimized.image) {
-      if (optimized.image.startsWith('data:') && optimized.image.length > 10000) {
-        // Only remove large base64 images (>10KB)
-        console.log('🖼️ Removing large base64 image data (size:', optimized.image.length, 'bytes)');
-        optimized.image = '';
-      } else if (optimized.image.startsWith('file://') || optimized.image.startsWith('http')) {
-        // Preserve file URIs and HTTP URLs
-        console.log('🖼️ Preserving file URI/URL for image:', optimized.image.substring(0, 50) + '...');
-      } else if (optimized.image.startsWith('data:')) {
-        console.log('🖼️ Keeping small base64 image (size:', optimized.image.length, 'bytes)');
-      }
+    // Remove or limit image data that might be too large
+    if (optimized.image && optimized.image.startsWith('data:')) {
+      // If it's a base64 image, remove it to prevent size issues
+      optimized.image = '';
     }
     
-    if (optimized.scannedImage) {
-      if (optimized.scannedImage.startsWith('data:') && optimized.scannedImage.length > 10000) {
-        // Only remove large base64 images (>10KB)
-        console.log('🖼️ Removing large base64 scannedImage data (size:', optimized.scannedImage.length, 'bytes)');
-        optimized.scannedImage = '';
-      } else if (optimized.scannedImage.startsWith('file://') || optimized.scannedImage.startsWith('http')) {
-        // Preserve file URIs and HTTP URLs
-        console.log('🖼️ Preserving file URI/URL for scannedImage:', optimized.scannedImage.substring(0, 50) + '...');
-      } else if (optimized.scannedImage.startsWith('data:')) {
-        console.log('🖼️ Keeping small base64 scannedImage (size:', optimized.scannedImage.length, 'bytes)');
-      }
+    if (optimized.scannedImage && optimized.scannedImage.startsWith('data:')) {
+      // If it's a base64 image, remove it to prevent size issues
+      optimized.scannedImage = '';
     }
-    
-    // Log image URLs for debugging
-    console.log('🖼️ Image URLs after optimization:', {
-      image: optimized.image ? `${optimized.image.substring(0, 50)}... (${optimized.image.length} chars)` : 'empty',
-      scannedImage: optimized.scannedImage ? `${optimized.scannedImage.substring(0, 50)}... (${optimized.scannedImage.length} chars)` : 'empty'
-    });
     
     return optimized;
   }
@@ -216,23 +194,6 @@ class ScanResultStore {
   }
   
   createEmergencyResult(result: HistoryItem): HistoryItem {
-    // Try to preserve file URIs and small images even in emergency mode
-    const preserveImage = result.image && (
-      result.image.startsWith('file://') || 
-      result.image.startsWith('http') || 
-      (result.image.startsWith('data:') && result.image.length < 5000)
-    );
-    const preserveScannedImage = result.scannedImage && (
-      result.scannedImage.startsWith('file://') || 
-      result.scannedImage.startsWith('http') || 
-      (result.scannedImage.startsWith('data:') && result.scannedImage.length < 5000)
-    );
-    
-    console.log('🆘 Emergency result - preserving images:', {
-      image: preserveImage ? 'yes' : 'no',
-      scannedImage: preserveScannedImage ? 'yes' : 'no'
-    });
-    
     return {
       id: result.id,
       name: result.name.substring(0, 100),
@@ -241,8 +202,8 @@ class ScanResultStore {
       description: result.description.substring(0, 200) + '...',
       significance: result.significance.substring(0, 200) + '...',
       facts: result.facts.slice(0, 3).map(fact => fact.substring(0, 80) + '...'),
-      image: preserveImage ? result.image : '',
-      scannedImage: preserveScannedImage ? result.scannedImage : '',
+      image: '', // Remove images in emergency mode
+      scannedImage: '',
       scannedAt: result.scannedAt,
       confidence: result.confidence,
       isRecognized: result.isRecognized,

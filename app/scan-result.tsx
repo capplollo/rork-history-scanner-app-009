@@ -43,7 +43,10 @@ export default function ScanResultScreen() {
   const [showContextForm, setShowContextForm] = useState<boolean>(false);
   const [, setIsRegenerating] = useState<boolean>(false);
   const [contextInfo, setContextInfo] = useState<AdditionalInfo>({
-    context: "",
+    name: "",
+    location: "",
+    building: "",
+    notes: "",
   });
   
   // Cleanup speech when component unmounts or when navigating away
@@ -231,10 +234,6 @@ export default function ScanResultScreen() {
               if (retrievedMonument && retrievedMonument.name) {
                 loadedMonument = retrievedMonument;
                 console.log('✅ Retrieved monument from store:', loadedMonument.name);
-                console.log('🖼️ Image URLs from store:', {
-                  image: loadedMonument.image ? loadedMonument.image.substring(0, 100) + '...' : 'empty',
-                  scannedImage: loadedMonument.scannedImage ? loadedMonument.scannedImage.substring(0, 100) + '...' : 'empty'
-                });
                 break;
               } else {
                 console.warn(`No valid monument found for resultId: ${resultId} (attempt ${retryCount + 1})`);
@@ -551,8 +550,8 @@ export default function ScanResultScreen() {
     }
   };
 
-  const updateContextInfo = (value: string) => {
-    setContextInfo({ context: value });
+  const updateContextInfo = (field: keyof AdditionalInfo, value: string) => {
+    setContextInfo(prev => ({ ...prev, [field]: value }));
   };
 
   const handleStop = async () => {
@@ -679,13 +678,7 @@ export default function ScanResultScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          <Image 
-            source={{ uri: monument.scannedImage || monument.image || 'https://via.placeholder.com/400x300?text=No+Image' }} 
-            style={styles.monumentImage} 
-            onError={(error) => {
-              console.log('Image load error:', error.nativeEvent.error);
-            }}
-          />
+          <Image source={{ uri: monument.scannedImage || monument.image }} style={styles.monumentImage} />
           <LinearGradient
             colors={["transparent", "rgba(0,0,0,0.8)"]}
             style={styles.imageOverlay}
@@ -737,18 +730,48 @@ export default function ScanResultScreen() {
             {showContextForm && (
               <View style={styles.contextForm}>
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Context Information</Text>
-                  <Text style={styles.contextDescription}>
-                    Add any details that might help identify this monument or artwork - name, location, museum, period, or any other relevant information.
-                  </Text>
+                  <Text style={styles.inputLabel}>Monuments and Art Name</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="e.g., Mona Lisa, David, Eiffel Tower"
+                    value={contextInfo.name}
+                    onChangeText={(text) => updateContextInfo('name', text)}
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+                
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Location</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="e.g., Paris, France or Central Park, NYC"
+                    value={contextInfo.location}
+                    onChangeText={(text) => updateContextInfo('location', text)}
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+                
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Building/Museum/Gallery</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="e.g., Louvre Museum, Uffizi Gallery, St. Peter's Basilica"
+                    value={contextInfo.building}
+                    onChangeText={(text) => updateContextInfo('building', text)}
+                    placeholderTextColor="#94a3b8"
+                  />
+                </View>
+                
+                <View style={styles.inputGroup}>
+                  <Text style={styles.inputLabel}>Additional Notes</Text>
                   <TextInput
                     style={[styles.textInput, styles.textInputMultiline]}
-                    placeholder="e.g., Mona Lisa at the Louvre Museum in Paris, or David sculpture by Michelangelo in Florence, or any other details..."
-                    value={contextInfo.context}
-                    onChangeText={updateContextInfo}
+                    placeholder="Any other details that might help..."
+                    value={contextInfo.notes}
+                    onChangeText={(text) => updateContextInfo('notes', text)}
                     placeholderTextColor="#94a3b8"
                     multiline
-                    numberOfLines={4}
+                    numberOfLines={3}
                   />
                 </View>
               </View>
@@ -774,84 +797,23 @@ export default function ScanResultScreen() {
           </View>
         )}
 
-        {/* Blue Info Section */}
-        <LinearGradient
-          colors={["#2C3E50", "#34495E"]}
-          style={styles.blueInfoSection}
-        >
+        <View style={styles.content}>
           <View style={styles.infoCards}>
             <View style={styles.infoCard}>
-              <MapPin size={20} color="#ffffff" />
+              <MapPin size={20} color="#1e3a8a" />
               <View>
                 <Text style={styles.infoLabel}>Location</Text>
                 <Text style={styles.infoValue}>{monument.location}, {monument.country}</Text>
               </View>
             </View>
             <View style={styles.infoCard}>
-              <Calendar size={20} color="#ffffff" />
+              <Calendar size={20} color="#1e3a8a" />
               <View>
                 <Text style={styles.infoLabel}>Period</Text>
                 <Text style={styles.infoValue}>{monument.period}</Text>
               </View>
             </View>
           </View>
-          
-          {/* Context Reanalysis Section */}
-          <View style={styles.contextReanalysisSection}>
-            <TouchableOpacity 
-              style={styles.contextToggleBlue} 
-              onPress={() => setShowContextForm(!showContextForm)}
-            >
-              <Text style={styles.contextToggleTextBlue}>
-                Is this recognition incorrect?
-              </Text>
-              {showContextForm ? (
-                <ChevronUp size={16} color="rgba(255, 255, 255, 0.8)" />
-              ) : (
-                <ChevronDown size={16} color="rgba(255, 255, 255, 0.8)" />
-              )}
-            </TouchableOpacity>
-            
-            {showContextForm && (
-              <View style={styles.contextFormBlue}>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.contextDescriptionBlue}>
-                    Add any details that might help identify this monument or artwork - name, location, museum, period, or any other relevant information.
-                  </Text>
-                  <TextInput
-                    style={[styles.textInputBlue, styles.textInputMultiline]}
-                    placeholder="e.g., Mona Lisa at the Louvre Museum in Paris, or David sculpture by Michelangelo in Florence, or any other details..."
-                    value={contextInfo.context}
-                    onChangeText={updateContextInfo}
-                    placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                    multiline
-                    numberOfLines={4}
-                  />
-                </View>
-                
-                <TouchableOpacity
-                  style={[styles.reanalyzeButtonBlue, isReanalyzing && styles.reanalyzeButtonDisabled]}
-                  onPress={handleReanalyze}
-                  disabled={isReanalyzing}
-                >
-                  {isReanalyzing ? (
-                    <>
-                      <ActivityIndicator color="#2C3E50" size="small" />
-                      <Text style={styles.reanalyzeButtonTextBlue}>Analyzing with Context...</Text>
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw size={18} color="#2C3E50" />
-                      <Text style={styles.reanalyzeButtonTextBlue}>Analyze Again with Context</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        </LinearGradient>
-
-        <View style={styles.content}>
           
 
 
@@ -1159,25 +1121,24 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
   },
-  blueInfoSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 25,
-  },
   infoCards: {
     flexDirection: "row",
     gap: 15,
-    marginBottom: 20,
+    marginBottom: 25,
   },
   infoCard: {
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    backgroundColor: "#ffffff",
     padding: 15,
     borderRadius: 12,
     gap: 12,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   infoLabel: {
     fontSize: 12,
@@ -1186,7 +1147,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#6b7280",
     marginBottom: 2,
   },
   infoValue: {
@@ -1197,86 +1158,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#ffffff",
-  },
-  contextReanalysisSection: {
-    marginTop: 5,
-  },
-  contextToggleBlue: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-  },
-  contextToggleTextBlue: {
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-    color: "rgba(255, 255, 255, 0.9)",
-  },
-  contextFormBlue: {
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    padding: 16,
-    borderRadius: 8,
-    gap: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.15)",
-  },
-  contextDescriptionBlue: {
-    fontSize: 13,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "rgba(255, 255, 255, 0.8)",
-    lineHeight: 18,
-    marginBottom: 8,
-  },
-  textInputBlue: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#ffffff",
-  },
-  reanalyzeButtonBlue: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    paddingVertical: 12,
-    borderRadius: 8,
-    gap: 8,
-    marginTop: 8,
-  },
-  reanalyzeButtonTextBlue: {
     color: "#2C3E50",
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
   },
   section: {
     marginBottom: 25,
@@ -1629,17 +1511,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#e5e7eb",
     gap: 12,
-  },
-  contextDescription: {
-    fontSize: 13,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#6b7280",
-    lineHeight: 18,
-    marginBottom: 8,
   },
   contextFormDescription: {
     fontSize: 13,
