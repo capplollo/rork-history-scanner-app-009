@@ -103,22 +103,22 @@ npm install @azure/ai-speech
 Add to your `.env` file:
 ```env
 # OpenAI
-EXPO_PUBLIC_OPENAI_API_KEY=your-openai-key
+EXPO_PUBLIC_OPENAI_API_KEY=your_actual_openai_api_key_here
 
 # ElevenLabs
-ELEVENLABS_API_KEY=your-elevenlabs-key
+EXPO_PUBLIC_ELEVENLABS_API_KEY=your_actual_elevenlabs_api_key_here
 
 # Amazon Polly
-AWS_ACCESS_KEY_ID=your-aws-key
-AWS_SECRET_ACCESS_KEY=your-aws-secret
+AWS_ACCESS_KEY_ID=your_actual_aws_access_key_here
+AWS_SECRET_ACCESS_KEY=your_actual_aws_secret_key_here
 
 # Google Cloud
-GOOGLE_CLOUD_PROJECT_ID=your-project-id
-GOOGLE_CLOUD_PRIVATE_KEY=your-private-key
+GOOGLE_CLOUD_PROJECT_ID=your_actual_project_id_here
+GOOGLE_CLOUD_PRIVATE_KEY=your_actual_private_key_here
 
 # Azure
-AZURE_SPEECH_KEY=your-azure-key
-AZURE_SPEECH_REGION=your-region
+AZURE_SPEECH_KEY=your_actual_azure_key_here
+AZURE_SPEECH_REGION=your_actual_region_here
 ```
 
 ### 3. Configure Providers

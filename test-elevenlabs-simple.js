@@ -1,5 +1,6 @@
 // Simple ElevenLabs API key test
-const API_KEY = 'sk_22cbad0171315d01474f3a02c222d9d04f67c9a5d8b3eae9';
+// Replace 'your_elevenlabs_api_key_here' with your actual API key
+const API_KEY = 'your_elevenlabs_api_key_here';
 
 async function testElevenLabs() {
   console.log('🔍 Testing ElevenLabs API key...\n');
