@@ -4,14 +4,14 @@
 // Load environment variables
 require('dotenv').config();
 
-const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 async function testOpenAIKey() {
   console.log('🔍 Testing OpenAI API key...\n');
   
   if (!OPENAI_API_KEY) {
     console.error('❌ No OpenAI API key found in environment variables');
-    console.log('Make sure EXPO_PUBLIC_OPENAI_API_KEY is set in your .env file');
+    console.log('Make sure OPENAI_API_KEY is set in your .env file');
     return;
   }
   
