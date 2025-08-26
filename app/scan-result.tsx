@@ -641,7 +641,7 @@ export default function ScanResultScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.imageContainer}>
-          <Image source={{ uri: monument.scannedImage || monument.image }} style={styles.monumentImage} />
+          <Image source={{ uri: monument.scannedImage || monument.image || 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400' }} style={styles.monumentImage} />
           <LinearGradient
             colors={["transparent", "rgba(0,0,0,0.8)"]}
             style={styles.imageOverlay}

@@ -52,7 +52,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           // Reduce initial limit to 8 items for faster loading
           const queryPromise = supabase
             .from('scan_history')
-            .select('id, monument_name, location, period, scanned_at, image_url, is_recognized, confidence')
+            .select('id, name, location, country, period, scanned_at, image')
             .eq('user_id', user.id)
             .order('scanned_at', { ascending: false })
             .limit(8);
@@ -78,18 +78,18 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
               try {
                 return {
                   id: item.id || '',
-                  name: item.monument_name || '',
+                  name: item.name || '',
                   location: item.location || '',
-                  country: '', // Not stored in current schema
-                  period: item.period || '', // Keep period for display
+                  country: item.country || '',
+                  period: item.period || '',
                   description: '', // Will be regenerated via API when needed
                   significance: '', // Will be regenerated via API when needed
                   facts: [], // Will be regenerated via API when needed
-                  image: item.image_url || '',
-                  scannedImage: '', // Not stored in simplified schema
+                  image: item.image || '',
+                  scannedImage: item.image || '', // Use same image for scanned image
                   scannedAt: item.scanned_at ? new Date(item.scanned_at).toISOString() : new Date().toISOString(),
-                  confidence: typeof item.confidence === 'number' ? item.confidence : undefined,
-                  isRecognized: typeof item.is_recognized === 'boolean' ? item.is_recognized : undefined,
+                  confidence: undefined, // Will be regenerated via API when needed
+                  isRecognized: undefined, // Will be regenerated via API when needed
                   detailedDescription: undefined, // Will be regenerated via API when needed
                 };
               } catch (mappingError) {
@@ -191,10 +191,11 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
         .from('scan_history')
         .insert({
           user_id: user.id,
-          monument_name: item.name,
+          name: item.name,
           location: item.location,
+          country: item.country || '',
           period: item.period,
-          image_url: item.image,
+          image: item.image,
           scanned_at: new Date(item.scannedAt).toISOString(),
         });
       

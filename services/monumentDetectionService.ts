@@ -100,8 +100,8 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
 
   console.log('Sending comprehensive analysis request to AI relay...');
 
-  // Use the local backend AI relay instead of external API
-  const response = await fetch('/api/ai/llm', {
+  // Use the Rork toolkit API for AI analysis
+  const response = await fetch('https://toolkit.rork.com/text/llm/', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

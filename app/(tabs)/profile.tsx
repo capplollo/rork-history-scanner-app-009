@@ -197,7 +197,7 @@ export default function ProfileScreen() {
                         });
                       }}
                     >
-                      <Image source={{ uri: item.scannedImage }} style={styles.historyCardBackground} />
+                      <Image source={{ uri: item.scannedImage || item.image || 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400' }} style={styles.historyCardBackground} />
                       <LinearGradient
                         colors={['transparent', 'transparent', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.9)']}
                         style={styles.historyCardOverlay}
