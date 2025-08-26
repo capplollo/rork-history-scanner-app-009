@@ -49,10 +49,10 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             setTimeout(() => reject(new Error('Request timeout')), 5000); // 5 second timeout
           });
           
-          // Use simplified schema fields
+          // Reduce initial limit to 8 items for faster loading
           const queryPromise = supabase
             .from('scan_history')
-            .select('id, name, location, country, period, uploaded_picture, scanned_at')
+            .select('id, name, location, country, period, scanned_at, image, is_recognized, confidence')
             .eq('user_id', user.id)
             .order('scanned_at', { ascending: false })
             .limit(8);
@@ -81,15 +81,15 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
                   name: item.name || '',
                   location: item.location || '',
                   country: item.country || '',
-                  period: item.period || '',
+                  period: item.period || '', // Keep period for display
                   description: '', // Will be regenerated via API when needed
                   significance: '', // Will be regenerated via API when needed
                   facts: [], // Will be regenerated via API when needed
-                  image: item.uploaded_picture || '',
+                  image: item.image || '',
                   scannedImage: '', // Not stored in simplified schema
                   scannedAt: item.scanned_at ? new Date(item.scanned_at).toISOString() : new Date().toISOString(),
-                  confidence: undefined, // Will be regenerated via API when needed
-                  isRecognized: undefined, // Will be regenerated via API when needed
+                  confidence: typeof item.confidence === 'number' ? item.confidence : undefined,
+                  isRecognized: typeof item.is_recognized === 'boolean' ? item.is_recognized : undefined,
                   detailedDescription: undefined, // Will be regenerated via API when needed
                 };
               } catch (mappingError) {
@@ -186,7 +186,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
     if (!user) return false;
     
     try {
-      // Only save minimal data to Supabase using simplified schema
+      // Only save minimal data to Supabase - no detailed descriptions or large content
       const { error } = await supabase
         .from('scan_history')
         .insert({
@@ -195,7 +195,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           location: item.location,
           country: item.country,
           period: item.period,
-          uploaded_picture: item.image,
+          image: item.image,
           scanned_at: new Date(item.scannedAt).toISOString(),
         });
       
@@ -295,10 +295,6 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
             period: item.period,
             image: item.image,
             scannedAt: item.scannedAt,
-            description: '',
-            significance: '',
-            facts: [],
-            scannedImage: '',
           }];
           try {
             await AsyncStorage.setItem(HISTORY_STORAGE_KEY + '_backup', JSON.stringify(minimalBackup));

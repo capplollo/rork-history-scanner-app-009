@@ -8,7 +8,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { Mail, ArrowLeft, RefreshCw, CheckCircle } from 'lucide-react-native';
 import { useAuth } from '@/providers/AuthProvider';
 import { supabase } from '@/lib/supabase';
@@ -18,7 +18,6 @@ export default function EmailConfirmationScreen() {
   const [isCheckingConfirmation, setIsCheckingConfirmation] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const { user, refreshSession } = useAuth();
-  const params = useLocalSearchParams();
 
   const handleResendConfirmation = async () => {
     if (!user?.email) {
@@ -52,35 +51,6 @@ export default function EmailConfirmationScreen() {
     router.replace('/login');
   };
 
-  // Handle URL parameters for email confirmation
-  useEffect(() => {
-    const handleUrlParams = async () => {
-      console.log('Email confirmation params:', params);
-      
-      // Check if we have confirmation tokens in URL
-      if (params.access_token || params.refresh_token) {
-        console.log('Found auth tokens in URL, processing confirmation...');
-        try {
-          // Let Supabase handle the tokens
-          const { data, error } = await supabase.auth.getSession();
-          if (data.session?.user?.email_confirmed_at) {
-            console.log('Email confirmed via URL!');
-            setIsConfirmed(true);
-            setTimeout(() => {
-              router.replace('/(tabs)');
-            }, 1500);
-          } else if (error) {
-            console.error('Error processing confirmation tokens:', error);
-          }
-        } catch (err) {
-          console.error('Error handling URL confirmation:', err);
-        }
-      }
-    };
-
-    handleUrlParams();
-  }, [params]);
-
   // Auto-check for email confirmation every few seconds
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval>;
@@ -100,14 +70,6 @@ export default function EmailConfirmationScreen() {
         console.log('Auth state change in email confirmation:', event, !!session?.user?.email_confirmed_at);
         
         if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at) {
-          setIsConfirmed(true);
-          clearInterval(intervalId);
-          
-          // Show success message and redirect
-          setTimeout(() => {
-            router.replace('/(tabs)');
-          }, 1500);
-        } else if (event === 'TOKEN_REFRESHED' && session?.user?.email_confirmed_at) {
           setIsConfirmed(true);
           clearInterval(intervalId);
           

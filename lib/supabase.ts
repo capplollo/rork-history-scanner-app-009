@@ -24,7 +24,7 @@ const supabaseConfig = {
     storage: Platform.OS === 'web' ? undefined : AsyncStorage,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: Platform.OS === 'web',
+    detectSessionInUrl: false,
   },
 };
 
@@ -87,8 +87,7 @@ export type Database = {
           id: string;
           email: string;
           full_name: string | null;
-          customer_id: string;
-          profile_picture: string | null;
+          avatar_url: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -96,8 +95,7 @@ export type Database = {
           id: string;
           email: string;
           full_name?: string | null;
-          customer_id: string;
-          profile_picture?: string | null;
+          avatar_url?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -105,46 +103,7 @@ export type Database = {
           id?: string;
           email?: string;
           full_name?: string | null;
-          customer_id?: string;
-          profile_picture?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      scan_history: {
-        Row: {
-          id: string;
-          user_id: string;
-          name: string;
-          location: string | null;
-          country: string | null;
-          period: string | null;
-          uploaded_picture: string | null;
-          scanned_at: string;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          name: string;
-          location?: string | null;
-          country?: string | null;
-          period?: string | null;
-          uploaded_picture?: string | null;
-          scanned_at?: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          name?: string;
-          location?: string | null;
-          country?: string | null;
-          period?: string | null;
-          uploaded_picture?: string | null;
-          scanned_at?: string;
+          avatar_url?: string | null;
           created_at?: string;
           updated_at?: string;
         };
