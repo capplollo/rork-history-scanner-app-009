@@ -10,68 +10,35 @@ import {
   Alert,
   Platform,
   Modal,
-  TextInput,
 } from "react-native";
 import { 
   User, 
   MapPin, 
+  Calendar,
   Settings,
   LogOut,
+  ChevronRight,
   Camera,
   Globe,
-  X,
-  Filter,
-  Search,
-  ChevronDown,
-  ImageIcon
+  Clock,
+  X
 } from "lucide-react-native";
 import { useHistory } from "@/providers/HistoryProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import * as ImagePicker from 'expo-image-picker';
-import { supabase } from '@/lib/supabase';
 
 
 export default function ProfileScreen() {
   const { history, clearHistory, isLoading: historyLoading } = useHistory();
   const { user, signOut, loading } = useAuth();
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [showFilters, setShowFilters] = useState<boolean>(false);
-  const [searchText, setSearchText] = useState<string>("");
-  const [selectedCountry, setSelectedCountry] = useState<string>("");
-  const [showCountryPicker, setShowCountryPicker] = useState<boolean>(false);
-  const [profilePicture, setProfilePicture] = useState<string | null>(null);
-  const [uploadingImage, setUploadingImage] = useState<boolean>(false);
 
   useEffect(() => {
     if (!loading && !user) {
       router.replace('/login');
     }
   }, [user, loading]);
-
-  // Load profile picture from Supabase
-  useEffect(() => {
-    const loadProfilePicture = async () => {
-      if (user) {
-        try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('profile_picture')
-            .eq('id', user.id)
-            .single();
-          
-          if (data?.profile_picture) {
-            setProfilePicture(data.profile_picture);
-          }
-        } catch (error) {
-          console.log('Error loading profile picture:', error);
-        }
-      }
-    };
-    
-    loadProfilePicture();
-  }, [user]);
 
   const handleSignOut = async () => {
     try {
@@ -93,123 +60,6 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleImagePicker = async () => {
-    try {
-      // Request permission
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission needed', 'Please grant permission to access your photo library.');
-        return;
-      }
-
-      // Show action sheet for camera or library
-      Alert.alert(
-        'Select Profile Picture',
-        'Choose how you want to select your profile picture',
-        [
-          {
-            text: 'Camera',
-            onPress: () => openCamera(),
-          },
-          {
-            text: 'Photo Library',
-            onPress: () => openImageLibrary(),
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-        ]
-      );
-    } catch (error) {
-      console.error('Error requesting permissions:', error);
-      Alert.alert('Error', 'Failed to request permissions');
-    }
-  };
-
-  const openCamera = async () => {
-    try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission needed', 'Please grant permission to access your camera.');
-        return;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        await uploadProfilePicture(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error opening camera:', error);
-      Alert.alert('Error', 'Failed to open camera');
-    }
-  };
-
-  const openImageLibrary = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        await uploadProfilePicture(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error opening image library:', error);
-      Alert.alert('Error', 'Failed to open image library');
-    }
-  };
-
-  const uploadProfilePicture = async (imageUri: string) => {
-    if (!user) return;
-    
-    try {
-      setUploadingImage(true);
-      
-      // For now, we'll store the image as base64 in the database
-      // In a production app, you'd want to upload to Supabase Storage
-      const response = await fetch(imageUri);
-      const blob = await response.blob();
-      
-      // Convert to base64
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64data = reader.result as string;
-        
-        // Update profile in Supabase
-        const { error } = await supabase
-          .from('profiles')
-          .update({ profile_picture: base64data })
-          .eq('id', user.id);
-        
-        if (error) {
-          console.error('Error updating profile picture:', error);
-          Alert.alert('Error', 'Failed to update profile picture');
-        } else {
-          setProfilePicture(base64data);
-          Alert.alert('Success', 'Profile picture updated successfully!');
-        }
-        
-        setUploadingImage(false);
-      };
-      
-      reader.readAsDataURL(blob);
-    } catch (error) {
-      console.error('Error uploading profile picture:', error);
-      Alert.alert('Error', 'Failed to upload profile picture');
-      setUploadingImage(false);
-    }
-  };
-
   if (!user) {
     return null;
   }
@@ -217,9 +67,7 @@ export default function ProfileScreen() {
   const visitedCountries = useMemo(() => {
     const countries = new Set<string>();
     history.forEach(item => {
-      if (item.country) {
-        countries.add(item.country);
-      } else if (item.location) {
+      if (item.location) {
         // Extract country from location string (assuming format like "City, Country" or "Country")
         const parts = item.location.split(',');
         const country = parts[parts.length - 1].trim();
@@ -231,45 +79,18 @@ export default function ProfileScreen() {
     return countries.size;
   }, [history]);
 
-  const allCountries = useMemo(() => {
-    const countries = new Set<string>();
-    history.forEach(item => {
-      if (item.country) {
-        countries.add(item.country);
-      } else if (item.location) {
-        const parts = item.location.split(',');
-        const country = parts[parts.length - 1].trim();
-        if (country) {
-          countries.add(country);
-        }
-      }
-    });
-    return Array.from(countries).sort();
-  }, [history]);
-
-  const filteredHistory = useMemo(() => {
-    return history.filter(item => {
-      const matchesSearch = searchText === "" || 
-        item.name.toLowerCase().includes(searchText.toLowerCase());
-      
-      const matchesCountry = selectedCountry === "" || 
-        item.country === selectedCountry || 
-        (item.location && item.location.includes(selectedCountry));
-      
-      return matchesSearch && matchesCountry;
-    });
-  }, [history, searchText, selectedCountry]);
-
   const stats = [
     { 
       label: "Discoveries", 
       value: history.length.toString(),
-      icon: Camera
+      icon: Camera,
+      description: "Monuments and art explored"
     },
     { 
-      label: "Countries", 
+      label: "Destinations", 
       value: visitedCountries.toString(),
-      icon: Globe
+      icon: Globe,
+      description: "Countries visited"
     },
   ];
 
@@ -286,97 +107,60 @@ export default function ProfileScreen() {
           colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
+          <TouchableOpacity 
+            style={styles.settingsButton}
+            onPress={() => setShowSettings(true)}
+          >
+            <Settings size={24} color="#ffffff" />
+          </TouchableOpacity>
           <View style={styles.profileSection}>
-            <View style={styles.profileRow}>
-              <TouchableOpacity 
-                style={styles.avatarContainer}
-                onPress={handleImagePicker}
-                disabled={uploadingImage}
-              >
-                <View style={styles.avatar}>
-                  {profilePicture ? (
-                    <Image 
-                      source={{ uri: profilePicture }} 
-                      style={styles.avatarImage}
-                    />
-                  ) : (
-                    <User size={28} color="#4f46e5" />
-                  )}
-                  {uploadingImage && (
-                    <View style={styles.avatarOverlay}>
-                      <Text style={styles.uploadingText}>...</Text>
-                    </View>
-                  )}
-                </View>
-                <View style={styles.cameraIcon}>
-                  <Camera size={12} color="#ffffff" />
-                </View>
-              </TouchableOpacity>
-              <View style={styles.profileInfo}>
-                <Text style={styles.userName}>{user.user_metadata?.full_name || 'Explorer'}</Text>
-                <Text style={styles.userEmail}>{user.email}</Text>
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatar}>
+                <User size={40} color="#4f46e5" />
               </View>
-              <TouchableOpacity 
-                style={styles.settingsButton}
-                onPress={() => setShowSettings(true)}
-              >
-                <Settings size={18} color="#ffffff" />
+              <TouchableOpacity style={styles.editAvatarButton}>
+                <Camera size={16} color="#ffffff" />
               </TouchableOpacity>
             </View>
+            <Text style={styles.userName}>{user.user_metadata?.full_name || 'Explorer'}</Text>
+            <Text style={styles.userEmail}>{user.email}</Text>
             
-            <View style={styles.statsContainer}>
-              {stats.map((stat, index) => {
-                const Icon = stat.icon;
-                return (
-                  <View key={index} style={styles.statBadge}>
-                    <Icon size={16} color="rgba(255, 255, 255, 0.9)" />
-                    <Text style={styles.statBadgeValue}>{stat.value}</Text>
-                    <Text style={styles.statBadgeLabel}>{stat.label}</Text>
-                  </View>
-                );
-              })}
-            </View>
+            <Text style={styles.userSubtitle}>Cultural Explorer</Text>
           </View>
         </LinearGradient>
 
-        {/* Filter Section */}
-        <View style={styles.filterSection}>
-          <TouchableOpacity 
-            style={styles.filterButton}
-            onPress={() => setShowFilters(!showFilters)}
-          >
-            <Filter size={16} color="#64748b" />
-            <Text style={styles.filterButtonText}>Filter</Text>
-          </TouchableOpacity>
+        <View style={styles.statsContainer}>
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <View key={index} style={styles.statCard}>
+                <View style={styles.statIconContainer}>
+                  <Icon size={24} color="#8B4513" />
+                </View>
+                <Text style={styles.statValue}>{stat.value}</Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+                <Text style={styles.statDescription}>{stat.description}</Text>
+              </View>
+            );
+          })}
         </View>
 
-        {showFilters && (
-          <View style={styles.filtersContainer}>
-            <View style={styles.searchContainer}>
-              <Search size={16} color="#94a3b8" />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search by name..."
-                value={searchText}
-                onChangeText={setSearchText}
-                placeholderTextColor="#94a3b8"
-              />
-            </View>
-            
-            <TouchableOpacity 
-              style={styles.countryPicker}
-              onPress={() => setShowCountryPicker(true)}
-            >
-              <Text style={styles.countryPickerText}>
-                {selectedCountry || "All Countries"}
-              </Text>
-              <ChevronDown size={16} color="#64748b" />
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* All Discoveries Section */}
+        {/* History Section */}
         <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionTitleContainer}>
+              <Clock size={20} color="#8B4513" />
+              <Text style={styles.sectionTitle}>Your Discoveries</Text>
+            </View>
+            {historyLoading ? (
+              <Text style={styles.sectionSubtitle}>Loading history...</Text>
+            ) : (
+              <Text style={styles.sectionSubtitle}>
+                {history.length} {history.length === 1 ? "monument and art piece" : "monuments and art pieces"} explored
+              </Text>
+            )}
+          </View>
+          
           {historyLoading ? (
             <View style={styles.loadingContainer}>
               <View style={styles.loadingGrid}>
@@ -393,7 +177,7 @@ export default function ProfileScreen() {
             </View>
           ) : history.length > 0 ? (
             <View style={styles.historyGrid}>
-              {filteredHistory.map((item, index) => {
+              {history.slice(0, 6).map((item, index) => {
                 const formatDate = (dateString: string) => {
                   const date = new Date(dateString);
                   return date.toLocaleDateString("en-US", {
@@ -435,18 +219,19 @@ export default function ProfileScreen() {
                 );
               })}
             </View>
-          ) : filteredHistory.length === 0 && history.length > 0 ? (
-            <View style={styles.emptyHistoryContainer}>
-              <Search size={48} color="#cbd5e1" />
-              <Text style={styles.emptyHistoryText}>No matches found</Text>
-              <Text style={styles.emptyHistorySubtext}>Try adjusting your search or filter criteria</Text>
-            </View>
           ) : (
             <View style={styles.emptyHistoryContainer}>
               <Camera size={48} color="#cbd5e1" />
               <Text style={styles.emptyHistoryText}>No discoveries yet</Text>
               <Text style={styles.emptyHistorySubtext}>Start scanning monuments and art to build your collection</Text>
             </View>
+          )}
+          
+          {!historyLoading && history.length > 6 && (
+            <TouchableOpacity style={styles.viewAllButton}>
+              <Text style={styles.viewAllButtonText}>View All Discoveries</Text>
+              <ChevronRight size={16} color="#8B4513" />
+            </TouchableOpacity>
           )}
         </View>
 
@@ -505,56 +290,12 @@ export default function ProfileScreen() {
                       </View>
                       <Text style={styles.menuItemText}>{item.label}</Text>
                     </View>
-                    <View style={{ width: 20, height: 20 }} />
+                    <ChevronRight size={20} color="#cbd5e1" />
                   </TouchableOpacity>
                 );
               })}
             </View>
           </View>
-        </SafeAreaView>
-      </Modal>
-
-      {/* Country Picker Modal */}
-      <Modal
-        visible={showCountryPicker}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setShowCountryPicker(false)}
-      >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Select Country</Text>
-            <TouchableOpacity 
-              style={styles.closeButton}
-              onPress={() => setShowCountryPicker(false)}
-            >
-              <X size={24} color="#64748b" />
-            </TouchableOpacity>
-          </View>
-          
-          <ScrollView style={styles.modalContent}>
-            <TouchableOpacity
-              style={styles.countryOption}
-              onPress={() => {
-                setSelectedCountry("");
-                setShowCountryPicker(false);
-              }}
-            >
-              <Text style={[styles.countryOptionText, selectedCountry === "" && styles.selectedCountryText]}>All Countries</Text>
-            </TouchableOpacity>
-            {allCountries.map((country, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.countryOption}
-                onPress={() => {
-                  setSelectedCountry(country);
-                  setShowCountryPicker(false);
-                }}
-              >
-                <Text style={[styles.countryOptionText, selectedCountry === country && styles.selectedCountryText]}>{country}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
@@ -567,86 +308,53 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEFEFE",
   },
   headerGradient: {
-    paddingTop: 24,
-    paddingBottom: 48,
-    paddingHorizontal: 24,
+    paddingTop: 30,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
   },
   profileSection: {
-    flex: 1,
-  },
-  profileRow: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: 20,
-    marginBottom: 4,
   },
   avatarContainer: {
     position: "relative",
+    marginBottom: 16,
   },
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: "#ffffff",
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
     elevation: 4,
-    borderWidth: 3,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    overflow: "hidden",
   },
-  avatarImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 28,
-  },
-  avatarOverlay: {
+  editAvatarButton: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    right: 0,
+    backgroundColor: "#f59e0b",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 28,
-  },
-  uploadingText: {
-    color: "#ffffff",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  cameraIcon: {
-    position: "absolute",
-    bottom: -2,
-    right: -2,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: "#4f46e5",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: "#ffffff",
   },
-  profileInfo: {
-    flex: 1,
-  },
   userName: {
-    fontSize: 20,
+    fontSize: 24,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#ffffff",
     marginBottom: 4,
-    letterSpacing: 0.3,
   },
   userEmail: {
     fontSize: 15,
@@ -655,57 +363,113 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "rgba(255,255,255,0.85)",
-    fontWeight: "400",
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.9)",
+    marginBottom: 20,
   },
-
-  statsContainer: {
-    flexDirection: "row",
-    marginTop: 32,
-    gap: 16,
-    justifyContent: "center",
-  },
-  statBadge: {
-    backgroundColor: "rgba(255, 255, 255, 0.18)",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 24,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    borderWidth: 1.5,
-    borderColor: "rgba(255, 255, 255, 0.25)",
-    shadowColor: "rgba(0, 0, 0, 0.1)",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  statBadgeValue: {
-    fontSize: 18,
+  userSubtitle: {
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "700",
-    color: "#ffffff",
-    letterSpacing: 0.2,
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.8)",
+    marginTop: 8,
   },
-  statBadgeLabel: {
+
+  statsContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    marginTop: -20,
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    padding: 20,
+    borderRadius: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+    gap: 8,
+  },
+  statIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#f8f4f0",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 28,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "600",
+    color: "#2C3E50",
+  },
+  statLabel: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#2C3E50",
+    fontWeight: "500",
+  },
+  statDescription: {
+    fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#64748b",
+    fontWeight: "400",
+    textAlign: "center",
+  },
+  section: {
+    marginTop: 30,
+    paddingHorizontal: 20,
+  },
+  sectionHeader: {
+    marginBottom: 20,
+  },
+  sectionTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 4,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
+  },
+  sectionSubtitle: {
     fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "rgba(255, 255, 255, 0.95)",
-    fontWeight: "500",
-    letterSpacing: 0.1,
-  },
-  section: {
-    marginTop: 20,
-    paddingHorizontal: 20,
+    color: "#64748b",
+    fontStyle: "italic",
   },
   historyGrid: {
     flexDirection: "row",
@@ -928,14 +692,16 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   settingsButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    position: "absolute",
+    top: 20,
+    right: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
+    zIndex: 1,
   },
   modalContainer: {
     flex: 1,
@@ -1001,96 +767,5 @@ const styles = StyleSheet.create({
     color: "#94a3b8",
     textAlign: "center",
     lineHeight: 20,
-  },
-  filterSection: {
-    paddingHorizontal: 20,
-    marginTop: 20,
-    alignItems: "center",
-  },
-  filterButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f8f9fa",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 6,
-    borderWidth: 1,
-    borderColor: "#e9ecef",
-  },
-  filterButtonText: {
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#64748b",
-    fontWeight: "500",
-  },
-  filtersContainer: {
-    paddingHorizontal: 20,
-    marginTop: 12,
-    gap: 12,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f8f9fa",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 12,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "#e9ecef",
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#2C3E50",
-  },
-  countryPicker: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#f8f9fa",
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#e9ecef",
-  },
-  countryPickerText: {
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#2C3E50",
-  },
-  countryOption: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f1f5f9",
-  },
-  countryOptionText: {
-    fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#2C3E50",
-  },
-  selectedCountryText: {
-    color: "#4f46e5",
-    fontWeight: "600",
   },
 });

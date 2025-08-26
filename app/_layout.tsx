@@ -11,14 +11,7 @@ import { cleanupLocalStorage } from "@/lib/supabase";
 
 SplashScreen.preventAutoHideAsync();
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 2,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 // Authentication guard component
 function AuthGuard() {
@@ -131,9 +124,9 @@ export default function RootLayout() {
       try {
         // Clean up storage on app start to prevent quota issues
         await cleanupLocalStorage();
-        console.log('✅ Storage cleanup completed');
+        console.log('Storage cleanup completed');
       } catch (error) {
-        console.error('❌ Storage cleanup failed:', error);
+        console.error('Storage cleanup failed:', error);
       } finally {
         SplashScreen.hideAsync();
       }

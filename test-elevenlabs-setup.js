@@ -1,8 +1,7 @@
 // Test script for ElevenLabs API key configuration
 // Run this with: node test-elevenlabs-setup.js
-// Replace 'your_elevenlabs_api_key_here' with your actual API key
 
-const ELEVENLABS_API_KEY = 'your_elevenlabs_api_key_here';
+const ELEVENLABS_API_KEY = 'sk_22cbad0171315d01474f3a02c222d9d04f67c9a5d8b3eae9';
 
 async function testElevenLabsKey() {
   console.log('🔍 Testing ElevenLabs API key...\n');

@@ -93,7 +93,6 @@ Focus your responses on these specific monuments and art when relevant to the us
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         messages: messages
@@ -157,7 +156,6 @@ Respond with ONLY the title, no quotes or additional text.`
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         messages: messages
