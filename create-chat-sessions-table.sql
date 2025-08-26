@@ -1,7 +1,7 @@
 -- Create chat_sessions table for AI chat functionality
--- Run this in your Supabase SQL Editor
+-- Run this in your Supabase SQL Editor if you get chat_sessions table errors
 
--- Create chat_sessions table
+-- Create chat_sessions table (safe - won't error if exists)
 CREATE TABLE IF NOT EXISTS public.chat_sessions (
     id TEXT PRIMARY KEY,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
@@ -14,6 +14,12 @@ CREATE TABLE IF NOT EXISTS public.chat_sessions (
 
 -- Enable Row Level Security (RLS) for chat_sessions
 ALTER TABLE public.chat_sessions ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies first (safe - won't error if they don't exist)
+DROP POLICY IF EXISTS "Users can view their own chat sessions" ON public.chat_sessions;
+DROP POLICY IF EXISTS "Users can insert their own chat sessions" ON public.chat_sessions;
+DROP POLICY IF EXISTS "Users can update their own chat sessions" ON public.chat_sessions;
+DROP POLICY IF EXISTS "Users can delete their own chat sessions" ON public.chat_sessions;
 
 -- Create policies for chat_sessions table
 CREATE POLICY "Users can view their own chat sessions" ON public.chat_sessions

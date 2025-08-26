@@ -4,12 +4,18 @@ import { HistoryItem } from '@/providers/HistoryProvider';
 export interface SupabaseScanHistory {
   id?: string;
   user_id: string;
-  name: string;  // Changed from monument_name to match simplified schema
+  monument_name: string;  // Use the actual column name from the database
   location?: string;
-  country?: string;  // Added to match simplified schema
   period?: string;
-  image?: string;  // Changed from image_url to match simplified schema
+  description?: string;
+  significance?: string;
+  facts?: string[];
+  image_url?: string;  // Use the actual column name from the database
+  scanned_image_url?: string;
   scanned_at: string;
+  confidence?: number;
+  is_recognized?: boolean;
+  detailed_description?: any;
   created_at?: string;
   updated_at?: string;
 }
@@ -22,12 +28,18 @@ export class SupabaseHistoryService {
       
       const supabaseScanData: Omit<SupabaseScanHistory, 'id' | 'created_at' | 'updated_at'> = {
         user_id: userId,
-        name: scanData.name,  // Match simplified schema
+        monument_name: scanData.name,
         location: scanData.location,
-        country: scanData.country || '',  // Match simplified schema
         period: scanData.period,
-        image: scanData.image,  // Match simplified schema
+        description: scanData.description,
+        significance: scanData.significance,
+        facts: scanData.facts,
+        image_url: scanData.image,
+        scanned_image_url: scanData.scannedImage,
         scanned_at: scanData.scannedAt,
+        confidence: scanData.confidence,
+        is_recognized: scanData.isRecognized,
+        detailed_description: scanData.detailedDescription,
       };
 
       const { data, error } = await supabase
@@ -68,7 +80,7 @@ export class SupabaseHistoryService {
       // Simple query without abort controller to avoid AbortError issues
       const { data, error } = await supabase
         .from('scan_history')
-        .select('id, name, location, country, period, image, scanned_at')  // Match simplified schema
+        .select('id, monument_name, location, period, description, significance, facts, image_url, scanned_image_url, scanned_at, confidence, is_recognized, detailed_description')
         .eq('user_id', userId)
         .order('scanned_at', { ascending: false })
         .limit(limit);
@@ -86,19 +98,19 @@ export class SupabaseHistoryService {
       // Convert Supabase data to HistoryItem format
       const scans: HistoryItem[] = (data || []).map((item: any) => ({
         id: item.id || '',
-        name: item.name || '',  // Match simplified schema
+        name: item.monument_name || '',
         location: item.location || '',
-        country: item.country || '',  // Match simplified schema
+        country: '', // Not stored in this schema
         period: item.period || '',
-        image: item.image || '',  // Match simplified schema
-        scannedImage: '',  // Not stored in simplified schema
+        image: item.image_url || '',
+        scannedImage: item.scanned_image_url || '',
         scannedAt: item.scanned_at || new Date().toISOString(),
-        description: '',  // Not stored in simplified schema
-        significance: '',  // Not stored in simplified schema
-        facts: [],  // Not stored in simplified schema
-        confidence: undefined,  // Not stored in simplified schema
-        isRecognized: undefined,  // Not stored in simplified schema
-        detailedDescription: undefined,  // Not stored in simplified schema
+        description: item.description || '',
+        significance: item.significance || '',
+        facts: item.facts || [],
+        confidence: item.confidence,
+        isRecognized: item.is_recognized,
+        detailedDescription: item.detailed_description,
       }));
 
       console.log('✅ Fetched', scans.length, 'scans from Supabase');
@@ -154,11 +166,17 @@ export class SupabaseHistoryService {
       
       const updateData: Partial<SupabaseScanHistory> = {};
       
-      if (updates.name) updateData.name = updates.name;  // Match simplified schema
+      if (updates.name) updateData.monument_name = updates.name;
       if (updates.location) updateData.location = updates.location;
-      if (updates.country) updateData.country = updates.country;  // Match simplified schema
       if (updates.period) updateData.period = updates.period;
-      if (updates.image) updateData.image = updates.image;  // Match simplified schema
+      if (updates.description) updateData.description = updates.description;
+      if (updates.significance) updateData.significance = updates.significance;
+      if (updates.facts) updateData.facts = updates.facts;
+      if (updates.image) updateData.image_url = updates.image;
+      if (updates.scannedImage) updateData.scanned_image_url = updates.scannedImage;
+      if (updates.confidence !== undefined) updateData.confidence = updates.confidence;
+      if (updates.isRecognized !== undefined) updateData.is_recognized = updates.isRecognized;
+      if (updates.detailedDescription) updateData.detailed_description = updates.detailedDescription;
 
       const { error } = await supabase
         .from('scan_history')
