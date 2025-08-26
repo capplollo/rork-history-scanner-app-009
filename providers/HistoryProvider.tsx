@@ -52,7 +52,7 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
           // Reduce initial limit to 8 items for faster loading
           const queryPromise = supabase
             .from('scan_history')
-            .select('id, name, location, country, period, scanned_at, image, is_recognized, confidence')
+            .select('id, monument_name, location, period, scanned_at, image_url, is_recognized, confidence')
             .eq('user_id', user.id)
             .order('scanned_at', { ascending: false })
             .limit(8);
@@ -78,14 +78,14 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
               try {
                 return {
                   id: item.id || '',
-                  name: item.name || '',
+                  name: item.monument_name || '',
                   location: item.location || '',
-                  country: item.country || '',
+                  country: '', // Not stored in current schema
                   period: item.period || '', // Keep period for display
                   description: '', // Will be regenerated via API when needed
                   significance: '', // Will be regenerated via API when needed
                   facts: [], // Will be regenerated via API when needed
-                  image: item.image || '',
+                  image: item.image_url || '',
                   scannedImage: '', // Not stored in simplified schema
                   scannedAt: item.scanned_at ? new Date(item.scanned_at).toISOString() : new Date().toISOString(),
                   confidence: typeof item.confidence === 'number' ? item.confidence : undefined,
@@ -191,11 +191,10 @@ export const [HistoryProvider, useHistory] = createContextHook(() => {
         .from('scan_history')
         .insert({
           user_id: user.id,
-          name: item.name,
+          monument_name: item.name,
           location: item.location,
-          country: item.country,
           period: item.period,
-          image: item.image,
+          image_url: item.image,
           scanned_at: new Date(item.scannedAt).toISOString(),
         });
       
