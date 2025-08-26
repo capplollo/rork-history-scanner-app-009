@@ -53,7 +53,7 @@ This guide shows you how to integrate external Text-to-Speech services for more 
 import { externalVoiceService } from '@/services/externalVoiceService';
 
 // Configure OpenAI TTS
-externalVoiceService.configureProvider('OpenAI TTS', 'your-openai-api-key-here');
+externalVoiceService.configureProvider('OpenAI TTS', process.env.EXPO_PUBLIC_OPENAI_API_KEY!);
 ```
 
 ### Step 3: Use in Voice Settings
@@ -103,7 +103,7 @@ npm install @azure/ai-speech
 Add to your `.env` file:
 ```env
 # OpenAI
-OPENAI_API_KEY=your-openai-key
+EXPO_PUBLIC_OPENAI_API_KEY=your-openai-key
 
 # ElevenLabs
 ELEVENLABS_API_KEY=your-elevenlabs-key
@@ -127,8 +127,8 @@ AZURE_SPEECH_REGION=your-region
 import { externalVoiceService } from '@/services/externalVoiceService';
 
 // Configure multiple providers
-externalVoiceService.configureProvider('OpenAI TTS', process.env.OPENAI_API_KEY!);
-externalVoiceService.configureProvider('ElevenLabs', process.env.ELEVENLABS_API_KEY!);
+externalVoiceService.configureProvider('OpenAI TTS', process.env.EXPO_PUBLIC_OPENAI_API_KEY!);
+externalVoiceService.configureProvider('ElevenLabs', process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY!);
 ```
 
 ## 🎯 Recommended Setup
