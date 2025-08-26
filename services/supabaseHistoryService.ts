@@ -26,7 +26,7 @@ export class SupabaseHistoryService {
         user_id: userId,
         name: scanData.name,
         location: scanData.location,
-        country: scanData.country,
+        country: scanData.country || '',
         period: scanData.period,
         uploaded_picture: scanData.image,
         scanned_at: scanData.scannedAt,
@@ -232,14 +232,7 @@ export class SupabaseHistoryService {
   // Get full scan details by regenerating them via AI API
   static async getFullScanDetails(scanId: string, name: string, location: string, country: string, period: string, imageUrl: string): Promise<{ scanDetails: HistoryItem | null; error?: string }> {
     try {
-      console.log('🔄 Regenerating full scan details for:', name);
-      console.log('🔄 Input parameters:', { scanId, name, location, country, period, imageUrl });
-      
-      // Check if we have a valid image URL
-      if (!imageUrl || imageUrl === '') {
-        console.warn('⚠️ No image URL provided for regeneration, using fallback content');
-        throw new Error('No image URL available for regeneration');
-      }
+      console.log('Regenerating full scan details for:', name);
       
       // Import the detection service to regenerate details
       const { detectMonumentsAndArt } = await import('./monumentDetectionService');
@@ -252,25 +245,14 @@ export class SupabaseHistoryService {
         notes: `Previously identified as ${name} from ${location}, ${country} (${period})`
       };
       
-      console.log('🔄 Calling AI detection service with image URL:', imageUrl);
-      
       // Regenerate the full details using AI
       const detectionResult = await detectMonumentsAndArt(imageUrl, additionalInfo);
-      
-      console.log('🔄 AI detection result received:', {
-        artworkName: detectionResult.artworkName,
-        confidence: detectionResult.confidence,
-        isRecognized: detectionResult.isRecognized,
-        hasDescription: !!detectionResult.description,
-        hasSignificance: !!detectionResult.significance,
-        factsCount: detectionResult.facts?.length || 0
-      });
       
       const fullScanDetails: HistoryItem = {
         id: scanId,
         name: detectionResult.artworkName,
         location: detectionResult.location,
-        country: detectionResult.country,
+        country,
         period: detectionResult.period,
         image: imageUrl,
         scannedImage: '',

@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import createContextHook from "@nkzw/create-context-hook";
 import { ChatSession, ChatMessage, MonumentContext, sendChatMessage, generateChatTitle } from "@/services/aiChatService";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { supabase } from "@/lib/supabase";
 
-const MAX_CHAT_SESSIONS = 10; // Reduced for local storage
+const MAX_CHAT_SESSIONS = 20; // Increased since we're using Supabase
 const MAX_MESSAGES_PER_SESSION = 50;
-const CHAT_STORAGE_KEY = "@monument_scanner_chat_sessions";
 
 export const [ChatProvider, useChat] = createContextHook(() => {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -19,74 +18,119 @@ export const [ChatProvider, useChat] = createContextHook(() => {
 
   const loadChatSessions = async () => {
     try {
-      console.log('Loading chat sessions from local storage...');
-      
-      const storedSessions = await AsyncStorage.getItem(CHAT_STORAGE_KEY);
-      
-      if (storedSessions) {
-        try {
-          const sessionsData = JSON.parse(storedSessions);
-          const sessionsWithDates = sessionsData.map((session: any) => {
-            try {
-              return {
-                id: session.id || '',
-                title: session.title || 'New Chat',
-                messages: Array.isArray(session.messages) ? session.messages : [],
-                createdAt: session.createdAt ? new Date(session.createdAt) : new Date(),
-                lastUpdated: session.lastUpdated ? new Date(session.lastUpdated) : new Date(),
-                monumentId: session.monumentId || undefined,
-              };
-            } catch (mappingError) {
-              console.error('Error mapping chat session:', mappingError, session);
-              return null;
-            }
-          }).filter(Boolean) as ChatSession[];
-          
-          setSessions(sessionsWithDates);
-          
-          // Set the most recent session as current
-          if (sessionsWithDates.length > 0) {
-            setCurrentSessionId(sessionsWithDates[0].id);
-          }
-          
-          console.log(`✅ Loaded ${sessionsWithDates.length} chat sessions from local storage`);
-        } catch (parseError) {
-          console.error('Error parsing stored chat sessions:', parseError);
-          setSessions([]);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('No user logged in, using local storage fallback');
+        setIsLoading(false);
+        return;
+      }
+
+      const { data: sessionsData, error } = await supabase
+        .from('chat_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('last_updated', { ascending: false });
+
+      if (error) {
+        const errorMessage = error.message || 'Unknown error';
+        console.error('Error loading chat sessions:', errorMessage);
+        console.error('Supabase error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
+        
+        // Check if it's a table not found error
+        if (error.message?.includes('chat_sessions') && error.message?.includes('does not exist')) {
+          console.error('❌ The chat_sessions table does not exist in your Supabase database.');
+          console.error('📝 Please run the create-chat-sessions-table.sql file in your Supabase SQL Editor.');
         }
-      } else {
-        console.log('No stored chat sessions found');
-        setSessions([]);
+        
+        setIsLoading(false);
+        return;
+      }
+
+      if (sessionsData) {
+        const sessionsWithDates = sessionsData.map((session: any) => {
+          try {
+            return {
+              id: session.id || '',
+              title: session.title || 'New Chat',
+              messages: Array.isArray(session.messages) ? session.messages : [],
+              createdAt: session.created_at ? new Date(session.created_at) : new Date(),
+              lastUpdated: session.last_updated ? new Date(session.last_updated) : new Date(),
+              monumentId: session.monument_id || undefined,
+            };
+          } catch (mappingError) {
+            console.error('Error mapping chat session:', mappingError, session);
+            return null;
+          }
+        }).filter(Boolean) as ChatSession[];
+        setSessions(sessionsWithDates);
+        
+        // Set the most recent session as current
+        if (sessionsWithDates.length > 0) {
+          setCurrentSessionId(sessionsWithDates[0].id);
+        }
       }
     } catch (error) {
-      console.error("Error loading chat sessions from local storage:", error);
-      setSessions([]);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Error loading chat sessions:", errorMessage);
+      console.error("Full error details:", error);
+      
+      // Check if it's a table not found error
+      if (errorMessage.includes('chat_sessions') && (errorMessage.includes('does not exist') || errorMessage.includes('schema cache'))) {
+        console.error('❌ The chat_sessions table does not exist in your Supabase database.');
+        console.error('📝 Please run the create-chat-sessions-table.sql file in your Supabase SQL Editor.');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-    const saveChatSessions = useCallback(async (newSessions: ChatSession[]) => {
+  const saveChatSessions = useCallback(async (newSessions: ChatSession[]) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('No user logged in, cannot save to Supabase');
+        return newSessions;
+      }
+
       // Limit the number of sessions
       const sessionsToSave = newSessions.slice(0, MAX_CHAT_SESSIONS);
+      
+      // Upsert sessions to Supabase
+      const { error } = await supabase
+        .from('chat_sessions')
+        .upsert(
+          sessionsToSave.map(session => ({
+            id: session.id,
+            user_id: user.id,
+            title: session.title,
+            messages: session.messages,
+            monument_id: session.monumentId,
+            created_at: session.createdAt.toISOString(),
+            last_updated: session.lastUpdated.toISOString()
+          }))
+        );
 
-      // Save to local storage
-      const sessionsData = sessionsToSave.map(session => ({
-        id: session.id,
-        title: session.title,
-        messages: session.messages,
-        createdAt: session.createdAt.toISOString(),
-        lastUpdated: session.lastUpdated.toISOString(),
-        monumentId: session.monumentId
-      }));
-
-      await AsyncStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(sessionsData));
-      console.log(`✅ Saved ${sessionsToSave.length} chat sessions to local storage`);
+      if (error) {
+        console.error('Error saving chat sessions:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
+        throw error;
+      }
 
       return sessionsToSave;
     } catch (error) {
-      console.error("Error saving chat sessions to local storage:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Error saving chat sessions:", errorMessage);
+      console.error("Full error details:", error);
       throw error;
     }
   }, []);
@@ -231,35 +275,76 @@ export const [ChatProvider, useChat] = createContextHook(() => {
 
   const deleteSession = useCallback(async (sessionId: string) => {
     try {
-      console.log('Deleting chat session from local storage:', sessionId);
-      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('No user logged in, cannot delete from Supabase');
+        return;
+      }
+
+      // Delete from Supabase
+      const { error } = await supabase
+        .from('chat_sessions')
+        .delete()
+        .eq('id', sessionId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error deleting session:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
+        throw error;
+      }
+
       const newSessions = sessions.filter(s => s.id !== sessionId);
-      await saveChatSessions(newSessions);
       setSessions(newSessions);
       
       // If we deleted the current session, set a new current session
       if (currentSessionId === sessionId) {
         setCurrentSessionId(newSessions.length > 0 ? newSessions[0].id : null);
       }
-      
-      console.log('✅ Chat session deleted successfully');
     } catch (error) {
-      console.error('Error deleting chat session:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error deleting session:', errorMessage);
+      console.error('Full error details:', error);
       throw error;
     }
-  }, [sessions, currentSessionId, saveChatSessions]);
+  }, [sessions, currentSessionId]);
 
   const clearAllSessions = useCallback(async () => {
     try {
-      console.log('Clearing all chat sessions from local storage');
-      
-      await AsyncStorage.removeItem(CHAT_STORAGE_KEY);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('No user logged in, cannot clear from Supabase');
+        return;
+      }
+
+      // Delete all sessions for user
+      const { error } = await supabase
+        .from('chat_sessions')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error clearing all sessions:', error.message || 'Unknown error');
+        console.error('Supabase error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
+        throw error;
+      }
+
       setSessions([]);
       setCurrentSessionId(null);
-      
-      console.log('✅ All chat sessions cleared successfully');
     } catch (error) {
-      console.error('Error clearing all chat sessions:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error clearing all sessions:', errorMessage);
+      console.error('Full error details:', error);
     }
   }, []);
 

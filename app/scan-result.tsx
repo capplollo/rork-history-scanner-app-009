@@ -12,7 +12,6 @@ import {
   Alert,
   TextInput,
   ActivityIndicator,
-  AppState,
 } from "react-native";
 import { useLocalSearchParams, router, useNavigation } from "expo-router";
 import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle, Volume2, VolumeX, Pause, RefreshCw, ChevronDown, ChevronUp } from "lucide-react-native";
@@ -52,7 +51,6 @@ export default function ScanResultScreen() {
   // Cleanup speech when component unmounts or when navigating away
   useEffect(() => {
     return () => {
-      console.log('🧹 Component unmounting - cleaning up voice service');
       // Force cleanup of voice service when component unmounts
       voiceService.forceCleanup().catch(error => {
         console.error('Error during voice cleanup:', error);
@@ -68,40 +66,9 @@ export default function ScanResultScreen() {
   // Additional cleanup when navigation focus changes
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', () => {
-      console.log('🧹 Navigation beforeRemove - stopping voice service');
       // Stop voice when navigating away
       voiceService.forceCleanup().catch(error => {
         console.error('Error during navigation voice cleanup:', error);
-      });
-    });
-    
-    return unsubscribe;
-  }, [navigation]);
-  
-  // Additional cleanup when app goes to background
-  useEffect(() => {
-    const handleAppStateChange = (nextAppState: string) => {
-      if (nextAppState === 'background' || nextAppState === 'inactive') {
-        console.log('🧹 App going to background - stopping voice service');
-        voiceService.forceCleanup().catch(error => {
-          console.error('Error during app state change voice cleanup:', error);
-        });
-      }
-    };
-    
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-    
-    return () => {
-      subscription?.remove();
-    };
-  }, []);
-  
-  // Additional cleanup when component loses focus
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('blur', () => {
-      console.log('🧹 Component losing focus - stopping voice service');
-      voiceService.forceCleanup().catch(error => {
-        console.error('Error during blur voice cleanup:', error);
       });
     });
     
@@ -148,9 +115,6 @@ export default function ScanResultScreen() {
             (scannedImage as string) || ''
           );
           
-          console.log('🔄 Regeneration attempt - Image URL:', scannedImage);
-          console.log('🔄 Regeneration attempt - Monument name:', monumentName);
-          
           if (scanDetails && !error) {
             console.log('✅ Content regenerated successfully via Supabase service:', scanDetails.name);
             console.log('📝 Detailed description available:', !!scanDetails.detailedDescription);
@@ -161,38 +125,26 @@ export default function ScanResultScreen() {
           } else {
             console.error('❌ Failed to regenerate content via Supabase service:', error);
             
-            // Fallback to basic monument data with more detailed content
+            // Fallback to basic monument data
             loadedMonument = {
               id: (historyItemId as string) || 'history-item',
               name: monumentName as string,
               location: (location as string) || '',
               country: '',
               period: (period as string) || '',
-              description: `${monumentName} is a remarkable monument located in ${location}. This historical site represents the rich cultural heritage and architectural achievements of ${period}. The monument stands as a testament to the artistic and engineering skills of its creators, offering visitors a glimpse into the past and the cultural significance of this period.`,
-              significance: `This monument holds profound historical and cultural significance, representing the architectural and artistic achievements of ${period}. It serves as a cultural landmark that connects present generations with the past, preserving important aspects of our shared heritage. The monument's design and construction reflect the technological capabilities and artistic vision of its time, making it an invaluable piece of cultural history.`,
+              description: `${monumentName} is a significant monument located in ${location}. This historical site represents important cultural heritage from ${period}.`,
+              significance: `This monument holds historical and cultural significance, representing the architectural and artistic achievements of ${period}.`,
               facts: [
                 `Located in ${location}`,
-                `Historical period: ${period}`,
-                'Previously scanned and identified by our AI system',
-                'This monument represents important cultural heritage',
-                'The site has been preserved for future generations',
-                'Content regeneration failed - please try scanning again for fresh analysis'
+                `Period: ${period}`,
+                'Previously scanned and identified',
+                'Content regeneration failed - please try again'
               ],
               image: (scannedImage as string) || '',
               scannedImage: (scannedImage as string) || '',
               scannedAt: new Date().toISOString(),
               confidence: 85,
               isRecognized: true,
-              detailedDescription: {
-                keyTakeaways: [
-                  `${monumentName} is a significant historical monument`,
-                  `Located in ${location} during ${period}`,
-                  'Represents important cultural and architectural heritage',
-                  'Preserved for future generations to appreciate'
-                ],
-                inDepthContext: `${monumentName} stands as a remarkable example of ${period} architecture and cultural expression. Located in ${location}, this monument has witnessed centuries of history and continues to serve as a bridge between past and present. The monument's design reflects the artistic and engineering achievements of its time, showcasing the skills and vision of its creators. Its preservation ensures that future generations can appreciate and learn from this important piece of cultural heritage.`,
-                curiosities: 'This monument has been preserved through various historical periods and continues to attract visitors from around the world who come to appreciate its historical and cultural significance.'
-              }
             };
           }
         } catch (error) {
@@ -556,29 +508,16 @@ export default function ScanResultScreen() {
 
   const handleStop = async () => {
     try {
-      console.log('🛑 User manually stopped voice narration');
       await voiceService.stop();
       setIsPlaying(false);
       setIsPaused(false);
-    } catch (error) {
-      console.error('Error stopping voice:', error);
-      // Force cleanup even if stop fails
-      try {
-        await voiceService.forceCleanup();
-      } catch (cleanupError) {
-        console.error('Error during force cleanup:', cleanupError);
-      }
-      setIsPlaying(false);
-      setIsPaused(false);
+    } catch {
+      // Silently handle stop errors
     }
   };
 
-  const handleGoBack = async () => {
+  const handleGoBack = () => {
     try {
-      // Stop voice before navigating away
-      console.log('🧹 Going back - stopping voice service');
-      await voiceService.forceCleanup();
-      
       // Check if we can go back in the navigation stack
       if (navigation.canGoBack()) {
         router.back();
@@ -803,7 +742,7 @@ export default function ScanResultScreen() {
               <MapPin size={20} color="#1e3a8a" />
               <View>
                 <Text style={styles.infoLabel}>Location</Text>
-                <Text style={styles.infoValue}>{monument.location}, {monument.country}</Text>
+                <Text style={styles.infoValue}>{monument.location}</Text>
               </View>
             </View>
             <View style={styles.infoCard}>

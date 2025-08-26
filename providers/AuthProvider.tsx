@@ -147,28 +147,9 @@ export const [AuthProvider, useAuth] = createContextHook((): AuthState => {
   const signOut = useCallback(async () => {
     try {
       setLoading(true);
-      console.log('Starting sign out process...');
-      
-      // Sign out from Supabase first
       const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error('Supabase signOut error:', error);
-        setLoading(false);
-        return { error };
-      }
-      
-      // Clear local state after successful Supabase signout
-      // The onAuthStateChange listener will handle this automatically
-      // but we can also clear it manually for immediate feedback
-      setUser(null);
-      setSession(null);
-      
-      console.log('Sign out successful');
-      return { error: null };
+      return { error };
     } catch (error) {
-      console.error('Unexpected signOut error:', error);
-      setLoading(false);
       return { error: error as AuthError };
     } finally {
       setLoading(false);

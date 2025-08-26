@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,7 +9,6 @@ import {
   Image,
   Alert,
   Platform,
-  Modal,
 } from "react-native";
 import { 
   User, 
@@ -20,8 +19,7 @@ import {
   ChevronRight,
   Camera,
   Globe,
-  Clock,
-  X
+  Clock
 } from "lucide-react-native";
 import { useHistory } from "@/providers/HistoryProvider";
 import { useAuth } from "@/providers/AuthProvider";
@@ -32,7 +30,6 @@ import { router } from "expo-router";
 export default function ProfileScreen() {
   const { history, clearHistory, isLoading: historyLoading } = useHistory();
   const { user, signOut, loading } = useAuth();
-  const [showSettings, setShowSettings] = useState<boolean>(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -41,23 +38,25 @@ export default function ProfileScreen() {
   }, [user, loading]);
 
   const handleSignOut = async () => {
-    try {
-      console.log('🔐 Settings sign out button pressed');
-      setShowSettings(false); // Close modal first
-      
-      const { error } = await signOut();
-      if (error) {
-        console.error('🔐 Sign out error:', error);
-        Alert.alert('Error', 'Failed to sign out: ' + error.message);
-      } else {
-        console.log('🔐 Sign out successful from settings');
-        // Don't manually navigate - let AuthGuard handle it
-        // The AuthGuard will detect the user is null and redirect to login
-      }
-    } catch (err) {
-      console.error('🔐 Unexpected sign out error:', err);
-      Alert.alert('Error', 'An unexpected error occurred during sign out');
-    }
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            const { error } = await signOut();
+            if (error) {
+              Alert.alert('Error', 'Failed to sign out');
+            } else {
+              router.replace('/login');
+            }
+          },
+        },
+      ]
+    );
   };
 
   if (!user) {
@@ -95,10 +94,9 @@ export default function ProfileScreen() {
   ];
 
   const menuItems = [
+    { icon: Settings, label: "Settings", action: () => {} },
     { icon: LogOut, label: "Sign Out", action: handleSignOut },
   ];
-
-
 
   return (
     <SafeAreaView style={styles.container}>
@@ -107,12 +105,6 @@ export default function ProfileScreen() {
           colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
-          <TouchableOpacity 
-            style={styles.settingsButton}
-            onPress={() => setShowSettings(true)}
-          >
-            <Settings size={24} color="#ffffff" />
-          </TouchableOpacity>
           <View style={styles.profileSection}>
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
@@ -235,7 +227,29 @@ export default function ProfileScreen() {
           )}
         </View>
 
-
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Settings</Text>
+          <View style={styles.menuContainer}>
+            {menuItems.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.menuItem}
+                  onPress={item.action}
+                >
+                  <View style={styles.menuItemLeft}>
+                    <View style={styles.menuIconContainer}>
+                      <Icon size={20} color="#64748b" />
+                    </View>
+                    <Text style={styles.menuItemText}>{item.label}</Text>
+                  </View>
+                  <ChevronRight size={20} color="#cbd5e1" />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
 
         {!historyLoading && history.length > 0 && (
           <TouchableOpacity 
@@ -246,58 +260,6 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         )}
       </ScrollView>
-      
-      {/* Settings Modal */}
-      <Modal
-        visible={showSettings}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => {
-          console.log('🔐 Modal onRequestClose triggered');
-          setShowSettings(false);
-        }}
-      >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Settings</Text>
-            <TouchableOpacity 
-              style={styles.closeButton}
-              onPress={() => {
-                console.log('🔐 Close button pressed');
-                setShowSettings(false);
-              }}
-            >
-              <X size={24} color="#64748b" />
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.modalContent}>
-            <View style={styles.menuContainer}>
-              {menuItems.map((item, index) => {
-                const Icon = item.icon;
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    style={styles.menuItem}
-                    onPress={() => {
-                      console.log('🔐 Menu item pressed:', item.label);
-                      item.action();
-                    }}
-                  >
-                    <View style={styles.menuItemLeft}>
-                      <View style={styles.menuIconContainer}>
-                        <Icon size={20} color="#64748b" />
-                      </View>
-                      <Text style={styles.menuItemText}>{item.label}</Text>
-                    </View>
-                    <ChevronRight size={20} color="#cbd5e1" />
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
-        </SafeAreaView>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -378,7 +340,6 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.8)",
     marginTop: 8,
   },
-
   statsContainer: {
     flexDirection: "row",
     paddingHorizontal: 20,
@@ -690,55 +651,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#dee2e6",
     borderRadius: 4,
     opacity: 0.5,
-  },
-  settingsButton: {
-    position: "absolute",
-    top: 20,
-    right: 20,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "#FEFEFE",
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f1f5f9",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "600",
-    color: "#2C3E50",
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#f1f5f9",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    backgroundColor: '#ffffff',
   },
   emptyHistoryContainer: {
     alignItems: "center",
