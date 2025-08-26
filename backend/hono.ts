@@ -56,7 +56,7 @@ app.post("/ai/llm", async (c) => {
           return { type: "text", text: p.text } as const;
         }
         const dataUrl = `data:image/jpeg;base64,${p.image}`;
-        return { type: "input_image", image_url: dataUrl } as const;
+        return { type: "image_url", image_url: { url: dataUrl } } as const;
       });
 
       return { role: m.role, content: contentParts } as const;

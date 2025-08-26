@@ -100,12 +100,8 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
 
   console.log('Sending comprehensive analysis request to AI relay...');
 
-  const baseUrl = (process.env.EXPO_PUBLIC_RORK_API_BASE_URL ?? '').trim();
-  if (!baseUrl) {
-    throw new Error('Missing EXPO_PUBLIC_RORK_API_BASE_URL');
-  }
-
-  const response = await fetch(`${baseUrl}/api/ai/llm`, {
+  // Use the local backend AI relay instead of external API
+  const response = await fetch('/api/ai/llm', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

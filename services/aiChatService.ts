@@ -89,12 +89,8 @@ Focus your responses on these specific monuments and art when relevant to the us
     console.log('Sending request to internal AI relay...');
     console.log('Chat request payload:', JSON.stringify({ messages: messages }, null, 2));
 
-    const baseUrl = (process.env.EXPO_PUBLIC_RORK_API_BASE_URL ?? '').trim();
-    if (!baseUrl) {
-      throw new Error('Missing EXPO_PUBLIC_RORK_API_BASE_URL');
-    }
-
-    const response = await fetch(`${baseUrl}/api/ai/llm`, {
+    // Use the local backend AI relay instead of external API
+    const response = await fetch('/api/ai/llm', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -157,12 +153,8 @@ Respond with ONLY the title, no quotes or additional text.`
     console.log('Sending chat title generation request to AI relay...');
     console.log('Title generation request payload:', JSON.stringify({ messages: messages }, null, 2));
 
-    const baseUrl = (process.env.EXPO_PUBLIC_RORK_API_BASE_URL ?? '').trim();
-    if (!baseUrl) {
-      throw new Error('Missing EXPO_PUBLIC_RORK_API_BASE_URL');
-    }
-
-    const response = await fetch(`${baseUrl}/api/ai/llm`, {
+    // Use the local backend AI relay instead of external API
+    const response = await fetch('/api/ai/llm', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
