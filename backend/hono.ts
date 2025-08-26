@@ -31,10 +31,18 @@ app.post("/api/openai/chat", async (c) => {
     const body = await c.req.json();
     const { messages, model = 'gpt-4o', max_tokens = 4000, temperature = 0.7 } = body;
 
-    const OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'YOUR_OPENAI_API_KEY_HERE';
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+    if (!OPENAI_API_KEY || OPENAI_API_KEY === 'YOUR_OPENAI_API_KEY_HERE') {
+      console.error('❌ OpenAI API key not configured properly');
+      return c.json({
+        error: 'API key not configured',
+        message: 'OpenAI API key is missing or invalid'
+      }, 500);
+    }
 
     console.log('🔑 Backend API - Using server-side API key');
-    console.log('🔑 API Key starts with:', OPENAI_API_KEY.substring(0, 20));
+    console.log('🔑 API Key configured:', OPENAI_API_KEY.substring(0, 20) + '...');
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -50,11 +58,11 @@ app.post("/api/openai/chat", async (c) => {
       })
     });
 
-    console.log('OpenAI API response status:', response.status);
+    console.log('✅ OpenAI API response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error details:');
+      console.error('❌ OpenAI API error details:');
       console.error('Status:', response.status, response.statusText);
       console.error('Response body:', errorText);
       
@@ -62,18 +70,18 @@ app.post("/api/openai/chat", async (c) => {
         error: 'OpenAI API error',
         status: response.status,
         details: errorText
-      }, response.status);
+      }, 400);
     }
 
     const data = await response.json();
-    console.log('OpenAI response received successfully');
+    console.log('✅ OpenAI response received successfully');
     
     return c.json(data);
   } catch (error) {
-    console.error('Backend API error:', error);
+    console.error('❌ Backend API error:', error);
     return c.json({
       error: 'Internal server error',
-      message: error.message
+      message: error instanceof Error ? error.message : 'Unknown error'
     }, 500);
   }
 });
@@ -132,18 +140,21 @@ app.post("/api/openai/analyze-image", async (c) => {
         error: 'OpenAI API error',
         status: response.status,
         details: errorText
-      }, response.status);
+      }, 400);
     }
 
     const data = await response.json();
     console.log('OpenAI image analysis completed successfully');
     
-    return c.json(data);
+    // Extract the completion from OpenAI response and format it for our service
+    const completion = data.choices?.[0]?.message?.content || '';
+    
+    return c.json({ completion });
   } catch (error) {
     console.error('Backend API error:', error);
     return c.json({
       error: 'Internal server error',
-      message: error.message
+      message: error instanceof Error ? error.message : 'Unknown error'
     }, 500);
   }
 });

@@ -76,32 +76,21 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
   
   analysisPrompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.\n\nRespond in this exact JSON format (NO markdown, NO code blocks, PURE JSON only):\n{\n  "artworkName": "Name or 'Unknown Monuments and Art'",\n  "confidence": 85,\n  "location": "City only (e.g., 'Paris', 'Rome', 'Florence')",\n  "country": "Country only (e.g., 'France', 'Italy', 'Spain')",\n  "period": "Year(s) or century format (e.g., '1503', '15th century', '1800s', '12th-13th century') or 'Unknown'",\n  "description": "Brief description",\n  "significance": "Cultural significance",\n  "facts": ["Fact 1", "Fact 2", "Fact 3"],\n  "isRecognized": true,\n  "detailedDescription": {\n    "keyTakeaways": [\n      "First key takeaway bullet point",\n      "Second key takeaway bullet point",\n      "Third key takeaway bullet point",\n      "Fourth key takeaway bullet point"\n    ],\n    "inDepthContext": "Write exactly 3 paragraphs (1400-3000 characters total). Separate paragraphs with double line breaks only - NO paragraph titles or labels. Use **bold** highlights for key terms, names, dates, and important details. Be specific and interesting. Avoid generalizations. First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context. Second paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features. Third paragraph: Discuss cultural impact, significance over the years, notable events or stories associated with the monuments and art and more.",\n    "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"\n  }\n}\n\nIMPORTANT: \n- If not recognized with high confidence (confidence < 80), omit the entire detailedDescription object\n- Return ONLY valid JSON, no markdown formatting\n- Ensure all strings are properly escaped\n- keyTakeaways must be exactly 4 bullet points as an array\n- location should contain ONLY the city name\n- country should contain ONLY the country name`;
 
-  const messages = [
-    {
-      role: 'user' as const,
-      content: [
-        {
-          type: 'text' as const,
-          text: analysisPrompt
-        },
-        {
-          type: 'image' as const,
-          image: base64Image
-        }
-      ]
-    }
-  ];
-
-  console.log('Sending comprehensive analysis request to AI API...');
+  console.log('Sending comprehensive analysis request to backend API...');
   
-  const response = await fetch('https://toolkit.rork.com/text/llm/', {
+  // Use the backend API instead of external service
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8081';
+  const response = await fetch(`${apiUrl}/api/openai/analyze-image`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY || process.env.EXPO_PUBLIC_OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
-      messages: messages
+      prompt: analysisPrompt,
+      base64Image: base64Image,
+      model: 'gpt-4o',
+      max_tokens: 4000,
+      temperature: 0.7
     })
   });
 
