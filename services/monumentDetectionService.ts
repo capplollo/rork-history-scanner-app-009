@@ -98,9 +98,14 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
     }
   ];
 
-  console.log('Sending comprehensive analysis request to AI API...');
-  
-  const response = await fetch('https://toolkit.rork.com/text/llm/', {
+  console.log('Sending comprehensive analysis request to AI relay...');
+
+  const baseUrl = (process.env.EXPO_PUBLIC_RORK_API_BASE_URL ?? '').trim();
+  if (!baseUrl) {
+    throw new Error('Missing EXPO_PUBLIC_RORK_API_BASE_URL');
+  }
+
+  const response = await fetch(`${baseUrl}/api/ai/llm`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -125,9 +130,9 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
 
   // Clean up the response and parse JSON with better error handling
   let cleanContent = content.trim();
-  
+
   // Remove markdown code blocks
-  cleanContent = cleanContent.replace(/```json\s*/g, '').replace(/```\s*/g, '').replace(/`/g, '');
+  cleanContent = cleanContent.replace(/```json\s*/g, '').replace(/```\s*/g, '');
   
   // Try to extract JSON from the content if it's mixed with other text
   const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
