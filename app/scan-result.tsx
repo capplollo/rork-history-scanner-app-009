@@ -20,6 +20,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import { mockMonuments } from "@/data/mockMonuments";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import VoiceSettings from "@/components/VoiceSettings";
+<<<<<<< HEAD
+=======
+import { detectMonumentsAndArt, AdditionalInfo } from "@/services/monumentDetectionService";
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
 import FormattedText from "@/components/FormattedText";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -60,9 +64,57 @@ export default function ScanResultScreen() {
     notes: "",
   });
   
+<<<<<<< HEAD
   const [monument, setMonument] = useState<MonumentData | undefined>(undefined);
   
   // Load monument data on component mount
+=======
+  // Cleanup speech when component unmounts or when navigating away
+  useEffect(() => {
+    return () => {
+      // Force cleanup of voice service when component unmounts
+      voiceService.forceCleanup().catch(error => {
+        console.error('Error during voice cleanup:', error);
+      });
+      
+      // Clean up stored result when component unmounts
+      if (resultId && typeof resultId === 'string') {
+        scanResultStore.clear(resultId);
+      }
+    };
+  }, [resultId]);
+  
+  // Additional cleanup when navigation focus changes
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      // Stop voice when navigating away
+      voiceService.forceCleanup().catch(error => {
+        console.error('Error during navigation voice cleanup:', error);
+      });
+    });
+    
+    return unsubscribe;
+  }, [navigation]);
+
+  // Initialize voice service and set default voice
+  useEffect(() => {
+    const initializeVoice = async () => {
+      try {
+        await voiceService.initialize();
+        const bestVoice = voiceService.getBestVoice();
+        setSelectedVoice(bestVoice);
+      } catch (error) {
+        console.error('Error initializing voice service:', error);
+      }
+    };
+    
+    initializeVoice();
+  }, []);
+  
+  const [monument, setMonument] = useState<HistoryItem | undefined>(undefined);
+  
+  // Load monument data on component mount with better error handling and retry logic
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
   useEffect(() => {
     const loadMonumentData = async () => {
       let loadedMonument: MonumentData | undefined;
@@ -73,13 +125,18 @@ export default function ScanResultScreen() {
         setIsRegenerating(true);
         
         try {
+<<<<<<< HEAD
           // Create basic monument data since backend services are not available
           loadedMonument = {
+=======
+          // Create a basic monument object with available data
+          const basicMonument: HistoryItem = {
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
             id: (historyItemId as string) || 'history-item',
             name: monumentName as string,
             location: (location as string) || '',
-            country: '',
             period: (period as string) || '',
+<<<<<<< HEAD
             description: `${monumentName} is a remarkable monument located in ${location}. This historical site represents the rich cultural heritage and architectural achievements of ${period}.`,
             significance: `This monument holds profound historical and cultural significance, representing the architectural and artistic achievements of ${period}.`,
             facts: [
@@ -107,6 +164,93 @@ export default function ScanResultScreen() {
           };
         } catch (error) {
           console.error('Error during content regeneration:', error);
+=======
+            description: '', // Will be regenerated
+            significance: '', // Will be regenerated
+            facts: [], // Will be regenerated
+            image: (scannedImage as string) || '', // Use scanned image as main image
+            scannedImage: (scannedImage as string) || '',
+            scannedAt: new Date().toISOString(),
+            confidence: undefined,
+            isRecognized: true, // Assume recognized since it's in history
+            detailedDescription: undefined, // Will be regenerated
+          };
+          
+          // Regenerate content via API using the same comprehensive analysis as first-time scans
+          if (basicMonument.scannedImage) {
+            try {
+              console.log('🔄 Starting content regeneration with same prompt as first-time scan...');
+              console.log('Image URI for regeneration:', basicMonument.scannedImage.substring(0, 100) + '...');
+              
+              const detectionResult = await detectMonumentsAndArt(basicMonument.scannedImage);
+              
+              console.log('🔍 Regeneration result:', {
+                name: detectionResult.artworkName,
+                confidence: detectionResult.confidence,
+                hasDetailedDescription: !!detectionResult.detailedDescription,
+                inDepthContextLength: detectionResult.detailedDescription?.inDepthContext?.length || 0
+              });
+              
+              // Update the monument with regenerated content - ensure it's marked as recognized
+              loadedMonument = {
+                ...basicMonument,
+                name: detectionResult.artworkName || basicMonument.name, // Use detected name or fallback to history name
+                description: detectionResult.description,
+                significance: detectionResult.significance,
+                facts: detectionResult.facts,
+                confidence: Math.max(detectionResult.confidence, 80), // Ensure high confidence for history items
+                isRecognized: true, // Force recognized for history items
+                detailedDescription: detectionResult.detailedDescription,
+              };
+              
+              console.log('✅ Content regenerated successfully for:', monumentName);
+              console.log('📝 Detailed description available:', !!loadedMonument.detailedDescription);
+              console.log('📝 Is recognized:', loadedMonument.isRecognized);
+              console.log('📝 Confidence:', loadedMonument.confidence);
+              if (loadedMonument.detailedDescription?.inDepthContext) {
+                console.log('📄 In-depth context length:', loadedMonument.detailedDescription.inDepthContext.length);
+                console.log('📄 In-depth context preview:', loadedMonument.detailedDescription.inDepthContext.substring(0, 200) + '...');
+              }
+            } catch (regenerationError) {
+              console.error('❌ Failed to regenerate content:', regenerationError);
+              console.error('❌ Regeneration error details:', {
+                message: regenerationError instanceof Error ? regenerationError.message : 'Unknown error',
+                stack: regenerationError instanceof Error ? regenerationError.stack : undefined
+              });
+              // Use basic monument data as fallback but mark as recognized
+              loadedMonument = {
+                ...basicMonument,
+                description: `${basicMonument.name} is a significant monument located in ${basicMonument.location}. This historical site represents important cultural heritage from ${basicMonument.period}.`,
+                significance: `This monument holds historical and cultural significance, representing the architectural and artistic achievements of ${basicMonument.period}.`,
+                facts: [
+                  `Located in ${basicMonument.location}`,
+                  `Period: ${basicMonument.period}`,
+                  'Previously scanned and identified',
+                  'Content regeneration in progress'
+                ],
+                confidence: 85, // Set reasonable confidence for history items
+                isRecognized: true, // Ensure it's marked as recognized
+              };
+            }
+          } else {
+            console.warn('⚠️ No image available for regeneration, using basic data');
+            // No image available, use basic data but mark as recognized
+            loadedMonument = {
+              ...basicMonument,
+              description: `${basicMonument.name} is a significant monument located in ${basicMonument.location}. This historical site represents important cultural heritage from ${basicMonument.period}.`,
+              significance: `This monument holds historical and cultural significance, representing the architectural and artistic achievements of ${basicMonument.period}.`,
+              facts: [
+                `Located in ${basicMonument.location}`,
+                `Period: ${basicMonument.period}`,
+                'Previously scanned and identified'
+              ],
+              confidence: 85, // Set reasonable confidence for history items
+              isRecognized: true, // Ensure it's marked as recognized
+            };
+          }
+        } catch (error) {
+          console.error('Error setting up regeneration:', error);
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
         } finally {
           setIsRegenerating(false);
         }
@@ -167,6 +311,36 @@ export default function ScanResultScreen() {
     Alert.alert('Share', 'Share functionality will be implemented when backend is ready.');
   };
 
+<<<<<<< HEAD
+=======
+  const handleStop = async () => {
+    try {
+      await voiceService.stop();
+      setIsPlaying(false);
+      setIsPaused(false);
+    } catch {
+      // Silently handle stop errors
+    }
+  };
+
+  const handleGoBack = () => {
+    try {
+      // Check if we can go back in the navigation stack
+      if (navigation.canGoBack()) {
+        router.back();
+      } else {
+        // If no screen to go back to, navigate to the main tabs
+        router.replace('/(tabs)');
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback to main tabs
+      router.replace('/(tabs)');
+    }
+  };
+
+  // Show loading state while data is being loaded
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -193,11 +367,37 @@ export default function ScanResultScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+<<<<<<< HEAD
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
             <X size={24} color="#000" />
+=======
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: monument.scannedImage || monument.image || 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400' }} style={styles.monumentImage} />
+          <LinearGradient
+            colors={["transparent", "rgba(0,0,0,0.8)"]}
+            style={styles.imageOverlay}
+          >
+            <Text style={styles.monumentName}>{monument.name}</Text>
+            {monument.confidence !== undefined && (
+              <View style={styles.confidenceContainer}>
+                {monument.isRecognized ? (
+                  <CheckCircle size={16} color="#10b981" />
+                ) : (
+                  <AlertCircle size={16} color="#f59e0b" />
+                )}
+                <Text style={styles.confidenceText}>
+                  {monument.confidence}% confidence
+                </Text>
+              </View>
+            )}
+          </LinearGradient>
+          <TouchableOpacity style={styles.closeButton} onPress={handleGoBack}>
+            <X size={24} color="#ffffff" />
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
           </TouchableOpacity>
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
@@ -217,6 +417,7 @@ export default function ScanResultScreen() {
           </View>
         )}
 
+<<<<<<< HEAD
         {/* Monument Info */}
         <View style={styles.contentContainer}>
           <Text style={styles.monumentName}>{monument.name}</Text>
@@ -224,6 +425,24 @@ export default function ScanResultScreen() {
           <View style={styles.locationContainer}>
             <MapPin size={16} color="#666" />
             <Text style={styles.locationText}>{monument.location}</Text>
+=======
+        <View style={styles.content}>
+          <View style={styles.infoCards}>
+            <View style={styles.infoCard}>
+              <MapPin size={20} color="#1e3a8a" />
+              <View>
+                <Text style={styles.infoLabel}>Location</Text>
+                <Text style={styles.infoValue}>{monument.location}</Text>
+              </View>
+            </View>
+            <View style={styles.infoCard}>
+              <Calendar size={20} color="#1e3a8a" />
+              <View>
+                <Text style={styles.infoLabel}>Period</Text>
+                <Text style={styles.infoValue}>{monument.period}</Text>
+              </View>
+            </View>
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
           </View>
           
           <View style={styles.periodContainer}>

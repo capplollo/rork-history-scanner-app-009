@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useState } from "react";
+=======
+import React, { useEffect, useMemo } from "react";
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
 import {
   StyleSheet,
   Text,
@@ -9,7 +13,6 @@ import {
   Image,
   Alert,
   Platform,
-  Modal,
 } from "react-native";
 import { 
   User, 
@@ -20,20 +23,25 @@ import {
   ChevronRight,
   Camera,
   Globe,
-  Clock,
-  X
+  Clock
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 
 export default function ProfileScreen() {
+<<<<<<< HEAD
   const [showSettings, setShowSettings] = useState<boolean>(false);
+=======
+  const { history, clearHistory, isLoading: historyLoading } = useHistory();
+  const { user, signOut, loading } = useAuth();
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
 
   const handleSignOut = async () => {
     Alert.alert(
       'Sign Out',
       'Are you sure you want to sign out?',
       [
+<<<<<<< HEAD
         {
           text: 'Cancel',
           style: 'cancel',
@@ -44,6 +52,19 @@ export default function ProfileScreen() {
           onPress: () => {
             setShowSettings(false);
             router.replace('/login');
+=======
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            const { error } = await signOut();
+            if (error) {
+              Alert.alert('Error', 'Failed to sign out');
+            } else {
+              router.replace('/login');
+            }
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
           },
         },
       ]
@@ -66,11 +87,13 @@ export default function ProfileScreen() {
   ];
 
   const menuItems = [
+    { icon: Settings, label: "Settings", action: () => {} },
     { icon: LogOut, label: "Sign Out", action: handleSignOut },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
+<<<<<<< HEAD
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
@@ -82,6 +105,28 @@ export default function ProfileScreen() {
             <Settings size={24} color="#007AFF" />
           </TouchableOpacity>
         </View>
+=======
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <LinearGradient
+          colors={["#2C3E50", "#34495E"]}
+          style={styles.headerGradient}
+        >
+          <View style={styles.profileSection}>
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatar}>
+                <User size={40} color="#4f46e5" />
+              </View>
+              <TouchableOpacity style={styles.editAvatarButton}>
+                <Camera size={16} color="#ffffff" />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.userName}>{user.user_metadata?.full_name || 'Explorer'}</Text>
+            <Text style={styles.userEmail}>{user.email}</Text>
+            
+            <Text style={styles.userSubtitle}>Cultural Explorer</Text>
+          </View>
+        </LinearGradient>
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
 
         {/* Profile Section */}
         <View style={styles.profileSection}>
@@ -121,6 +166,7 @@ export default function ProfileScreen() {
               </View>
             ))}
           </View>
+<<<<<<< HEAD
         </View>
 
         {/* Recent Activity */}
@@ -170,6 +216,116 @@ export default function ProfileScreen() {
           </ScrollView>
         </SafeAreaView>
       </Modal>
+=======
+          
+          {historyLoading ? (
+            <View style={styles.loadingContainer}>
+              <View style={styles.loadingGrid}>
+                {[1, 2, 3, 4].map((_, index) => (
+                  <View key={index} style={styles.loadingCard}>
+                    <View style={styles.loadingCardBackground} />
+                    <View style={styles.loadingCardContent}>
+                      <View style={styles.loadingText} />
+                      <View style={styles.loadingTextSmall} />
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : history.length > 0 ? (
+            <View style={styles.historyGrid}>
+              {history.slice(0, 6).map((item, index) => {
+                const formatDate = (dateString: string) => {
+                  const date = new Date(dateString);
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
+                };
+                
+                return (
+                  <View key={`${item.id}-${index}`} style={styles.historyCardContainer}>
+                    <TouchableOpacity
+                      style={styles.historyCard}
+                      onPress={() => {
+                        // Navigate to scan result with minimal data - content will be regenerated via API
+                        router.push({
+                          pathname: "/scan-result" as any,
+                          params: { 
+                            historyItemId: item.id,
+                            monumentName: item.name,
+                            location: item.location,
+                            period: item.period,
+                            scannedImage: item.scannedImage,
+                            regenerate: 'true' // Flag to indicate content should be regenerated
+                          },
+                        });
+                      }}
+                    >
+                      <Image source={{ uri: item.scannedImage || item.image || 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400' }} style={styles.historyCardBackground} />
+                      <LinearGradient
+                        colors={['transparent', 'transparent', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.9)']}
+                        style={styles.historyCardOverlay}
+                      />
+                      <View style={styles.historyCardContent}>
+                        <Text style={styles.historyMonumentName} numberOfLines={2}>{item.name}</Text>
+                        <Text style={styles.historyPeriod} numberOfLines={1}>{item.period || formatDate(item.scannedAt)}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </View>
+          ) : (
+            <View style={styles.emptyHistoryContainer}>
+              <Camera size={48} color="#cbd5e1" />
+              <Text style={styles.emptyHistoryText}>No discoveries yet</Text>
+              <Text style={styles.emptyHistorySubtext}>Start scanning monuments and art to build your collection</Text>
+            </View>
+          )}
+          
+          {!historyLoading && history.length > 6 && (
+            <TouchableOpacity style={styles.viewAllButton}>
+              <Text style={styles.viewAllButtonText}>View All Discoveries</Text>
+              <ChevronRight size={16} color="#8B4513" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Settings</Text>
+          <View style={styles.menuContainer}>
+            {menuItems.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.menuItem}
+                  onPress={item.action}
+                >
+                  <View style={styles.menuItemLeft}>
+                    <View style={styles.menuIconContainer}>
+                      <Icon size={20} color="#64748b" />
+                    </View>
+                    <Text style={styles.menuItemText}>{item.label}</Text>
+                  </View>
+                  <ChevronRight size={20} color="#cbd5e1" />
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        {!historyLoading && history.length > 0 && (
+          <TouchableOpacity 
+            style={styles.clearButton}
+            onPress={clearHistory}
+          >
+            <Text style={styles.clearButtonText}>Clear Discovery History</Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
     </SafeAreaView>
   );
 }
@@ -231,7 +387,27 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontFamily: 'Times New Roman',
   },
+<<<<<<< HEAD
   userInfo: {
+=======
+  statsContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    marginTop: -20,
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    padding: 20,
+    borderRadius: 16,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
     gap: 8,
   },
   infoItem: {
@@ -311,6 +487,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontFamily: 'Times New Roman',
   },
+<<<<<<< HEAD
   emptyStateText: {
     fontSize: 14,
     color: '#666',
@@ -357,6 +534,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+=======
+  loadingTextSmall: {
+    height: 12,
+    width: "60%",
+    backgroundColor: "#dee2e6",
+    borderRadius: 4,
+    opacity: 0.5,
+  },
+  emptyHistoryContainer: {
+    alignItems: "center",
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
   },
   menuItemText: {
     fontSize: 16,

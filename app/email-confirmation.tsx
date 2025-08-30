@@ -15,6 +15,10 @@ export default function EmailConfirmationScreen() {
   const [isResending, setIsResending] = useState(false);
   const [isCheckingConfirmation, setIsCheckingConfirmation] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+<<<<<<< HEAD
+=======
+  const { user, refreshSession } = useAuth();
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
 
   const handleResendConfirmation = async () => {
     setIsResending(true);
@@ -44,6 +48,65 @@ export default function EmailConfirmationScreen() {
     router.replace('/login');
   };
 
+<<<<<<< HEAD
+=======
+  // Auto-check for email confirmation every few seconds
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval>;
+    let authListener: any;
+
+    const startAutoCheck = () => {
+      // Check immediately
+      checkEmailConfirmation();
+      
+      // Then check every 3 seconds
+      intervalId = setInterval(() => {
+        checkEmailConfirmation();
+      }, 3000);
+
+      // Also listen for auth state changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log('Auth state change in email confirmation:', event, !!session?.user?.email_confirmed_at);
+        
+        if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at) {
+          setIsConfirmed(true);
+          clearInterval(intervalId);
+          
+          // Show success message and redirect
+          setTimeout(() => {
+            router.replace('/(tabs)');
+          }, 1500);
+        }
+      });
+      
+      authListener = subscription;
+    };
+
+    startAutoCheck();
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+      if (authListener) authListener.unsubscribe();
+    };
+  }, []);
+
+  const checkEmailConfirmation = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user?.email_confirmed_at) {
+        setIsConfirmed(true);
+        // Redirect after showing success state
+        setTimeout(() => {
+          router.replace('/(tabs)');
+        }, 1500);
+      }
+    } catch (err) {
+      console.log('Error checking email confirmation:', err);
+    }
+  };
+
+>>>>>>> 4732a54d147b6cb99b572dc2354968fcd61c1611
   const handleCheckEmail = async () => {
     setIsCheckingConfirmation(true);
     try {
