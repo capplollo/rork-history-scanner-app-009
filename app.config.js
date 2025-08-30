@@ -2,12 +2,12 @@ import 'dotenv/config';
 
 export default {
   expo: {
-    name: "History Scanner App",
-    slug: "history-scanner-app",
+    name: "History Scanner",
+    slug: "history-scanner",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/icon.png",
-    scheme: "myapp",
+    scheme: "historyscanner",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     splash: {
@@ -17,15 +17,13 @@ export default {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "app.rork.history-scanner-app",
+      bundleIdentifier: "com.rork.historyscanner",
       infoPlist: {
-        NSPhotoLibraryUsageDescription: "Allow $(PRODUCT_NAME) to access your photos",
-        NSCameraUsageDescription: "Allow $(PRODUCT_NAME) to access your camera",
-        NSMicrophoneUsageDescription: "Allow $(PRODUCT_NAME) to access your microphone",
-        UIBackgroundModes: [
-          "audio"
-        ],
-        NSPhotoLibraryAddUsageDescription: "Allow $(PRODUCT_NAME) to save photos."
+        NSPhotoLibraryUsageDescription: "Allow History Scanner to access your photos for monument analysis",
+        NSCameraUsageDescription: "Allow History Scanner to access your camera for monument scanning",
+        NSMicrophoneUsageDescription: "Allow History Scanner to access your microphone for voice features",
+        UIBackgroundModes: ["audio"],
+        NSPhotoLibraryAddUsageDescription: "Allow History Scanner to save analyzed images."
       }
     },
     android: {
@@ -33,7 +31,7 @@ export default {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff"
       },
-      package: "app.rork.history-scanner-app",
+      package: "com.rork.historyscanner",
       permissions: [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
@@ -60,20 +58,20 @@ export default {
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
+          "photosPermission": "History Scanner accesses your photos to analyze historical monuments."
         }
       ],
       [
         "expo-av",
         {
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone"
+          "microphonePermission": "Allow History Scanner to access your microphone"
         }
       ],
       [
         "expo-media-library",
         {
-          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
-          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "photosPermission": "Allow History Scanner to access your photos.",
+          "savePhotosPermission": "Allow History Scanner to save analyzed images.",
           "isAccessMediaLocationEnabled": true
         }
       ]
@@ -82,11 +80,16 @@ export default {
       typedRoutes: true
     },
     extra: {
-      EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://qgpjmcpnytkewtmjfkzw.supabase.co',
-      EXPO_PUBLIC_SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFncGptY3BueXRrZXd0bWpma3p3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU1Mzg2MTQsImV4cCI6MjA3MTExNDYxNH0.RDznTdQFOAO6wFVaM3jWBE7yldRTASpoLut-PIzzJZk',
-      EXPO_PUBLIC_OPENAI_API_KEY: process.env.EXPO_PUBLIC_OPENAI_API_KEY || 'YOUR_OPENAI_API_KEY_HERE',
-      EXPO_PUBLIC_ELEVENLABS_API_KEY: process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY || 'your-elevenlabs-api-key-here',
-      EXPO_PUBLIC_RORK_API_BASE_URL: process.env.EXPO_PUBLIC_RORK_API_BASE_URL || 'https://73qgocn9i14y5zez10kps.rork.live',
+      EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+      EXPO_PUBLIC_ELEVENLABS_API_KEY: process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY,
+      EXPO_PUBLIC_APP_SCHEME: process.env.EXPO_PUBLIC_APP_SCHEME || "historyscanner",
+      EXPO_PUBLIC_SITE_URL: process.env.EXPO_PUBLIC_SITE_URL || "https://rork.com",
+      EXPO_PUBLIC_REDIRECT_URL: process.env.EXPO_PUBLIC_REDIRECT_URL || "historyscanner://email-confirmation",
+      EXPO_PUBLIC_MAX_IMAGE_SIZE: process.env.EXPO_PUBLIC_MAX_IMAGE_SIZE || "5242880",
+      EXPO_PUBLIC_VOICE_ENABLED: process.env.EXPO_PUBLIC_VOICE_ENABLED || "true",
+      EXPO_PUBLIC_DEBUG_MODE: process.env.EXPO_PUBLIC_DEBUG_MODE || "true",
+      EXPO_PUBLIC_SESSION_TIMEOUT: process.env.EXPO_PUBLIC_SESSION_TIMEOUT || "60"
     }
   }
 };

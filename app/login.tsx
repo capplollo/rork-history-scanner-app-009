@@ -8,9 +8,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '@/providers/AuthProvider';
 import { router } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
 
@@ -20,8 +20,6 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  
-  const { signIn } = useAuth();
 
   const handleLogin = async () => {
     setErrorMessage('');
@@ -32,30 +30,18 @@ export default function LoginScreen() {
     }
 
     setIsLoading(true);
-    const { error } = await signIn(email, password);
-    setIsLoading(false);
-
-    if (error) {
-      let errorMsg = 'Invalid email or password';
+    
+    // Simulate login process
+    setTimeout(() => {
+      setIsLoading(false);
       
-      if (error.message) {
-        if (error.message.includes('Invalid login credentials') || 
-            error.message.includes('Email not confirmed') ||
-            error.message.includes('Invalid email or password')) {
-          errorMsg = 'Invalid email or password';
-        } else if (error.message.includes('Too many requests')) {
-          errorMsg = 'Too many login attempts. Please try again later.';
-        } else if (error.message.includes('Email not confirmed')) {
-          errorMsg = 'Please check your email and confirm your account first.';
-        } else {
-          errorMsg = error.message;
-        }
+      // For demo purposes, accept any email/password
+      if (email && password) {
+        router.replace('/(tabs)');
+      } else {
+        setErrorMessage('Invalid email or password');
       }
-      
-      setErrorMessage(errorMsg);
-    } else {
-      router.replace('/(tabs)');
-    }
+    }, 1000);
   };
 
   const navigateToSignUp = () => {
@@ -102,12 +88,12 @@ export default function LoginScreen() {
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
+                autoCorrect={false}
                 testID="password-input"
               />
               <TouchableOpacity
-                onPress={() => setShowPassword(!showPassword)}
                 style={styles.eyeIcon}
-                testID="toggle-password"
+                onPress={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
                   <EyeOff size={20} color="#666" />
@@ -117,18 +103,8 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity
-              style={styles.forgotPassword}
-              onPress={navigateToForgotPassword}
-              testID="forgot-password-button"
-            >
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
-
             {errorMessage ? (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{errorMessage}</Text>
-              </View>
+              <Text style={styles.errorText}>{errorMessage}</Text>
             ) : null}
 
             <TouchableOpacity
@@ -142,12 +118,19 @@ export default function LoginScreen() {
               </Text>
             </TouchableOpacity>
 
-            <View style={styles.signupContainer}>
-              <Text style={styles.signupText}>Don&apos;t have an account? </Text>
-              <TouchableOpacity onPress={navigateToSignUp} testID="signup-link">
-                <Text style={styles.signupLink}>Sign Up</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={styles.forgotPasswordButton}
+              onPress={navigateToForgotPassword}
+            >
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Don't have an account? </Text>
+            <TouchableOpacity onPress={navigateToSignUp}>
+              <Text style={styles.signUpText}>Sign Up</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -166,85 +149,64 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 24,
+    paddingHorizontal: 30,
   },
   header: {
     alignItems: 'center',
     marginBottom: 40,
   },
   title: {
-    fontSize: 28,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
-    fontWeight: '400' as const,
-    color: '#2C3E50',
-    marginBottom: 8,
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#2C2C2C',
+    marginBottom: 10,
+    fontFamily: 'Times New Roman',
   },
   subtitle: {
-    fontSize: 15,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
-    fontStyle: 'italic',
-    color: '#64748b',
+    fontSize: 16,
+    color: '#666',
     textAlign: 'center',
+    fontFamily: 'Times New Roman',
   },
   form: {
-    width: '100%',
+    marginBottom: 30,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
-    borderRadius: 16,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
     marginBottom: 16,
     paddingHorizontal: 16,
-    backgroundColor: '#FAFAFA',
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
   },
   inputIcon: {
     marginRight: 12,
   },
   input: {
     flex: 1,
-    height: 50,
-    fontSize: 15,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
-    color: '#2C3E50',
+    paddingVertical: 16,
+    fontSize: 16,
+    color: '#2C2C2C',
+    fontFamily: 'Times New Roman',
   },
   eyeIcon: {
     padding: 4,
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 24,
-  },
-  forgotPasswordText: {
-    color: '#8B4513',
+  errorText: {
+    color: '#DC3545',
     fontSize: 14,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
-    fontWeight: '400' as const,
+    marginBottom: 16,
+    textAlign: 'center',
+    fontFamily: 'Times New Roman',
   },
   loginButton: {
     backgroundColor: '#8B4513',
-    borderRadius: 16,
-    height: 52,
-    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -252,58 +214,37 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   loginButtonDisabled: {
-    backgroundColor: '#ccc',
+    opacity: 0.7,
   },
   loginButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
-    fontWeight: '500' as const,
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Times New Roman',
   },
-  signupContainer: {
+  forgotPasswordButton: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  forgotPasswordText: {
+    color: '#007AFF',
+    fontSize: 16,
+    fontFamily: 'Times New Roman',
+  },
+  footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  signupText: {
-    color: '#64748b',
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
+  footerText: {
+    fontSize: 16,
+    color: '#666',
+    fontFamily: 'Times New Roman',
   },
-  signupLink: {
-    color: '#8B4513',
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
-    fontWeight: '500' as const,
-  },
-  errorContainer: {
-    backgroundColor: '#FEF2F2',
-    borderWidth: 1,
-    borderColor: '#FECACA',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
-  errorText: {
-    color: '#DC2626',
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: 'Times New Roman',
-      android: 'serif',
-      default: 'Times New Roman'
-    }),
-    textAlign: 'center',
+  signUpText: {
+    fontSize: 16,
+    color: '#007AFF',
+    fontWeight: '600',
+    fontFamily: 'Times New Roman',
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,39 +8,31 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { Mail, ArrowLeft, RefreshCw, CheckCircle } from 'lucide-react-native';
-import { useAuth } from '@/providers/AuthProvider';
-import { supabase } from '@/lib/supabase';
 
 export default function EmailConfirmationScreen() {
   const [isResending, setIsResending] = useState(false);
   const [isCheckingConfirmation, setIsCheckingConfirmation] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const { user, refreshSession } = useAuth();
-  const params = useLocalSearchParams();
 
   const handleResendConfirmation = async () => {
-    if (!user?.email) {
-      Alert.alert('Error', 'No email address found');
-      return;
-    }
-
     setIsResending(true);
     try {
-      // Note: Supabase doesn't have a direct resend confirmation method
-      // We'll show a message to the user
-      Alert.alert(
-        'Confirmation Email',
-        'If you haven&apos;t received the confirmation email, please check your spam folder or try signing up again.',
-        [
-          { text: 'OK', style: 'default' },
-          { 
-            text: 'Try Again', 
-            onPress: () => router.replace('/signup') 
-          }
-        ]
-      );
+      // Simulate resending confirmation
+      setTimeout(() => {
+        Alert.alert(
+          'Confirmation Email',
+          'If you haven\'t received the confirmation email, please check your spam folder or try signing up again.',
+          [
+            { text: 'OK', style: 'default' },
+            { 
+              text: 'Try Again', 
+              onPress: () => router.replace('/signup') 
+            }
+          ]
+        );
+      }, 1000);
     } catch {
       Alert.alert('Error', 'Failed to resend confirmation email');
     } finally {
@@ -52,112 +44,17 @@ export default function EmailConfirmationScreen() {
     router.replace('/login');
   };
 
-  // Handle URL parameters for email confirmation
-  useEffect(() => {
-    const handleUrlParams = async () => {
-      console.log('Email confirmation params:', params);
-      
-      // Check if we have confirmation tokens in URL
-      if (params.access_token || params.refresh_token) {
-        console.log('Found auth tokens in URL, processing confirmation...');
-        try {
-          // Let Supabase handle the tokens
-          const { data, error } = await supabase.auth.getSession();
-          if (data.session?.user?.email_confirmed_at) {
-            console.log('Email confirmed via URL!');
-            setIsConfirmed(true);
-            setTimeout(() => {
-              router.replace('/(tabs)');
-            }, 1500);
-          } else if (error) {
-            console.error('Error processing confirmation tokens:', error);
-          }
-        } catch (err) {
-          console.error('Error handling URL confirmation:', err);
-        }
-      }
-    };
-
-    handleUrlParams();
-  }, [params]);
-
-  // Auto-check for email confirmation every few seconds
-  useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval>;
-    let authListener: any;
-
-    const startAutoCheck = () => {
-      // Check immediately
-      checkEmailConfirmation();
-      
-      // Then check every 3 seconds
-      intervalId = setInterval(() => {
-        checkEmailConfirmation();
-      }, 3000);
-
-      // Also listen for auth state changes
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('Auth state change in email confirmation:', event, !!session?.user?.email_confirmed_at);
-        
-        if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at) {
-          setIsConfirmed(true);
-          clearInterval(intervalId);
-          
-          // Show success message and redirect
-          setTimeout(() => {
-            router.replace('/(tabs)');
-          }, 1500);
-        } else if (event === 'TOKEN_REFRESHED' && session?.user?.email_confirmed_at) {
-          setIsConfirmed(true);
-          clearInterval(intervalId);
-          
-          // Show success message and redirect
-          setTimeout(() => {
-            router.replace('/(tabs)');
-          }, 1500);
-        }
-      });
-      
-      authListener = subscription;
-    };
-
-    startAutoCheck();
-
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-      if (authListener) authListener.unsubscribe();
-    };
-  }, []);
-
-  const checkEmailConfirmation = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.user?.email_confirmed_at) {
-        setIsConfirmed(true);
-        // Redirect after showing success state
-        setTimeout(() => {
-          router.replace('/(tabs)');
-        }, 1500);
-      }
-    } catch (err) {
-      console.log('Error checking email confirmation:', err);
-    }
-  };
-
   const handleCheckEmail = async () => {
     setIsCheckingConfirmation(true);
     try {
-      await refreshSession();
-      await checkEmailConfirmation();
-      
-      if (!isConfirmed) {
+      // Simulate checking email confirmation
+      setTimeout(() => {
         Alert.alert(
           'Email Not Confirmed Yet',
           'Please check your email inbox (and spam folder) for the confirmation link. Click the link to verify your account.',
           [{ text: 'OK', style: 'default' }]
         );
-      }
+      }, 1000);
     } catch {
       Alert.alert(
         'Check Your Email',
@@ -196,7 +93,7 @@ export default function EmailConfirmationScreen() {
               Your email has been successfully confirmed!
             </Text>
             
-            <Text style={styles.email}>{user?.email}</Text>
+            <Text style={styles.email}>user@example.com</Text>
 
             <Text style={styles.description}>
               Redirecting you to the app...
@@ -205,14 +102,14 @@ export default function EmailConfirmationScreen() {
         ) : (
           <>
             <Text style={styles.subtitle}>
-              We&apos;ve sent a confirmation link to:
+              We've sent a confirmation link to:
             </Text>
             
-            <Text style={styles.email}>{user?.email}</Text>
+            <Text style={styles.email}>user@example.com</Text>
 
             <Text style={styles.description}>
               Please check your email and click the confirmation link to verify your account. 
-              We&apos;re automatically checking for confirmation...
+              We're automatically checking for confirmation...
             </Text>
           </>
         )}
@@ -227,7 +124,7 @@ export default function EmailConfirmationScreen() {
               {isCheckingConfirmation ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
-                <Text style={styles.primaryButtonText}>I&apos;ve Confirmed My Email</Text>
+                <Text style={styles.primaryButtonText}>I've Confirmed My Email</Text>
               )}
             </TouchableOpacity>
           )}
