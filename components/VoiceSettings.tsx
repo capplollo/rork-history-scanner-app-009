@@ -1,218 +1,181 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ScrollView, View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { Volume2, Check, Star } from 'lucide-react-native';
-import { voiceService, VoiceOption } from '@/services/voiceService';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  ScrollView,
+  Alert,
+} from 'react-native';
+import { Volume2, X, Play, Pause, Settings } from 'lucide-react-native';
 
-interface VoiceSettingsProps {
-  isVisible: boolean;
-  onClose: () => void;
-  onVoiceChange: (voice: VoiceOption) => void;
-  currentVoice?: VoiceOption | null;
+// Define a simplified voice interface
+interface VoiceOption {
+  identifier: string;
+  name: string;
+  language: string;
+  quality: 'high' | 'medium' | 'low';
 }
 
-export default function VoiceSettings({ isVisible, onClose, onVoiceChange, currentVoice }: VoiceSettingsProps) {
-  const [availableVoices, setAvailableVoices] = useState<VoiceOption[]>([]);
-  const [selectedVoice, setSelectedVoice] = useState<VoiceOption | null>(currentVoice || null);
+interface VoiceSettingsProps {
+  visible: boolean;
+  onClose: () => void;
+  onVoiceChange?: (voice: VoiceOption) => void;
+}
+
+export default function VoiceSettings({ 
+  visible, 
+  onClose, 
+  onVoiceChange 
+}: VoiceSettingsProps) {
+  const [selectedVoice, setSelectedVoice] = useState<VoiceOption | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (isVisible) {
-      loadVoices();
+  // Mock voice options
+  const availableVoices: VoiceOption[] = [
+    {
+      identifier: 'en-US-1',
+      name: 'Sarah (US)',
+      language: 'en-US',
+      quality: 'high'
+    },
+    {
+      identifier: 'en-GB-1',
+      name: 'James (UK)',
+      language: 'en-GB',
+      quality: 'high'
+    },
+    {
+      identifier: 'en-AU-1',
+      name: 'Emma (Australia)',
+      language: 'en-AU',
+      quality: 'medium'
+    },
+    {
+      identifier: 'en-CA-1',
+      name: 'Michael (Canada)',
+      language: 'en-CA',
+      quality: 'medium'
     }
-  }, [isVisible]);
+  ];
 
-  const loadVoices = async () => {
-    setIsLoading(true);
-    try {
-      await voiceService.initialize();
-      const voices = voiceService.getAvailableVoices();
-      setAvailableVoices(voices);
-      
-      // Set default voice if none selected
-      if (!selectedVoice && voices.length > 0) {
-        const bestVoice = voiceService.getBestVoice();
-        setSelectedVoice(bestVoice);
-      }
-    } catch (error) {
-      console.error('Failed to load voices:', error);
-      Alert.alert('Error', 'Failed to load available voices');
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    // Set default voice
+    if (!selectedVoice && availableVoices.length > 0) {
+      setSelectedVoice(availableVoices[0]);
     }
-  };
+  }, []);
 
   const handleVoiceSelect = (voice: VoiceOption) => {
     setSelectedVoice(voice);
-    onVoiceChange(voice);
+    onVoiceChange?.(voice);
   };
 
-  const testVoice = async (voice: VoiceOption) => {
+  const handleTestVoice = async () => {
+    if (!selectedVoice) return;
+
+    setIsLoading(true);
+    setIsPlaying(true);
+
     try {
-      const testText = "Hello! This is a test of the voice narrator. Welcome to the Rork History Scanner app.";
-      
-      await voiceService.speak(testText, { voice: voice.identifier }, {
-        onStart: () => {
-          Alert.alert('Testing Voice', `Playing test audio with ${voice.name}...`);
-        },
-        onDone: () => {
-          console.log('Voice test completed');
-        },
-        onError: (error) => {
-          Alert.alert('Voice Test Error', `Failed to test voice: ${error}`);
-        }
-      });
-    } catch {
-      Alert.alert('Error', 'Failed to test voice');
+      // Simulate voice test
+      setTimeout(() => {
+        setIsPlaying(false);
+        setIsLoading(false);
+        Alert.alert('Voice Test', `Testing voice: ${selectedVoice.name}`);
+      }, 2000);
+    } catch (error) {
+      setIsPlaying(false);
+      setIsLoading(false);
+      Alert.alert('Error', 'Failed to test voice. Please try again.');
     }
   };
 
-  const getQualityColor = (quality: string) => {
-    switch (quality.toLowerCase()) {
-      case 'premium':
-        return '#FFD700'; // Gold
-      case 'enhanced':
-        return '#87CEEB'; // Sky blue
-      case 'basic':
-        return '#98FB98'; // Pale green
-      default:
-        return '#D3D3D3'; // Light gray
-    }
-  };
-
-  const getQualityLabel = (quality: string) => {
-    switch (quality.toLowerCase()) {
-      case 'premium':
-        return 'Premium';
-      case 'enhanced':
-        return 'Enhanced';
-      case 'basic':
-        return 'Basic';
-      default:
-        return 'Standard';
-    }
-  };
-
-  const getProviderIcon = (provider: string) => {
-    if (provider === 'elevenlabs') {
-      return <Star size={16} color="#FFD700" />;
-    }
-    return <Volume2 size={16} color="#666" />;
+  const handleStopTest = () => {
+    setIsPlaying(false);
+    setIsLoading(false);
   };
 
   return (
-    <Modal visible={isVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+    >
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Voice Settings</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>Done</Text>
+            <X size={24} color="#000" />
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {isLoading ? (
-            <View style={styles.loadingContainer}>
-              <Text style={styles.loadingText}>Loading voices...</Text>
-            </View>
-          ) : (
-            <>
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Available Voices</Text>
-                <Text style={styles.sectionSubtitle}>
-                  Using Charles - Mature narrator for the best storytelling experience
-                </Text>
-              </View>
+        <ScrollView style={styles.content}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Select Voice</Text>
+            <Text style={styles.sectionDescription}>
+              Choose a voice for monument narration
+            </Text>
+          </View>
 
-              {availableVoices.map((voice, index) => {
-                const uniqueKey = `${voice.provider}-${voice.identifier || index}-${voice.name.replace(/\s+/g, '-')}`;
-                return (
-                  <TouchableOpacity
-                    key={uniqueKey}
-                    style={[
-                      styles.voiceItem,
-                      selectedVoice?.identifier === voice.identifier && styles.selectedVoiceItem
-                    ]}
-                    onPress={() => handleVoiceSelect(voice)}
-                  >
-                  <View style={styles.voiceInfo}>
-                    <View style={styles.voiceHeader}>
-                      <Text style={styles.voiceName}>{voice.name}</Text>
-                      <View style={styles.voiceBadges}>
-                        <View style={[styles.qualityBadge, { backgroundColor: getQualityColor(voice.quality) }]}>
-                          <Text style={styles.qualityText}>{getQualityLabel(voice.quality)}</Text>
-                        </View>
-                        {getProviderIcon(voice.provider)}
-                      </View>
-                    </View>
-                    
-                    <View style={styles.voiceDetails}>
-                      <Text style={styles.voiceDetail}>
-                        Language: {voice.language}
-                      </Text>
-                      {voice.gender && (
-                        <Text style={styles.voiceDetail}>
-                          Gender: {voice.gender}
-                        </Text>
-                      )}
-                      <Text style={styles.voiceDetail}>
-                        Provider: {voice.provider === 'elevenlabs' ? 'ElevenLabs AI' : 'Built-in'}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.voiceActions}>
-                    {selectedVoice?.identifier === voice.identifier && (
-                      <Check size={20} color="#007AFF" />
-                    )}
-                    <TouchableOpacity
-                      style={styles.testButton}
-                      onPress={() => testVoice(voice)}
-                    >
-                      <Volume2 size={16} color="#007AFF" />
-                      <Text style={styles.testButtonText}>Test</Text>
-                    </TouchableOpacity>
-                  </View>
-                  </TouchableOpacity>
-                );
-              })}
-
-              <View style={styles.infoSection}>
-                <Text style={styles.infoTitle}>Voice Quality</Text>
-                <View style={styles.qualityInfo}>
-                  <View style={styles.qualityItem}>
-                    <View style={[styles.qualityDot, { backgroundColor: '#FFD700' }]} />
-                    <Text style={styles.qualityItemText}>Premium - AI-powered natural voices (ElevenLabs)</Text>
-                  </View>
-                  <View style={styles.qualityItem}>
-                    <View style={[styles.qualityDot, { backgroundColor: '#87CEEB' }]} />
-                    <Text style={styles.qualityItemText}>Enhanced - High-quality device voices</Text>
-                  </View>
-                  <View style={styles.qualityItem}>
-                    <View style={[styles.qualityDot, { backgroundColor: '#98FB98' }]} />
-                    <Text style={styles.qualityItemText}>Basic - Standard device voices</Text>
+          <View style={styles.voiceList}>
+            {availableVoices.map((voice) => (
+              <TouchableOpacity
+                key={voice.identifier}
+                style={[
+                  styles.voiceOption,
+                  selectedVoice?.identifier === voice.identifier && styles.selectedVoice
+                ]}
+                onPress={() => handleVoiceSelect(voice)}
+              >
+                <View style={styles.voiceInfo}>
+                  <Text style={styles.voiceName}>{voice.name}</Text>
+                  <Text style={styles.voiceLanguage}>{voice.language}</Text>
+                  <View style={styles.qualityContainer}>
+                    <Text style={styles.qualityText}>
+                      Quality: {voice.quality}
+                    </Text>
                   </View>
                 </View>
-              </View>
+                
+                {selectedVoice?.identifier === voice.identifier && (
+                  <View style={styles.selectedIndicator}>
+                    <Text style={styles.selectedText}>✓</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
 
-              <View style={styles.infoSection}>
-                <Text style={styles.infoTitle}>Voice Quality Tips</Text>
-                <Text style={styles.infoText}>
-                  • Premium voices (ElevenLabs) offer the most natural sound but require internet connection{"\n"}
-                  • Built-in voices work offline and are reliable for all content{"\n"}
-                  • If ElevenLabs quota is exceeded, the app automatically falls back to built-in voices{"\n"}
-                  • For best quality, ensure good internet connection when using premium voices
-                </Text>
-              </View>
-
-              <View style={styles.infoSection}>
-                <Text style={styles.infoTitle}>About Charles - Mature narrator</Text>
-                <Text style={styles.infoText}>
-                  Charles is a premium AI voice from ElevenLabs, specifically chosen for his mature, 
-                  authoritative tone that&apos;s perfect for historical storytelling. His voice brings 
-                  monument descriptions to life with natural inflection and engaging delivery.
-                </Text>
-              </View>
-            </>
+          {selectedVoice && (
+            <View style={styles.testSection}>
+              <Text style={styles.testTitle}>Test Voice</Text>
+              <Text style={styles.testDescription}>
+                Listen to how {selectedVoice.name} sounds
+              </Text>
+              
+              <TouchableOpacity
+                style={styles.testButton}
+                onPress={isPlaying ? handleStopTest : handleTestVoice}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Text style={styles.testButtonText}>Loading...</Text>
+                ) : isPlaying ? (
+                  <>
+                    <Pause size={20} color="#FFF" />
+                    <Text style={styles.testButtonText}>Stop Test</Text>
+                  </>
+                ) : (
+                  <>
+                    <Play size={20} color="#FFF" />
+                    <Text style={styles.testButtonText}>Test Voice</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
           )}
         </ScrollView>
       </View>
@@ -223,165 +186,135 @@ export default function VoiceSettings({ isVisible, onClose, onVoiceChange, curre
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#FEFEFE',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e1e5e9',
-    backgroundColor: '#fff',
+    borderBottomColor: '#E5E5E5',
   },
   title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1a1a1a',
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2C2C2C',
+    fontFamily: 'Times New Roman',
   },
   closeButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  closeButtonText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '500',
+    padding: 8,
   },
   content: {
     flex: 1,
-    padding: 16,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 40,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#666',
+    padding: 20,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 4,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2C2C2C',
+    marginBottom: 8,
+    fontFamily: 'Times New Roman',
   },
-  sectionSubtitle: {
+  sectionDescription: {
     fontSize: 14,
     color: '#666',
-    lineHeight: 20,
+    fontFamily: 'Times New Roman',
   },
-  voiceItem: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+  voiceList: {
+    gap: 12,
+    marginBottom: 24,
+  },
+  voiceOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
-    marginBottom: 12,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e1e5e9',
+    borderColor: '#E5E5E5',
   },
-  selectedVoiceItem: {
-    borderColor: '#007AFF',
-    backgroundColor: '#f0f8ff',
+  selectedVoice: {
+    backgroundColor: '#FFF8F0',
+    borderColor: '#8B4513',
   },
   voiceInfo: {
     flex: 1,
   },
-  voiceHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
   voiceName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
-    flex: 1,
+    color: '#2C2C2C',
+    marginBottom: 4,
+    fontFamily: 'Times New Roman',
   },
-  voiceBadges: {
+  voiceLanguage: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+    fontFamily: 'Times New Roman',
+  },
+  qualityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  qualityBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
   },
   qualityText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
-  voiceDetails: {
-    gap: 2,
-  },
-  voiceDetail: {
     fontSize: 12,
-    color: '#666',
+    color: '#8B4513',
+    fontFamily: 'Times New Roman',
   },
-  voiceActions: {
-    flexDirection: 'row',
+  selectedIndicator: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#8B4513',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 12,
-    marginTop: 12,
+  },
+  selectedText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  testSection: {
+    backgroundColor: '#F8F9FA',
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+  },
+  testTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2C2C2C',
+    marginBottom: 8,
+    fontFamily: 'Times New Roman',
+  },
+  testDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 16,
+    fontFamily: 'Times New Roman',
   },
   testButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#f0f8ff',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#007AFF',
+    justifyContent: 'center',
+    backgroundColor: '#8B4513',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    gap: 8,
   },
   testButtonText: {
-    fontSize: 12,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  infoSection: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: '#e1e5e9',
-  },
-  infoTitle: {
+    color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 12,
-  },
-  qualityInfo: {
-    gap: 8,
-  },
-  qualityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  qualityDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  qualityItemText: {
-    fontSize: 14,
-    color: '#666',
-    flex: 1,
-  },
-  infoText: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
+    fontFamily: 'Times New Roman',
   },
 });
