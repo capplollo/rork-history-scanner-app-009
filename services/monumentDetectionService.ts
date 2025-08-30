@@ -136,6 +136,16 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
     cleanContent = jsonMatch[0];
   }
   
+  // Fix specific backslash issues that cause "Unrecognized token '\'"
+  // This handles the specific error pattern we're seeing
+  cleanContent = cleanContent
+    // Fix escaped backslashes followed by quotes that break JSON
+    .replace(/\\\\?"/g, '"')
+    // Fix lone backslashes that aren't valid JSON escape sequences
+    .replace(/\\(?!["\\nrtbf/])/g, '')
+    // Fix any remaining problematic escape sequences
+    .replace(/\\([^"\\nrtbf/])/g, '$1');
+  
   // Additional check for unterminated strings at the end
   // Count quotes to see if we have an odd number (indicating unterminated string)
   const quoteCount = (cleanContent.match(/"/g) || []).length;
@@ -149,8 +159,10 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
   cleanContent = cleanContent
     // Remove ALL control characters except newlines and tabs
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '')
-    // Fix escaped quotes that break JSON parsing
-    .replace(/\\"/g, '"')
+    // Fix problematic backslashes that break JSON parsing
+    .replace(/\\(?!["\\nrtbf/])/g, '')
+    // Fix escaped quotes that break JSON parsing - be more careful
+    .replace(/\\\\?"/g, '"')
     // Fix unescaped newlines within JSON strings - more comprehensive
     .replace(/"([^"]*?)\n+([^"]*?)"/g, '"$1 $2"')
     // Fix unescaped tabs within JSON strings
@@ -159,8 +171,6 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
     .replace(/"([^"]*?)\r+([^"]*?)"/g, '"$1 $2"')
     // Fix unterminated strings by finding and fixing broken quotes
     .replace(/"([^"]*?)\*\*([^"]*?)\*\*([^"]*?)"/g, '"$1**$2**$3"')
-    // Fix any unescaped quotes within strings
-    .replace(/"([^"]*?)"([^":,}\]\s][^":,}\]]*?)([":,}\]])/g, '"$1\\"$2$3')
     // Remove any trailing commas before closing braces/brackets
     .replace(/,\s*([}\]])/g, '$1')
     // Fix any double commas
@@ -211,16 +221,16 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
         extractedJson = extractedJson
           // Remove any remaining control characters
           .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '')
-          // Fix escaped quotes that break JSON parsing
-          .replace(/\\"/g, '"')
+          // Fix problematic backslashes that break JSON parsing
+          .replace(/\\(?!["\\nrtbf/])/g, '')
+          // Fix escaped quotes that break JSON parsing - be more careful
+          .replace(/\\\\?"/g, '"')
           // Fix malformed strings by ensuring proper escaping
           .replace(/"([^"\\]*)\\n([^"\\]*)"/g, '"$1\\n$2"')
           .replace(/"([^"\\]*)\\t([^"\\]*)"/g, '"$1\\t$2"')
           .replace(/"([^"\\]*)\\r([^"\\]*)"/g, '"$1\\r$2"')
           // Fix unterminated strings by finding and closing them properly
           .replace(/"([^"]*?)\*\*([^"]*?)\*\*([^"]*?)(?="|$)/g, '"$1**$2**$3"')
-          // Fix any unescaped quotes within strings more aggressively
-          .replace(/"([^"]*?)"([^":,}\]\s][^":,}\]]*?)([":,}\]])/g, '"$1\\"$2$3')
           // Ensure strings are properly terminated
           .replace(/"([^"]*?)$/, '"$1"')
           // Remove any trailing commas before closing braces/brackets
