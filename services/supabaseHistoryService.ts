@@ -80,7 +80,7 @@ export class SupabaseHistoryService {
       // Simple query without abort controller to avoid AbortError issues
       const { data, error } = await supabase
         .from('scan_history')
-        .select('id, monument_name, location, period, description, significance, facts, image_url, scanned_image_url, scanned_at, confidence, is_recognized, detailed_description')
+        .select('*')
         .eq('user_id', userId)
         .order('scanned_at', { ascending: false })
         .limit(limit);

@@ -136,6 +136,15 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
     cleanContent = jsonMatch[0];
   }
   
+  // Additional check for unterminated strings at the end
+  // Count quotes to see if we have an odd number (indicating unterminated string)
+  const quoteCount = (cleanContent.match(/"/g) || []).length;
+  if (quoteCount % 2 !== 0) {
+    // We have an unterminated string, try to fix it
+    console.log('Detected unterminated string, attempting to fix...');
+    cleanContent = cleanContent + '"';
+  }
+  
   // More aggressive control character removal and JSON fixing
   cleanContent = cleanContent
     // Remove ALL control characters except newlines and tabs
@@ -148,6 +157,10 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
     .replace(/"([^"]*?)\t+([^"]*?)"/g, '"$1 $2"')
     // Fix unescaped carriage returns within JSON strings
     .replace(/"([^"]*?)\r+([^"]*?)"/g, '"$1 $2"')
+    // Fix unterminated strings by finding and fixing broken quotes
+    .replace(/"([^"]*?)\*\*([^"]*?)\*\*([^"]*?)"/g, '"$1**$2**$3"')
+    // Fix any unescaped quotes within strings
+    .replace(/"([^"]*?)"([^":,}\]\s][^":,}\]]*?)([":,}\]])/g, '"$1\\"$2$3')
     // Remove any trailing commas before closing braces/brackets
     .replace(/,\s*([}\]])/g, '$1')
     // Fix any double commas
@@ -156,7 +169,9 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
     .replace(/\s*:\s*/g, ': ')
     .replace(/\s*,\s*/g, ', ')
     // Remove any remaining problematic characters in strings
-    .replace(/"([^"]*?)[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]([^"]*?)"/g, '"$1$2"');
+    .replace(/"([^"]*?)[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]([^"]*?)"/g, '"$1$2"')
+    // Fix specific issue with unterminated strings at end of content
+    .replace(/"([^"]*?)$/, '"$1"');
 
   console.log('Cleaned content for JSON parsing:', cleanContent.substring(0, 200) + '...');
 
@@ -202,6 +217,12 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
           .replace(/"([^"\\]*)\\n([^"\\]*)"/g, '"$1\\n$2"')
           .replace(/"([^"\\]*)\\t([^"\\]*)"/g, '"$1\\t$2"')
           .replace(/"([^"\\]*)\\r([^"\\]*)"/g, '"$1\\r$2"')
+          // Fix unterminated strings by finding and closing them properly
+          .replace(/"([^"]*?)\*\*([^"]*?)\*\*([^"]*?)(?="|$)/g, '"$1**$2**$3"')
+          // Fix any unescaped quotes within strings more aggressively
+          .replace(/"([^"]*?)"([^":,}\]\s][^":,}\]]*?)([":,}\]])/g, '"$1\\"$2$3')
+          // Ensure strings are properly terminated
+          .replace(/"([^"]*?)$/, '"$1"')
           // Remove any trailing commas before closing braces/brackets
           .replace(/,\s*([}\]])/g, '$1')
           // Fix any double commas
