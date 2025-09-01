@@ -136,6 +136,17 @@ Respond in this exact JSON format:
 CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bullet point should be a complete, informative sentence about the monument/artwork.`;
       
       // Call the AI API
+      console.log('Making AI API request to:', 'https://toolkit.rork.com/text/llm/');
+      console.log('Request payload structure:', {
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'text', text: 'PROMPT_LENGTH: ' + prompt.length },
+            { type: 'image', image: 'BASE64_LENGTH: ' + base64.length }
+          ]
+        }]
+      });
+      
       const aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
         method: 'POST',
         headers: {
@@ -154,8 +165,56 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         })
       });
       
+      console.log('AI API response status:', aiResponse.status);
+      console.log('AI API response headers:', Object.fromEntries(aiResponse.headers.entries()));
+      
       if (!aiResponse.ok) {
-        throw new Error(`AI API error: ${aiResponse.status} ${aiResponse.statusText}`);
+        const errorText = await aiResponse.text();
+        console.error('AI API error response body:', errorText);
+        
+        // If it's a 500 error, provide a fallback response
+        if (aiResponse.status === 500) {
+          console.log('AI service unavailable, using fallback response');
+          setAnalysisStatus("AI service unavailable, providing basic analysis...");
+          
+          // Create a fallback analysis result
+          const fallbackResult = {
+            artworkName: "Monument or Artwork",
+            confidence: 50,
+            location: "Location Unknown",
+            period: "Unknown",
+            isRecognized: false,
+            detailedDescription: {
+              keyTakeaways: [
+                "This appears to be a monument or artwork captured in the image.",
+                "The AI analysis service is currently unavailable for detailed identification.",
+                "You can try again later when the service is restored.",
+                "Consider adding context information to help with future analysis."
+              ],
+              inDepthContext: "The AI analysis service is temporarily unavailable, so we cannot provide detailed historical information about this monument or artwork at this time.\n\nWe apologize for the inconvenience. The service should be restored shortly.\n\nIn the meantime, you can try adding context information such as the name, location, or building where this monument or artwork is located to help with future analysis attempts.",
+              curiosities: "AI analysis service is currently unavailable."
+            }
+          };
+          
+          // Navigate to scan result with fallback data
+          router.push({
+            pathname: "/scan-result" as any,
+            params: {
+              artworkName: fallbackResult.artworkName,
+              confidence: fallbackResult.confidence.toString(),
+              location: fallbackResult.location,
+              period: fallbackResult.period,
+              isRecognized: fallbackResult.isRecognized.toString(),
+              keyTakeaways: JSON.stringify(fallbackResult.detailedDescription.keyTakeaways),
+              inDepthContext: fallbackResult.detailedDescription.inDepthContext,
+              curiosities: fallbackResult.detailedDescription.curiosities,
+              scannedImage: selectedImage,
+            },
+          });
+          return;
+        }
+        
+        throw new Error(`AI API error: ${aiResponse.status}`);
       }
       
       const aiResult = await aiResponse.json();
@@ -263,7 +322,19 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
     } catch (error) {
       console.error('Error detecting monuments and art:', error);
       console.error('Error details:', error);
-      Alert.alert('Analysis Failed', 'Failed to analyze the image. Please check your internet connection and try again.');
+      
+      let errorMessage = 'Failed to analyze the image. Please try again.';
+      if (error instanceof Error) {
+        if (error.message.includes('500')) {
+          errorMessage = 'The AI service is temporarily unavailable. Please try again in a few moments.';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your internet connection and try again.';
+        } else if (error.message.includes('JSON')) {
+          errorMessage = 'There was an issue processing the AI response. Please try again.';
+        }
+      }
+      
+      Alert.alert('Analysis Failed', errorMessage);
     } finally {
       setIsAnalyzing(false);
       setAnalysisStatus("");
