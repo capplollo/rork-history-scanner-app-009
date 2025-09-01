@@ -169,37 +169,76 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
       // Remove markdown code blocks
       cleanedResponse = cleanedResponse.replace(/```json\s*/g, '').replace(/```\s*/g, '');
       
-      // Fix escaped quotes and other JSON issues
-      cleanedResponse = cleanedResponse.replace(/\\"/g, '"');
-      cleanedResponse = cleanedResponse.replace(/\\n/g, '\n');
+      // Remove leading/trailing whitespace
+      cleanedResponse = cleanedResponse.trim();
       
+      console.log('Raw AI response:', aiResult.completion);
       console.log('Cleaned content that will be parsed:', cleanedResponse);
       
       let analysisResult;
       try {
+        // First attempt: try parsing as-is
         analysisResult = JSON.parse(cleanedResponse);
       } catch (parseError) {
         console.error('Failed to parse AI response as JSON:', parseError);
-        console.error('Raw AI response:', aiResult.completion);
         console.error('Cleaned content that failed to parse:', cleanedResponse);
         
         // Try a more aggressive cleaning approach
         try {
-          // Remove any remaining markdown or extra characters
-          let secondCleanAttempt = aiResult.completion
+          // Fix common JSON issues that break parsing
+          let secondCleanAttempt = cleanedResponse
+            // Fix unescaped newlines in string values
+            .replace(/(?<!\\)\n/g, '\\n')
+            // Fix unescaped quotes
+            .replace(/(?<!\\)"/g, '\"')
+            // Fix the quotes we just over-escaped at the beginning/end of values
+            .replace(/":\ *\\"/g, '": "')
+            .replace(/\\",/g, '",') 
+            .replace(/\\"\s*}/g, '" }')
+            .replace(/\\"\s*]/g, '" ]')
+            // Fix escaped single quotes that don't need escaping in JSON
+            .replace(/\\'/g, "'")
+            // Fix any remaining double-escaped characters
+            .replace(/\\\\/g, '\\')
+            // Remove any remaining markdown
             .replace(/```json/g, '')
             .replace(/```/g, '')
-            .replace(/^\s*/, '') // Remove leading whitespace
-            .replace(/\s*$/, '') // Remove trailing whitespace
-            .replace(/\\\\n/g, '\n') // Fix double-escaped newlines
-            .replace(/\\\"/g, '"') // Fix double-escaped quotes
-            .replace(/\\'/g, "'"); // Fix escaped single quotes
+            .trim();
           
           console.log('Second JSON parse attempt with content:', secondCleanAttempt);
           analysisResult = JSON.parse(secondCleanAttempt);
         } catch (secondParseError) {
           console.error('Second JSON parse attempt also failed:', secondParseError);
-          throw new Error('Failed to parse AI response as valid JSON');
+          
+          // Final attempt: try to extract just the JSON object
+          try {
+            const jsonMatch = aiResult.completion.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              let finalAttempt = jsonMatch[0]
+                // Fix unescaped control characters
+                .replace(/[\x00-\x1F\x7F-\x9F]/g, (match: string) => {
+                  switch (match) {
+                    case '\n': return '\\n';
+                    case '\r': return '\\r';
+                    case '\t': return '\\t';
+                    case '\b': return '\\b';
+                    case '\f': return '\\f';
+                    default: return '';
+                  }
+                })
+                // Fix quotes that aren't properly escaped
+                .replace(/"([^"]*?)\n([^"]*?)"/g, '"$1\\n$2"')
+                .trim();
+              
+              console.log('Final JSON parse attempt with content:', finalAttempt);
+              analysisResult = JSON.parse(finalAttempt);
+            } else {
+              throw new Error('Could not extract JSON object from response');
+            }
+          } catch (finalParseError) {
+            console.error('Final JSON parse attempt also failed:', finalParseError);
+            throw new Error('Failed to parse AI response as valid JSON');
+          }
         }
       }
       
