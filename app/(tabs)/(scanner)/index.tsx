@@ -14,7 +14,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info, Zap } from "lucide-react-native";
+import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info, Zap, Camera } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { mockMonuments } from "@/data/mockMonuments";
@@ -385,55 +385,30 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <LinearGradient
-          colors={["#2C3E50", "#34495E"]}
-          style={styles.headerGradient}
-        >
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Discover History</Text>
-            <Text style={styles.headerSubtitle}>
-              Scan monuments and art to unlock their stories
-            </Text>
-            <View style={styles.headerStats}>
-              <View style={styles.statItem}>
-                <Sparkles size={16} color="rgba(255,255,255,0.8)" />
-                <Text style={styles.statText}>AI-Powered</Text>
-              </View>
-              <View style={styles.statItem}>
-                <Zap size={16} color="rgba(255,255,255,0.8)" />
-                <Text style={styles.statText}>Instant Results</Text>
-              </View>
-            </View>
-          </View>
-        </LinearGradient>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Discover</Text>
+          <Text style={styles.headerSubtitle}>
+            Scan monuments and art to unlock their stories
+          </Text>
+        </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Capture or Select</Text>
-          
           {selectedImage ? (
             <View style={styles.selectedImageContainer}>
               <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
-              <LinearGradient
-                colors={["transparent", "rgba(0,0,0,0.6)"]}
-                style={styles.imageOverlay}
-              >
-                <TouchableOpacity style={styles.clearButton} onPress={clearImage}>
-                  <X size={20} color="#FFF" />
-                </TouchableOpacity>
-              </LinearGradient>
+              <TouchableOpacity style={styles.clearButton} onPress={clearImage}>
+                <X size={18} color="#FFF" />
+              </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.placeholderContainer}>
-              <LinearGradient
-                colors={["#8B4513", "#A0522D"]}
-                style={styles.placeholderGradient}
-              >
-                <Sparkles size={48} color="rgba(255,255,255,0.9)" />
+              <View style={styles.placeholderContent}>
+                <CameraIcon size={32} color="#8B4513" />
                 <Text style={styles.placeholderText}>Ready to Discover</Text>
                 <Text style={styles.placeholderSubtext}>
-                  Capture or select an image to begin your journey
+                  Capture or select an image to begin
                 </Text>
-              </LinearGradient>
+              </View>
             </View>
           )}
         </View>
@@ -442,23 +417,13 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           <View style={styles.section}>
             <View style={styles.actionButtons}>
               <TouchableOpacity style={styles.actionButton} onPress={takePhoto}>
-                <LinearGradient
-                  colors={["#4f46e5", "#7c3aed"]}
-                  style={styles.actionButtonGradient}
-                >
-                  <CameraIcon size={24} color="#ffffff" />
-                  <Text style={styles.actionButtonText}>Take Photo</Text>
-                </LinearGradient>
+                <CameraIcon size={20} color="#8B4513" />
+                <Text style={styles.actionButtonText}>Take Photo</Text>
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.actionButton} onPress={pickImageFromGallery}>
-                <LinearGradient
-                  colors={["#059669", "#10b981"]}
-                  style={styles.actionButtonGradient}
-                >
-                  <ImageIcon size={24} color="#ffffff" />
-                  <Text style={styles.actionButtonText}>From Gallery</Text>
-                </LinearGradient>
+                <ImageIcon size={20} color="#8B4513" />
+                <Text style={styles.actionButtonText}>From Gallery</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -545,46 +510,29 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               onPress={analyzeImage}
               disabled={isAnalyzing}
             >
-              <LinearGradient
-                colors={isAnalyzing ? ["#999", "#777"] : ["#dc2626", "#f87171"]}
-                style={styles.analyzeGradient}
-              >
-                {isAnalyzing ? (
-                  <View style={styles.analyzingContainer}>
-                    <ActivityIndicator size="small" color="#FFF" />
-                    <Text style={styles.analyzeButtonText}>{analysisStatus}</Text>
-                  </View>
-                ) : (
-                  <View style={styles.analyzeContainer}>
-                    <Sparkles size={24} color="#FFF" />
-                    <Text style={styles.analyzeButtonText}>Discover History</Text>
-                  </View>
-                )}
-              </LinearGradient>
+              {isAnalyzing ? (
+                <View style={styles.analyzingContainer}>
+                  <ActivityIndicator size="small" color="#8B4513" />
+                  <Text style={styles.analyzeButtonText}>{analysisStatus}</Text>
+                </View>
+              ) : (
+                <View style={styles.analyzeContainer}>
+                  <Sparkles size={20} color="#8B4513" />
+                  <Text style={styles.analyzeButtonText}>Discover History</Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
         )}
 
         <View style={styles.section}>
           <View style={styles.tipsCard}>
-            <Text style={styles.tipsTitle}>Pro Tips</Text>
+            <Text style={styles.tipsTitle}>Tips for Better Results</Text>
             <View style={styles.tipsList}>
-              <View style={styles.tipItem}>
-                <View style={styles.tipDot} />
-                <Text style={styles.tipText}>Ensure good lighting and clear focus</Text>
-              </View>
-              <View style={styles.tipItem}>
-                <View style={styles.tipDot} />
-                <Text style={styles.tipText}>Include the entire monument or artwork</Text>
-              </View>
-              <View style={styles.tipItem}>
-                <View style={styles.tipDot} />
-                <Text style={styles.tipText}>Avoid extreme angles or reflections</Text>
-              </View>
-              <View style={styles.tipItem}>
-                <View style={styles.tipDot} />
-                <Text style={styles.tipText}>Add context for better accuracy</Text>
-              </View>
+              <Text style={styles.tipText}>• Ensure good lighting and clear focus</Text>
+              <Text style={styles.tipText}>• Include the entire monument or artwork</Text>
+              <Text style={styles.tipText}>• Avoid extreme angles or reflections</Text>
+              <Text style={styles.tipText}>• Add context for better accuracy</Text>
             </View>
           </View>
         </View>
@@ -598,6 +546,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FEFEFE",
   },
+  header: {
+    paddingTop: 60,
+    paddingBottom: 30,
+    paddingHorizontal: 20,
+    backgroundColor: "#FEFEFE",
+  },
   headerGradient: {
     paddingTop: 20,
     paddingBottom: 30,
@@ -607,25 +561,24 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 32,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "400",
-    color: "#ffffff",
+    color: "#2C3E50",
     marginBottom: 8,
   },
   headerSubtitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontStyle: "italic",
-    color: "rgba(255,255,255,0.9)",
+    color: "#64748b",
     lineHeight: 22,
   },
   headerStats: {
@@ -688,6 +641,9 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   clearButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     borderRadius: 20,
     padding: 8,
@@ -695,12 +651,16 @@ const styles = StyleSheet.create({
   placeholderContainer: {
     height: 280,
     borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 8,
+    backgroundColor: '#f8fafc',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    borderStyle: 'dashed',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderContent: {
+    alignItems: 'center',
+    gap: 12,
   },
   placeholderGradient: {
     flex: 1,
@@ -709,16 +669,14 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   placeholderText: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#ffffff",
-    marginTop: 16,
-    marginBottom: 8,
+    color: "#2C3E50",
   },
   placeholderSubtext: {
     fontSize: 14,
@@ -727,8 +685,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    fontStyle: "italic",
-    color: "rgba(255,255,255,0.9)",
+    color: "#64748b",
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -738,13 +695,21 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
+    backgroundColor: '#ffffff',
     borderRadius: 16,
-    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    gap: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   actionButtonGradient: {
     flexDirection: 'row',
@@ -762,7 +727,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#ffffff",
+    color: "#8B4513",
   },
   contextCard: {
     backgroundColor: '#ffffff',
@@ -852,13 +817,17 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   analyzeButton: {
+    backgroundColor: '#ffffff',
     borderRadius: 16,
-    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#8B4513',
+    paddingVertical: 20,
+    paddingHorizontal: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   analyzeButtonDisabled: {
     opacity: 0.7,
@@ -887,7 +856,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#ffffff",
+    color: "#8B4513",
   },
   tipsCard: {
     backgroundColor: '#ffffff',
@@ -926,7 +895,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   tipText: {
-    flex: 1,
     fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
@@ -935,5 +903,6 @@ const styles = StyleSheet.create({
     }),
     color: "#64748b",
     lineHeight: 20,
+    marginBottom: 4,
   },
 });

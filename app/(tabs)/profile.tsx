@@ -75,25 +75,20 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <LinearGradient
-          colors={["#2C3E50", "#34495E"]}
-          style={styles.headerGradient}
-        >
-          <View style={styles.headerContent}>
-            <View style={styles.headerTop}>
-              <Text style={styles.headerTitle}>Your Journey</Text>
-              <TouchableOpacity 
-                style={styles.settingsButton}
-                onPress={() => setShowSettings(true)}
-              >
-                <Settings size={24} color="rgba(255,255,255,0.9)" />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.headerSubtitle}>
-              Track your discoveries and explore history
-            </Text>
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <Text style={styles.headerTitle}>Profile</Text>
+            <TouchableOpacity 
+              style={styles.settingsButton}
+              onPress={() => setShowSettings(true)}
+            >
+              <Settings size={24} color="#8B4513" />
+            </TouchableOpacity>
           </View>
-        </LinearGradient>
+          <Text style={styles.headerSubtitle}>
+            Track your discoveries and explore history
+          </Text>
+        </View>
 
         <View style={styles.section}>
           <View style={styles.profileCard}>
@@ -137,16 +132,11 @@ export default function ProfileScreen() {
           <View style={styles.statsGrid}>
             {stats.map((stat, index) => (
               <TouchableOpacity key={index} style={styles.statCard}>
-                <LinearGradient
-                  colors={index === 0 ? ["#4f46e5", "#7c3aed"] : ["#059669", "#10b981"]}
-                  style={styles.statGradient}
-                >
-                  <View style={styles.statContent}>
-                    <stat.icon size={24} color="rgba(255,255,255,0.9)" />
-                    <Text style={styles.statValue}>{stat.value}</Text>
-                    <Text style={styles.statLabel}>{stat.label}</Text>
-                  </View>
-                </LinearGradient>
+                <View style={styles.statContent}>
+                  <stat.icon size={24} color="#8B4513" />
+                  <Text style={styles.statValue}>{stat.value}</Text>
+                  <Text style={styles.statLabel}>{stat.label}</Text>
+                </View>
               </TouchableOpacity>
             ))}
           </View>
@@ -170,13 +160,8 @@ export default function ProfileScreen() {
                 Start scanning monuments and art to see your discoveries here
               </Text>
               <TouchableOpacity style={styles.startButton} onPress={() => router.push('/(tabs)/(scanner)')}>  
-                <LinearGradient
-                  colors={["#dc2626", "#f87171"]}
-                  style={styles.startGradient}
-                >
-                  <Sparkles size={16} color="#ffffff" />
-                  <Text style={styles.startButtonText}>Start Exploring</Text>
-                </LinearGradient>
+                <Sparkles size={16} color="#8B4513" />
+                <Text style={styles.startButtonText}>Start Exploring</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -184,18 +169,13 @@ export default function ProfileScreen() {
         
         <View style={styles.section}>
           <View style={styles.achievementCard}>
-            <LinearGradient
-              colors={["#f59e0b", "#fbbf24"]}
-              style={styles.achievementGradient}
-            >
-              <View style={styles.achievementContent}>
-                <Award size={32} color="rgba(255,255,255,0.9)" />
-                <Text style={styles.achievementTitle}>Ready to Discover</Text>
-                <Text style={styles.achievementDescription}>
-                  Your first monument scan awaits. Start your historical journey today!
-                </Text>
-              </View>
-            </LinearGradient>
+            <View style={styles.achievementContent}>
+              <Award size={32} color="#8B4513" />
+              <Text style={styles.achievementTitle}>Ready to Discover</Text>
+              <Text style={styles.achievementDescription}>
+                Your first monument scan awaits. Start your historical journey today!
+              </Text>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -243,6 +223,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FEFEFE",
   },
+  header: {
+    paddingTop: 60,
+    paddingBottom: 30,
+    paddingHorizontal: 20,
+    backgroundColor: "#FEFEFE",
+  },
   headerGradient: {
     paddingTop: 20,
     paddingBottom: 30,
@@ -257,25 +243,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 32,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "400",
-    color: "#ffffff",
+    color: "#2C3E50",
   },
   headerSubtitle: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontStyle: "italic",
-    color: "rgba(255,255,255,0.9)",
+    color: "#64748b",
     lineHeight: 22,
+    marginTop: 8,
   },
   settingsButton: {
     padding: 8,
@@ -386,13 +372,17 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
+    backgroundColor: '#ffffff',
     borderRadius: 16,
-    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    padding: 20,
+    alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   statGradient: {
     padding: 20,
@@ -410,7 +400,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#ffffff",
+    color: "#2C3E50",
   },
   statLabel: {
     fontSize: 14,
@@ -420,7 +410,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "rgba(255,255,255,0.9)",
+    color: "#64748b",
     textAlign: 'center',
   },
   activityCard: {
@@ -470,13 +460,21 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   startButton: {
+    backgroundColor: '#ffffff',
     borderRadius: 12,
-    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#8B4513',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    gap: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 2,
   },
   startGradient: {
     flexDirection: 'row',
@@ -494,16 +492,20 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#ffffff",
+    color: "#8B4513",
   },
   achievementCard: {
+    backgroundColor: '#ffffff',
     borderRadius: 16,
-    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    padding: 24,
+    alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
     marginBottom: 30,
   },
   achievementGradient: {
@@ -522,7 +524,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#ffffff",
+    color: "#2C3E50",
   },
   achievementDescription: {
     fontSize: 14,
@@ -531,8 +533,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    fontStyle: "italic",
-    color: "rgba(255,255,255,0.9)",
+    color: "#64748b",
     textAlign: 'center',
     lineHeight: 20,
   },
