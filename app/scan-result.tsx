@@ -9,9 +9,10 @@ import {
   SafeAreaView,
   Alert,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { X, MapPin, Calendar, Share2, CheckCircle, AlertCircle, RefreshCw } from "lucide-react-native";
+import { MapPin, Calendar, Share2, CheckCircle, AlertCircle, RefreshCw, ArrowLeft, Sparkles, Clock } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { mockMonuments } from "@/data/mockMonuments";
@@ -59,7 +60,7 @@ export default function ScanResultScreen() {
   } = useLocalSearchParams();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isReanalyzing, setIsReanalyzing] = useState<boolean>(false);
-  const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
+
   
   const [monument, setMonument] = useState<MonumentData | undefined>(undefined);
   
@@ -118,7 +119,6 @@ export default function ScanResultScreen() {
       // Check if this is a regeneration request from history
       else if (regenerate === 'true' && monumentName && typeof monumentName === 'string') {
         console.log('🔄 Regenerating content for history item:', monumentName);
-        setIsRegenerating(true);
         
         try {
           // Create basic monument data since backend services are not available
@@ -155,8 +155,6 @@ export default function ScanResultScreen() {
           };
         } catch (error) {
           console.error('Error during content regeneration:', error);
-        } finally {
-          setIsRegenerating(false);
         }
       } else {
         // Try to load from mock data or create basic data
@@ -244,123 +242,168 @@ export default function ScanResultScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-            <X size={24} color="#000" />
-          </TouchableOpacity>
-          <View style={styles.headerActions}>
-            <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
-              <Share2 size={20} color="#007AFF" />
+        <LinearGradient
+          colors={["#2C3E50", "#34495E"]}
+          style={styles.headerGradient}
+        >
+          <View style={styles.headerContent}>
+            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+              <ArrowLeft size={24} color="rgba(255,255,255,0.9)" />
+            </TouchableOpacity>
+            <View style={styles.headerInfo}>
+              <Text style={styles.headerTitle}>Discovery Complete</Text>
+              <Text style={styles.headerSubtitle}>Your monument has been analyzed</Text>
+            </View>
+            <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+              <Share2 size={20} color="rgba(255,255,255,0.9)" />
             </TouchableOpacity>
           </View>
-        </View>
+        </LinearGradient>
 
         {/* Monument Image */}
         {monument.scannedImage && (
-          <View style={styles.imageContainer}>
-            <Image source={{ uri: monument.scannedImage }} style={styles.monumentImage} />
-            <LinearGradient
-              colors={['transparent', 'rgba(0,0,0,0.7)']}
-              style={styles.imageOverlay}
-            />
+          <View style={styles.imageSection}>
+            <View style={styles.imageContainer}>
+              <Image source={{ uri: monument.scannedImage }} style={styles.monumentImage} />
+              <LinearGradient
+                colors={['transparent', 'rgba(0,0,0,0.6)']}
+                style={styles.imageOverlay}
+              >
+                <View style={styles.imageInfo}>
+                  <View style={styles.recognitionBadge}>
+                    {monument.isRecognized ? (
+                      <>
+                        <CheckCircle size={16} color="#4CAF50" />
+                        <Text style={styles.recognitionText}>Recognized</Text>
+                        <Text style={styles.confidenceText}>{monument.confidence}%</Text>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle size={16} color="#FF9800" />
+                        <Text style={styles.notRecognizedText}>Not Recognized</Text>
+                      </>
+                    )}
+                  </View>
+                </View>
+              </LinearGradient>
+            </View>
           </View>
         )}
 
         {/* Monument Info */}
-        <View style={styles.contentContainer}>
-          <Text style={styles.monumentName}>{monument.name}</Text>
-          
-          <View style={styles.locationContainer}>
-            <MapPin size={16} color="#666" />
-            <Text style={styles.locationText}>{monument.location}</Text>
-          </View>
-          
-          <View style={styles.periodContainer}>
-            <Calendar size={16} color="#666" />
-            <Text style={styles.periodText}>{monument.period}</Text>
-          </View>
-
-          {/* Recognition Status */}
-          <View style={styles.recognitionContainer}>
-            {monument.isRecognized ? (
-              <View style={styles.recognizedContainer}>
-                <CheckCircle size={16} color="#4CAF50" />
-                <Text style={styles.recognizedText}>Recognized</Text>
-                <Text style={styles.confidenceText}>{monument.confidence}% confidence</Text>
+        <View style={styles.section}>
+          <View style={styles.monumentCard}>
+            <Text style={styles.monumentName}>{monument.name}</Text>
+            
+            <View style={styles.detailsRow}>
+              <View style={styles.detailItem}>
+                <MapPin size={16} color="#8B4513" />
+                <Text style={styles.detailText}>{monument.location}</Text>
               </View>
-            ) : (
-              <View style={styles.notRecognizedContainer}>
-                <AlertCircle size={16} color="#FF9800" />
-                <Text style={styles.notRecognizedText}>Not Recognized</Text>
+              <View style={styles.detailItem}>
+                <Calendar size={16} color="#8B4513" />
+                <Text style={styles.detailText}>{monument.period}</Text>
               </View>
-            )}
+            </View>
           </View>
+        </View>
 
-          {/* Description */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Description</Text>
+        {/* Description */}
+        <View style={styles.section}>
+          <View style={styles.contentCard}>
+            <View style={styles.cardHeader}>
+              <Sparkles size={20} color="#8B4513" />
+              <Text style={styles.sectionTitle}>Description</Text>
+            </View>
             <FormattedText style={styles.descriptionText}>{monument.description}</FormattedText>
           </View>
+        </View>
 
-          {/* Significance */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Historical Significance</Text>
+        {/* Significance */}
+        <View style={styles.section}>
+          <View style={styles.contentCard}>
+            <View style={styles.cardHeader}>
+              <Clock size={20} color="#8B4513" />
+              <Text style={styles.sectionTitle}>Historical Significance</Text>
+            </View>
             <FormattedText style={styles.descriptionText}>{monument.significance}</FormattedText>
           </View>
+        </View>
 
-          {/* Key Facts */}
-          <View style={styles.section}>
+        {/* Key Facts */}
+        <View style={styles.section}>
+          <View style={styles.contentCard}>
             <Text style={styles.sectionTitle}>Key Facts</Text>
-            {monument.facts.map((fact, index) => (
-              <View key={index} style={styles.factContainer}>
-                <Text style={styles.factBullet}>•</Text>
-                <Text style={styles.factText}>{fact}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Detailed Description */}
-          {monument.detailedDescription && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Detailed Analysis</Text>
-              
-              <Text style={styles.subsectionTitle}>Key Takeaways</Text>
-              {monument.detailedDescription.keyTakeaways.map((takeaway, index) => (
-                <View key={index} style={styles.factContainer}>
-                  <Text style={styles.factBullet}>•</Text>
-                  <Text style={styles.factText}>{takeaway}</Text>
+            <View style={styles.factsContainer}>
+              {monument.facts.map((fact, index) => (
+                <View key={index} style={styles.factItem}>
+                  <View style={styles.factDot} />
+                  <Text style={styles.factText}>{fact}</Text>
                 </View>
               ))}
-              
-              <Text style={styles.subsectionTitle}>In-Depth Context</Text>
-              <FormattedText style={styles.descriptionText}>{monument.detailedDescription.inDepthContext}</FormattedText>
-              
-              <Text style={styles.subsectionTitle}>Curiosities</Text>
-              <FormattedText style={styles.descriptionText}>{monument.detailedDescription.curiosities}</FormattedText>
             </View>
-          )}
+          </View>
+        </View>
+
+        {/* Detailed Description */}
+        {monument.detailedDescription && (
+          <View style={styles.section}>
+            <View style={styles.contentCard}>
+              <Text style={styles.sectionTitle}>Detailed Analysis</Text>
+              
+              <View style={styles.subsection}>
+                <Text style={styles.subsectionTitle}>Key Takeaways</Text>
+                <View style={styles.factsContainer}>
+                  {monument.detailedDescription.keyTakeaways.map((takeaway, index) => (
+                    <View key={index} style={styles.factItem}>
+                      <View style={styles.factDot} />
+                      <Text style={styles.factText}>{takeaway}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+              
+              <View style={styles.subsection}>
+                <Text style={styles.subsectionTitle}>In-Depth Context</Text>
+                <FormattedText style={styles.descriptionText}>{monument.detailedDescription.inDepthContext}</FormattedText>
+              </View>
+              
+              <View style={styles.subsection}>
+                <Text style={styles.subsectionTitle}>Curiosities</Text>
+                <FormattedText style={styles.descriptionText}>{monument.detailedDescription.curiosities}</FormattedText>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Action Button */}
+        <View style={styles.section}>
+          <TouchableOpacity
+            style={[styles.reanalyzeButton, isReanalyzing && styles.reanalyzeButtonDisabled]}
+            onPress={handleReanalyze}
+            disabled={isReanalyzing}
+          >
+            <LinearGradient
+              colors={isReanalyzing ? ["#999", "#777"] : ["#dc2626", "#f87171"]}
+              style={styles.reanalyzeGradient}
+            >
+              {isReanalyzing ? (
+                <View style={styles.reanalyzeContent}>
+                  <ActivityIndicator size="small" color="#FFF" />
+                  <Text style={styles.reanalyzeText}>Reanalyzing...</Text>
+                </View>
+              ) : (
+                <View style={styles.reanalyzeContent}>
+                  <RefreshCw size={20} color="#FFF" />
+                  <Text style={styles.reanalyzeText}>Reanalyze Monument</Text>
+                </View>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
       </ScrollView>
-
-      {/* Action Buttons */}
-      <View style={styles.actionBar}>
-        <TouchableOpacity 
-          style={[styles.actionButton, styles.reanalyzeButton]} 
-          onPress={handleReanalyze}
-          disabled={isReanalyzing}
-        >
-          {isReanalyzing ? (
-            <ActivityIndicator size="small" color="#FFF" />
-          ) : (
-            <RefreshCw size={20} color="#FFF" />
-          )}
-          <Text style={styles.actionButtonText}>
-            {isReanalyzing ? 'Reanalyzing...' : 'Reanalyze'}
-          </Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
@@ -368,10 +411,7 @@ export default function ScanResultScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  scrollView: {
-    flex: 1,
+    backgroundColor: "#FEFEFE",
   },
   loadingContainer: {
     flex: 1,
@@ -381,7 +421,12 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#666',
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: '#64748b',
   },
   errorContainer: {
     flex: 1,
@@ -391,43 +436,92 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    color: '#666',
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: '#64748b',
     textAlign: 'center',
     marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#8B4513',
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
   },
   retryButtonText: {
     color: '#FFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  headerGradient: {
+    paddingTop: 20,
+    paddingBottom: 30,
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
   },
-  closeButton: {
-    padding: 8,
-  },
-  headerActions: {
+  headerContent: {
     flexDirection: 'row',
-    gap: 12,
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  actionButton: {
+  backButton: {
     padding: 8,
+  },
+  headerInfo: {
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: 16,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#ffffff",
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.9)",
+  },
+  shareButton: {
+    padding: 8,
+  },
+  imageSection: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
   },
   imageContainer: {
     position: 'relative',
-    height: 300,
+    height: 280,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 8,
   },
   monumentImage: {
     width: '100%',
@@ -439,126 +533,200 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 100,
+    height: '100%',
+    justifyContent: 'flex-end',
+    padding: 16,
   },
-  contentContainer: {
-    padding: 20,
+  imageInfo: {
+    alignItems: 'flex-end',
   },
-  monumentName: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 12,
-  },
-  locationContainer: {
+  recognitionBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
   },
-  locationText: {
-    marginLeft: 8,
-    fontSize: 16,
-    color: '#666',
-  },
-  periodContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  periodText: {
-    marginLeft: 8,
-    fontSize: 16,
-    color: '#666',
-  },
-  recognitionContainer: {
-    marginBottom: 24,
-  },
-  recognizedContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#E8F5E8',
-    padding: 12,
-    borderRadius: 8,
-  },
-  recognizedText: {
-    marginLeft: 8,
-    fontSize: 14,
-    fontWeight: '600',
+  recognitionText: {
+    fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
     color: '#4CAF50',
   },
   confidenceText: {
-    marginLeft: 'auto',
     fontSize: 12,
-    color: '#666',
-  },
-  notRecognizedContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFF3E0',
-    padding: 12,
-    borderRadius: 8,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: '#64748b',
   },
   notRecognizedText: {
-    marginLeft: 8,
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
     color: '#FF9800',
   },
   section: {
-    marginBottom: 24,
+    marginTop: 30,
+    paddingHorizontal: 20,
+  },
+  monumentCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  monumentName: {
+    fontSize: 24,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
+    marginBottom: 16,
+  },
+  detailsRow: {
+    gap: 12,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  detailText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: '#64748b',
+  },
+  contentCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 12,
+    fontSize: 18,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
+  },
+  subsection: {
+    marginTop: 20,
   },
   subsectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    marginTop: 16,
-    marginBottom: 8,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: '#2C3E50',
+    marginBottom: 12,
   },
   descriptionText: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#333',
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    lineHeight: 22,
+    color: '#64748b',
   },
-  factContainer: {
+  factsContainer: {
+    gap: 12,
+  },
+  factItem: {
     flexDirection: 'row',
-    marginBottom: 8,
+    alignItems: 'flex-start',
+    gap: 12,
   },
-  factBullet: {
-    fontSize: 16,
-    color: '#007AFF',
-    marginRight: 8,
-    fontWeight: 'bold',
+  factDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#8B4513',
+    marginTop: 8,
   },
   factText: {
     flex: 1,
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#333',
-  },
-  actionBar: {
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
-    backgroundColor: '#fff',
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    lineHeight: 22,
+    color: '#64748b',
   },
   reanalyzeButton: {
-    backgroundColor: '#007AFF',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    marginBottom: 30,
+  },
+  reanalyzeButtonDisabled: {
+    opacity: 0.7,
+  },
+  reanalyzeGradient: {
+    paddingVertical: 18,
+    paddingHorizontal: 24,
+  },
+  reanalyzeContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 8,
+    gap: 12,
   },
-  actionButtonText: {
-    color: '#FFF',
+  reanalyzeText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#ffffff",
   },
 });
