@@ -77,34 +77,154 @@ export default function ScannerScreen() {
     setAnalysisStatus("Preparing image...");
     
     try {
+      setAnalysisStatus("Converting image to base64...");
+      
+      // Convert image to base64
+      const response = await fetch(selectedImage);
+      const blob = await response.blob();
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          // Remove data:image/jpeg;base64, prefix
+          const base64Data = result.split(',')[1];
+          resolve(base64Data);
+        };
+        reader.readAsDataURL(blob);
+      });
+
       setAnalysisStatus("Analyzing monuments and art with AI...");
       
-      // Simulate AI analysis
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Build the prompt
+      let prompt = `Analyze this image and identify any monuments and art including sculptures, paintings, or cultural landmarks. Include paintings that depict buildings/landmarks (identify the PAINTING, not the depicted structure).
+
+Consider that many sculptures share similar themes, poses, or subjects but are different works entirely. For sculptures, confidence should be 90% or higher for recognition. For other monuments and art, confidence should be 80% or higher.`;
       
-      setAnalysisStatus("Monuments and art recognized! Finalizing...");
+      // Add additional context if provided
+      const hasAdditionalInfo = additionalInfo.name || additionalInfo.location || additionalInfo.building || additionalInfo.notes;
+      if (hasAdditionalInfo) {
+        prompt += `\n\n**CRITICAL USER CONTEXT - PRIORITIZE THIS INFORMATION HEAVILY:**`;
+        if (additionalInfo.name) prompt += `\n- Monument/Art Name: "${additionalInfo.name}" (Use this name if it matches what you see in the image)`;
+        if (additionalInfo.location) prompt += `\n- Location: "${additionalInfo.location}" (This location context is EXTREMELY IMPORTANT - if the image could plausibly be from this location, strongly favor monuments/art from this area)`;
+        if (additionalInfo.building) prompt += `\n- Building/Context: "${additionalInfo.building}" (Consider this building context when identifying)`;
+        if (additionalInfo.notes) prompt += `\n- Additional Notes: "${additionalInfo.notes}" (Important context clues)`;
+        
+        prompt += `\n\nWith this context provided, you should:\n1. STRONGLY prioritize monuments and art that match this location\n2. If the visual matches reasonably well with something from this location, increase confidence significantly\n3. Use the provided name if it matches what you observe in the image\n4. Consider the building/context information as key identifying factors`;
+      }
       
-      // Simulate finalization
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      prompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.
+
+Respond in this exact JSON format:
+{
+"artworkName": "Name or 'Unknown Monuments and Art'",
+"confidence": 85,
+"location": "Actual location",
+"period": "Year(s) or century format (e.g., '1503', '15th century', '1800s', '12th-13th century') or 'Unknown'",
+"isRecognized": true/false,
+"detailedDescription": {
+  "keyTakeaways": [
+    "First key takeaway bullet point - must be specific and informative",
+    "Second key takeaway bullet point - must be specific and informative", 
+    "Third key takeaway bullet point - must be specific and informative",
+    "Fourth key takeaway bullet point - must be specific and informative"
+  ],
+  "inDepthContext": "Write exactly 3 paragraphs (1400-3000 characters total). Separate paragraphs with double line breaks only - NO paragraph titles or labels. Use **bold** highlights for key terms, names, dates, and important details. Be specific and interesting. Avoid generalizations.\n\nFirst paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context.\n\nSecond paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features.\n\nThird paragraph: Discuss cultural impact, significance over the years, notable events or stories associated with the monuments and art and more.",
+  "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"
+}
+}
+
+CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bullet point should be a complete, informative sentence about the monument/artwork.`;
       
-      // Get a random mock monument for demo
-      const randomMonument = mockMonuments[Math.floor(Math.random() * mockMonuments.length)];
+      // Call the AI API
+      const aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: prompt },
+                { type: 'image', image: base64 }
+              ]
+            }
+          ]
+        })
+      });
       
-      // Navigate to scan result with mock data
+      if (!aiResponse.ok) {
+        throw new Error(`AI API error: ${aiResponse.status} ${aiResponse.statusText}`);
+      }
+      
+      const aiResult = await aiResponse.json();
+      console.log('Raw AI response:', aiResult.completion);
+      
+      setAnalysisStatus("Processing AI response...");
+      
+      // Clean and parse the AI response
+      let cleanedResponse = aiResult.completion;
+      
+      // Remove markdown code blocks
+      cleanedResponse = cleanedResponse.replace(/```json\s*/g, '').replace(/```\s*/g, '');
+      
+      // Fix escaped quotes and other JSON issues
+      cleanedResponse = cleanedResponse.replace(/\\"/g, '"');
+      cleanedResponse = cleanedResponse.replace(/\\n/g, '\n');
+      
+      console.log('Cleaned content that will be parsed:', cleanedResponse);
+      
+      let analysisResult;
+      try {
+        analysisResult = JSON.parse(cleanedResponse);
+      } catch (parseError) {
+        console.error('Failed to parse AI response as JSON:', parseError);
+        console.error('Raw AI response:', aiResult.completion);
+        console.error('Cleaned content that failed to parse:', cleanedResponse);
+        
+        // Try a more aggressive cleaning approach
+        try {
+          // Remove any remaining markdown or extra characters
+          let secondCleanAttempt = aiResult.completion
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
+            .replace(/^\s*/, '') // Remove leading whitespace
+            .replace(/\s*$/, '') // Remove trailing whitespace
+            .replace(/\\\\n/g, '\n') // Fix double-escaped newlines
+            .replace(/\\\"/g, '"') // Fix double-escaped quotes
+            .replace(/\\'/g, "'"); // Fix escaped single quotes
+          
+          console.log('Second JSON parse attempt with content:', secondCleanAttempt);
+          analysisResult = JSON.parse(secondCleanAttempt);
+        } catch (secondParseError) {
+          console.error('Second JSON parse attempt also failed:', secondParseError);
+          throw new Error('Failed to parse AI response as valid JSON');
+        }
+      }
+      
+      setAnalysisStatus("Analysis complete! Preparing results...");
+      
+      // Navigate to scan result with AI analysis data
       router.push({
         pathname: "/scan-result" as any,
         params: {
-          monumentId: randomMonument.id,
-          monumentName: randomMonument.name,
-          location: randomMonument.location,
-          period: randomMonument.period,
+          artworkName: analysisResult.artworkName,
+          confidence: analysisResult.confidence.toString(),
+          location: analysisResult.location,
+          period: analysisResult.period,
+          isRecognized: analysisResult.isRecognized.toString(),
+          keyTakeaways: JSON.stringify(analysisResult.detailedDescription.keyTakeaways),
+          inDepthContext: analysisResult.detailedDescription.inDepthContext,
+          curiosities: analysisResult.detailedDescription.curiosities,
           scannedImage: selectedImage,
         },
       });
       
     } catch (error) {
-      console.error('Analysis error:', error);
-      Alert.alert('Analysis Failed', 'Failed to analyze the image. Please try again.');
+      console.error('Error detecting monuments and art:', error);
+      console.error('Error details:', error);
+      Alert.alert('Analysis Failed', 'Failed to analyze the image. Please check your internet connection and try again.');
     } finally {
       setIsAnalyzing(false);
       setAnalysisStatus("");

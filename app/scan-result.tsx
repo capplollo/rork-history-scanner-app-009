@@ -7,22 +7,15 @@ import {
   Image,
   TouchableOpacity,
   SafeAreaView,
-  Dimensions,
-  Platform,
   Alert,
-  TextInput,
   ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { X, MapPin, Calendar, Info, Share2, CheckCircle, AlertCircle, MessageCircle, Volume2, VolumeX, Pause, RefreshCw, ChevronDown, ChevronUp } from "lucide-react-native";
+import { X, MapPin, Calendar, Share2, CheckCircle, AlertCircle, RefreshCw } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { mockMonuments } from "@/data/mockMonuments";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import VoiceSettings from "@/components/VoiceSettings";
 import FormattedText from "@/components/FormattedText";
-
-const { width: screenWidth } = Dimensions.get("window");
 
 // Define basic types for the simplified version
 interface MonumentData {
@@ -47,18 +40,26 @@ interface MonumentData {
 }
 
 export default function ScanResultScreen() {
-  const { monumentId, scanData, resultId, historyItemId, monumentName, location, period, scannedImage, regenerate } = useLocalSearchParams();
+  const { 
+    monumentId, 
+    scanData, 
+    resultId, 
+    historyItemId, 
+    monumentName, 
+    location, 
+    period, 
+    scannedImage, 
+    regenerate,
+    artworkName,
+    confidence,
+    isRecognized,
+    keyTakeaways,
+    inDepthContext,
+    curiosities
+  } = useLocalSearchParams();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [showVoiceSettings, setShowVoiceSettings] = useState<boolean>(false);
   const [isReanalyzing, setIsReanalyzing] = useState<boolean>(false);
-  const [showContextForm, setShowContextForm] = useState<boolean>(false);
   const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
-  const [contextInfo, setContextInfo] = useState({
-    name: "",
-    location: "",
-    building: "",
-    notes: "",
-  });
   
   const [monument, setMonument] = useState<MonumentData | undefined>(undefined);
   
@@ -67,8 +68,55 @@ export default function ScanResultScreen() {
     const loadMonumentData = async () => {
       let loadedMonument: MonumentData | undefined;
       
+      // Check if we have AI analysis data from the scanner
+      if (artworkName && typeof artworkName === 'string') {
+        console.log('📊 Loading AI analysis data:', artworkName);
+        
+        try {
+          // Parse keyTakeaways if it's a JSON string
+          let parsedKeyTakeaways: string[] = [];
+          if (keyTakeaways && typeof keyTakeaways === 'string') {
+            try {
+              parsedKeyTakeaways = JSON.parse(keyTakeaways);
+            } catch (e) {
+              console.error('Failed to parse keyTakeaways:', e);
+              parsedKeyTakeaways = [keyTakeaways];
+            }
+          }
+          
+          const confidenceNum = confidence ? parseInt(confidence as string, 10) : 75;
+          const isRecognizedBool = isRecognized === 'true';
+          
+          loadedMonument = {
+            id: resultId as string || 'ai-analysis',
+            name: artworkName as string,
+            location: (location as string) || 'Unknown Location',
+            country: '',
+            period: (period as string) || 'Unknown Period',
+            description: parsedKeyTakeaways.length > 0 ? parsedKeyTakeaways.join(' ') : 'AI analysis completed.',
+            significance: (inDepthContext as string) || 'This monument holds historical and cultural significance.',
+            facts: parsedKeyTakeaways.length > 0 ? parsedKeyTakeaways : [
+              'Analyzed using AI technology',
+              'Monument identification completed',
+              'Historical significance confirmed'
+            ],
+            image: (scannedImage as string) || '',
+            scannedImage: (scannedImage as string) || '',
+            scannedAt: new Date().toISOString(),
+            confidence: confidenceNum,
+            isRecognized: isRecognizedBool,
+            detailedDescription: {
+              keyTakeaways: parsedKeyTakeaways,
+              inDepthContext: (inDepthContext as string) || 'Detailed analysis completed.',
+              curiosities: (curiosities as string) || 'No specific curiosities identified.'
+            }
+          };
+        } catch (error) {
+          console.error('Error processing AI analysis data:', error);
+        }
+      }
       // Check if this is a regeneration request from history
-      if (regenerate === 'true' && monumentName && typeof monumentName === 'string') {
+      else if (regenerate === 'true' && monumentName && typeof monumentName === 'string') {
         console.log('🔄 Regenerating content for history item:', monumentName);
         setIsRegenerating(true);
         
@@ -119,6 +167,9 @@ export default function ScanResultScreen() {
               ...mockMonument,
               scannedImage: (scannedImage as string) || mockMonument.image,
               scannedAt: new Date().toISOString(),
+              country: '',
+              confidence: 75,
+              isRecognized: true,
             };
           }
         }
@@ -127,7 +178,7 @@ export default function ScanResultScreen() {
         if (!loadedMonument) {
           loadedMonument = {
             id: resultId as string || 'unknown',
-            name: monumentName as string || 'Unknown Monument',
+            name: monumentName as string || artworkName as string || 'Unknown Monument',
             location: location as string || 'Unknown Location',
             country: '',
             period: period as string || 'Unknown Period',
@@ -152,7 +203,7 @@ export default function ScanResultScreen() {
     };
     
     loadMonumentData();
-  }, [monumentId, scanData, resultId, historyItemId, monumentName, location, period, scannedImage, regenerate]);
+  }, [monumentId, scanData, resultId, historyItemId, monumentName, location, period, scannedImage, regenerate, artworkName, confidence, isRecognized, keyTakeaways, inDepthContext, curiosities]);
 
   const handleReanalyze = async () => {
     setIsReanalyzing(true);
@@ -250,13 +301,13 @@ export default function ScanResultScreen() {
           {/* Description */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Description</Text>
-            <FormattedText text={monument.description} style={styles.descriptionText} />
+            <FormattedText style={styles.descriptionText}>{monument.description}</FormattedText>
           </View>
 
           {/* Significance */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Historical Significance</Text>
-            <FormattedText text={monument.significance} style={styles.descriptionText} />
+            <FormattedText style={styles.descriptionText}>{monument.significance}</FormattedText>
           </View>
 
           {/* Key Facts */}
@@ -284,10 +335,10 @@ export default function ScanResultScreen() {
               ))}
               
               <Text style={styles.subsectionTitle}>In-Depth Context</Text>
-              <FormattedText text={monument.detailedDescription.inDepthContext} style={styles.descriptionText} />
+              <FormattedText style={styles.descriptionText}>{monument.detailedDescription.inDepthContext}</FormattedText>
               
               <Text style={styles.subsectionTitle}>Curiosities</Text>
-              <FormattedText text={monument.detailedDescription.curiosities} style={styles.descriptionText} />
+              <FormattedText style={styles.descriptionText}>{monument.detailedDescription.curiosities}</FormattedText>
             </View>
           )}
         </View>
