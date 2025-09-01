@@ -21,7 +21,10 @@ import {
   Camera,
   Globe,
   Clock,
-  X
+  X,
+  Award,
+  Sparkles,
+  History
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -71,67 +74,128 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Profile</Text>
-          <TouchableOpacity 
-            style={styles.settingsButton}
-            onPress={() => setShowSettings(true)}
-          >
-            <Settings size={24} color="#007AFF" />
-          </TouchableOpacity>
-        </View>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <LinearGradient
+          colors={["#2C3E50", "#34495E"]}
+          style={styles.headerGradient}
+        >
+          <View style={styles.headerContent}>
+            <View style={styles.headerTop}>
+              <Text style={styles.headerTitle}>Your Journey</Text>
+              <TouchableOpacity 
+                style={styles.settingsButton}
+                onPress={() => setShowSettings(true)}
+              >
+                <Settings size={24} color="rgba(255,255,255,0.9)" />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.headerSubtitle}>
+              Track your discoveries and explore history
+            </Text>
+          </View>
+        </LinearGradient>
 
-        {/* Profile Section */}
-        <View style={styles.profileSection}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <User size={40} color="#8B4513" />
+        <View style={styles.section}>
+          <View style={styles.profileCard}>
+            <View style={styles.profileHeader}>
+              <View style={styles.avatarContainer}>
+                <LinearGradient
+                  colors={["#8B4513", "#A0522D"]}
+                  style={styles.avatar}
+                >
+                  <User size={32} color="#ffffff" />
+                </LinearGradient>
+              </View>
+              
+              <View style={styles.profileInfo}>
+                <Text style={styles.userName}>Demo User</Text>
+                <Text style={styles.userEmail}>demo@example.com</Text>
+                
+                <View style={styles.userDetails}>
+                  <View style={styles.detailItem}>
+                    <MapPin size={14} color="#64748b" />
+                    <Text style={styles.detailText}>Location not set</Text>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <Calendar size={14} color="#64748b" />
+                    <Text style={styles.detailText}>Member since 2024</Text>
+                  </View>
+                </View>
+              </View>
             </View>
           </View>
-          
-          <Text style={styles.userName}>Demo User</Text>
-          <Text style={styles.userEmail}>demo@example.com</Text>
-          
-          <View style={styles.userInfo}>
-            <View style={styles.infoItem}>
-              <MapPin size={16} color="#666" />
-              <Text style={styles.infoText}>Location not set</Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Calendar size={16} color="#666" />
-              <Text style={styles.infoText}>Member since 2024</Text>
-            </View>
-          </View>
         </View>
 
-        {/* Stats Section */}
-        <View style={styles.statsSection}>
-          <Text style={styles.sectionTitle}>Your Journey</Text>
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Your Stats</Text>
+            <TouchableOpacity>
+              <Text style={styles.seeAllText}>View all</Text>
+            </TouchableOpacity>
+          </View>
+          
           <View style={styles.statsGrid}>
             {stats.map((stat, index) => (
-              <View key={index} style={styles.statCard}>
-                <View style={styles.statIcon}>
-                  <stat.icon size={24} color="#8B4513" />
-                </View>
-                <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
-                <Text style={styles.statDescription}>{stat.description}</Text>
-              </View>
+              <TouchableOpacity key={index} style={styles.statCard}>
+                <LinearGradient
+                  colors={index === 0 ? ["#4f46e5", "#7c3aed"] : ["#059669", "#10b981"]}
+                  style={styles.statGradient}
+                >
+                  <View style={styles.statContent}>
+                    <stat.icon size={24} color="rgba(255,255,255,0.9)" />
+                    <Text style={styles.statValue}>{stat.value}</Text>
+                    <Text style={styles.statLabel}>{stat.label}</Text>
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        {/* Recent Activity */}
-        <View style={styles.activitySection}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-          <View style={styles.emptyState}>
-            <Clock size={48} color="#CCC" />
-            <Text style={styles.emptyStateTitle}>No Recent Activity</Text>
-            <Text style={styles.emptyStateText}>
-              Start scanning monuments and art to see your activity here
-            </Text>
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recent Activity</Text>
+            <TouchableOpacity>
+              <Text style={styles.seeAllText}>View all</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.activityCard}>
+            <View style={styles.emptyState}>
+              <View style={styles.emptyIconContainer}>
+                <History size={40} color="rgba(139, 69, 19, 0.3)" />
+              </View>
+              <Text style={styles.emptyStateTitle}>No Recent Activity</Text>
+              <Text style={styles.emptyStateText}>
+                Start scanning monuments and art to see your discoveries here
+              </Text>
+              <TouchableOpacity style={styles.startButton} onPress={() => router.push('/(tabs)/(scanner)')}>  
+                <LinearGradient
+                  colors={["#dc2626", "#f87171"]}
+                  style={styles.startGradient}
+                >
+                  <Sparkles size={16} color="#ffffff" />
+                  <Text style={styles.startButtonText}>Start Exploring</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+        
+        <View style={styles.section}>
+          <View style={styles.achievementCard}>
+            <LinearGradient
+              colors={["#f59e0b", "#fbbf24"]}
+              style={styles.achievementGradient}
+            >
+              <View style={styles.achievementContent}>
+                <Award size={32} color="rgba(255,255,255,0.9)" />
+                <Text style={styles.achievementTitle}>Ready to Discover</Text>
+                <Text style={styles.achievementDescription}>
+                  Your first monument scan awaits. Start your historical journey today!
+                </Text>
+              </View>
+            </LinearGradient>
           </View>
         </View>
       </ScrollView>
@@ -177,83 +241,144 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FEFEFE',
+    backgroundColor: "#FEFEFE",
   },
-  scrollView: {
-    flex: 1,
+  headerGradient: {
+    paddingTop: 20,
+    paddingBottom: 30,
+    paddingHorizontal: 20,
   },
-  header: {
+  headerContent: {
+    gap: 20,
+  },
+  headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2C2C2C',
-    fontFamily: 'Times New Roman',
+    fontSize: 28,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "400",
+    color: "#ffffff",
+  },
+  headerSubtitle: {
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.9)",
+    lineHeight: 22,
   },
   settingsButton: {
     padding: 8,
   },
-  profileSection: {
-    alignItems: 'center',
-    paddingVertical: 30,
+  section: {
+    marginTop: 30,
     paddingHorizontal: 20,
   },
-  avatarContainer: {
-    marginBottom: 16,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#FFF8F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 3,
-    borderColor: '#8B4513',
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2C2C2C',
-    marginBottom: 4,
-    fontFamily: 'Times New Roman',
-  },
-  userEmail: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 16,
-    fontFamily: 'Times New Roman',
-  },
-  userInfo: {
-    gap: 8,
-  },
-  infoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  infoText: {
-    fontSize: 14,
-    color: '#666',
-    fontFamily: 'Times New Roman',
-  },
-  statsSection: {
-    paddingHorizontal: 20,
-    marginBottom: 30,
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#2C2C2C',
-    marginBottom: 16,
-    fontFamily: 'Times New Roman',
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
+  },
+  seeAllText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#8B4513",
+    fontWeight: "400",
+  },
+  profileCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  avatarContainer: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileInfo: {
+    flex: 1,
+    gap: 8,
+  },
+  userName: {
+    fontSize: 20,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
+  },
+  userEmail: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#64748b",
+  },
+  userDetails: {
+    gap: 6,
+    marginTop: 4,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  detailText: {
+    fontSize: 13,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#64748b",
   },
   statsGrid: {
     flexDirection: 'row',
@@ -261,63 +386,155 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#FFF8F0',
-    padding: 20,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E5E5',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  statIcon: {
-    marginBottom: 8,
+  statGradient: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  statContent: {
+    alignItems: 'center',
+    gap: 8,
   },
   statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#8B4513',
-    marginBottom: 4,
-    fontFamily: 'Times New Roman',
+    fontSize: 28,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#ffffff",
   },
   statLabel: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#2C2C2C',
-    marginBottom: 4,
-    fontFamily: 'Times New Roman',
-  },
-  statDescription: {
-    fontSize: 12,
-    color: '#666',
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "rgba(255,255,255,0.9)",
     textAlign: 'center',
-    fontFamily: 'Times New Roman',
   },
-  activitySection: {
-    paddingHorizontal: 20,
-    marginBottom: 30,
+  activityCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   emptyState: {
     alignItems: 'center',
     paddingVertical: 40,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E5E5',
+    paddingHorizontal: 24,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#f8fafc',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   emptyStateTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#666',
-    marginTop: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#2C3E50",
     marginBottom: 8,
-    fontFamily: 'Times New Roman',
   },
   emptyStateText: {
     fontSize: 14,
-    color: '#666',
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#64748b",
     textAlign: 'center',
-    paddingHorizontal: 20,
     lineHeight: 20,
-    fontFamily: 'Times New Roman',
+    marginBottom: 24,
+  },
+  startButton: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  startGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  startButtonText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#ffffff",
+  },
+  achievementCard: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 8,
+    marginBottom: 30,
+  },
+  achievementGradient: {
+    padding: 24,
+    alignItems: 'center',
+  },
+  achievementContent: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  achievementTitle: {
+    fontSize: 18,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#ffffff",
+  },
+  achievementDescription: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.9)",
+    textAlign: 'center',
+    lineHeight: 20,
   },
   modalContainer: {
     flex: 1,
@@ -334,9 +551,13 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
     color: '#2C2C2C',
-    fontFamily: 'Times New Roman',
   },
   closeButton: {
     padding: 8,
@@ -360,7 +581,11 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
     color: '#2C2C2C',
-    fontFamily: 'Times New Roman',
   },
 });
