@@ -114,7 +114,7 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
       
       prompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.
 
-Respond in this exact JSON format:
+Respond in this exact JSON format (ensure all strings are properly escaped and no control characters are included):
 {
 "artworkName": "Name or 'Unknown Monuments and Art'",
 "confidence": 85,
@@ -128,12 +128,12 @@ Respond in this exact JSON format:
     "Third key takeaway bullet point - must be specific and informative",
     "Fourth key takeaway bullet point - must be specific and informative"
   ],
-  "inDepthContext": "Write exactly 3 paragraphs (1400-3000 characters total). Separate paragraphs with double line breaks only - NO paragraph titles or labels. Use **bold** highlights for key terms, names, dates, and important details. Be specific and interesting. Avoid generalizations.\n\nFirst paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context.\n\nSecond paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features.\n\nThird paragraph: Discuss cultural impact, significance over the years, notable events or stories associated with the monuments and art and more.",
+  "inDepthContext": "Write exactly 3 paragraphs. Separate paragraphs with double line breaks only. Use bold highlights for key terms. Be specific and interesting. Avoid generalizations. First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context. Second paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features. Third paragraph: Discuss cultural impact, significance over the years, notable events or stories associated with the monuments and art and more.",
   "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"
 }
 }
 
-CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bullet point should be a complete, informative sentence about the monument/artwork.`;
+CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bullet point should be a complete, informative sentence about the monument/artwork. Ensure all text is properly escaped for JSON.`;
       
       // Call the AI API
       console.log('Making AI API request to:', 'https://toolkit.rork.com/text/llm/');
@@ -147,30 +147,52 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         }]
       });
       
+      // Validate base64 data
+      if (!base64 || base64.length === 0) {
+        throw new Error('Invalid image data: base64 is empty');
+      }
+      
+      // Check if base64 is too large (limit to ~10MB)
+      if (base64.length > 13000000) {
+        throw new Error('Image is too large. Please use a smaller image.');
+      }
+      
+      const requestBody = {
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image', image: base64 }
+            ]
+          }
+        ]
+      };
+      
+      console.log('Request body size:', JSON.stringify(requestBody).length, 'characters');
+      
       const aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'user',
-              content: [
-                { type: 'text', text: prompt },
-                { type: 'image', image: base64 }
-              ]
-            }
-          ]
-        })
+        body: JSON.stringify(requestBody)
       });
       
       console.log('AI API response status:', aiResponse.status);
       console.log('AI API response headers:', Object.fromEntries(aiResponse.headers.entries()));
       
       if (!aiResponse.ok) {
-        const errorText = await aiResponse.text();
+        let errorText = 'Unknown error';
+        try {
+          errorText = await aiResponse.text();
+        } catch (e) {
+          console.error('Failed to read error response:', e);
+        }
+        
         console.error('AI API error response body:', errorText);
+        console.error('AI API error status:', aiResponse.status);
+        console.error('AI API error status text:', aiResponse.statusText);
         
         // If it's a 500 error, provide a fallback response
         if (aiResponse.status === 500) {
@@ -214,24 +236,37 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           return;
         }
         
-        throw new Error(`AI API error: ${aiResponse.status}`);
+        throw new Error(`AI API error: ${aiResponse.status} - ${errorText}`);
       }
       
-      const aiResult = await aiResponse.json();
+      let aiResult;
+      try {
+        aiResult = await aiResponse.json();
+      } catch (jsonError) {
+        console.error('Failed to parse AI response as JSON:', jsonError);
+        throw new Error('AI service returned invalid response format');
+      }
+      
       console.log('Raw AI response:', aiResult.completion);
+      
+      if (!aiResult.completion) {
+        console.error('AI response missing completion field:', aiResult);
+        throw new Error('AI service returned incomplete response');
+      }
       
       setAnalysisStatus("Processing AI response...");
       
       // Clean and parse the AI response
       let cleanedResponse = aiResult.completion;
       
-      // Remove markdown code blocks
-      cleanedResponse = cleanedResponse.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-      
-      // Remove leading/trailing whitespace
-      cleanedResponse = cleanedResponse.trim();
-      
       console.log('Raw AI response:', aiResult.completion);
+      
+      // Remove markdown code blocks and clean up
+      cleanedResponse = cleanedResponse
+        .replace(/```json\s*/g, '')
+        .replace(/```\s*/g, '')
+        .trim();
+      
       console.log('Cleaned content that will be parsed:', cleanedResponse);
       
       let analysisResult;
@@ -240,64 +275,54 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         analysisResult = JSON.parse(cleanedResponse);
       } catch (parseError) {
         console.error('Failed to parse AI response as JSON:', parseError);
-        console.error('Cleaned content that failed to parse:', cleanedResponse);
         
-        // Try a more aggressive cleaning approach
         try {
-          // Fix common JSON issues that break parsing
-          let secondCleanAttempt = cleanedResponse
-            // Fix unescaped newlines in string values
-            .replace(/(?<!\\)\n/g, '\\n')
-            // Fix unescaped quotes
-            .replace(/(?<!\\)"/g, '\"')
-            // Fix the quotes we just over-escaped at the beginning/end of values
-            .replace(/":\ *\\"/g, '": "')
-            .replace(/\\",/g, '",') 
-            .replace(/\\"\s*}/g, '" }')
-            .replace(/\\"\s*]/g, '" ]')
-            // Fix escaped single quotes that don't need escaping in JSON
-            .replace(/\\'/g, "'")
-            // Fix any remaining double-escaped characters
-            .replace(/\\\\/g, '\\')
-            // Remove any remaining markdown
-            .replace(/```json/g, '')
-            .replace(/```/g, '')
+          // Extract JSON object from the response
+          const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+          if (!jsonMatch) {
+            throw new Error('No JSON object found in response');
+          }
+          
+          let jsonString = jsonMatch[0];
+          
+          // Fix common JSON issues
+          jsonString = jsonString
+            // Fix unescaped newlines in strings
+            .replace(/"([^"]*?)\n([^"]*?)"/g, (_match: string, p1: string, p2: string) => `"${p1}\\n${p2}"`)
+            // Fix unescaped tabs
+            .replace(/"([^"]*?)\t([^"]*?)"/g, (_match: string, p1: string, p2: string) => `"${p1}\\t${p2}"`)
+            // Fix unescaped carriage returns
+            .replace(/"([^"]*?)\r([^"]*?)"/g, (_match: string, p1: string, p2: string) => `"${p1}\\r${p2}"`)
+            // Remove any control characters that might break JSON
+            .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+            // Fix any remaining markdown
+            .replace(/\*\*([^*]+)\*\*/g, '$1')
             .trim();
           
-          console.log('Second JSON parse attempt with content:', secondCleanAttempt);
-          analysisResult = JSON.parse(secondCleanAttempt);
+          console.log('Attempting to parse cleaned JSON:', jsonString.substring(0, 200) + '...');
+          analysisResult = JSON.parse(jsonString);
         } catch (secondParseError) {
           console.error('Second JSON parse attempt also failed:', secondParseError);
           
-          // Final attempt: try to extract just the JSON object
-          try {
-            const jsonMatch = aiResult.completion.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-              let finalAttempt = jsonMatch[0]
-                // Fix unescaped control characters
-                .replace(/[\x00-\x1F\x7F-\x9F]/g, (match: string) => {
-                  switch (match) {
-                    case '\n': return '\\n';
-                    case '\r': return '\\r';
-                    case '\t': return '\\t';
-                    case '\b': return '\\b';
-                    case '\f': return '\\f';
-                    default: return '';
-                  }
-                })
-                // Fix quotes that aren't properly escaped
-                .replace(/"([^"]*?)\n([^"]*?)"/g, '"$1\\n$2"')
-                .trim();
-              
-              console.log('Final JSON parse attempt with content:', finalAttempt);
-              analysisResult = JSON.parse(finalAttempt);
-            } else {
-              throw new Error('Could not extract JSON object from response');
+          // Create a fallback response if JSON parsing completely fails
+          console.log('Creating fallback response due to JSON parsing failure');
+          analysisResult = {
+            artworkName: "Monument or Artwork",
+            confidence: 50,
+            location: "Location Unknown",
+            period: "Unknown",
+            isRecognized: false,
+            detailedDescription: {
+              keyTakeaways: [
+                "AI analysis encountered a technical issue.",
+                "The monument or artwork could not be fully identified.",
+                "Please try scanning again or add context information.",
+                "Consider taking a clearer photo with better lighting."
+              ],
+              inDepthContext: "The AI analysis service encountered a technical issue while processing this image. This could be due to image quality, lighting conditions, or temporary service issues.\n\nTo improve results, try taking a clearer photo with good lighting and minimal reflections.\n\nYou can also add context information such as the location or name of the monument to help with identification.",
+              curiosities: "Technical analysis was not completed due to processing issues."
             }
-          } catch (finalParseError) {
-            console.error('Final JSON parse attempt also failed:', finalParseError);
-            throw new Error('Failed to parse AI response as valid JSON');
-          }
+          };
         }
       }
       
