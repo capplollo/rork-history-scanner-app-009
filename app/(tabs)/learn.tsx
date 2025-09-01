@@ -77,7 +77,7 @@ export default function LearnScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <LinearGradient
-          colors={["#4f46e5", "#6366f1"]}
+          colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
           <View style={styles.headerContent}>
@@ -175,68 +175,59 @@ export default function LearnScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#FEFEFE",
   },
   headerGradient: {
     paddingTop: 20,
-    paddingBottom: 40,
-    paddingHorizontal: 24,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingBottom: 30,
+    paddingHorizontal: 20,
   },
   headerContent: {
     gap: 20,
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontFamily: Platform.select({
-      ios: "System",
-      android: "Roboto",
-      default: "System"
-    }),
-    fontWeight: "700",
-    color: "#ffffff",
-    marginBottom: 8,
-    letterSpacing: -0.5,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "System",
-      android: "Roboto",
-      default: "System"
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
     }),
     fontWeight: "400",
-    color: "rgba(255,255,255,0.85)",
-    lineHeight: 24,
+    color: "#ffffff",
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.9)",
+    lineHeight: 22,
   },
   searchContainer: {
     marginTop: 8,
   },
   searchBar: {
-    backgroundColor: "rgba(255,255,255,0.95)",
-    borderRadius: 16,
+    backgroundColor: "#ffffff",
+    borderRadius: 25,
     paddingHorizontal: 20,
-    paddingVertical: 18,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    paddingVertical: 16,
   },
   searchPlaceholder: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: Platform.select({
-      ios: "System",
-      android: "Roboto",
-      default: "System"
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
     }),
     color: "#64748b",
-    fontWeight: "400",
   },
   section: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+    marginTop: 30,
+    paddingHorizontal: 20,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -245,25 +236,24 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: Platform.select({
-      ios: "System",
-      android: "Roboto",
-      default: "System"
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
     }),
-    fontWeight: "700",
-    color: "#1e293b",
-    letterSpacing: -0.3,
+    fontWeight: "500",
+    color: "#2C3E50",
   },
   seeAllText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: Platform.select({
-      ios: "System",
-      android: "Roboto",
-      default: "System"
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
     }),
-    color: "#4f46e5",
-    fontWeight: "600",
+    color: "#8B4513",
+    fontWeight: "400",
   },
   categoriesGrid: {
     flexDirection: "row",
@@ -272,14 +262,9 @@ const styles = StyleSheet.create({
   },
   categoryCard: {
     width: "47%",
-    height: 140,
-    borderRadius: 20,
+    height: 120,
+    borderRadius: 16,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
   },
   categoryImage: {
     width: "100%",
@@ -298,26 +283,26 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   categoryTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: Platform.select({
-      ios: "System",
-      android: "Roboto",
-      default: "System"
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
     }),
-    fontWeight: "600",
+    fontWeight: "500",
     color: "#ffffff",
   },
   articleCard: {
     flexDirection: "row",
     backgroundColor: "#ffffff",
-    marginBottom: 20,
-    borderRadius: 20,
+    marginBottom: 16,
+    borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   articleImage: {
     width: 100,
@@ -329,27 +314,25 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   articleTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: Platform.select({
-      ios: "System",
-      android: "Roboto",
-      default: "System"
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
     }),
-    fontWeight: "600",
-    color: "#1e293b",
-    marginBottom: 8,
-    letterSpacing: -0.2,
+    fontWeight: "500",
+    color: "#2C3E50",
+    marginBottom: 6,
   },
   articleExcerpt: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: Platform.select({
-      ios: "System",
-      android: "Roboto",
-      default: "System"
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
     }),
     color: "#64748b",
-    lineHeight: 20,
-    fontWeight: "400",
+    lineHeight: 18,
   },
   articleFooter: {
     flexDirection: "row",
@@ -358,14 +341,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   readTime: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: Platform.select({
-      ios: "System",
-      android: "Roboto",
-      default: "System"
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
     }),
     color: "#64748b",
-    fontWeight: "500",
   },
   quizCard: {
     marginBottom: 30,
@@ -373,54 +355,51 @@ const styles = StyleSheet.create({
   quizGradient: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 28,
-    borderRadius: 24,
+    padding: 24,
+    borderRadius: 20,
   },
   quizContent: {
     flex: 1,
   },
   quizTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: Platform.select({
-      ios: "System",
-      android: "Roboto",
-      default: "System"
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
     }),
-    fontWeight: "700",
+    fontWeight: "500",
     color: "#ffffff",
     marginBottom: 8,
-    letterSpacing: -0.2,
   },
   quizDescription: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: Platform.select({
-      ios: "System",
-      android: "Roboto",
-      default: "System"
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
     }),
-    fontWeight: "400",
-    color: "rgba(255,255,255,0.85)",
-    marginBottom: 20,
-    lineHeight: 22,
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.9)",
+    marginBottom: 16,
+    lineHeight: 20,
   },
   quizButton: {
-    backgroundColor: "rgba(255,255,255,0.25)",
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
     alignSelf: "flex-start",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
   },
   quizButtonText: {
     color: "#ffffff",
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: Platform.select({
-      ios: "System",
-      android: "Roboto",
-      default: "System"
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
     }),
-    fontWeight: "600",
+    fontWeight: "500",
   },
   quizIcon: {
     marginLeft: 16,

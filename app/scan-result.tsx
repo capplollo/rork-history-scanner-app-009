@@ -9,7 +9,6 @@ import {
   SafeAreaView,
   Alert,
   ActivityIndicator,
-  Platform,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { X, MapPin, Calendar, Share2, CheckCircle, AlertCircle, RefreshCw } from "lucide-react-native";
@@ -223,7 +222,7 @@ export default function ScanResultScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4f46e5" />
+          <ActivityIndicator size="large" color="#007AFF" />
           <Text style={styles.loadingText}>Loading monument details...</Text>
         </View>
       </SafeAreaView>
@@ -253,7 +252,7 @@ export default function ScanResultScreen() {
           </TouchableOpacity>
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
-              <Share2 size={20} color="#4f46e5" />
+              <Share2 size={20} color="#007AFF" />
             </TouchableOpacity>
           </View>
         </View>
@@ -369,7 +368,7 @@ export default function ScanResultScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#fff',
   },
   scrollView: {
     flex: 1,
@@ -382,12 +381,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#64748b',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    color: '#666',
   },
   errorContainer: {
     flex: 1,
@@ -397,20 +391,15 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    color: '#64748b',
+    color: '#666',
     textAlign: 'center',
     marginBottom: 20,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
   },
   retryButton: {
-    backgroundColor: '#4f46e5',
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 12,
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
   },
   retryButtonText: {
     color: '#FFF',
@@ -421,43 +410,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    backgroundColor: '#ffffff',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 4,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
   },
   closeButton: {
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: '#f1f5f9',
+    padding: 8,
   },
   headerActions: {
     flexDirection: 'row',
     gap: 12,
   },
   actionButton: {
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: '#f1f5f9',
+    padding: 8,
   },
   imageContainer: {
     position: 'relative',
-    height: 320,
-    borderRadius: 24,
-    overflow: 'hidden',
-    marginHorizontal: 24,
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
+    height: 300,
   },
   monumentImage: {
     width: '100%',
@@ -472,20 +442,13 @@ const styles = StyleSheet.create({
     height: 100,
   },
   contentContainer: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
+    padding: 20,
   },
   monumentName: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: 16,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    letterSpacing: -0.5,
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 12,
   },
   locationContainer: {
     flexDirection: 'row',
@@ -495,12 +458,7 @@ const styles = StyleSheet.create({
   locationText: {
     marginLeft: 8,
     fontSize: 16,
-    color: '#64748b',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    color: '#666',
   },
   periodContainer: {
     flexDirection: 'row',
@@ -510,12 +468,7 @@ const styles = StyleSheet.create({
   periodText: {
     marginLeft: 8,
     fontSize: 16,
-    color: '#64748b',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    color: '#666',
   },
   recognitionContainer: {
     marginBottom: 24,
@@ -523,11 +476,9 @@ const styles = StyleSheet.create({
   recognizedContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f0fdf4',
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
+    backgroundColor: '#E8F5E8',
+    padding: 12,
+    borderRadius: 8,
   },
   recognizedText: {
     marginLeft: 8,
@@ -537,23 +488,15 @@ const styles = StyleSheet.create({
   },
   confidenceText: {
     marginLeft: 'auto',
-    fontSize: 13,
-    color: '#64748b',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    fontWeight: '500',
+    fontSize: 12,
+    color: '#666',
   },
   notRecognizedContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fefce8',
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#fde047',
+    backgroundColor: '#FFF3E0',
+    padding: 12,
+    borderRadius: 8,
   },
   notRecognizedText: {
     marginLeft: 8,
@@ -562,49 +505,25 @@ const styles = StyleSheet.create({
     color: '#FF9800',
   },
   section: {
-    marginBottom: 32,
-    backgroundColor: '#ffffff',
-    padding: 24,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 4,
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: 16,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    letterSpacing: -0.3,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 12,
   },
   subsectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#1e293b',
-    marginTop: 20,
-    marginBottom: 12,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    color: '#000',
+    marginTop: 16,
+    marginBottom: 8,
   },
   descriptionText: {
     fontSize: 16,
-    lineHeight: 26,
-    color: '#475569',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    lineHeight: 24,
+    color: '#333',
   },
   factContainer: {
     flexDirection: 'row',
@@ -612,54 +531,34 @@ const styles = StyleSheet.create({
   },
   factBullet: {
     fontSize: 16,
-    color: '#4f46e5',
-    marginRight: 12,
-    fontWeight: '700',
+    color: '#007AFF',
+    marginRight: 8,
+    fontWeight: 'bold',
   },
   factText: {
     flex: 1,
     fontSize: 16,
-    lineHeight: 26,
-    color: '#475569',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    lineHeight: 24,
+    color: '#333',
   },
   actionBar: {
-    padding: 24,
-    backgroundColor: '#ffffff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 4,
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E5E5',
+    backgroundColor: '#fff',
   },
   reanalyzeButton: {
-    backgroundColor: '#4f46e5',
+    backgroundColor: '#007AFF',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 18,
-    borderRadius: 16,
-    gap: 10,
-    shadowColor: '#4f46e5',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
+    paddingVertical: 16,
+    borderRadius: 12,
+    gap: 8,
   },
   actionButtonText: {
     color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
   },
 });

@@ -398,7 +398,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         ) : (
           <View style={styles.placeholderContainer}>
-            <Sparkles size={48} color="#4f46e5" />
+            <Sparkles size={48} color="#8B4513" />
             <Text style={styles.placeholderText}>Select an image to analyze</Text>
             <Text style={styles.placeholderSubtext}>
               Take a photo or choose from your gallery
@@ -411,12 +411,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
       {!selectedImage && (
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.actionButton} onPress={takePhoto}>
-            <CameraIcon size={24} color="#4f46e5" />
+            <CameraIcon size={24} color="#8B4513" />
             <Text style={styles.actionButtonText}>Take Photo</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.actionButton} onPress={pickImageFromGallery}>
-            <ImageIcon size={24} color="#4f46e5" />
+            <ImageIcon size={24} color="#8B4513" />
             <Text style={styles.actionButtonText}>Choose from Gallery</Text>
           </TouchableOpacity>
         </View>
@@ -429,12 +429,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             style={styles.infoToggle}
             onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
           >
-            <Info size={20} color="#4f46e5" />
+            <Info size={20} color="#8B4513" />
             <Text style={styles.infoToggleText}>Add Context (Optional)</Text>
             {showAdditionalInfo ? (
-              <ChevronUp size={20} color="#4f46e5" />
+              <ChevronUp size={20} color="#8B4513" />
             ) : (
-              <ChevronDown size={20} color="#4f46e5" />
+              <ChevronDown size={20} color="#8B4513" />
             )}
           </TouchableOpacity>
 
@@ -524,122 +524,79 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#FEFEFE',
   },
   contentContainer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
   header: {
     alignItems: 'center',
-    paddingVertical: 40,
-    paddingHorizontal: 24,
-    backgroundColor: '#ffffff',
-    marginHorizontal: -24,
-    marginTop: -24,
-    marginBottom: 32,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 4,
+    paddingVertical: 30,
   },
   title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1e293b',
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#2C2C2C',
     marginBottom: 8,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    letterSpacing: -0.5,
+    fontFamily: 'Times New Roman',
   },
   subtitle: {
     fontSize: 16,
-    color: '#64748b',
+    color: '#666',
     textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    fontWeight: '400',
-    lineHeight: 24,
+    fontFamily: 'Times New Roman',
   },
   imageSection: {
     marginBottom: 30,
   },
   selectedImageContainer: {
     position: 'relative',
-    borderRadius: 24,
+    borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   selectedImage: {
     width: '100%',
-    height: 320,
+    height: 300,
     resizeMode: 'cover',
   },
   clearButton: {
     position: 'absolute',
-    top: 16,
-    right: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    borderRadius: 24,
-    padding: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 20,
+    padding: 8,
   },
   placeholderContainer: {
-    height: 320,
-    backgroundColor: '#ffffff',
-    borderRadius: 24,
+    height: 300,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 16,
     borderWidth: 2,
-    borderColor: '#e2e8f0',
+    borderColor: '#E5E5E5',
     borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
   },
   placeholderText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
-    color: '#4f46e5',
+    color: '#8B4513',
     marginTop: 16,
     marginBottom: 8,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    letterSpacing: -0.2,
+    fontFamily: 'Times New Roman',
   },
   placeholderSubtext: {
-    fontSize: 15,
-    color: '#64748b',
+    fontSize: 14,
+    color: '#666',
     textAlign: 'center',
-    paddingHorizontal: 24,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    lineHeight: 22,
+    paddingHorizontal: 20,
+    fontFamily: 'Times New Roman',
   },
   actionButtons: {
     flexDirection: 'row',
@@ -651,28 +608,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#ffffff',
-    paddingVertical: 18,
-    paddingHorizontal: 24,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#4f46e5',
-    gap: 10,
-    shadowColor: '#4f46e5',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    backgroundColor: '#FFF8F0',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#8B4513',
+    gap: 8,
   },
   actionButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#4f46e5',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    color: '#8B4513',
+    fontFamily: 'Times New Roman',
   },
   additionalInfoSection: {
     marginBottom: 30,
@@ -680,29 +628,20 @@ const styles = StyleSheet.create({
   infoToggle: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    paddingVertical: 18,
+    backgroundColor: '#F8F9FA',
+    paddingVertical: 16,
     paddingHorizontal: 20,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#E5E5E5',
     gap: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
   },
   infoToggleText: {
     flex: 1,
     fontSize: 16,
     fontWeight: '600',
-    color: '#4f46e5',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    color: '#8B4513',
+    fontFamily: 'Times New Roman',
   },
   infoForm: {
     marginTop: 16,
@@ -712,44 +651,36 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   inputLabel: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#1e293b',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    color: '#2C2C2C',
+    fontFamily: 'Times New Roman',
   },
   textInput: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#F8F9FA',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 12,
+    borderColor: '#E5E5E5',
+    borderRadius: 8,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 12,
     fontSize: 16,
-    color: '#1e293b',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    color: '#2C2C2C',
+    fontFamily: 'Times New Roman',
   },
   textArea: {
     height: 80,
     textAlignVertical: 'top',
   },
   analyzeButton: {
-    backgroundColor: '#4f46e5',
+    backgroundColor: '#8B4513',
     paddingVertical: 20,
-    borderRadius: 16,
+    borderRadius: 12,
     marginBottom: 30,
-    shadowColor: '#4f46e5',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   analyzeButtonDisabled: {
     opacity: 0.7,
@@ -770,47 +701,29 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#FFF',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    fontFamily: 'Times New Roman',
   },
   tipsSection: {
-    backgroundColor: '#ffffff',
-    padding: 24,
-    borderRadius: 20,
+    backgroundColor: '#F8F9FA',
+    padding: 20,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    borderColor: '#E5E5E5',
   },
   tipsTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: 16,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    letterSpacing: -0.2,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2C2C2C',
+    marginBottom: 12,
+    fontFamily: 'Times New Roman',
   },
   tipsList: {
     gap: 8,
   },
   tipItem: {
-    fontSize: 15,
-    color: '#64748b',
-    lineHeight: 22,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+    fontFamily: 'Times New Roman',
   },
 });

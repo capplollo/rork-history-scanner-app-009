@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -126,7 +127,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don&apos;t have an account? </Text>
+            <Text style={styles.footerText}>Don't have an account? </Text>
             <TouchableOpacity onPress={navigateToSignUp}>
               <Text style={styles.signUpText}>Sign Up</Text>
             </TouchableOpacity>
@@ -140,7 +141,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#FEFEFE',
   },
   keyboardView: {
     flex: 1,
@@ -155,27 +156,17 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   title: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: 12,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    letterSpacing: -0.5,
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#2C2C2C',
+    marginBottom: 10,
+    fontFamily: 'Times New Roman',
   },
   subtitle: {
     fontSize: 16,
-    color: '#64748b',
+    color: '#666',
     textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    lineHeight: 24,
+    fontFamily: 'Times New Roman',
   },
   form: {
     marginBottom: 30,
@@ -183,85 +174,62 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    marginBottom: 20,
-    paddingHorizontal: 20,
-    borderWidth: 2,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
   },
   inputIcon: {
-    marginRight: 16,
+    marginRight: 12,
   },
   input: {
     flex: 1,
-    paddingVertical: 18,
+    paddingVertical: 16,
     fontSize: 16,
-    color: '#1e293b',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    color: '#2C2C2C',
+    fontFamily: 'Times New Roman',
   },
   eyeIcon: {
     padding: 4,
   },
   errorText: {
-    color: '#ef4444',
+    color: '#DC3545',
     fontSize: 14,
-    marginBottom: 20,
+    marginBottom: 16,
     textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    fontWeight: '500',
+    fontFamily: 'Times New Roman',
   },
   loginButton: {
-    backgroundColor: '#4f46e5',
-    paddingVertical: 18,
-    borderRadius: 16,
+    backgroundColor: '#8B4513',
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 20,
-    shadowColor: '#4f46e5',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 6,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   loginButtonDisabled: {
     opacity: 0.7,
   },
   loginButtonText: {
     color: '#FFFFFF',
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '600',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    fontFamily: 'Times New Roman',
   },
   forgotPasswordButton: {
     alignItems: 'center',
     paddingVertical: 8,
   },
   forgotPasswordText: {
-    color: '#4f46e5',
+    color: '#007AFF',
     fontSize: 16,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    fontWeight: '500',
+    fontFamily: 'Times New Roman',
   },
   footer: {
     flexDirection: 'row',
@@ -270,21 +238,13 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 16,
-    color: '#64748b',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    color: '#666',
+    fontFamily: 'Times New Roman',
   },
   signUpText: {
     fontSize: 16,
-    color: '#4f46e5',
+    color: '#007AFF',
     fontWeight: '600',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    fontFamily: 'Times New Roman',
   },
 });

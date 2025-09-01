@@ -7,29 +7,28 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#4f46e5",
-        tabBarInactiveTintColor: "#94a3b8",
+        tabBarActiveTintColor: "#8B4513",
+        tabBarInactiveTintColor: "#A0A0A0",
         tabBarStyle: {
-          backgroundColor: "#ffffff",
-          borderTopWidth: 0,
-          paddingBottom: Platform.OS === "ios" ? 0 : 12,
-          paddingTop: 8,
-          height: Platform.OS === "ios" ? 88 : 72,
+          backgroundColor: "#FEFEFE",
+          borderTopWidth: 0.5,
+          borderTopColor: "#E8E8E8",
+          paddingBottom: Platform.OS === "ios" ? 0 : 8,
+          height: Platform.OS === "ios" ? 88 : 65,
           shadowColor: "#000",
-          shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.1,
-          shadowRadius: 12,
-          elevation: 12,
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 8,
+          elevation: 8,
         },
         tabBarLabelStyle: {
           fontFamily: Platform.select({
-            ios: "System",
-            android: "Roboto",
-            default: "System"
+            ios: "Times New Roman",
+            android: "serif",
+            default: "Times New Roman"
           }),
-          fontSize: 12,
-          fontWeight: "600",
-          marginTop: 4,
+          fontSize: 11,
+          fontWeight: "500",
         },
         headerShown: false,
       }}
@@ -47,22 +46,20 @@ export default function TabLayout() {
           title: "Discover",
           tabBarIcon: ({ color, focused }) => (
             <View style={{
-              width: 60,
-              height: 60,
-              borderRadius: 30,
-              backgroundColor: focused ? "#4f46e5" : "#6366f1",
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: focused ? "#8B4513" : "#D4A574",
               justifyContent: "center",
               alignItems: "center",
-              marginBottom: 24,
-              shadowColor: "#4f46e5",
-              shadowOffset: { width: 0, height: 6 },
-              shadowOpacity: 0.3,
-              shadowRadius: 12,
-              elevation: 12,
-              borderWidth: focused ? 3 : 0,
-              borderColor: "#ffffff",
+              marginBottom: 20,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 8,
+              elevation: 8,
             }}>
-              <Camera size={30} color="#ffffff" />
+              <Camera size={28} color="#ffffff" />
             </View>
           ),
           tabBarLabel: () => null,

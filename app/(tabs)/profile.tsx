@@ -79,7 +79,7 @@ export default function ProfileScreen() {
             style={styles.settingsButton}
             onPress={() => setShowSettings(true)}
           >
-            <Settings size={24} color="#4f46e5" />
+            <Settings size={24} color="#007AFF" />
           </TouchableOpacity>
         </View>
 
@@ -87,7 +87,7 @@ export default function ProfileScreen() {
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
-              <User size={44} color="#4f46e5" />
+              <User size={40} color="#8B4513" />
             </View>
           </View>
           
@@ -113,7 +113,7 @@ export default function ProfileScreen() {
             {stats.map((stat, index) => (
               <View key={index} style={styles.statCard}>
                 <View style={styles.statIcon}>
-                  <stat.icon size={28} color="#4f46e5" />
+                  <stat.icon size={24} color="#8B4513" />
                 </View>
                 <Text style={styles.statValue}>{stat.value}</Text>
                 <Text style={styles.statLabel}>{stat.label}</Text>
@@ -161,7 +161,7 @@ export default function ProfileScreen() {
                 onPress={item.action}
               >
                 <View style={styles.menuItemContent}>
-                  <item.icon size={20} color="#4f46e5" />
+                  <item.icon size={20} color="#8B4513" />
                   <Text style={styles.menuItemText}>{item.label}</Text>
                 </View>
                 <ChevronRight size={20} color="#CCC" />
@@ -177,7 +177,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#FEFEFE',
   },
   scrollView: {
     flex: 1,
@@ -186,88 +186,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    backgroundColor: '#ffffff',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 4,
-    marginBottom: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1e293b',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    letterSpacing: -0.3,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2C2C2C',
+    fontFamily: 'Times New Roman',
   },
   settingsButton: {
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: '#f1f5f9',
+    padding: 8,
   },
   profileSection: {
     alignItems: 'center',
-    paddingVertical: 40,
-    paddingHorizontal: 24,
-    backgroundColor: '#ffffff',
-    marginHorizontal: 24,
-    borderRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 4,
-    marginBottom: 24,
+    paddingVertical: 30,
+    paddingHorizontal: 20,
   },
   avatarContainer: {
     marginBottom: 16,
   },
   avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: '#f1f5f9',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#FFF8F0',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,
-    borderColor: '#4f46e5',
-    shadowColor: '#4f46e5',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
+    borderColor: '#8B4513',
   },
   userName: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: 6,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    letterSpacing: -0.3,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2C2C2C',
+    marginBottom: 4,
+    fontFamily: 'Times New Roman',
   },
   userEmail: {
     fontSize: 16,
-    color: '#64748b',
-    marginBottom: 20,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    fontWeight: '400',
+    color: '#666',
+    marginBottom: 16,
+    fontFamily: 'Times New Roman',
   },
   userInfo: {
     gap: 8,
@@ -279,29 +241,19 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 14,
-    color: '#64748b',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    fontWeight: '400',
+    color: '#666',
+    fontFamily: 'Times New Roman',
   },
   statsSection: {
-    paddingHorizontal: 24,
-    marginBottom: 32,
+    paddingHorizontal: 20,
+    marginBottom: 30,
   },
   sectionTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: 20,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    letterSpacing: -0.3,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2C2C2C',
+    marginBottom: 16,
+    fontFamily: 'Times New Roman',
   },
   statsGrid: {
     flexDirection: 'row',
@@ -309,131 +261,85 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#ffffff',
-    padding: 24,
-    borderRadius: 20,
+    backgroundColor: '#FFF8F0',
+    padding: 20,
+    borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 4,
+    borderColor: '#E5E5E5',
   },
   statIcon: {
     marginBottom: 8,
   },
   statValue: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#4f46e5',
-    marginBottom: 6,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    letterSpacing: -0.3,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#8B4513',
+    marginBottom: 4,
+    fontFamily: 'Times New Roman',
   },
   statLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#1e293b',
-    marginBottom: 6,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    color: '#2C2C2C',
+    marginBottom: 4,
+    fontFamily: 'Times New Roman',
   },
   statDescription: {
-    fontSize: 13,
-    color: '#64748b',
+    fontSize: 12,
+    color: '#666',
     textAlign: 'center',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    lineHeight: 18,
+    fontFamily: 'Times New Roman',
   },
   activitySection: {
-    paddingHorizontal: 24,
-    marginBottom: 32,
+    paddingHorizontal: 20,
+    marginBottom: 30,
   },
   emptyState: {
     alignItems: 'center',
-    paddingVertical: 48,
-    backgroundColor: '#ffffff',
-    borderRadius: 20,
+    paddingVertical: 40,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    borderColor: '#E5E5E5',
   },
   emptyStateTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
-    color: '#64748b',
-    marginTop: 20,
-    marginBottom: 10,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    color: '#666',
+    marginTop: 16,
+    marginBottom: 8,
+    fontFamily: 'Times New Roman',
   },
   emptyStateText: {
-    fontSize: 15,
-    color: '#64748b',
+    fontSize: 14,
+    color: '#666',
     textAlign: 'center',
-    paddingHorizontal: 24,
-    lineHeight: 22,
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
+    paddingHorizontal: 20,
+    lineHeight: 20,
+    fontFamily: 'Times New Roman',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#FEFEFE',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    backgroundColor: '#ffffff',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 4,
-    marginBottom: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
   },
   modalTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1e293b',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    letterSpacing: -0.3,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2C2C2C',
+    fontFamily: 'Times New Roman',
   },
   closeButton: {
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: '#f1f5f9',
+    padding: 8,
   },
   modalContent: {
     flex: 1,
@@ -442,17 +348,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 18,
-    backgroundColor: '#ffffff',
-    marginHorizontal: 24,
-    marginBottom: 12,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
   },
   menuItemContent: {
     flexDirection: 'row',
@@ -461,12 +360,7 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 16,
-    color: '#1e293b',
-    fontFamily: Platform.select({
-      ios: 'System',
-      android: 'Roboto',
-      default: 'System'
-    }),
-    fontWeight: '500',
+    color: '#2C2C2C',
+    fontFamily: 'Times New Roman',
   },
 });
