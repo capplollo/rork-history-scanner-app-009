@@ -103,29 +103,19 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header with Profile Info */}
+        {/* Minimal Header with Profile Info */}
         <LinearGradient
           colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
           <View style={styles.headerContent}>
-            <View style={styles.headerTop}>
-              <Text style={styles.headerTitle}>Your Profile</Text>
-              <TouchableOpacity 
-                style={styles.settingsButton}
-                onPress={() => setShowSettings(true)}
-              >
-                <Settings size={24} color="#ffffff" />
-              </TouchableOpacity>
-            </View>
-            
             <View style={styles.profileSection}>
               <View style={styles.avatarContainer}>
                 <LinearGradient
                   colors={["#8B4513", "#A0522D"]}
                   style={styles.avatar}
                 >
-                  <User size={24} color="#ffffff" />
+                  <User size={20} color="#ffffff" />
                 </LinearGradient>
               </View>
               
@@ -133,6 +123,13 @@ export default function ProfileScreen() {
                 <Text style={styles.userName}>Demo User</Text>
                 <Text style={styles.userEmail}>demo@example.com</Text>
               </View>
+              
+              <TouchableOpacity 
+                style={styles.settingsButton}
+                onPress={() => setShowSettings(true)}
+              >
+                <Settings size={20} color="#ffffff" />
+              </TouchableOpacity>
             </View>
           </View>
         </LinearGradient>
@@ -248,34 +245,20 @@ const styles = StyleSheet.create({
   },
   headerGradient: {
     paddingTop: 20,
-    paddingBottom: 25,
+    paddingBottom: 20,
     paddingHorizontal: 20,
   },
   headerContent: {
-    gap: 16,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "400",
-    color: "#ffffff",
-  },
-  settingsButton: {
-    padding: 8,
+    gap: 0,
   },
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+  },
+  settingsButton: {
+    padding: 6,
+    marginLeft: 'auto',
   },
   avatarContainer: {
     shadowColor: '#000',
@@ -285,9 +268,9 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -296,7 +279,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -306,7 +289,7 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   userEmail: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -316,14 +299,14 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   section: {
-    marginTop: 30,
+    marginTop: 25,
     paddingHorizontal: 20,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 20,
@@ -348,11 +331,11 @@ const styles = StyleSheet.create({
   historyGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    justifyContent: "space-between",
   },
   monumentCard: {
     width: "47.5%",
-    height: 280,
+    height: 320,
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
@@ -360,6 +343,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 4,
+    marginBottom: 12,
   },
   monumentImage: {
     width: "100%",
