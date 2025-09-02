@@ -125,7 +125,7 @@ export default function ProfileScreen() {
                   colors={["#8B4513", "#A0522D"]}
                   style={styles.avatar}
                 >
-                  <User size={32} color="#ffffff" />
+                  <User size={24} color="#ffffff" />
                 </LinearGradient>
               </View>
               
@@ -248,11 +248,11 @@ const styles = StyleSheet.create({
   },
   headerGradient: {
     paddingTop: 20,
-    paddingBottom: 30,
+    paddingBottom: 25,
     paddingHorizontal: 20,
   },
   headerContent: {
-    gap: 20,
+    gap: 16,
   },
   headerTop: {
     flexDirection: 'row',
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: 12,
   },
   avatarContainer: {
     shadowColor: '#000',
@@ -285,9 +285,9 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   userName: {
-    fontSize: 22,
+    fontSize: 18,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   userEmail: {
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
