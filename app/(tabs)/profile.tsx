@@ -115,7 +115,7 @@ export default function ProfileScreen() {
                   colors={["#8B4513", "#A0522D"]}
                   style={styles.avatar}
                 >
-                  <User size={20} color="#ffffff" />
+                  <User size={23} color="#ffffff" />
                 </LinearGradient>
               </View>
               
@@ -244,8 +244,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEFEFE",
   },
   headerGradient: {
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingTop: 15,
+    paddingBottom: 15,
     paddingHorizontal: 20,
   },
   headerContent: {
@@ -268,9 +268,9 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 43,
+    height: 43,
+    borderRadius: 21.5,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   userName: {
-    fontSize: 16,
+    fontSize: 19,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   userEmail: {
-    fontSize: 12,
+    fontSize: 15,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
   },
   monumentCard: {
     width: "47.5%",
-    height: 320,
+    height: 240,
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
