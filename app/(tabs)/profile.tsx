@@ -10,6 +10,7 @@ import {
   Alert,
   Platform,
   Modal,
+  Share,
 } from "react-native";
 import { 
   User, 
@@ -24,7 +25,10 @@ import {
   X,
   Award,
   Sparkles,
-  History
+  History,
+  Share2,
+  Heart,
+  Bookmark
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -53,52 +57,81 @@ export default function ProfileScreen() {
     );
   };
 
-  const stats = [
-    { 
-      label: "Discoveries", 
-      value: "0",
-      icon: Camera,
-      description: "Monuments and art explored"
-    },
-    { 
-      label: "Destinations", 
-      value: "0",
-      icon: Globe,
-      description: "Countries visited"
-    },
-  ];
+  const handleShare = async (monument: any) => {
+    try {
+      await Share.share({
+        message: `Check out this amazing discovery: ${monument.name} in ${monument.location}! 🏛️`,
+        url: monument.image,
+      });
+    } catch (error) {
+      console.log('Error sharing:', error);
+    }
+  };
 
   const menuItems = [
     { icon: LogOut, label: "Sign Out", action: handleSignOut },
   ];
 
+  // Mock scan history data - replace with real data
+  const scanHistory = [
+    {
+      id: "1",
+      name: "Colosseum",
+      location: "Rome, Italy",
+      period: "72-80 AD",
+      image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400",
+      scannedAt: "2 days ago",
+      confidence: 95,
+      description: "The largest amphitheatre ever built, a testament to Roman engineering prowess."
+    },
+    {
+      id: "2",
+      name: "Eiffel Tower",
+      location: "Paris, France",
+      period: "1887-1889",
+      image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=400",
+      scannedAt: "1 week ago",
+      confidence: 98,
+      description: "An iron lattice tower that became the symbol of Paris and French ingenuity."
+    },
+    {
+      id: "3",
+      name: "Taj Mahal",
+      location: "Agra, India",
+      period: "1632-1653",
+      image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400",
+      scannedAt: "2 weeks ago",
+      confidence: 92,
+      description: "A white marble mausoleum, considered the jewel of Muslim art in India."
+    },
+  ];
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <Text style={styles.headerTitle}>Profile</Text>
-            <TouchableOpacity 
-              style={styles.settingsButton}
-              onPress={() => setShowSettings(true)}
-            >
-              <Settings size={24} color="#8B4513" />
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.headerSubtitle}>
-            Track your discoveries and explore history
-          </Text>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.profileCard}>
-            <View style={styles.profileHeader}>
+        {/* Header with Profile Info */}
+        <LinearGradient
+          colors={["#2C3E50", "#34495E"]}
+          style={styles.headerGradient}
+        >
+          <View style={styles.headerContent}>
+            <View style={styles.headerTop}>
+              <Text style={styles.headerTitle}>Your Profile</Text>
+              <TouchableOpacity 
+                style={styles.settingsButton}
+                onPress={() => setShowSettings(true)}
+              >
+                <Settings size={24} color="#ffffff" />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.profileSection}>
               <View style={styles.avatarContainer}>
                 <LinearGradient
                   colors={["#8B4513", "#A0522D"]}
                   style={styles.avatar}
                 >
-                  <User size={32} color="#ffffff" />
+                  <User size={40} color="#ffffff" />
                 </LinearGradient>
               </View>
               
@@ -106,77 +139,82 @@ export default function ProfileScreen() {
                 <Text style={styles.userName}>Demo User</Text>
                 <Text style={styles.userEmail}>demo@example.com</Text>
                 
-                <View style={styles.userDetails}>
-                  <View style={styles.detailItem}>
-                    <MapPin size={14} color="#64748b" />
-                    <Text style={styles.detailText}>Location not set</Text>
+                <View style={styles.statsRow}>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statNumber}>{scanHistory.length}</Text>
+                    <Text style={styles.statLabel}>Discoveries</Text>
                   </View>
-                  <View style={styles.detailItem}>
-                    <Calendar size={14} color="#64748b" />
-                    <Text style={styles.detailText}>Member since 2024</Text>
+                  <View style={styles.statDivider} />
+                  <View style={styles.statItem}>
+                    <Text style={styles.statNumber}>3</Text>
+                    <Text style={styles.statLabel}>Countries</Text>
                   </View>
                 </View>
               </View>
             </View>
           </View>
-        </View>
+        </LinearGradient>
 
+        {/* Scan History */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Your Stats</Text>
+            <Text style={styles.sectionTitle}>Your Discoveries</Text>
             <TouchableOpacity>
               <Text style={styles.seeAllText}>View all</Text>
             </TouchableOpacity>
           </View>
           
-          <View style={styles.statsGrid}>
-            {stats.map((stat, index) => (
-              <TouchableOpacity key={index} style={styles.statCard}>
-                <View style={styles.statContent}>
-                  <stat.icon size={24} color="#8B4513" />
-                  <Text style={styles.statValue}>{stat.value}</Text>
-                  <Text style={styles.statLabel}>{stat.label}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Activity</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>View all</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.activityCard}>
+          {scanHistory.length > 0 ? (
+            <View style={styles.historyGrid}>
+              {scanHistory.map((monument) => (
+                <TouchableOpacity key={monument.id} style={styles.monumentCard}>
+                  <Image source={{ uri: monument.image }} style={styles.monumentImage} />
+                  <LinearGradient
+                    colors={["transparent", "rgba(0,0,0,0.8)"]}
+                    style={styles.monumentOverlay}
+                  >
+                    <View style={styles.monumentContent}>
+                      <View style={styles.monumentHeader}>
+                        <View style={styles.confidenceBadge}>
+                          <Text style={styles.confidenceText}>{monument.confidence}%</Text>
+                        </View>
+                        <TouchableOpacity 
+                          style={styles.shareButton}
+                          onPress={() => handleShare(monument)}
+                        >
+                          <Share2 size={16} color="#ffffff" />
+                        </TouchableOpacity>
+                      </View>
+                      
+                      <View style={styles.monumentInfo}>
+                        <Text style={styles.monumentName}>{monument.name}</Text>
+                        <View style={styles.monumentDetails}>
+                          <MapPin size={12} color="rgba(255,255,255,0.8)" />
+                          <Text style={styles.monumentLocation}>{monument.location}</Text>
+                        </View>
+                        <Text style={styles.monumentPeriod}>{monument.period}</Text>
+                        <Text style={styles.scannedTime}>{monument.scannedAt}</Text>
+                      </View>
+                    </View>
+                  </LinearGradient>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
             <View style={styles.emptyState}>
               <View style={styles.emptyIconContainer}>
                 <History size={40} color="rgba(139, 69, 19, 0.3)" />
               </View>
-              <Text style={styles.emptyStateTitle}>No Recent Activity</Text>
+              <Text style={styles.emptyStateTitle}>No Discoveries Yet</Text>
               <Text style={styles.emptyStateText}>
-                Start scanning monuments and art to see your discoveries here
+                Start scanning monuments and art to build your collection
               </Text>
               <TouchableOpacity style={styles.startButton} onPress={() => router.push('/(tabs)/(scanner)')}>  
-                <Sparkles size={16} color="#8B4513" />
-                <Text style={styles.startButtonText}>Start Exploring</Text>
+                <Camera size={16} color="#8B4513" />
+                <Text style={styles.startButtonText}>Start Scanning</Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
-        
-        <View style={styles.section}>
-          <View style={styles.achievementCard}>
-            <View style={styles.achievementContent}>
-              <Award size={32} color="#8B4513" />
-              <Text style={styles.achievementTitle}>Ready to Discover</Text>
-              <Text style={styles.achievementDescription}>
-                Your first monument scan awaits. Start your historical journey today!
-              </Text>
-            </View>
-          </View>
+          )}
         </View>
       </ScrollView>
 
@@ -223,19 +261,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FEFEFE",
   },
-  header: {
-    paddingTop: 60,
-    paddingBottom: 30,
-    paddingHorizontal: 20,
-    backgroundColor: "#FEFEFE",
-  },
   headerGradient: {
     paddingTop: 20,
     paddingBottom: 30,
     paddingHorizontal: 20,
   },
   headerContent: {
-    gap: 20,
+    gap: 24,
   },
   headerTop: {
     flexDirection: 'row',
@@ -243,28 +275,93 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "400",
-    color: "#2C3E50",
+    color: "#ffffff",
   },
-  headerSubtitle: {
+  settingsButton: {
+    padding: 8,
+  },
+  profileSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20,
+  },
+  avatarContainer: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileInfo: {
+    flex: 1,
+    gap: 8,
+  },
+  userName: {
+    fontSize: 24,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: "#ffffff",
+  },
+  userEmail: {
     fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
-    lineHeight: 22,
-    marginTop: 8,
+    color: "rgba(255,255,255,0.8)",
+    marginBottom: 12,
   },
-  settingsButton: {
-    padding: 8,
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 20,
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: 20,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "600",
+    color: "#ffffff",
+  },
+  statLabel: {
+    fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "rgba(255,255,255,0.7)",
+    marginTop: 2,
+  },
+  statDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: 'rgba(255,255,255,0.3)',
   },
   section: {
     marginTop: 30,
@@ -296,136 +393,123 @@ const styles = StyleSheet.create({
     color: "#8B4513",
     fontWeight: "400",
   },
-  profileCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  historyGrid: {
     gap: 16,
   },
-  avatarContainer: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
+  monumentCard: {
+    height: 200,
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
   },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
+  monumentImage: {
+    width: "100%",
+    height: "100%",
   },
-  profileInfo: {
+  monumentOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "100%",
+    justifyContent: "space-between",
+    padding: 20,
+  },
+  monumentContent: {
     flex: 1,
-    gap: 8,
+    justifyContent: "space-between",
   },
-  userName: {
+  monumentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  confidenceBadge: {
+    backgroundColor: "rgba(139, 69, 19, 0.9)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  confidenceText: {
+    fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "600",
+    color: "#ffffff",
+  },
+  shareButton: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    padding: 8,
+    borderRadius: 20,
+  },
+  monumentInfo: {
+    gap: 4,
+  },
+  monumentName: {
     fontSize: 20,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "500",
-    color: "#2C3E50",
+    fontWeight: "600",
+    color: "#ffffff",
+    marginBottom: 4,
   },
-  userEmail: {
+  monumentDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 2,
+  },
+  monumentLocation: {
     fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: "rgba(255,255,255,0.9)",
   },
-  userDetails: {
-    gap: 6,
-    marginTop: 4,
-  },
-  detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  detailText: {
+  monumentPeriod: {
     fontSize: 13,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    fontStyle: "italic",
+    color: "rgba(255,255,255,0.8)",
+    marginBottom: 4,
   },
-  statsGrid: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  statGradient: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  statContent: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  statValue: {
-    fontSize: 28,
+  scannedTime: {
+    fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "500",
-    color: "#2C3E50",
+    color: "rgba(255,255,255,0.7)",
   },
-  statLabel: {
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-    color: "#64748b",
-    textAlign: 'center',
-  },
-  activityCard: {
+
+  emptyState: {
     backgroundColor: '#ffffff',
-    borderRadius: 16,
+    borderRadius: 20,
+    alignItems: 'center',
+    paddingVertical: 50,
+    paddingHorizontal: 30,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 4,
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 40,
-    paddingHorizontal: 24,
   },
   emptyIconContainer: {
     width: 80,
@@ -434,21 +518,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8fafc',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   emptyStateTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "500",
+    fontWeight: "600",
     color: "#2C3E50",
-    marginBottom: 8,
+    marginBottom: 12,
   },
   emptyStateText: {
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -456,86 +540,33 @@ const styles = StyleSheet.create({
     }),
     color: "#64748b",
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 24,
-  },
-  startButton: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#8B4513',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  startGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    gap: 8,
-  },
-  startButtonText: {
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-    color: "#8B4513",
-  },
-  achievementCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    padding: 24,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    lineHeight: 22,
     marginBottom: 30,
   },
-  achievementGradient: {
-    padding: 24,
+  startButton: {
+    backgroundColor: '#8B4513',
+    borderRadius: 25,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    gap: 8,
+    shadowColor: '#8B4513',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  achievementContent: {
-    alignItems: 'center',
-    gap: 12,
-  },
-  achievementTitle: {
-    fontSize: 18,
+  startButtonText: {
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "500",
-    color: "#2C3E50",
-  },
-  achievementDescription: {
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#64748b",
-    textAlign: 'center',
-    lineHeight: 20,
+    fontWeight: "600",
+    color: "#ffffff",
   },
   modalContainer: {
     flex: 1,
