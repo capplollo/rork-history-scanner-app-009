@@ -15,20 +15,14 @@ import {
 import { 
   User, 
   MapPin, 
-  Calendar,
   Settings,
   LogOut,
   ChevronRight,
   Camera,
-  Globe,
   Clock,
   X,
-  Award,
-  Sparkles,
   History,
-  Share2,
-  Heart,
-  Bookmark
+  Share2
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -131,25 +125,13 @@ export default function ProfileScreen() {
                   colors={["#8B4513", "#A0522D"]}
                   style={styles.avatar}
                 >
-                  <User size={40} color="#ffffff" />
+                  <User size={32} color="#ffffff" />
                 </LinearGradient>
               </View>
               
               <View style={styles.profileInfo}>
                 <Text style={styles.userName}>Demo User</Text>
                 <Text style={styles.userEmail}>demo@example.com</Text>
-                
-                <View style={styles.statsRow}>
-                  <View style={styles.statItem}>
-                    <Text style={styles.statNumber}>{scanHistory.length}</Text>
-                    <Text style={styles.statLabel}>Discoveries</Text>
-                  </View>
-                  <View style={styles.statDivider} />
-                  <View style={styles.statItem}>
-                    <Text style={styles.statNumber}>3</Text>
-                    <Text style={styles.statLabel}>Countries</Text>
-                  </View>
-                </View>
               </View>
             </View>
           </View>
@@ -158,7 +140,7 @@ export default function ProfileScreen() {
         {/* Scan History */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Your Discoveries</Text>
+            <Text style={styles.sectionTitle}>Discovery History</Text>
             <TouchableOpacity>
               <Text style={styles.seeAllText}>View all</Text>
             </TouchableOpacity>
@@ -170,7 +152,7 @@ export default function ProfileScreen() {
                 <TouchableOpacity key={monument.id} style={styles.monumentCard}>
                   <Image source={{ uri: monument.image }} style={styles.monumentImage} />
                   <LinearGradient
-                    colors={["transparent", "rgba(0,0,0,0.8)"]}
+                    colors={["transparent", "rgba(0,0,0,0.7)"]}
                     style={styles.monumentOverlay}
                   >
                     <View style={styles.monumentContent}>
@@ -182,18 +164,21 @@ export default function ProfileScreen() {
                           style={styles.shareButton}
                           onPress={() => handleShare(monument)}
                         >
-                          <Share2 size={16} color="#ffffff" />
+                          <Share2 size={14} color="#ffffff" />
                         </TouchableOpacity>
                       </View>
                       
                       <View style={styles.monumentInfo}>
                         <Text style={styles.monumentName}>{monument.name}</Text>
                         <View style={styles.monumentDetails}>
-                          <MapPin size={12} color="rgba(255,255,255,0.8)" />
+                          <MapPin size={10} color="rgba(255,255,255,0.8)" />
                           <Text style={styles.monumentLocation}>{monument.location}</Text>
                         </View>
                         <Text style={styles.monumentPeriod}>{monument.period}</Text>
-                        <Text style={styles.scannedTime}>{monument.scannedAt}</Text>
+                        <View style={styles.timeContainer}>
+                          <Clock size={10} color="rgba(255,255,255,0.6)" />
+                          <Text style={styles.scannedTime}>{monument.scannedAt}</Text>
+                        </View>
                       </View>
                     </View>
                   </LinearGradient>
@@ -210,7 +195,7 @@ export default function ProfileScreen() {
                 Start scanning monuments and art to build your collection
               </Text>
               <TouchableOpacity style={styles.startButton} onPress={() => router.push('/(tabs)/(scanner)')}>  
-                <Camera size={16} color="#8B4513" />
+                <Camera size={16} color="#ffffff" />
                 <Text style={styles.startButtonText}>Start Scanning</Text>
               </TouchableOpacity>
             </View>
@@ -267,7 +252,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   headerContent: {
-    gap: 24,
+    gap: 20,
   },
   headerTop: {
     flexDirection: 'row',
@@ -290,7 +275,7 @@ const styles = StyleSheet.create({
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 20,
+    gap: 16,
   },
   avatarContainer: {
     shadowColor: '#000',
@@ -300,18 +285,18 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
   },
   profileInfo: {
     flex: 1,
-    gap: 8,
+    gap: 4,
   },
   userName: {
-    fontSize: 24,
+    fontSize: 22,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -321,47 +306,14 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   userEmail: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     color: "rgba(255,255,255,0.8)",
-    marginBottom: 12,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 20,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 20,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "600",
-    color: "#ffffff",
-  },
-  statLabel: {
-    fontSize: 12,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "rgba(255,255,255,0.7)",
-    marginTop: 2,
-  },
-  statDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    fontStyle: "italic",
   },
   section: {
     marginTop: 30,
@@ -394,17 +346,20 @@ const styles = StyleSheet.create({
     fontWeight: "400",
   },
   historyGrid: {
-    gap: 16,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
   },
   monumentCard: {
-    height: 200,
-    borderRadius: 20,
+    width: "47.5%",
+    height: 280,
+    borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
   },
   monumentImage: {
     width: "100%",
@@ -417,7 +372,7 @@ const styles = StyleSheet.create({
     right: 0,
     height: "100%",
     justifyContent: "space-between",
-    padding: 20,
+    padding: 12,
   },
   monumentContent: {
     flex: 1,
@@ -430,12 +385,12 @@ const styles = StyleSheet.create({
   },
   confidenceBadge: {
     backgroundColor: "rgba(139, 69, 19, 0.9)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   confidenceText: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -446,14 +401,14 @@ const styles = StyleSheet.create({
   },
   shareButton: {
     backgroundColor: "rgba(255,255,255,0.2)",
-    padding: 8,
-    borderRadius: 20,
+    padding: 6,
+    borderRadius: 12,
   },
   monumentInfo: {
-    gap: 4,
+    gap: 3,
   },
   monumentName: {
-    fontSize: 20,
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -461,16 +416,17 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "600",
     color: "#ffffff",
-    marginBottom: 4,
+    marginBottom: 2,
+    lineHeight: 20,
   },
   monumentDetails: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 3,
     marginBottom: 2,
   },
   monumentLocation: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -479,7 +435,7 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.9)",
   },
   monumentPeriod: {
-    fontSize: 13,
+    fontSize: 11,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -489,14 +445,19 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.8)",
     marginBottom: 4,
   },
+  timeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
   scannedTime: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "rgba(255,255,255,0.7)",
+    color: "rgba(255,255,255,0.6)",
   },
 
   emptyState: {
