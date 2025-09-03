@@ -538,8 +538,8 @@ Respond in this exact JSON format:
 
 
 
-        {/* Key Takeaways */}
-        {monument.detailedDescription && monument.detailedDescription.keyTakeaways && (
+        {/* Key Takeaways - Only show when recognized */}
+        {monument.isRecognized && monument.detailedDescription && monument.detailedDescription.keyTakeaways && (
           <View style={styles.section}>
             <View style={styles.contentCard}>
               <View style={styles.cardHeader}>
@@ -558,8 +558,8 @@ Respond in this exact JSON format:
           </View>
         )}
 
-        {/* In-Depth Context */}
-        {monument.detailedDescription && monument.detailedDescription.inDepthContext && (
+        {/* In-Depth Context - Only show when recognized */}
+        {monument.isRecognized && monument.detailedDescription && monument.detailedDescription.inDepthContext && (
           <View style={styles.section}>
             <View style={styles.contentCard}>
               <View style={styles.cardHeader}>
@@ -571,8 +571,8 @@ Respond in this exact JSON format:
           </View>
         )}
 
-        {/* Curiosity */}
-        {monument.detailedDescription && monument.detailedDescription.curiosities && monument.detailedDescription.curiosities !== 'No widely known curiosities are associated with these monuments and art.' && (
+        {/* Curiosity - Only show when recognized */}
+        {monument.isRecognized && monument.detailedDescription && monument.detailedDescription.curiosities && monument.detailedDescription.curiosities !== 'No widely known curiosities are associated with these monuments and art.' && (
           <View style={styles.section}>
             <View style={styles.contentCard}>
               <View style={styles.cardHeader}>
