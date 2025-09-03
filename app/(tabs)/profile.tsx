@@ -109,7 +109,7 @@ export default function ProfileScreen() {
           colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
-          <Logo size={64} style={styles.logo} />
+          <Logo size={32} style={styles.logo} />
           <View style={styles.headerContent}>
             <View style={styles.profileSection}>
               <View style={styles.avatarContainer}>
@@ -250,9 +250,12 @@ const styles = StyleSheet.create({
     paddingBottom: 25,
     paddingHorizontal: 25,
     alignItems: 'center',
+    position: 'relative',
   },
   logo: {
-    marginBottom: 16,
+    position: 'absolute',
+    top: 25,
+    right: 25,
   },
   headerContent: {
     gap: 0,
