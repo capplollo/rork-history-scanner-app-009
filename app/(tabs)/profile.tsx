@@ -109,7 +109,7 @@ export default function ProfileScreen() {
           colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
-          <Logo size={32} style={styles.logo} />
+          <Logo size={64} style={styles.logo} />
           <View style={styles.headerContent}>
             <View style={styles.profileSection}>
               <View style={styles.avatarContainer}>

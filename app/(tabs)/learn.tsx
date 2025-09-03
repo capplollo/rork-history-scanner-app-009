@@ -81,7 +81,7 @@ export default function LearnScreen() {
           colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
-          <Logo size={32} style={styles.logo} />
+          <Logo size={64} style={styles.logo} />
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Explore History</Text>
             <Text style={styles.headerSubtitle}>

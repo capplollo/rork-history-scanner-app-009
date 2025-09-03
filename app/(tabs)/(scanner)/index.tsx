@@ -468,7 +468,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
-          <Logo size={32} style={styles.logo} />
+          <Logo size={64} style={styles.logo} />
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Snap into heritage</Text>
             <Text style={styles.headerSubtitle}>
@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEFEFE",
   },
   headerGradient: {
-    paddingTop: 60,
+    paddingTop: 30,
     paddingBottom: 30,
     paddingHorizontal: 20,
     minHeight: 140,

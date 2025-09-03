@@ -6,7 +6,7 @@ interface LogoProps {
   style?: any;
 }
 
-export default function Logo({ size = 40, style }: LogoProps) {
+export default function Logo({ size = 80, style }: LogoProps) {
   return (
     <View style={[styles.container, style]}>
       <Image 
