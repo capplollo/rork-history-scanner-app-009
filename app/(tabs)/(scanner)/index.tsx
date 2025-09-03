@@ -464,9 +464,9 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Discover</Text>
+          <Text style={styles.headerTitle}>Snap into heritage</Text>
           <Text style={styles.headerSubtitle}>
-            Scan monuments and art to unlock their stories
+            Discover the living stories of art and monuments
           </Text>
         </View>
 
