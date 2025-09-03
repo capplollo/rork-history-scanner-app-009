@@ -597,9 +597,13 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 30,
     paddingHorizontal: 20,
+    minHeight: 140,
   },
   headerContent: {
     gap: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
   },
   headerTitle: {
     fontSize: 32,
