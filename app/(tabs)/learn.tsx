@@ -185,6 +185,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
     position: 'relative',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   logo: {
     position: 'absolute',

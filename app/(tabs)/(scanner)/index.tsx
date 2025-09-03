@@ -601,6 +601,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     minHeight: 140,
     alignItems: 'center',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   logo: {
     marginBottom: 16,

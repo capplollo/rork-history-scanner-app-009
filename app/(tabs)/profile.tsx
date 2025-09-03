@@ -250,6 +250,8 @@ const styles = StyleSheet.create({
     paddingBottom: 25,
     paddingHorizontal: 25,
     position: 'relative',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   logo: {
     position: 'absolute',
