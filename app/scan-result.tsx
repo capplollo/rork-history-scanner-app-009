@@ -681,6 +681,8 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
     paddingHorizontal: 20,
     alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   logo: {
     marginBottom: 12,
@@ -924,8 +926,8 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   reanalyzeGradient: {
-    paddingVertical: 18,
-    paddingHorizontal: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
   },
   reanalyzeContent: {
     flexDirection: 'row',
