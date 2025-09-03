@@ -14,6 +14,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
 import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info, Zap, Camera } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -79,42 +80,123 @@ export default function ScannerScreen() {
     setAnalysisStatus("Preparing image...");
     
     try {
-      setAnalysisStatus("Converting image to base64...");
+      setAnalysisStatus("Compressing image...");
       
-      // Convert image to base64
-      const response = await fetch(selectedImage);
-      const blob = await response.blob();
-      const base64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const result = reader.result as string;
-          // Remove data:image/jpeg;base64, prefix
-          const base64Data = result.split(',')[1];
-          resolve(base64Data);
-        };
-        reader.readAsDataURL(blob);
-      });
+      // Compress image to reduce size for API
+      const compressedImage = await ImageManipulator.manipulateAsync(
+        selectedImage,
+        [
+          // Resize to max 1024px on longest side to reduce file size
+          { resize: { width: 1024 } }
+        ],
+        {
+          compress: 0.7, // 70% quality
+          format: ImageManipulator.SaveFormat.JPEG,
+          base64: true
+        }
+      );
+      
+      if (!compressedImage.base64) {
+        throw new Error('Failed to compress image');
+      }
+      
+      const base64 = compressedImage.base64;
+      
+      setAnalysisStatus("Image compressed successfully...");
 
       setAnalysisStatus("Analyzing monuments and art with AI...");
       
+      // Validate base64 data
+      if (!base64 || base64.length === 0) {
+        throw new Error('Invalid image data: base64 is empty');
+      }
+      
+      // Check if compressed base64 is still too large (limit to ~1MB for better compatibility)
+      if (base64.length > 1000000) {
+        console.log('Image still too large after compression, applying additional compression...');
+        
+        // Apply more aggressive compression
+        const furtherCompressed = await ImageManipulator.manipulateAsync(
+          selectedImage,
+          [
+            { resize: { width: 800 } }
+          ],
+          {
+            compress: 0.5, // 50% quality
+            format: ImageManipulator.SaveFormat.JPEG,
+            base64: true
+          }
+        );
+        
+        if (!furtherCompressed.base64) {
+          throw new Error('Failed to compress image further');
+        }
+        
+        const finalBase64 = furtherCompressed.base64;
+        
+        // Final check - if still too large, throw error
+        if (finalBase64.length > 1000000) {
+          throw new Error('Image is too large even after compression. Please use a smaller image.');
+        }
+        
+        // Use the further compressed image
+        console.log('Using further compressed image. Final size:', finalBase64.length, 'characters');
+        
+        // Update base64 variable for the rest of the function
+        const base64Final = finalBase64;
+        
+        // Continue with the compressed image
+        await processImageAnalysis(base64Final);
+        return;
+      }
+      
+      // Continue with normally compressed image
+      await processImageAnalysis(base64);
+      
+    } catch (error) {
+      console.error('Error detecting monuments and art:', error);
+      
+      let errorMessage = 'Failed to analyze the image. Please try again.';
+      if (error instanceof Error) {
+        if (error.message.includes('too large')) {
+          errorMessage = 'Image is too large. Please use a smaller image or reduce quality.';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your internet connection and try again.';
+        } else if (error.message.includes('JSON')) {
+          errorMessage = 'There was an issue processing the AI response. Please try again.';
+        } else if (error.message.includes('Invalid image')) {
+          errorMessage = 'Invalid image format. Please select a different image.';
+        } else if (error.message.includes('compress')) {
+          errorMessage = 'Failed to process the image. Please try with a different image.';
+        }
+      }
+      
+      Alert.alert('Analysis Failed', errorMessage);
+    } finally {
+      setIsAnalyzing(false);
+      setAnalysisStatus("");
+    }
+  };
+  
+  const processImageAnalysis = async (base64: string) => {
       // Build the prompt
-      let prompt = `Analyze this image and identify any monuments and art including sculptures, paintings, or cultural landmarks. Include paintings that depict buildings/landmarks (identify the PAINTING, not the depicted structure).
+      let promptText = `Analyze this image and identify any monuments and art including sculptures, paintings, or cultural landmarks. Include paintings that depict buildings/landmarks (identify the PAINTING, not the depicted structure).
 
 Consider that many sculptures share similar themes, poses, or subjects but are different works entirely. For sculptures, confidence should be 90% or higher for recognition. For other monuments and art, confidence should be 80% or higher.`;
       
       // Add additional context if provided
       const hasAdditionalInfo = additionalInfo.name || additionalInfo.location || additionalInfo.building || additionalInfo.notes;
       if (hasAdditionalInfo) {
-        prompt += `\n\n**CRITICAL USER CONTEXT - PRIORITIZE THIS INFORMATION HEAVILY:**`;
-        if (additionalInfo.name) prompt += `\n- Monument/Art Name: "${additionalInfo.name}" (Use this name if it matches what you see in the image)`;
-        if (additionalInfo.location) prompt += `\n- Location: "${additionalInfo.location}" (This location context is EXTREMELY IMPORTANT - if the image could plausibly be from this location, strongly favor monuments/art from this area)`;
-        if (additionalInfo.building) prompt += `\n- Building/Context: "${additionalInfo.building}" (Consider this building context when identifying)`;
-        if (additionalInfo.notes) prompt += `\n- Additional Notes: "${additionalInfo.notes}" (Important context clues)`;
+        promptText += `\n\n**CRITICAL USER CONTEXT - PRIORITIZE THIS INFORMATION HEAVILY:**`;
+        if (additionalInfo.name) promptText += `\n- Monument/Art Name: "${additionalInfo.name}" (Use this name if it matches what you see in the image)`;
+        if (additionalInfo.location) promptText += `\n- Location: "${additionalInfo.location}" (This location context is EXTREMELY IMPORTANT - if the image could plausibly be from this location, strongly favor monuments/art from this area)`;
+        if (additionalInfo.building) promptText += `\n- Building/Context: "${additionalInfo.building}" (Consider this building context when identifying)`;
+        if (additionalInfo.notes) promptText += `\n- Additional Notes: "${additionalInfo.notes}" (Important context clues)`;
         
-        prompt += `\n\nWith this context provided, you should:\n1. STRONGLY prioritize monuments and art that match this location\n2. If the visual matches reasonably well with something from this location, increase confidence significantly\n3. Use the provided name if it matches what you observe in the image\n4. Consider the building/context information as key identifying factors`;
+        promptText += `\n\nWith this context provided, you should:\n1. STRONGLY prioritize monuments and art that match this location\n2. If the visual matches reasonably well with something from this location, increase confidence significantly\n3. Use the provided name if it matches what you observe in the image\n4. Consider the building/context information as key identifying factors`;
       }
       
-      prompt += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.
+      promptText += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.
 
 Respond in this exact JSON format (ensure all strings are properly escaped and no control characters are included):
 {
@@ -137,25 +219,17 @@ Respond in this exact JSON format (ensure all strings are properly escaped and n
 
 CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bullet point should be a complete, informative sentence about the monument/artwork. The curiosities field should contain only ONE curiosity, not multiple. Ensure all text is properly escaped for JSON.`;
       
-      // Validate base64 data
-      if (!base64 || base64.length === 0) {
-        throw new Error('Invalid image data: base64 is empty');
-      }
-      
-      // Check if base64 is too large (limit to ~2MB for better compatibility)
-      if (base64.length > 2000000) {
-        throw new Error('Image is too large. Please use a smaller image or reduce quality.');
-      }
-      
       // Call the AI API with proper error handling
       console.log('Making AI API request...');
-      console.log('Prompt length:', prompt.length, 'characters');
+      console.log('Prompt length:', promptText.length, 'characters');
       console.log('Base64 length:', base64.length, 'characters');
       
+      setAnalysisStatus("Sending to AI for analysis...");
+      
       // Validate prompt length (API might have limits)
-      if (prompt.length > 16000) {
+      if (promptText.length > 16000) {
         console.warn('Prompt is very long, truncating...');
-        prompt = prompt.substring(0, 15000) + '\n\nRespond in the exact JSON format specified above.';
+        promptText = promptText.substring(0, 15000) + '\n\nRespond in the exact JSON format specified above.';
       }
       
       const requestBody = {
@@ -163,7 +237,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           {
             role: 'user',
             content: [
-              { type: 'text', text: prompt },
+              { type: 'text', text: promptText },
               { type: 'image', image: base64 }
             ]
           }
@@ -200,7 +274,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         console.error('AI API error status:', aiResponse.status);
         console.error('AI API error status text:', aiResponse.statusText);
         console.error('AI API error response body:', errorDetails);
-        console.error('Request details - Prompt length:', prompt.length, 'Base64 length:', base64.length);
+        console.error('Request details - Prompt length:', promptText.length, 'Base64 length:', base64.length);
         
         // Check if it's a size-related error
         if (aiResponse.status === 413 || aiResponse.status === 500) {
@@ -358,28 +432,6 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           scannedImage: selectedImage,
         },
       });
-      
-    } catch (error) {
-      console.error('Error detecting monuments and art:', error);
-      
-      let errorMessage = 'Failed to analyze the image. Please try again.';
-      if (error instanceof Error) {
-        if (error.message.includes('too large')) {
-          errorMessage = 'Image is too large. Please use a smaller image or reduce quality.';
-        } else if (error.message.includes('network') || error.message.includes('fetch')) {
-          errorMessage = 'Network error. Please check your internet connection and try again.';
-        } else if (error.message.includes('JSON')) {
-          errorMessage = 'There was an issue processing the AI response. Please try again.';
-        } else if (error.message.includes('Invalid image')) {
-          errorMessage = 'Invalid image format. Please select a different image.';
-        }
-      }
-      
-      Alert.alert('Analysis Failed', errorMessage);
-    } finally {
-      setIsAnalyzing(false);
-      setAnalysisStatus("");
-    }
   };
 
   const clearImage = () => {
