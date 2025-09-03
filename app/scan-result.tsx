@@ -926,7 +926,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   reanalyzeGradient: {
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: 20,
   },
   reanalyzeContent: {
