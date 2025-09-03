@@ -45,7 +45,7 @@ export default function ScannerScreen() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.8,
+      quality: 0.6,
     });
 
     if (!result.canceled && result.assets[0]) {
@@ -64,7 +64,7 @@ export default function ScannerScreen() {
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.8,
+      quality: 0.6,
     });
 
     if (!result.canceled && result.assets[0]) {
@@ -142,8 +142,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         throw new Error('Invalid image data: base64 is empty');
       }
       
-      // Check if base64 is too large (limit to ~4MB for better compatibility)
-      if (base64.length > 5000000) {
+      // Check if base64 is too large (limit to ~2MB for better compatibility)
+      if (base64.length > 2000000) {
         throw new Error('Image is too large. Please use a smaller image or reduce quality.');
       }
       
@@ -153,9 +153,9 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
       console.log('Base64 length:', base64.length, 'characters');
       
       // Validate prompt length (API might have limits)
-      if (prompt.length > 32000) {
+      if (prompt.length > 16000) {
         console.warn('Prompt is very long, truncating...');
-        prompt = prompt.substring(0, 31000) + '\n\nRespond in the exact JSON format specified above.';
+        prompt = prompt.substring(0, 15000) + '\n\nRespond in the exact JSON format specified above.';
       }
       
       const requestBody = {
@@ -202,7 +202,18 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         console.error('AI API error response body:', errorDetails);
         console.error('Request details - Prompt length:', prompt.length, 'Base64 length:', base64.length);
         
-        // Always provide a fallback response for any error
+        // Check if it's a size-related error
+        if (aiResponse.status === 413 || aiResponse.status === 500) {
+          console.log('Likely image size issue, suggesting compression');
+          Alert.alert(
+            'Image Too Large', 
+            'The image is too large for analysis. Please try with a smaller image or take a new photo with lower quality.',
+            [{ text: 'OK' }]
+          );
+          return;
+        }
+        
+        // Always provide a fallback response for other errors
         console.log('AI service error, using fallback response');
         setAnalysisStatus("The AI analysis service is temporarily unavailable. Please try again shortly.");
         
