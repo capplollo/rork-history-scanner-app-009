@@ -128,7 +128,7 @@ export default function ProfileScreen() {
                 style={styles.settingsButton}
                 onPress={() => setShowSettings(true)}
               >
-                <Settings size={36} color="#ffffff" />
+                <Settings size={22} color="#ffffff" />
               </TouchableOpacity>
             </View>
           </View>
@@ -244,9 +244,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEFEFE",
   },
   headerGradient: {
-    paddingTop: 36,
-    paddingBottom: 36,
-    paddingHorizontal: 36,
+    paddingTop: 25,
+    paddingBottom: 25,
+    paddingHorizontal: 25,
   },
   headerContent: {
     gap: 0,
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     gap: 7,
   },
   userName: {
-    fontSize: 34,
+    fontSize: 21,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   userEmail: {
-    fontSize: 27,
+    fontSize: 17,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
