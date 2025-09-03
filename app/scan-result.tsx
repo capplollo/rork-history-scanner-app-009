@@ -594,22 +594,17 @@ Respond in this exact JSON format:
               onPress={handleReanalyze}
               disabled={isReanalyzing}
             >
-              <LinearGradient
-                colors={isReanalyzing ? ["#999", "#777"] : ["#dc2626", "#f87171"]}
-                style={styles.reanalyzeGradient}
-              >
-                {isReanalyzing ? (
-                  <View style={styles.reanalyzeContent}>
-                    <ActivityIndicator size="small" color="#FFF" />
-                    <Text style={styles.reanalyzeText}>Reanalyzing...</Text>
-                  </View>
-                ) : (
-                  <View style={styles.reanalyzeContent}>
-                    <RefreshCw size={20} color="#FFF" />
-                    <Text style={styles.reanalyzeText}>Reanalyze Monument</Text>
-                  </View>
-                )}
-              </LinearGradient>
+              {isReanalyzing ? (
+                <View style={styles.reanalyzeContent}>
+                  <ActivityIndicator size="small" color="#dc2626" />
+                  <Text style={styles.reanalyzeText}>Reanalyzing...</Text>
+                </View>
+              ) : (
+                <View style={styles.reanalyzeContent}>
+                  <RefreshCw size={18} color="#dc2626" />
+                  <Text style={styles.reanalyzeText}>Reanalyze Monument</Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
         )}
@@ -913,21 +908,25 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   reanalyzeButton: {
-    borderRadius: 16,
-    overflow: 'hidden',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#dc2626',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
     marginBottom: 30,
   },
   reanalyzeButtonDisabled: {
     opacity: 0.7,
   },
   reanalyzeGradient: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
   },
   reanalyzeContent: {
     flexDirection: 'row',
@@ -936,14 +935,14 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   reanalyzeText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#ffffff",
+    color: "#dc2626",
   },
   actionButtonsContainer: {
     flexDirection: 'row',
