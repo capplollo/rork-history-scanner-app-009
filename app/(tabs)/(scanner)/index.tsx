@@ -137,27 +137,20 @@ Respond in this exact JSON format (ensure all strings are properly escaped and n
 
 CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bullet point should be a complete, informative sentence about the monument/artwork. The curiosities field should contain only ONE curiosity, not multiple. Ensure all text is properly escaped for JSON.`;
       
-      // Call the AI API
-      console.log('Making AI API request to:', 'https://toolkit.rork.com/text/llm/');
-      console.log('Request payload structure:', {
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'text', text: 'PROMPT_LENGTH: ' + prompt.length },
-            { type: 'image', image: 'BASE64_LENGTH: ' + base64.length }
-          ]
-        }]
-      });
-      
       // Validate base64 data
       if (!base64 || base64.length === 0) {
         throw new Error('Invalid image data: base64 is empty');
       }
       
-      // Check if base64 is too large (limit to ~10MB)
-      if (base64.length > 13000000) {
-        throw new Error('Image is too large. Please use a smaller image.');
+      // Check if base64 is too large (limit to ~4MB for better compatibility)
+      if (base64.length > 5000000) {
+        throw new Error('Image is too large. Please use a smaller image or reduce quality.');
       }
+      
+      // Call the AI API with proper error handling
+      console.log('Making AI API request...');
+      console.log('Prompt length:', prompt.length, 'characters');
+      console.log('Base64 length:', base64.length, 'characters');
       
       const requestBody = {
         messages: [
@@ -171,7 +164,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         ]
       };
       
-      console.log('Request body size:', JSON.stringify(requestBody).length, 'characters');
+      console.log('Sending request to AI API...');
       
       const aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
         method: 'POST',
@@ -182,61 +175,64 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
       });
       
       console.log('AI API response status:', aiResponse.status);
-      console.log('AI API response headers:', Object.fromEntries(aiResponse.headers.entries()));
       
       if (!aiResponse.ok) {
         let errorText = 'Unknown error';
+        let errorDetails = '';
+        
         try {
-          errorText = await aiResponse.text();
+          const responseText = await aiResponse.text();
+          errorText = responseText || `HTTP ${aiResponse.status}`;
+          errorDetails = responseText;
+          console.log('AI API error response body:', responseText);
         } catch (e) {
           console.error('Failed to read error response:', e);
+          errorText = `HTTP ${aiResponse.status} ${aiResponse.statusText}`;
         }
         
-        console.log('AI API temporarily unavailable (status:', aiResponse.status, ')');
+        console.error('AI API error status:', aiResponse.status);
+        console.error('AI API error status text:', aiResponse.statusText);
+        console.error('AI API error response body:', errorDetails);
         
-        // If it's a 500 error or other server error, provide a fallback response
-        if (aiResponse.status >= 500) {
-          console.log('AI service temporarily unavailable, using fallback response');
-          setAnalysisStatus("AI service temporarily unavailable, providing basic analysis...");
-          
-          // Create a fallback analysis result
-          const fallbackResult = {
-            artworkName: "Monument or Artwork",
-            confidence: 50,
-            location: "Location Unknown",
-            period: "Unknown",
-            isRecognized: false,
-            detailedDescription: {
-              keyTakeaways: [
-                "This appears to be a monument or artwork captured in the image.",
-                "The AI analysis service is temporarily unavailable for detailed identification.",
-                "Please try scanning again in a few moments when the service is restored.",
-                "You can add context information above to help improve future analysis results."
-              ],
-              inDepthContext: "The AI analysis service is temporarily unavailable, so we cannot provide detailed historical information about this monument or artwork at this time. This is a temporary technical issue and should be resolved shortly.\n\nTo improve your experience when the service is restored, consider adding context information such as the monument's name, location, or the building/museum where it's located using the 'Add Context' section above.\n\nWe apologize for the inconvenience and appreciate your patience as we work to restore full functionality.",
-              curiosities: "The AI analysis service is temporarily unavailable. Please try again shortly."
-            }
-          };
-          
-          // Navigate to scan result with fallback data
-          router.push({
-            pathname: "/scan-result" as any,
-            params: {
-              artworkName: fallbackResult.artworkName,
-              confidence: fallbackResult.confidence.toString(),
-              location: fallbackResult.location,
-              period: fallbackResult.period,
-              isRecognized: fallbackResult.isRecognized.toString(),
-              keyTakeaways: JSON.stringify(fallbackResult.detailedDescription.keyTakeaways),
-              inDepthContext: fallbackResult.detailedDescription.inDepthContext,
-              curiosities: fallbackResult.detailedDescription.curiosities,
-              scannedImage: selectedImage,
-            },
-          });
-          return;
-        }
+        // Always provide a fallback response for any error
+        console.log('AI service error, using fallback response');
+        setAnalysisStatus("AI service encountered an error, providing basic analysis...");
         
-        throw new Error(`AI API error: ${aiResponse.status} - ${errorText}`);
+        // Create a fallback analysis result
+        const fallbackResult = {
+          artworkName: "Monument or Artwork",
+          confidence: 50,
+          location: "Location Unknown",
+          period: "Unknown",
+          isRecognized: false,
+          detailedDescription: {
+            keyTakeaways: [
+              "This appears to be a monument or artwork captured in the image.",
+              "The AI analysis service encountered a technical issue.",
+              "Please try scanning again in a few moments.",
+              "You can add context information above to help improve analysis results."
+            ],
+            inDepthContext: "The AI analysis service encountered a technical issue while processing this image. This could be due to various factors including service availability, image format, or network connectivity.\n\nTo improve your experience, try taking a clearer photo with good lighting and minimal reflections. You can also add context information such as the monument's name, location, or the building/museum where it's located.\n\nWe apologize for the inconvenience and are working to resolve any service issues.",
+            curiosities: "Technical analysis was not completed due to service issues. Please try again shortly."
+          }
+        };
+        
+        // Navigate to scan result with fallback data
+        router.push({
+          pathname: "/scan-result" as any,
+          params: {
+            artworkName: fallbackResult.artworkName,
+            confidence: fallbackResult.confidence.toString(),
+            location: fallbackResult.location,
+            period: fallbackResult.period,
+            isRecognized: fallbackResult.isRecognized.toString(),
+            keyTakeaways: JSON.stringify(fallbackResult.detailedDescription.keyTakeaways),
+            inDepthContext: fallbackResult.detailedDescription.inDepthContext,
+            curiosities: fallbackResult.detailedDescription.curiosities,
+            scannedImage: selectedImage,
+          },
+        });
+        return;
       }
       
       let aiResult;
@@ -346,16 +342,17 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
       
     } catch (error) {
       console.error('Error detecting monuments and art:', error);
-      console.error('Error details:', error);
       
       let errorMessage = 'Failed to analyze the image. Please try again.';
       if (error instanceof Error) {
-        if (error.message.includes('500')) {
-          errorMessage = 'The AI service is temporarily unavailable. Please try again in a few moments.';
+        if (error.message.includes('too large')) {
+          errorMessage = 'Image is too large. Please use a smaller image or reduce quality.';
         } else if (error.message.includes('network') || error.message.includes('fetch')) {
           errorMessage = 'Network error. Please check your internet connection and try again.';
         } else if (error.message.includes('JSON')) {
           errorMessage = 'There was an issue processing the AI response. Please try again.';
+        } else if (error.message.includes('Invalid image')) {
+          errorMessage = 'Invalid image format. Please select a different image.';
         }
       }
       
