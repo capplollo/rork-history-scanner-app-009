@@ -29,10 +29,7 @@ export default function ScannerScreen() {
   const [analysisStatus, setAnalysisStatus] = useState<string>("");
   const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
   const [additionalInfo, setAdditionalInfo] = useState({
-    name: "",
-    location: "",
-    building: "",
-    notes: "",
+    context: "",
   });
 
   // Handle reanalysis flow
@@ -209,15 +206,9 @@ When in doubt, mark as NOT RECOGNIZED. It's better to provide general analysis t
 If confidence is below 95%, mark as not recognized and provide general analysis instead.`;
       
       // Add additional context if provided
-      const hasAdditionalInfo = additionalInfo.name || additionalInfo.location || additionalInfo.building || additionalInfo.notes;
+      const hasAdditionalInfo = additionalInfo.context.trim().length > 0;
       if (hasAdditionalInfo) {
-        promptText += `\n\n**CRITICAL USER CONTEXT - PRIORITIZE THIS INFORMATION HEAVILY:**`;
-        if (additionalInfo.name) promptText += `\n- Monument/Art Name: "${additionalInfo.name}" (Use this name if it matches what you see in the image)`;
-        if (additionalInfo.location) promptText += `\n- Location: "${additionalInfo.location}" (This location context is EXTREMELY IMPORTANT - if the image could plausibly be from this location, strongly favor monuments/art from this area)`;
-        if (additionalInfo.building) promptText += `\n- Building/Context: "${additionalInfo.building}" (Consider this building context when identifying)`;
-        if (additionalInfo.notes) promptText += `\n- Additional Notes: "${additionalInfo.notes}" (Important context clues)`;
-        
-        promptText += `\n\nWith this context provided, you should:\n1. STRONGLY prioritize monuments and art that match this location\n2. If the visual matches reasonably well with something from this location, increase confidence significantly\n3. Use the provided name if it matches what you observe in the image\n4. Consider the building/context information as key identifying factors`;
+        promptText += `\n\n**CRITICAL USER CONTEXT - PRIORITIZE THIS INFORMATION HEAVILY:**\n"${additionalInfo.context}"\n\nWith this context provided, you should:\n1. STRONGLY prioritize monuments and art that match any location, name, or details mentioned\n2. If the visual matches reasonably well with the provided context, increase confidence significantly\n3. Use any names, locations, museums, or other details mentioned as key identifying factors\n4. Consider all provided information as important context clues for identification`;
       }
       
       promptText += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 95% or higher. Always provide the ACTUAL location, not user's location unless they match. If not 95% confident, provide general analysis of what you see without claiming specific identification.
@@ -461,15 +452,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
   const clearImage = () => {
     setSelectedImage(null);
     setAdditionalInfo({
-      name: "",
-      location: "",
-      building: "",
-      notes: "",
+      context: "",
     });
   };
 
-  const updateAdditionalInfo = (field: string, value: string) => {
-    setAdditionalInfo(prev => ({ ...prev, [field]: value }));
+  const updateAdditionalInfo = (value: string) => {
+    setAdditionalInfo({ context: value });
   };
 
   return (
@@ -543,48 +531,16 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               {showAdditionalInfo && (
                 <View style={styles.infoForm}>
                   <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Monument/Art Name</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      placeholder="e.g., Mona Lisa, Eiffel Tower"
-                      placeholderTextColor="#999"
-                      value={additionalInfo.name}
-                      onChangeText={(text) => updateAdditionalInfo('name', text)}
-                    />
-                  </View>
-
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Location</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      placeholder="e.g., Paris, France"
-                      placeholderTextColor="#999"
-                      value={additionalInfo.location}
-                      onChangeText={(text) => updateAdditionalInfo('location', text)}
-                    />
-                  </View>
-
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Building/Museum</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      placeholder="e.g., Louvre Museum"
-                      placeholderTextColor="#999"
-                      value={additionalInfo.building}
-                      onChangeText={(text) => updateAdditionalInfo('building', text)}
-                    />
-                  </View>
-
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Additional Notes</Text>
+                    <Text style={styles.inputLabel}>Context Information</Text>
+                    <Text style={styles.inputHint}>Add any helpful details like name, location, museum, or other information</Text>
                     <TextInput
                       style={[styles.textInput, styles.textArea]}
-                      placeholder="Any other details that might help..."
+                      placeholder="e.g., Mona Lisa at the Louvre Museum in Paris, or Statue of Liberty in New York, or any other details that might help identify this monument or artwork..."
                       placeholderTextColor="#999"
-                      value={additionalInfo.notes}
-                      onChangeText={(text) => updateAdditionalInfo('notes', text)}
+                      value={additionalInfo.context}
+                      onChangeText={updateAdditionalInfo}
                       multiline
-                      numberOfLines={3}
+                      numberOfLines={4}
                     />
                   </View>
                 </View>
@@ -893,8 +849,18 @@ const styles = StyleSheet.create({
     color: '#2C3E50',
   },
   textArea: {
-    height: 90,
+    height: 120,
     textAlignVertical: 'top',
+  },
+  inputHint: {
+    fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#64748b",
+    marginBottom: 4,
   },
   analyzeButton: {
     backgroundColor: '#ffffff',
