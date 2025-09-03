@@ -114,7 +114,7 @@ export default function ProfileScreen() {
             <View style={styles.profileSection}>
               <View style={styles.avatarContainer}>
                 <LinearGradient
-                  colors={["#8B4513", "#A0522D"]}
+                  colors={["#2C3E50", "#34495E"]}
                   style={styles.avatar}
                 >
                   <User size={41} color="#ffffff" />
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
   },
   settingsButton: {
     position: 'absolute',
-    bottom: 0,
+    bottom: -15,
     right: 0,
     padding: 11,
   },
