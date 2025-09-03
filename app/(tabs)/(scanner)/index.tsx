@@ -192,14 +192,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           console.error('Failed to read error response:', e);
         }
         
-        console.error('AI API error response body:', errorText);
-        console.error('AI API error status:', aiResponse.status);
-        console.error('AI API error status text:', aiResponse.statusText);
+        console.log('AI API temporarily unavailable (status:', aiResponse.status, ')');
         
-        // If it's a 500 error, provide a fallback response
-        if (aiResponse.status === 500) {
-          console.log('AI service unavailable, using fallback response');
-          setAnalysisStatus("AI service unavailable, providing basic analysis...");
+        // If it's a 500 error or other server error, provide a fallback response
+        if (aiResponse.status >= 500) {
+          console.log('AI service temporarily unavailable, using fallback response');
+          setAnalysisStatus("AI service temporarily unavailable, providing basic analysis...");
           
           // Create a fallback analysis result
           const fallbackResult = {
@@ -211,12 +209,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             detailedDescription: {
               keyTakeaways: [
                 "This appears to be a monument or artwork captured in the image.",
-                "The AI analysis service is currently unavailable for detailed identification.",
-                "You can try again later when the service is restored.",
-                "Consider adding context information to help with future analysis."
+                "The AI analysis service is temporarily unavailable for detailed identification.",
+                "Please try scanning again in a few moments when the service is restored.",
+                "You can add context information above to help improve future analysis results."
               ],
-              inDepthContext: "The AI analysis service is temporarily unavailable, so we cannot provide detailed historical information about this monument or artwork at this time.\n\nWe apologize for the inconvenience. The service should be restored shortly.\n\nIn the meantime, you can try adding context information such as the name, location, or building where this monument or artwork is located to help with future analysis attempts.",
-              curiosities: "AI analysis service is currently unavailable."
+              inDepthContext: "The AI analysis service is temporarily unavailable, so we cannot provide detailed historical information about this monument or artwork at this time. This is a temporary technical issue and should be resolved shortly.\n\nTo improve your experience when the service is restored, consider adding context information such as the monument's name, location, or the building/museum where it's located using the 'Add Context' section above.\n\nWe apologize for the inconvenience and appreciate your patience as we work to restore full functionality.",
+              curiosities: "The AI analysis service is temporarily unavailable. Please try again shortly."
             }
           };
           
