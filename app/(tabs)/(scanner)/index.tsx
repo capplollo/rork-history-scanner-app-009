@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -17,12 +17,13 @@ import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info, Zap, Camera } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { mockMonuments } from "@/data/mockMonuments";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 export default function ScannerScreen() {
+  const { reanalyzeImage, showContext } = useLocalSearchParams();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<string>("");
@@ -33,6 +34,16 @@ export default function ScannerScreen() {
     building: "",
     notes: "",
   });
+
+  // Handle reanalysis flow
+  useEffect(() => {
+    if (reanalyzeImage && typeof reanalyzeImage === 'string') {
+      setSelectedImage(reanalyzeImage);
+      if (showContext === 'true') {
+        setShowAdditionalInfo(true);
+      }
+    }
+  }, [reanalyzeImage, showContext]);
 
   const pickImageFromGallery = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -182,7 +193,15 @@ export default function ScannerScreen() {
       // Build the prompt
       let promptText = `Analyze this image and identify any monuments and art including sculptures, paintings, or cultural landmarks. Include paintings that depict buildings/landmarks (identify the PAINTING, not the depicted structure).
 
-Consider that many sculptures share similar themes, poses, or subjects but are different works entirely. For sculptures, confidence should be 90% or higher for recognition. For other monuments and art, confidence should be 80% or higher.`;
+BE EXTREMELY CONSERVATIVE with identification. Many sculptures, buildings, and artworks share similar themes, poses, or subjects but are completely different works. Only identify a specific monument/artwork if you are 90% or more confident it is that exact piece.
+
+For recognition (isRecognized: true), confidence must be 90% or higher. Be especially conservative with:
+- Local or smaller monuments that may look similar to famous ones
+- Sculptures with common poses or themes
+- Buildings with similar architectural styles
+- Artworks with similar subjects or compositions
+
+If confidence is below 90%, mark as not recognized and provide general analysis instead.`;
       
       // Add additional context if provided
       const hasAdditionalInfo = additionalInfo.name || additionalInfo.location || additionalInfo.building || additionalInfo.notes;
@@ -196,7 +215,7 @@ Consider that many sculptures share similar themes, poses, or subjects but are d
         promptText += `\n\nWith this context provided, you should:\n1. STRONGLY prioritize monuments and art that match this location\n2. If the visual matches reasonably well with something from this location, increase confidence significantly\n3. Use the provided name if it matches what you observe in the image\n4. Consider the building/context information as key identifying factors`;
       }
       
-      promptText += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 80+. Always provide the ACTUAL location, not user's location unless they match.
+      promptText += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 90% or higher. Always provide the ACTUAL location, not user's location unless they match. If not 90% confident, provide general analysis of what you see without claiming specific identification.
 
 Respond in this exact JSON format (ensure all strings are properly escaped and no control characters are included):
 {

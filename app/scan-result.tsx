@@ -14,6 +14,7 @@ import {
 import { useLocalSearchParams, router } from "expo-router";
 import { MapPin, Calendar, Share2, CheckCircle, AlertCircle, RefreshCw, ArrowLeft, Sparkles, Clock } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import * as ImageManipulator from "expo-image-manipulator";
 
 import { mockMonuments } from "@/data/mockMonuments";
 import FormattedText from "@/components/FormattedText";
@@ -204,12 +205,184 @@ export default function ScanResultScreen() {
   }, [monumentId, scanData, resultId, historyItemId, monumentName, location, period, scannedImage, regenerate, artworkName, confidence, isRecognized, keyTakeaways, inDepthContext, curiosities]);
 
   const handleReanalyze = async () => {
+    if (!monument?.scannedImage) {
+      Alert.alert('Error', 'No image available for reanalysis.');
+      return;
+    }
+
     setIsReanalyzing(true);
-    // Simulate reanalysis
-    setTimeout(() => {
+    
+    try {
+      // Show a prompt to add context for better results
+      Alert.alert(
+        'Reanalyze with Context',
+        'Adding context information like location, name, or museum can significantly improve identification accuracy. Would you like to add context or proceed with reanalysis?',
+        [
+          {
+            text: 'Add Context',
+            onPress: () => {
+              setIsReanalyzing(false);
+              // Navigate back to scanner with the current image and context form open
+              router.push({
+                pathname: '/(tabs)/(scanner)' as any,
+                params: {
+                  reanalyzeImage: monument.scannedImage,
+                  showContext: 'true'
+                }
+              });
+            }
+          },
+          {
+            text: 'Reanalyze Now',
+            onPress: async () => {
+              await performReanalysis();
+            }
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => setIsReanalyzing(false)
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error during reanalysis setup:', error);
       setIsReanalyzing(false);
-      Alert.alert('Reanalysis Complete', 'The monument has been reanalyzed with updated information.');
-    }, 2000);
+      Alert.alert('Error', 'Failed to start reanalysis. Please try again.');
+    }
+  };
+
+  const performReanalysis = async () => {
+    if (!monument?.scannedImage) return;
+
+    try {
+      // Compress image for reanalysis
+      const compressedImage = await ImageManipulator.manipulateAsync(
+        monument.scannedImage,
+        [{ resize: { width: 1024 } }],
+        {
+          compress: 0.7,
+          format: ImageManipulator.SaveFormat.JPEG,
+          base64: true
+        }
+      );
+      
+      if (!compressedImage.base64) {
+        throw new Error('Failed to compress image for reanalysis');
+      }
+
+      // Build reanalysis prompt with more conservative approach
+      const promptText = `Reanalyze this image with EXTREME CAUTION. The previous analysis may have been incorrect. 
+
+BE EXTREMELY CONSERVATIVE with identification. Only identify a specific monument/artwork if you are 90% or more confident it is that exact piece. Many sculptures, buildings, and artworks share similar themes, poses, or subjects but are completely different works.
+
+For recognition (isRecognized: true), confidence must be 90% or higher. If not 90% confident, mark as not recognized and provide general analysis instead.
+
+Provide ALL information in ONE response. Always provide the ACTUAL location, not assumptions.
+
+Respond in this exact JSON format:
+{
+"artworkName": "Name or 'Unknown Monument or Artwork'",
+"confidence": 85,
+"location": "Actual location or 'Unknown Location'",
+"period": "Year(s) or century format or 'Unknown'",
+"isRecognized": true/false,
+"detailedDescription": {
+  "keyTakeaways": [
+    "First key takeaway - specific and informative",
+    "Second key takeaway - specific and informative", 
+    "Third key takeaway - specific and informative",
+    "Fourth key takeaway - specific and informative"
+  ],
+  "inDepthContext": "Write exactly 3 paragraphs separated by double line breaks. Be specific and avoid generalizations.",
+  "curiosities": "ONE interesting fact or 'No widely known curiosities are associated with this monument or artwork.'"
+}
+}`;
+
+      const requestBody = {
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: promptText },
+              { type: 'image', image: compressedImage.base64 }
+            ]
+          }
+        ]
+      };
+
+      const aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!aiResponse.ok) {
+        throw new Error(`AI API error: ${aiResponse.status}`);
+      }
+
+      const aiResult = await aiResponse.json();
+      
+      if (!aiResult.completion) {
+        throw new Error('AI service returned incomplete response');
+      }
+
+      // Parse the AI response
+      let cleanedResponse = aiResult.completion
+        .replace(/```json\s*/g, '')
+        .replace(/```\s*/g, '')
+        .trim();
+
+      let analysisResult;
+      try {
+        analysisResult = JSON.parse(cleanedResponse);
+      } catch (parseError) {
+        // Try to extract JSON from response
+        const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          let jsonString = jsonMatch[0]
+            .replace(/"([^"]*?)\n([^"]*?)"/g, (_match: string, p1: string, p2: string) => `"${p1}\\n${p2}"`)
+            .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+            .trim();
+          analysisResult = JSON.parse(jsonString);
+        } else {
+          throw new Error('Could not parse AI response');
+        }
+      }
+
+      // Update monument data with new analysis
+      const updatedMonument: MonumentData = {
+        ...monument,
+        name: analysisResult.artworkName,
+        location: analysisResult.location,
+        period: analysisResult.period,
+        confidence: analysisResult.confidence,
+        isRecognized: analysisResult.isRecognized,
+        detailedDescription: {
+          keyTakeaways: analysisResult.detailedDescription.keyTakeaways,
+          inDepthContext: analysisResult.detailedDescription.inDepthContext,
+          curiosities: analysisResult.detailedDescription.curiosities
+        }
+      };
+
+      setMonument(updatedMonument);
+      setIsReanalyzing(false);
+      
+      Alert.alert(
+        'Reanalysis Complete', 
+        `The analysis has been updated. ${analysisResult.isRecognized ? 'Monument identified' : 'Monument not specifically identified'} with ${analysisResult.confidence}% confidence.`
+      );
+      
+    } catch (error) {
+      console.error('Error during reanalysis:', error);
+      setIsReanalyzing(false);
+      Alert.alert(
+        'Reanalysis Failed', 
+        'Could not reanalyze the image. Please try again or add context information for better results.'
+      );
+    }
   };
 
   const handleShare = () => {
