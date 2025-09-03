@@ -267,8 +267,8 @@ const styles = StyleSheet.create({
   },
   settingsButton: {
     position: 'absolute',
-    bottom: 25,
-    right: 25,
+    bottom: 0,
+    right: 0,
     padding: 11,
   },
   avatarContainer: {
