@@ -274,9 +274,20 @@ export default function ScanResultScreen() {
       // Build reanalysis prompt with more conservative approach
       const promptText = `Reanalyze this image with EXTREME CAUTION. The previous analysis may have been incorrect. 
 
-BE EXTREMELY CONSERVATIVE with identification. Only identify a specific monument/artwork if you are 90% or more confident it is that exact piece. Many sculptures, buildings, and artworks share similar themes, poses, or subjects but are completely different works.
+BE EXTREMELY CONSERVATIVE with identification. Only identify a specific monument/artwork if you are 95% or more confident it is that exact piece. Many sculptures, buildings, and artworks share similar themes, poses, or subjects but are completely different works.
 
-For recognition (isRecognized: true), confidence must be 90% or higher. If not 90% confident, mark as not recognized and provide general analysis instead.
+For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
+- Local, regional, or smaller monuments that may look similar to famous ones
+- Religious sculptures, statues, or buildings with common iconography
+- Sculptures with common poses, themes, or subjects (angels, saints, warriors, etc.)
+- Buildings with similar architectural styles from the same period
+- Artworks with similar subjects, compositions, or artistic styles
+- Churches, chapels, and religious buildings that often share similar designs
+- Memorial statues and commemorative monuments
+
+When in doubt, mark as NOT RECOGNIZED. It's better to provide general analysis than incorrect identification. If you see common religious iconography, architectural elements, or artistic themes, do NOT assume it's a specific famous work unless you are absolutely certain.
+
+If not 95% confident, mark as not recognized and provide general analysis instead.
 
 Provide ALL information in ONE response. Always provide the ACTUAL location, not assumptions.
 

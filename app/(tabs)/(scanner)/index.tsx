@@ -193,15 +193,20 @@ export default function ScannerScreen() {
       // Build the prompt
       let promptText = `Analyze this image and identify any monuments and art including sculptures, paintings, or cultural landmarks. Include paintings that depict buildings/landmarks (identify the PAINTING, not the depicted structure).
 
-BE EXTREMELY CONSERVATIVE with identification. Many sculptures, buildings, and artworks share similar themes, poses, or subjects but are completely different works. Only identify a specific monument/artwork if you are 90% or more confident it is that exact piece.
+BE EXTREMELY CONSERVATIVE with identification. Many sculptures, buildings, and artworks share similar themes, poses, or subjects but are completely different works. Only identify a specific monument/artwork if you are 95% or more confident it is that exact piece.
 
-For recognition (isRecognized: true), confidence must be 90% or higher. Be especially conservative with:
-- Local or smaller monuments that may look similar to famous ones
-- Sculptures with common poses or themes
-- Buildings with similar architectural styles
-- Artworks with similar subjects or compositions
+For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
+- Local, regional, or smaller monuments that may look similar to famous ones
+- Religious sculptures, statues, or buildings with common iconography
+- Sculptures with common poses, themes, or subjects (angels, saints, warriors, etc.)
+- Buildings with similar architectural styles from the same period
+- Artworks with similar subjects, compositions, or artistic styles
+- Churches, chapels, and religious buildings that often share similar designs
+- Memorial statues and commemorative monuments
 
-If confidence is below 90%, mark as not recognized and provide general analysis instead.`;
+When in doubt, mark as NOT RECOGNIZED. It's better to provide general analysis than incorrect identification. If you see common religious iconography, architectural elements, or artistic themes, do NOT assume it's a specific famous work unless you are absolutely certain.
+
+If confidence is below 95%, mark as not recognized and provide general analysis instead.`;
       
       // Add additional context if provided
       const hasAdditionalInfo = additionalInfo.name || additionalInfo.location || additionalInfo.building || additionalInfo.notes;
@@ -215,7 +220,7 @@ If confidence is below 90%, mark as not recognized and provide general analysis 
         promptText += `\n\nWith this context provided, you should:\n1. STRONGLY prioritize monuments and art that match this location\n2. If the visual matches reasonably well with something from this location, increase confidence significantly\n3. Use the provided name if it matches what you observe in the image\n4. Consider the building/context information as key identifying factors`;
       }
       
-      promptText += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 90% or higher. Always provide the ACTUAL location, not user's location unless they match. If not 90% confident, provide general analysis of what you see without claiming specific identification.
+      promptText += `\n\nProvide ALL information in ONE response. Only mark isRecognized as true if confidence is 95% or higher. Always provide the ACTUAL location, not user's location unless they match. If not 95% confident, provide general analysis of what you see without claiming specific identification.
 
 Respond in this exact JSON format (ensure all strings are properly escaped and no control characters are included):
 {
