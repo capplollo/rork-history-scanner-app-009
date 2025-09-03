@@ -152,6 +152,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
       console.log('Prompt length:', prompt.length, 'characters');
       console.log('Base64 length:', base64.length, 'characters');
       
+      // Validate prompt length (API might have limits)
+      if (prompt.length > 32000) {
+        console.warn('Prompt is very long, truncating...');
+        prompt = prompt.substring(0, 31000) + '\n\nRespond in the exact JSON format specified above.';
+      }
+      
       const requestBody = {
         messages: [
           {
@@ -164,6 +170,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         ]
       };
       
+      console.log('Request body size:', JSON.stringify(requestBody).length, 'characters');
       console.log('Sending request to AI API...');
       
       const aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
@@ -193,10 +200,11 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         console.error('AI API error status:', aiResponse.status);
         console.error('AI API error status text:', aiResponse.statusText);
         console.error('AI API error response body:', errorDetails);
+        console.error('Request details - Prompt length:', prompt.length, 'Base64 length:', base64.length);
         
         // Always provide a fallback response for any error
         console.log('AI service error, using fallback response');
-        setAnalysisStatus("AI service encountered an error, providing basic analysis...");
+        setAnalysisStatus("The AI analysis service is temporarily unavailable. Please try again shortly.");
         
         // Create a fallback analysis result
         const fallbackResult = {
@@ -207,13 +215,13 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           isRecognized: false,
           detailedDescription: {
             keyTakeaways: [
-              "This appears to be a monument or artwork captured in the image.",
-              "The AI analysis service encountered a technical issue.",
+              "The AI analysis service is currently experiencing technical difficulties.",
+              "This could be due to high server load or temporary maintenance.",
               "Please try scanning again in a few moments.",
-              "You can add context information above to help improve analysis results."
+              "Adding context information may help improve results when the service is restored."
             ],
-            inDepthContext: "The AI analysis service encountered a technical issue while processing this image. This could be due to various factors including service availability, image format, or network connectivity.\n\nTo improve your experience, try taking a clearer photo with good lighting and minimal reflections. You can also add context information such as the monument's name, location, or the building/museum where it's located.\n\nWe apologize for the inconvenience and are working to resolve any service issues.",
-            curiosities: "Technical analysis was not completed due to service issues. Please try again shortly."
+            inDepthContext: "The AI analysis service is temporarily unavailable due to technical issues. This is likely a temporary problem that should resolve shortly.\n\nWhile we work to restore full service, you can try again in a few minutes. For better results when the service is restored, consider adding context information such as the monument's name, location, or museum.\n\nWe apologize for the inconvenience and appreciate your patience.",
+            curiosities: "Service temporarily unavailable - please try again shortly."
           }
         };
         
