@@ -463,12 +463,17 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Snap into heritage</Text>
-          <Text style={styles.headerSubtitle}>
-            Discover the living stories of art and monuments
-          </Text>
-        </View>
+        <LinearGradient
+          colors={["#2C3E50", "#34495E"]}
+          style={styles.headerGradient}
+        >
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Snap into heritage</Text>
+            <Text style={styles.headerSubtitle}>
+              Discover the living stories of art and monuments
+            </Text>
+          </View>
+        </LinearGradient>
 
         <View style={styles.section}>
           {selectedImage ? (
@@ -589,12 +594,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEFEFE",
   },
   headerGradient: {
-    paddingTop: 20,
+    paddingTop: 60,
     paddingBottom: 30,
     paddingHorizontal: 20,
   },
   headerContent: {
-    gap: 20,
+    gap: 8,
   },
   headerTitle: {
     fontSize: 32,
@@ -604,7 +609,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "400",
-    color: "#2C3E50",
+    color: "#ffffff",
     marginBottom: 8,
   },
   headerSubtitle: {
@@ -614,7 +619,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: "rgba(255,255,255,0.8)",
     lineHeight: 22,
   },
   headerStats: {
