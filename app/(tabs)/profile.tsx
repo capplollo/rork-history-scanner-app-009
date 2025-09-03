@@ -115,7 +115,7 @@ export default function ProfileScreen() {
                   colors={["#8B4513", "#A0522D"]}
                   style={styles.avatar}
                 >
-                  <User size={23} color="#ffffff" />
+                  <User size={41} color="#ffffff" />
                 </LinearGradient>
               </View>
               
@@ -128,7 +128,7 @@ export default function ProfileScreen() {
                 style={styles.settingsButton}
                 onPress={() => setShowSettings(true)}
               >
-                <Settings size={20} color="#ffffff" />
+                <Settings size={36} color="#ffffff" />
               </TouchableOpacity>
             </View>
           </View>
@@ -244,9 +244,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEFEFE",
   },
   headerGradient: {
-    paddingTop: 20,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
+    paddingTop: 36,
+    paddingBottom: 36,
+    paddingHorizontal: 36,
   },
   headerContent: {
     gap: 0,
@@ -254,10 +254,10 @@ const styles = StyleSheet.create({
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 22,
   },
   settingsButton: {
-    padding: 6,
+    padding: 11,
     marginLeft: 'auto',
   },
   avatarContainer: {
@@ -268,18 +268,18 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   avatar: {
-    width: 43,
-    height: 43,
-    borderRadius: 21.5,
+    width: 77,
+    height: 77,
+    borderRadius: 38.5,
     justifyContent: 'center',
     alignItems: 'center',
   },
   profileInfo: {
     flex: 1,
-    gap: 4,
+    gap: 7,
   },
   userName: {
-    fontSize: 19,
+    fontSize: 34,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   userEmail: {
-    fontSize: 15,
+    fontSize: 27,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
