@@ -494,6 +494,48 @@ Respond in this exact JSON format:
           </View>
         </View>
 
+        {/* Context and Reanalyze Buttons - Only show when not recognized */}
+        {!monument.isRecognized && (
+          <View style={styles.section}>
+            <View style={styles.actionButtonsContainer}>
+              <TouchableOpacity
+                style={styles.contextButton}
+                onPress={() => {
+                  router.push({
+                    pathname: '/(tabs)/(scanner)' as any,
+                    params: {
+                      reanalyzeImage: monument.scannedImage,
+                      showContext: 'true'
+                    }
+                  });
+                }}
+              >
+                <View style={styles.buttonContent}>
+                  <Sparkles size={18} color="#8B4513" />
+                  <Text style={styles.contextButtonText}>Add Context</Text>
+                </View>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.reanalyzeButtonSmall, isReanalyzing && styles.reanalyzeButtonDisabled]}
+                onPress={performReanalysis}
+                disabled={isReanalyzing}
+              >
+                <View style={styles.buttonContent}>
+                  {isReanalyzing ? (
+                    <ActivityIndicator size="small" color="#dc2626" />
+                  ) : (
+                    <RefreshCw size={18} color="#dc2626" />
+                  )}
+                  <Text style={styles.reanalyzeButtonSmallText}>
+                    {isReanalyzing ? 'Reanalyzing...' : 'Reanalyze'}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
 
 
         {/* Key Takeaways */}
@@ -542,31 +584,33 @@ Respond in this exact JSON format:
           </View>
         )}
 
-        {/* Action Button */}
-        <View style={styles.section}>
-          <TouchableOpacity
-            style={[styles.reanalyzeButton, isReanalyzing && styles.reanalyzeButtonDisabled]}
-            onPress={handleReanalyze}
-            disabled={isReanalyzing}
-          >
-            <LinearGradient
-              colors={isReanalyzing ? ["#999", "#777"] : ["#dc2626", "#f87171"]}
-              style={styles.reanalyzeGradient}
+        {/* Action Button - Only show when recognized */}
+        {monument.isRecognized && (
+          <View style={styles.section}>
+            <TouchableOpacity
+              style={[styles.reanalyzeButton, isReanalyzing && styles.reanalyzeButtonDisabled]}
+              onPress={handleReanalyze}
+              disabled={isReanalyzing}
             >
-              {isReanalyzing ? (
-                <View style={styles.reanalyzeContent}>
-                  <ActivityIndicator size="small" color="#FFF" />
-                  <Text style={styles.reanalyzeText}>Reanalyzing...</Text>
-                </View>
-              ) : (
-                <View style={styles.reanalyzeContent}>
-                  <RefreshCw size={20} color="#FFF" />
-                  <Text style={styles.reanalyzeText}>Reanalyze Monument</Text>
-                </View>
-              )}
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
+              <LinearGradient
+                colors={isReanalyzing ? ["#999", "#777"] : ["#dc2626", "#f87171"]}
+                style={styles.reanalyzeGradient}
+              >
+                {isReanalyzing ? (
+                  <View style={styles.reanalyzeContent}>
+                    <ActivityIndicator size="small" color="#FFF" />
+                    <Text style={styles.reanalyzeText}>Reanalyzing...</Text>
+                  </View>
+                ) : (
+                  <View style={styles.reanalyzeContent}>
+                    <RefreshCw size={20} color="#FFF" />
+                    <Text style={styles.reanalyzeText}>Reanalyze Monument</Text>
+                  </View>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -892,5 +936,63 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "500",
     color: "#ffffff",
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  contextButton: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#8B4513',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  reanalyzeButtonSmall: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#dc2626',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  contextButtonText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: '#8B4513',
+  },
+  reanalyzeButtonSmallText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: '#dc2626',
   },
 });
