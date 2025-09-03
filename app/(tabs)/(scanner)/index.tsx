@@ -596,12 +596,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEFEFE",
   },
   headerGradient: {
-    paddingTop: 20,
+    paddingTop: 60,
     paddingBottom: 30,
     paddingHorizontal: 20,
-    minHeight: 280,
+    minHeight: 140,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   logo: {
     marginBottom: 16,
