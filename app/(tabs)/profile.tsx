@@ -24,6 +24,7 @@ import {
   History,
   Share2
 } from "lucide-react-native";
+import Logo from "@/components/Logo";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 
@@ -108,6 +109,7 @@ export default function ProfileScreen() {
           colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
+          <Logo size={32} style={styles.logo} />
           <View style={styles.headerContent}>
             <View style={styles.profileSection}>
               <View style={styles.avatarContainer}>
@@ -247,6 +249,10 @@ const styles = StyleSheet.create({
     paddingTop: 25,
     paddingBottom: 25,
     paddingHorizontal: 25,
+    alignItems: 'center',
+  },
+  logo: {
+    marginBottom: 16,
   },
   headerContent: {
     gap: 0,

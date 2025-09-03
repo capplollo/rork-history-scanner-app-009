@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react-native';
+import Logo from '@/components/Logo';
 
 export default function SignUpScreen() {
   const [fullName, setFullName] = useState<string>('');
@@ -74,6 +75,7 @@ export default function SignUpScreen() {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
+            <Logo size={48} style={styles.logo} />
             <Text style={styles.title}>Create Account</Text>
             <Text style={styles.subtitle}>Join us to explore monuments and art</Text>
           </View>
@@ -193,6 +195,9 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 40,
+  },
+  logo: {
+    marginBottom: 20,
   },
   title: {
     fontSize: 32,

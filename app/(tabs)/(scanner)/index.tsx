@@ -16,6 +16,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info, Zap, Camera } from "lucide-react-native";
+import Logo from "@/components/Logo";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { mockMonuments } from "@/data/mockMonuments";
@@ -467,6 +468,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
+          <Logo size={32} style={styles.logo} />
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Snap into heritage</Text>
             <Text style={styles.headerSubtitle}>
@@ -598,12 +600,15 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
     paddingHorizontal: 20,
     minHeight: 140,
+    alignItems: 'center',
+  },
+  logo: {
+    marginBottom: 16,
   },
   headerContent: {
     gap: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    flex: 1,
   },
   headerTitle: {
     fontSize: 32,

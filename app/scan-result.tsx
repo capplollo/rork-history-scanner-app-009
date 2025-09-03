@@ -18,6 +18,7 @@ import * as ImageManipulator from "expo-image-manipulator";
 
 import { mockMonuments } from "@/data/mockMonuments";
 import FormattedText from "@/components/FormattedText";
+import Logo from "@/components/Logo";
 
 // Define basic types for the simplified version
 interface MonumentData {
@@ -432,6 +433,7 @@ Respond in this exact JSON format:
           colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
+          <Logo size={28} style={styles.logo} />
           <View style={styles.headerContent}>
             <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
               <ArrowLeft size={24} color="rgba(255,255,255,0.9)" />
@@ -678,6 +680,10 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 30,
     paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  logo: {
+    marginBottom: 12,
   },
   headerContent: {
     flexDirection: 'row',

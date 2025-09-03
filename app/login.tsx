@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
+import Logo from '@/components/Logo';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState<string>('');
@@ -60,6 +61,7 @@ export default function LoginScreen() {
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
+            <Logo size={48} style={styles.logo} />
             <Text style={styles.title}>Welcome Back</Text>
             <Text style={styles.subtitle}>Sign in to continue exploring monuments and art</Text>
           </View>
@@ -154,6 +156,9 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 40,
+  },
+  logo: {
+    marginBottom: 20,
   },
   title: {
     fontSize: 32,
