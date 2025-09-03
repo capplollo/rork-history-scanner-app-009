@@ -310,70 +310,50 @@ export default function ScanResultScreen() {
           </View>
         </View>
 
-        {/* Description */}
-        <View style={styles.section}>
-          <View style={styles.contentCard}>
-            <View style={styles.cardHeader}>
-              <Sparkles size={20} color="#8B4513" />
-              <Text style={styles.sectionTitle}>Description</Text>
-            </View>
-            <FormattedText style={styles.descriptionText}>{monument.description}</FormattedText>
-          </View>
-        </View>
 
-        {/* Significance */}
-        <View style={styles.section}>
-          <View style={styles.contentCard}>
-            <View style={styles.cardHeader}>
-              <Clock size={20} color="#8B4513" />
-              <Text style={styles.sectionTitle}>Historical Significance</Text>
-            </View>
-            <FormattedText style={styles.descriptionText}>{monument.significance}</FormattedText>
-          </View>
-        </View>
 
-        {/* Key Facts */}
-        <View style={styles.section}>
-          <View style={styles.contentCard}>
-            <Text style={styles.sectionTitle}>Key Facts</Text>
-            <View style={styles.factsContainer}>
-              {monument.facts.map((fact, index) => (
-                <View key={index} style={styles.factItem}>
-                  <View style={styles.factDot} />
-                  <Text style={styles.factText}>{fact}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        </View>
-
-        {/* Detailed Description */}
-        {monument.detailedDescription && (
+        {/* Key Takeaways */}
+        {monument.detailedDescription && monument.detailedDescription.keyTakeaways && (
           <View style={styles.section}>
             <View style={styles.contentCard}>
-              <Text style={styles.sectionTitle}>Detailed Analysis</Text>
-              
-              <View style={styles.subsection}>
-                <Text style={styles.subsectionTitle}>Key Takeaways</Text>
-                <View style={styles.factsContainer}>
-                  {monument.detailedDescription.keyTakeaways.map((takeaway, index) => (
-                    <View key={index} style={styles.factItem}>
-                      <View style={styles.factDot} />
-                      <Text style={styles.factText}>{takeaway}</Text>
-                    </View>
-                  ))}
-                </View>
+              <View style={styles.cardHeader}>
+                <Sparkles size={20} color="#8B4513" />
+                <Text style={styles.sectionTitle}>Key Takeaways</Text>
               </View>
-              
-              <View style={styles.subsection}>
-                <Text style={styles.subsectionTitle}>In-Depth Context</Text>
-                <FormattedText style={styles.descriptionText}>{monument.detailedDescription.inDepthContext}</FormattedText>
+              <View style={styles.factsContainer}>
+                {monument.detailedDescription.keyTakeaways.map((takeaway, index) => (
+                  <View key={index} style={styles.factItem}>
+                    <View style={styles.factDot} />
+                    <Text style={styles.factText}>{takeaway}</Text>
+                  </View>
+                ))}
               </View>
-              
-              <View style={styles.subsection}>
-                <Text style={styles.subsectionTitle}>Curiosities</Text>
-                <FormattedText style={styles.descriptionText}>{monument.detailedDescription.curiosities}</FormattedText>
+            </View>
+          </View>
+        )}
+
+        {/* In-Depth Context */}
+        {monument.detailedDescription && monument.detailedDescription.inDepthContext && (
+          <View style={styles.section}>
+            <View style={styles.contentCard}>
+              <View style={styles.cardHeader}>
+                <Clock size={20} color="#8B4513" />
+                <Text style={styles.sectionTitle}>In-Depth Context</Text>
               </View>
+              <FormattedText style={styles.descriptionText}>{monument.detailedDescription.inDepthContext}</FormattedText>
+            </View>
+          </View>
+        )}
+
+        {/* Curiosity */}
+        {monument.detailedDescription && monument.detailedDescription.curiosities && monument.detailedDescription.curiosities !== 'No widely known curiosities are associated with these monuments and art.' && (
+          <View style={styles.section}>
+            <View style={styles.contentCard}>
+              <View style={styles.cardHeader}>
+                <Sparkles size={20} color="#8B4513" />
+                <Text style={styles.sectionTitle}>Curiosity</Text>
+              </View>
+              <FormattedText style={styles.descriptionText}>{monument.detailedDescription.curiosities}</FormattedText>
             </View>
           </View>
         )}

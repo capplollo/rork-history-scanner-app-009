@@ -131,11 +131,11 @@ Respond in this exact JSON format (ensure all strings are properly escaped and n
     "Fourth key takeaway bullet point - must be specific and informative"
   ],
   "inDepthContext": "Write exactly 3 paragraphs. Separate paragraphs with double line breaks only. Use bold highlights for key terms. Be specific and interesting. Avoid generalizations. First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context. Second paragraph: Detail artistic/architectural elements, materials used, construction techniques, style characteristics, dimensions, and unique technical features. Third paragraph: Discuss cultural impact, significance over the years, notable events or stories associated with the monuments and art and more.",
-  "curiosities": "Interesting anecdotes, lesser-known facts, or unusual stories. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"
+  "curiosities": "ONE interesting anecdote, lesser-known fact, or unusual story. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"
 }
 }
 
-CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bullet point should be a complete, informative sentence about the monument/artwork. Ensure all text is properly escaped for JSON.`;
+CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bullet point should be a complete, informative sentence about the monument/artwork. The curiosities field should contain only ONE curiosity, not multiple. Ensure all text is properly escaped for JSON.`;
       
       // Call the AI API
       console.log('Making AI API request to:', 'https://toolkit.rork.com/text/llm/');
