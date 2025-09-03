@@ -523,17 +523,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         )}
 
-        <View style={styles.section}>
-          <View style={styles.tipsCard}>
-            <Text style={styles.tipsTitle}>Tips for Better Results</Text>
-            <View style={styles.tipsList}>
-              <Text style={styles.tipText}>• Ensure good lighting and clear focus</Text>
-              <Text style={styles.tipText}>• Include the entire monument or artwork</Text>
-              <Text style={styles.tipText}>• Avoid extreme angles or reflections</Text>
-              <Text style={styles.tipText}>• Add context for better accuracy</Text>
-            </View>
-          </View>
-        </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -856,51 +846,5 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#8B4513",
   },
-  tipsCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  tipsTitle: {
-    fontSize: 18,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-    color: "#2C3E50",
-    marginBottom: 16,
-  },
-  tipsList: {
-    gap: 12,
-  },
-  tipItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  tipDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#8B4513',
-    marginTop: 6,
-  },
-  tipText: {
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#64748b",
-    lineHeight: 20,
-    marginBottom: 4,
-  },
+
 });
