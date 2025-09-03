@@ -249,7 +249,6 @@ const styles = StyleSheet.create({
     paddingTop: 25,
     paddingBottom: 25,
     paddingHorizontal: 25,
-    alignItems: 'center',
     position: 'relative',
   },
   logo: {
@@ -264,10 +263,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 22,
+    paddingRight: 60,
   },
   settingsButton: {
+    position: 'absolute',
+    bottom: 25,
+    right: 25,
     padding: 11,
-    marginLeft: 'auto',
   },
   avatarContainer: {
     shadowColor: '#000',
