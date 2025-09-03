@@ -154,31 +154,13 @@ export default function ProfileScreen() {
                     colors={["transparent", "rgba(0,0,0,0.7)"]}
                     style={styles.monumentOverlay}
                   >
-                    <View style={styles.monumentContent}>
-                      <View style={styles.monumentHeader}>
-                        <View style={styles.confidenceBadge}>
-                          <Text style={styles.confidenceText}>{monument.confidence}%</Text>
-                        </View>
-                        <TouchableOpacity 
-                          style={styles.shareButton}
-                          onPress={() => handleShare(monument)}
-                        >
-                          <Share2 size={14} color="#ffffff" />
-                        </TouchableOpacity>
+                    <View style={styles.monumentInfo}>
+                      <Text style={styles.monumentName}>{monument.name}</Text>
+                      <View style={styles.monumentDetails}>
+                        <MapPin size={10} color="rgba(255,255,255,0.8)" />
+                        <Text style={styles.monumentLocation}>{monument.location}</Text>
                       </View>
-                      
-                      <View style={styles.monumentInfo}>
-                        <Text style={styles.monumentName}>{monument.name}</Text>
-                        <View style={styles.monumentDetails}>
-                          <MapPin size={10} color="rgba(255,255,255,0.8)" />
-                          <Text style={styles.monumentLocation}>{monument.location}</Text>
-                        </View>
-                        <Text style={styles.monumentPeriod}>{monument.period}</Text>
-                        <View style={styles.timeContainer}>
-                          <Clock size={10} color="rgba(255,255,255,0.6)" />
-                          <Text style={styles.scannedTime}>{monument.scannedAt}</Text>
-                        </View>
-                      </View>
+                      <Text style={styles.monumentPeriod}>{monument.period}</Text>
                     </View>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -368,39 +350,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: "100%",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     padding: 12,
   },
-  monumentContent: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
-  monumentHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  confidenceBadge: {
-    backgroundColor: "rgba(139, 69, 19, 0.9)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  confidenceText: {
-    fontSize: 10,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "600",
-    color: "#ffffff",
-  },
-  shareButton: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    padding: 6,
-    borderRadius: 12,
-  },
+
   monumentInfo: {
     gap: 3,
   },
@@ -442,20 +395,7 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.8)",
     marginBottom: 4,
   },
-  timeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  scannedTime: {
-    fontSize: 10,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "rgba(255,255,255,0.6)",
-  },
+
 
   emptyState: {
     backgroundColor: '#ffffff',
