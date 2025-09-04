@@ -11,6 +11,7 @@ import {
   Platform,
   Modal,
   Share,
+  ActivityIndicator,
 } from "react-native";
 import { 
   User, 
@@ -19,17 +20,19 @@ import {
   LogOut,
   ChevronRight,
   Camera,
-  Clock,
   X,
   History,
-  Share2
 } from "lucide-react-native";
 import Logo from "@/components/Logo";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import { useAuth } from '@/contexts/AuthContext';
+import { useHistory } from '@/contexts/HistoryContext';
 
 export default function ProfileScreen() {
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const { user, signOut } = useAuth();
+  const { history, loading: historyLoading } = useHistory();
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -43,9 +46,9 @@ export default function ProfileScreen() {
         {
           text: 'Sign Out',
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
             setShowSettings(false);
-            router.replace('/login');
+            await signOut();
           },
         },
       ]
@@ -55,8 +58,8 @@ export default function ProfileScreen() {
   const handleShare = async (monument: any) => {
     try {
       await Share.share({
-        message: `Check out this amazing discovery: ${monument.name} in ${monument.location}! 🏛️`,
-        url: monument.image,
+        message: `Check out this amazing discovery: ${monument.monument_name} in ${monument.location}! 🏛️`,
+        url: monument.image_url,
       });
     } catch (error) {
       console.log('Error sharing:', error);
@@ -67,39 +70,17 @@ export default function ProfileScreen() {
     { icon: LogOut, label: "Sign Out", action: handleSignOut },
   ];
 
-  // Mock scan history data - replace with real data
-  const scanHistory = [
-    {
-      id: "1",
-      name: "Colosseum",
-      location: "Rome, Italy",
-      period: "72-80 AD",
-      image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400",
-      scannedAt: "2 days ago",
-      confidence: 95,
-      description: "The largest amphitheatre ever built, a testament to Roman engineering prowess."
-    },
-    {
-      id: "2",
-      name: "Eiffel Tower",
-      location: "Paris, France",
-      period: "1887-1889",
-      image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=400",
-      scannedAt: "1 week ago",
-      confidence: 98,
-      description: "An iron lattice tower that became the symbol of Paris and French ingenuity."
-    },
-    {
-      id: "3",
-      name: "Taj Mahal",
-      location: "Agra, India",
-      period: "1632-1653",
-      image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400",
-      scannedAt: "2 weeks ago",
-      confidence: 92,
-      description: "A white marble mausoleum, considered the jewel of Muslim art in India."
-    },
-  ];
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+    return `${Math.ceil(diffDays / 30)} months ago`;
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -122,8 +103,8 @@ export default function ProfileScreen() {
               </View>
               
               <View style={styles.profileInfo}>
-                <Text style={styles.userName}>Demo User</Text>
-                <Text style={styles.userEmail}>demo@example.com</Text>
+                <Text style={styles.userName}>{user?.user_metadata?.full_name || 'User'}</Text>
+                <Text style={styles.userEmail}>{user?.email || 'user@example.com'}</Text>
               </View>
               
               <TouchableOpacity 
@@ -145,17 +126,22 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
           
-          {scanHistory.length > 0 ? (
+          {historyLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#8B4513" />
+              <Text style={styles.loadingText}>Loading your discoveries...</Text>
+            </View>
+          ) : history.length > 0 ? (
             <View style={styles.historyGrid}>
-              {scanHistory.map((monument) => (
+              {history.map((monument) => (
                 <TouchableOpacity key={monument.id} style={styles.monumentCard}>
-                  <Image source={{ uri: monument.image }} style={styles.monumentImage} />
+                  <Image source={{ uri: monument.image_url }} style={styles.monumentImage} />
                   <LinearGradient
                     colors={["transparent", "rgba(0,0,0,0.7)"]}
                     style={styles.monumentOverlay}
                   >
                     <View style={styles.monumentInfo}>
-                      <Text style={styles.monumentName}>{monument.name}</Text>
+                      <Text style={styles.monumentName}>{monument.monument_name}</Text>
                       <View style={styles.monumentDetails}>
                         <MapPin size={10} color="rgba(255,255,255,0.8)" />
                         <Text style={styles.monumentLocation}>{monument.location}</Text>
@@ -517,5 +503,27 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     color: '#2C2C2C',
+  },
+  loadingContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    alignItems: 'center',
+    paddingVertical: 50,
+    paddingHorizontal: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "#64748b",
+    marginTop: 12,
   },
 });

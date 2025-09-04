@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -19,6 +19,8 @@ import * as ImageManipulator from "expo-image-manipulator";
 import { mockMonuments } from "@/data/mockMonuments";
 import FormattedText from "@/components/FormattedText";
 import Logo from "@/components/Logo";
+import { useAuth } from '@/contexts/AuthContext';
+import { useHistory } from '@/contexts/HistoryContext';
 
 // Define basic types for the simplified version
 interface MonumentData {
@@ -62,10 +64,34 @@ export default function ScanResultScreen() {
   } = useLocalSearchParams();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isReanalyzing, setIsReanalyzing] = useState<boolean>(false);
-
+  const [isSavingToHistory, setIsSavingToHistory] = useState<boolean>(false);
   
   const [monument, setMonument] = useState<MonumentData | undefined>(undefined);
+  const { user } = useAuth();
+  const { addToHistory } = useHistory();
   
+  const saveToHistory = useCallback(async (monumentData: MonumentData) => {
+    if (!user || isSavingToHistory) return;
+    
+    setIsSavingToHistory(true);
+    try {
+      await addToHistory({
+        monument_name: monumentData.name,
+        location: monumentData.location,
+        period: monumentData.period,
+        image_url: monumentData.scannedImage || monumentData.image,
+        description: monumentData.description,
+        confidence: monumentData.confidence,
+      });
+      console.log('Successfully saved to history:', monumentData.name);
+    } catch (error) {
+      console.error('Failed to save to history:', error);
+      // Don't show error to user as this is a background operation
+    } finally {
+      setIsSavingToHistory(false);
+    }
+  }, [user, isSavingToHistory, addToHistory]);
+
   // Load monument data on component mount
   useEffect(() => {
     const loadMonumentData = async () => {
@@ -199,11 +225,17 @@ export default function ScanResultScreen() {
       }
       
       setMonument(loadedMonument);
+      
+      // Save to history if user is logged in and this is a new scan (not from history)
+      if (user && loadedMonument && !historyItemId && !regenerate) {
+        await saveToHistory(loadedMonument);
+      }
+      
       setIsLoading(false);
     };
     
     loadMonumentData();
-  }, [monumentId, scanData, resultId, historyItemId, monumentName, location, period, scannedImage, regenerate, artworkName, confidence, isRecognized, keyTakeaways, inDepthContext, curiosities]);
+  }, [monumentId, scanData, resultId, historyItemId, monumentName, location, period, scannedImage, regenerate, artworkName, confidence, isRecognized, keyTakeaways, inDepthContext, curiosities, user, saveToHistory]);
 
   const handleReanalyze = async () => {
     if (!monument?.scannedImage) {
@@ -350,7 +382,7 @@ Respond in this exact JSON format:
       let analysisResult;
       try {
         analysisResult = JSON.parse(cleanedResponse);
-      } catch (parseError) {
+      } catch {
         // Try to extract JSON from response
         const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
@@ -396,6 +428,8 @@ Respond in this exact JSON format:
       );
     }
   };
+
+
 
   const handleShare = () => {
     Alert.alert('Share', 'Share functionality will be implemented when backend is ready.');
