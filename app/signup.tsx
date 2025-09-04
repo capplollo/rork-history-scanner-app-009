@@ -14,7 +14,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react-native';
 import Logo from '@/components/Logo';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignUpScreen() {
   const [fullName, setFullName] = useState<string>('');
@@ -25,8 +24,6 @@ export default function SignUpScreen() {
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
-
-  const { signUp } = useAuth();
 
   const handleSignUp = async () => {
     setErrorMessage('');
@@ -48,29 +45,22 @@ export default function SignUpScreen() {
 
     setIsLoading(true);
     
-    try {
-      const { error } = await signUp(email, password, fullName);
-      
-      if (error) {
-        setErrorMessage(error.message);
-      } else {
-        Alert.alert(
-          'Account Created',
-          'Your account has been created successfully! Please check your email to confirm your account.',
-          [
-            {
-              text: 'OK',
-              onPress: () => router.replace('/email-confirmation')
-            }
-          ]
-        );
-      }
-    } catch (error) {
-      console.error('Signup error:', error);
-      setErrorMessage('An unexpected error occurred');
-    } finally {
+    // Simulate signup process
+    setTimeout(() => {
       setIsLoading(false);
-    }
+      
+      // For demo purposes, accept any valid input
+      Alert.alert(
+        'Account Created',
+        'Your account has been created successfully! Please check your email to confirm your account.',
+        [
+          {
+            text: 'OK',
+            onPress: () => router.replace('/email-confirmation')
+          }
+        ]
+      );
+    }, 1000);
   };
 
   const navigateToLogin = () => {

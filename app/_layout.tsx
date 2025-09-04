@@ -1,12 +1,32 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { AuthProvider } from '@/contexts/AuthContext';
-import { HistoryProvider } from '@/contexts/HistoryContext';
-import ProtectedRoute from '@/components/ProtectedRoute';
 
 SplashScreen.preventAutoHideAsync();
+
+// Authentication guard component
+function AuthGuard() {
+  const segments = useSegments();
+  const router = useRouter();
+  const lastRedirectRef = useRef<string | null>(null);
+
+  const currentPath = useMemo(() => {
+    return segments.join('/');
+  }, [segments]);
+
+  useEffect(() => {
+    console.log('AuthGuard check:', { 
+      currentPath, 
+      lastRedirect: lastRedirectRef.current 
+    });
+
+    // For now, just allow access to all routes
+    // You can implement authentication logic here later
+  }, [currentPath, router]);
+
+  return null;
+}
 
 function RootLayoutNav() {
   return (
@@ -73,13 +93,8 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthProvider>
-        <HistoryProvider>
-          <ProtectedRoute>
-            <RootLayoutNav />
-          </ProtectedRoute>
-        </HistoryProvider>
-      </AuthProvider>
+      <AuthGuard />
+      <RootLayoutNav />
     </GestureHandlerRootView>
   );
 }
