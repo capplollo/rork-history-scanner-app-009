@@ -272,10 +272,10 @@ export default function ScanResultScreen() {
         throw new Error('Failed to compress image for reanalysis');
       }
 
-      // Build reanalysis prompt with more conservative approach
-      const promptText = `Reanalyze this image with EXTREME CAUTION. The previous analysis may have been incorrect. 
+      // Build reanalysis prompt with the new conservative approach
+      const promptText = `Analyze this image and identify any monuments and art including sculptures, paintings, or cultural landmarks. Include paintings that depict buildings/landmarks (identify the PAINTING, not the depicted structure).
 
-BE EXTREMELY CONSERVATIVE with identification. Only identify a specific monument/artwork if you are 95% or more confident it is that exact piece. Many sculptures, buildings, and artworks share similar themes, poses, or subjects but are completely different works.
+BE EXTREMELY CONSERVATIVE with identification. Many sculptures, buildings, and artworks share similar themes, poses, or subjects but are completely different works. Only identify a specific monument/artwork if you are 95% or more confident it is that exact piece.
 
 For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
 - Local, regional, or smaller monuments that may look similar to famous ones
@@ -288,28 +288,30 @@ For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPEC
 
 When in doubt, mark as NOT RECOGNIZED. It's better to provide general analysis than incorrect identification. If you see common religious iconography, architectural elements, or artistic themes, do NOT assume it's a specific famous work unless you are absolutely certain.
 
-If not 95% confident, mark as not recognized and provide general analysis instead.
+If confidence is below 95%, mark as not recognized and provide general analysis instead.
 
-Provide ALL information in ONE response. Always provide the ACTUAL location, not assumptions.
+Provide ALL information in ONE response. Only mark isRecognized as true if confidence is 95% or higher. Always provide the ACTUAL location, not user's location unless they match. If not 95% confident, provide general analysis of what you see without claiming specific identification.
 
-Respond in this exact JSON format:
+Respond in this exact JSON format (ensure all strings are properly escaped and no control characters are included):
 {
-"artworkName": "Name or 'Unknown Monument or Artwork'",
+"artworkName": "Name or 'Unknown Monuments and Art'",
 "confidence": 85,
-"location": "Actual location or 'Unknown Location'",
-"period": "Year(s) or century format or 'Unknown'",
+"location": "Actual location",
+"period": "Year(s) or century format (e.g., '1503', '15th century', '1800s', '12th-13th century') or 'Unknown'",
 "isRecognized": true/false,
 "detailedDescription": {
-  "keyTakeaways": [
-    "First key takeaway - specific and informative",
-    "Second key takeaway - specific and informative", 
-    "Third key takeaway - specific and informative",
-    "Fourth key takeaway - specific and informative"
-  ],
-  "inDepthContext": "Write exactly 3 paragraphs separated by double line breaks. Be specific and avoid generalizations.",
-  "curiosities": "ONE interesting fact or 'No widely known curiosities are associated with this monument or artwork.'"
+"keyTakeaways": [
+  "First key takeaway bullet point - must be specific and informative",
+  "Second key takeaway bullet point - must be specific and informative", 
+  "Third key takeaway bullet point - must be specific and informative",
+  "Fourth key takeaway bullet point - must be specific and informative"
+],
+"inDepthContext": "Write exactly 3 condensed paragraphs (around 1000 characters total) about [TOPIC]. Separate paragraphs with double line breaks only. Use bold highlights for key terms. Be specific and interesting, avoid generalizations. Start in medias res with an anecdote or striking detail so it feels like a story.\n* First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context.\n* Second paragraph: Visually guide the reader across the artwork/monument — describe it step by step (from top to bottom, left to right, or foreground to background). Detail artistic/architectural elements, materials used, techniques, style characteristics, dimensions, and unique features as if the reader is standing in front of it.\n* Third paragraph: Discuss cultural impact, significance over the years, and notable events or stories associated with it. Keep the tone vivid, narrative, and engaging, while remaining concise.",
+"curiosities": "ONE interesting anecdote, lesser-known fact, or unusual story. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"
 }
-}`;
+}
+
+CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bullet point should be a complete, informative sentence about the monument/artwork. The curiosities field should contain only ONE curiosity, not multiple. Ensure all text is properly escaped for JSON.`;
 
       const requestBody = {
         messages: [
