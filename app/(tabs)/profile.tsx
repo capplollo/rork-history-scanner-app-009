@@ -105,20 +105,14 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Minimal Header with Profile Info */}
-        <LinearGradient
-          colors={["#2C3E50", "#34495E"]}
-          style={styles.headerGradient}
-        >
+        <View style={styles.headerContainer}>
           <Logo size={32} style={styles.logo} />
           <View style={styles.headerContent}>
             <View style={styles.profileSection}>
               <View style={styles.avatarContainer}>
-                <LinearGradient
-                  colors={["#2C3E50", "#34495E"]}
-                  style={styles.avatar}
-                >
-                  <User size={41} color="#ffffff" />
-                </LinearGradient>
+                <View style={styles.avatar}>
+                  <User size={41} color="#8B4513" />
+                </View>
               </View>
               
               <View style={styles.profileInfo}>
@@ -130,11 +124,11 @@ export default function ProfileScreen() {
                 style={styles.settingsButton}
                 onPress={() => setShowSettings(true)}
               >
-                <Settings size={22} color="#ffffff" />
+                <Settings size={22} color="#8B4513" />
               </TouchableOpacity>
             </View>
           </View>
-        </LinearGradient>
+        </View>
 
         {/* Scan History */}
         <View style={styles.section}>
@@ -227,13 +221,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FEFEFE",
   },
-  headerGradient: {
+  headerContainer: {
     paddingTop: 30,
     paddingBottom: 30,
     paddingHorizontal: 24,
     position: 'relative',
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    backgroundColor: '#FEFEFE',
   },
   logo: {
     position: 'absolute',
@@ -268,6 +261,9 @@ const styles = StyleSheet.create({
     borderRadius: 36,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
   },
   profileInfo: {
     flex: 1,
@@ -281,7 +277,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: "#ffffff",
+    color: "#2C3E50",
   },
   userEmail: {
     fontSize: 17,
@@ -290,7 +286,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "rgba(255,255,255,0.8)",
+    color: "#64748b",
     fontStyle: "italic",
   },
   section: {
@@ -330,7 +326,7 @@ const styles = StyleSheet.create({
   },
   monumentCard: {
     width: "47.5%",
-    height: 240,
+    height: 288,
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",

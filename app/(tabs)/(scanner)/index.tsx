@@ -464,10 +464,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <LinearGradient
-          colors={["#2C3E50", "#34495E"]}
-          style={styles.headerGradient}
-        >
+        <View style={styles.headerContainer}>
           <Logo size={64} style={styles.logo} />
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Snap into heritage</Text>
@@ -475,7 +472,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               Discover the living stories of art and monuments
             </Text>
           </View>
-        </LinearGradient>
+        </View>
 
         <View style={styles.section}>
           {selectedImage ? (
@@ -595,14 +592,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: "#FEFEFE",
   },
-  headerGradient: {
+  headerContainer: {
     paddingTop: 40,
     paddingBottom: 40,
     paddingHorizontal: 24,
     minHeight: 160,
     alignItems: 'center',
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    backgroundColor: '#FEFEFE',
   },
   logo: {
     marginBottom: 20,
@@ -620,7 +616,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: "#ffffff",
+    color: "#2C3E50",
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -631,7 +627,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "rgba(255,255,255,0.85)",
+    color: "#64748b",
     lineHeight: 24,
     textAlign: 'center',
     maxWidth: 280,
@@ -653,7 +649,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "rgba(255,255,255,0.8)",
+    color: "#64748b",
   },
   section: {
     marginTop: 20,
