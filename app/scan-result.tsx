@@ -428,22 +428,23 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header - Simple back button */}
-        <View style={styles.simpleHeader}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <ArrowLeft size={24} color="#2C3E50" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-            <Share2 size={20} color="#2C3E50" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Monument Image - Full Background */}
+        {/* Monument Image - Full Background with Header Overlay */}
         {monument.scannedImage && (
           <View style={styles.imageSection}>
             <Image source={{ uri: monument.scannedImage }} style={styles.monumentImage} />
+            
+            {/* Header overlay on top of image */}
+            <View style={styles.headerOverlay}>
+              <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                <ArrowLeft size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+                <Share2 size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+            
             <LinearGradient
               colors={['transparent', 'rgba(0,0,0,0.6)']}
               style={styles.imageOverlay}
@@ -599,7 +600,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -661,23 +662,32 @@ const styles = StyleSheet.create({
     }),
     fontWeight: '500',
   },
-  simpleHeader: {
+  headerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 60,
     paddingBottom: 10,
+    zIndex: 10,
   },
   backButton: {
     padding: 8,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 20,
   },
   shareButton: {
     padding: 8,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 20,
   },
   imageSection: {
     position: 'relative',
-    height: 320,
+    height: 400,
   },
   monumentImage: {
     width: '100%',
