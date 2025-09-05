@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
   },
   monumentCard: {
     width: "47.5%",
-    height: 288,
+    height: 239,
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
