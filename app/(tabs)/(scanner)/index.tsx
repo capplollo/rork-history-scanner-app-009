@@ -565,12 +565,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             >
               {isAnalyzing ? (
                 <View style={styles.analyzingContainer}>
-                  <ActivityIndicator size="small" color="#8B4513" />
+                  <ActivityIndicator size="small" color="#ffffff" />
                   <Text style={styles.analyzeButtonText}>{analysisStatus}</Text>
                 </View>
               ) : (
                 <View style={styles.analyzeContainer}>
-                  <Sparkles size={20} color="#8B4513" />
+                  <Sparkles size={20} color="#ffffff" />
                   <Text style={styles.analyzeButtonText}>Discover History</Text>
                 </View>
               )}
@@ -596,16 +596,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEFEFE",
   },
   headerGradient: {
-    paddingTop: 30,
-    paddingBottom: 30,
-    paddingHorizontal: 20,
-    minHeight: 140,
+    paddingTop: 40,
+    paddingBottom: 40,
+    paddingHorizontal: 24,
+    minHeight: 160,
     alignItems: 'center',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
   },
   logo: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   headerContent: {
     gap: 8,
@@ -613,15 +613,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "400",
+    fontWeight: "600",
     color: "#ffffff",
     marginBottom: 8,
+    textAlign: 'center',
   },
   headerSubtitle: {
     fontSize: 16,
@@ -630,8 +631,10 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "rgba(255,255,255,0.8)",
-    lineHeight: 22,
+    color: "rgba(255,255,255,0.85)",
+    lineHeight: 24,
+    textAlign: 'center',
+    maxWidth: 280,
   },
   headerStats: {
     flexDirection: "row",
@@ -653,8 +656,8 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.8)",
   },
   section: {
-    marginTop: 30,
-    paddingHorizontal: 20,
+    marginTop: 24,
+    paddingHorizontal: 24,
   },
   sectionTitle: {
     fontSize: 20,
@@ -669,17 +672,18 @@ const styles = StyleSheet.create({
   },
   selectedImageContainer: {
     position: 'relative',
-    borderRadius: 16,
+    borderRadius: 24,
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 12,
+    marginBottom: 8,
   },
   selectedImage: {
     width: '100%',
-    height: 280,
+    height: 240,
     resizeMode: 'cover',
   },
   imageOverlay: {
@@ -701,14 +705,15 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   placeholderContainer: {
-    height: 280,
-    borderRadius: 16,
+    height: 240,
+    borderRadius: 24,
     backgroundColor: '#f8fafc',
     borderWidth: 2,
     borderColor: '#e2e8f0',
     borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 8,
   },
   placeholderContent: {
     alignItems: 'center',
@@ -743,25 +748,24 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
   },
   actionButton: {
     flex: 1,
     backgroundColor: '#ffffff',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderRadius: 20,
+    borderWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    gap: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+    gap: 12,
+    shadowColor: '#8B4513',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
   },
   actionButtonGradient: {
     flexDirection: 'row',
@@ -783,20 +787,20 @@ const styles = StyleSheet.create({
   },
   contextCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 16,
+    borderRadius: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 8,
     overflow: 'hidden',
   },
   infoToggle: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 18,
-    paddingHorizontal: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 24,
   },
   infoToggleLeft: {
     flexDirection: 'row',
@@ -830,8 +834,8 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   infoForm: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
     gap: 20,
     borderTopWidth: 1,
     borderTopColor: '#f1f5f9',
@@ -853,9 +857,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8fafc',
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     fontSize: 15,
     fontFamily: Platform.select({
       ios: "Times New Roman",
@@ -879,17 +883,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   analyzeButton: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#8B4513',
+    backgroundColor: '#8B4513',
+    borderRadius: 24,
+    borderWidth: 0,
     paddingVertical: 20,
-    paddingHorizontal: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    paddingHorizontal: 32,
+    shadowColor: '#8B4513',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
   },
   analyzeButtonDisabled: {
     opacity: 0.7,
@@ -917,8 +920,8 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "500",
-    color: "#8B4513",
+    fontWeight: "600",
+    color: "#ffffff",
   },
 
 });
