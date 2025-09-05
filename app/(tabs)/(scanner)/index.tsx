@@ -464,7 +464,10 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.headerContainer}>
+        <LinearGradient
+          colors={['#3B82F6', '#1E40AF']}
+          style={styles.headerContainer}
+        >
           <Logo size={64} style={styles.logo} />
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Snap into heritage</Text>
@@ -472,7 +475,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               Discover the living stories of art and monuments
             </Text>
           </View>
-        </View>
+        </LinearGradient>
 
         <View style={styles.section}>
           {selectedImage ? (
@@ -598,7 +601,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     minHeight: 160,
     alignItems: 'center',
-    backgroundColor: '#FEFEFE',
   },
   logo: {
     marginBottom: 20,
@@ -616,7 +618,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: "#2C3E50",
+    color: "#ffffff",
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -627,7 +629,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: "rgba(255, 255, 255, 0.9)",
     lineHeight: 24,
     textAlign: 'center',
     maxWidth: 280,
