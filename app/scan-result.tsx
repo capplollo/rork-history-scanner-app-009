@@ -450,33 +450,31 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         </LinearGradient>
 
-        {/* Monument Image */}
+        {/* Monument Image - Full Background */}
         {monument.scannedImage && (
           <View style={styles.imageSection}>
-            <View style={styles.imageContainer}>
-              <Image source={{ uri: monument.scannedImage }} style={styles.monumentImage} />
-              <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.6)']}
-                style={styles.imageOverlay}
-              >
-                <View style={styles.imageInfo}>
-                  <View style={styles.recognitionBadge}>
-                    {monument.isRecognized ? (
-                      <>
-                        <CheckCircle size={16} color="#4CAF50" />
-                        <Text style={styles.recognitionText}>Recognized</Text>
-                        <Text style={styles.confidenceText}>{monument.confidence}%</Text>
-                      </>
-                    ) : (
-                      <>
-                        <AlertCircle size={16} color="#FF9800" />
-                        <Text style={styles.notRecognizedText}>Not Recognized</Text>
-                      </>
-                    )}
-                  </View>
+            <Image source={{ uri: monument.scannedImage }} style={styles.monumentImage} />
+            <LinearGradient
+              colors={['transparent', 'rgba(0,0,0,0.6)']}
+              style={styles.imageOverlay}
+            >
+              <View style={styles.imageInfo}>
+                <View style={styles.recognitionBadge}>
+                  {monument.isRecognized ? (
+                    <>
+                      <CheckCircle size={16} color="#4CAF50" />
+                      <Text style={styles.recognitionText}>Recognized</Text>
+                      <Text style={styles.confidenceText}>{monument.confidence}%</Text>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle size={16} color="#FF9800" />
+                      <Text style={styles.notRecognizedText}>Not Recognized</Text>
+                    </>
+                  )}
                 </View>
-              </LinearGradient>
-            </View>
+              </View>
+            </LinearGradient>
           </View>
         )}
 
@@ -722,19 +720,9 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   imageSection: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-  },
-  imageContainer: {
     position: 'relative',
-    height: 240,
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    height: 320,
+    marginTop: -32,
   },
   monumentImage: {
     width: '100%',
@@ -748,7 +736,7 @@ const styles = StyleSheet.create({
     right: 0,
     height: '100%',
     justifyContent: 'flex-end',
-    padding: 16,
+    padding: 24,
   },
   imageInfo: {
     alignItems: 'flex-end',
