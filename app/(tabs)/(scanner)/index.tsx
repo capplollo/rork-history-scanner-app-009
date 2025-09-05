@@ -783,21 +783,19 @@ const styles = StyleSheet.create({
   },
   contextCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 20,
+    borderRadius: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
   },
   infoToggle: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 22,
+    paddingVertical: 20,
     paddingHorizontal: 24,
   },
   infoToggleLeft: {
@@ -817,24 +815,22 @@ const styles = StyleSheet.create({
   },
   optionalBadge: {
     backgroundColor: '#f59e0b',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
   },
   optionalText: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "600",
+    fontWeight: "500",
     color: '#ffffff',
-    letterSpacing: 0.3,
   },
   infoForm: {
     paddingHorizontal: 24,
-    paddingTop: 4,
     paddingBottom: 24,
     gap: 20,
     borderTopWidth: 1,
@@ -859,7 +855,7 @@ const styles = StyleSheet.create({
     borderColor: '#e2e8f0',
     borderRadius: 16,
     paddingHorizontal: 20,
-    paddingVertical: 18,
+    paddingVertical: 16,
     fontSize: 15,
     fontFamily: Platform.select({
       ios: "Times New Roman",
@@ -867,7 +863,6 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     color: '#2C3E50',
-    lineHeight: 22,
   },
   textArea: {
     height: 120,
@@ -885,15 +880,15 @@ const styles = StyleSheet.create({
   },
   analyzeButton: {
     backgroundColor: '#8B4513',
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 0,
-    paddingVertical: 20,
-    paddingHorizontal: 32,
-    shadowColor: '#8B4513',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 8,
+    paddingVertical: 18,
+    paddingHorizontal: 28,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
   },
   analyzeButtonDisabled: {
     opacity: 0.7,
@@ -921,9 +916,8 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#ffffff",
-    letterSpacing: 0.5,
   },
 
 });
