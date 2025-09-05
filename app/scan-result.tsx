@@ -430,25 +430,15 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <LinearGradient
-          colors={["#2C3E50", "#34495E"]}
-          style={styles.headerGradient}
-        >
-          <Logo size={28} style={styles.logo} />
-          <View style={styles.headerContent}>
-            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-              <ArrowLeft size={24} color="rgba(255,255,255,0.9)" />
-            </TouchableOpacity>
-            <View style={styles.headerInfo}>
-              <Text style={styles.headerTitle}>Discovery Complete</Text>
-              <Text style={styles.headerSubtitle}>Your monument has been analyzed</Text>
-            </View>
-            <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-              <Share2 size={20} color="rgba(255,255,255,0.9)" />
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
+        {/* Header - Simple back button */}
+        <View style={styles.simpleHeader}>
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <ArrowLeft size={24} color="#2C3E50" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+            <Share2 size={20} color="#2C3E50" />
+          </TouchableOpacity>
+        </View>
 
         {/* Monument Image - Full Background */}
         {monument.scannedImage && (
@@ -671,50 +661,16 @@ const styles = StyleSheet.create({
     }),
     fontWeight: '500',
   },
-  headerGradient: {
-    paddingTop: 30,
-    paddingBottom: 40,
-    paddingHorizontal: 24,
-    alignItems: 'center',
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-  },
-  logo: {
-    marginBottom: 12,
-  },
-  headerContent: {
+  simpleHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
   },
   backButton: {
     padding: 8,
-  },
-  headerInfo: {
-    flex: 1,
-    alignItems: 'center',
-    marginHorizontal: 16,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-    color: "#ffffff",
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontStyle: "italic",
-    color: "rgba(255,255,255,0.9)",
   },
   shareButton: {
     padding: 8,
@@ -722,7 +678,6 @@ const styles = StyleSheet.create({
   imageSection: {
     position: 'relative',
     height: 320,
-    marginTop: -32,
   },
   monumentImage: {
     width: '100%',
