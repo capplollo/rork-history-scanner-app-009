@@ -133,49 +133,51 @@ export default function ProfileScreen() {
 
         {/* Scan History */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Discovery History</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>View all</Text>
-            </TouchableOpacity>
-          </View>
-          
-          {scanHistory.length > 0 ? (
-            <View style={styles.historyGrid}>
-              {scanHistory.map((monument) => (
-                <TouchableOpacity key={monument.id} style={styles.monumentCard}>
-                  <Image source={{ uri: monument.image }} style={styles.monumentImage} />
-                  <LinearGradient
-                    colors={["transparent", "rgba(0,0,0,0.7)"]}
-                    style={styles.monumentOverlay}
-                  >
-                    <View style={styles.monumentInfo}>
-                      <Text style={styles.monumentName}>{monument.name}</Text>
-                      <View style={styles.monumentDetails}>
-                        <MapPin size={10} color="rgba(255,255,255,0.8)" />
-                        <Text style={styles.monumentLocation}>{monument.location}</Text>
-                      </View>
-                      <Text style={styles.monumentPeriod}>{monument.period}</Text>
-                    </View>
-                  </LinearGradient>
-                </TouchableOpacity>
-              ))}
-            </View>
-          ) : (
-            <View style={styles.emptyState}>
-              <View style={styles.emptyIconContainer}>
-                <History size={40} color={Colors.cinereous} />
-              </View>
-              <Text style={styles.emptyStateTitle}>No Discoveries Yet</Text>
-              <Text style={styles.emptyStateText}>
-                Start scanning monuments and art to build your collection
-              </Text>
-              <TouchableOpacity style={styles.startButton} onPress={() => router.push('/(tabs)/(scanner)')}>  
-                <Camera size={16} color="#ffffff" />
-                <Text style={styles.startButtonText}>Start Scanning</Text>
+          <View style={styles.historyContainer}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Discovery History</Text>
+              <TouchableOpacity>
+                <Text style={styles.seeAllText}>View all</Text>
               </TouchableOpacity>
             </View>
-          )}
+            
+            {scanHistory.length > 0 ? (
+              <View style={styles.historyGrid}>
+                {scanHistory.map((monument) => (
+                  <TouchableOpacity key={monument.id} style={styles.monumentCard}>
+                    <Image source={{ uri: monument.image }} style={styles.monumentImage} />
+                    <LinearGradient
+                      colors={["transparent", "rgba(0,0,0,0.7)"]}
+                      style={styles.monumentOverlay}
+                    >
+                      <View style={styles.monumentInfo}>
+                        <Text style={styles.monumentName}>{monument.name}</Text>
+                        <View style={styles.monumentDetails}>
+                          <MapPin size={10} color="rgba(255,255,255,0.8)" />
+                          <Text style={styles.monumentLocation}>{monument.location}</Text>
+                        </View>
+                        <Text style={styles.monumentPeriod}>{monument.period}</Text>
+                      </View>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ) : (
+              <View style={styles.emptyState}>
+                <View style={styles.emptyIconContainer}>
+                  <History size={40} color={Colors.cinereous} />
+                </View>
+                <Text style={styles.emptyStateTitle}>No Discoveries Yet</Text>
+                <Text style={styles.emptyStateText}>
+                  Start scanning monuments and art to build your collection
+                </Text>
+                <TouchableOpacity style={styles.startButton} onPress={() => router.push('/(tabs)/(scanner)')}>  
+                  <Camera size={16} color="#ffffff" />
+                  <Text style={styles.startButtonText}>Start Scanning</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
         </View>
       </ScrollView>
 
@@ -227,7 +229,15 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
     paddingHorizontal: 24,
     position: 'relative',
-    backgroundColor: '#FEFEFE',
+    backgroundColor: Colors.surface,
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   logo: {
     position: 'absolute',
@@ -291,8 +301,8 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   section: {
-    marginTop: 24,
-    paddingHorizontal: 20,
+    marginTop: 16,
+    paddingHorizontal: 16,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -327,7 +337,7 @@ const styles = StyleSheet.create({
   },
   monumentCard: {
     width: "47.5%",
-    height: 239,
+    height: 198,
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
@@ -396,7 +406,7 @@ const styles = StyleSheet.create({
 
   emptyState: {
     backgroundColor: Colors.surface,
-    borderRadius: 16,
+    borderRadius: 20,
     alignItems: 'center',
     paddingVertical: 40,
     paddingHorizontal: 24,
@@ -465,7 +475,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#FEFEFE',
+    backgroundColor: Colors.surface,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -514,5 +524,15 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     color: '#2C2C2C',
+  },
+  historyContainer: {
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
 });

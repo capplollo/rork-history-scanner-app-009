@@ -608,7 +608,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FEFEFE",
+    backgroundColor: Colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -746,12 +746,12 @@ const styles = StyleSheet.create({
     color: '#FF9800',
   },
   section: {
-    marginTop: 20,
-    paddingHorizontal: 20,
+    marginTop: 16,
+    paddingHorizontal: 16,
   },
   monumentCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
     padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -788,8 +788,8 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   contentCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
     padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -864,8 +864,8 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   reanalyzeButton: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
     borderWidth: 1.5,
     borderColor: '#dc2626',
     paddingVertical: 16,
@@ -906,8 +906,8 @@ const styles = StyleSheet.create({
   },
   contextButton: {
     flex: 1,
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
     borderWidth: 2,
     borderColor: Colors.accent.secondary,
     paddingVertical: 16,
@@ -920,8 +920,8 @@ const styles = StyleSheet.create({
   },
   reanalyzeButtonSmall: {
     flex: 1,
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
     borderWidth: 2,
     borderColor: '#dc2626',
     paddingVertical: 16,

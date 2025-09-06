@@ -8,7 +8,7 @@ export const Colors = {
   berkeleyBlue: '#1D3557',
   
   // Semantic colors
-  background: '#FEFEFE',
+  background: '#A49B97', // Main app background using taupeGray
   surface: '#FFFFFF',
   text: {
     primary: '#1D3557',
