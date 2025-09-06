@@ -27,6 +27,7 @@ import {
 import Logo from "@/components/Logo";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import Colors from "@/constants/colors";
 
 export default function ProfileScreen() {
   const [showSettings, setShowSettings] = useState<boolean>(false);
@@ -111,7 +112,7 @@ export default function ProfileScreen() {
             <View style={styles.profileSection}>
               <View style={styles.avatarContainer}>
                 <View style={styles.avatar}>
-                  <User size={41} color="#8B4513" />
+                  <User size={41} color={Colors.accent.secondary} />
                 </View>
               </View>
               
@@ -124,7 +125,7 @@ export default function ProfileScreen() {
                 style={styles.settingsButton}
                 onPress={() => setShowSettings(true)}
               >
-                <Settings size={22} color="#8B4513" />
+                <Settings size={22} color={Colors.accent.secondary} />
               </TouchableOpacity>
             </View>
           </View>
@@ -163,7 +164,7 @@ export default function ProfileScreen() {
           ) : (
             <View style={styles.emptyState}>
               <View style={styles.emptyIconContainer}>
-                <History size={40} color="rgba(139, 69, 19, 0.3)" />
+                <History size={40} color={Colors.cinereous} />
               </View>
               <Text style={styles.emptyStateTitle}>No Discoveries Yet</Text>
               <Text style={styles.emptyStateText}>
@@ -203,7 +204,7 @@ export default function ProfileScreen() {
                 onPress={item.action}
               >
                 <View style={styles.menuItemContent}>
-                  <item.icon size={20} color="#8B4513" />
+                  <item.icon size={20} color={Colors.accent.secondary} />
                   <Text style={styles.menuItemText}>{item.label}</Text>
                 </View>
                 <ChevronRight size={20} color="#CCC" />
@@ -219,7 +220,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FEFEFE",
+    backgroundColor: Colors.background,
   },
   headerContainer: {
     paddingTop: 30,
@@ -261,9 +262,9 @@ const styles = StyleSheet.create({
     borderRadius: 36,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8fafc',
+    backgroundColor: Colors.platinum,
     borderWidth: 2,
-    borderColor: '#e2e8f0',
+    borderColor: Colors.border,
   },
   profileInfo: {
     flex: 1,
@@ -277,7 +278,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: "#2C3E50",
+    color: Colors.text.primary,
   },
   userEmail: {
     fontSize: 17,
@@ -286,7 +287,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: Colors.text.muted,
     fontStyle: "italic",
   },
   section: {
@@ -307,7 +308,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#2C3E50",
+    color: Colors.text.primary,
   },
   seeAllText: {
     fontSize: 14,
@@ -316,7 +317,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#8B4513",
+    color: Colors.accent.secondary,
     fontWeight: "400",
   },
   historyGrid: {
@@ -394,7 +395,7 @@ const styles = StyleSheet.create({
 
 
   emptyState: {
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     alignItems: 'center',
     paddingVertical: 40,
@@ -409,7 +410,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#f8fafc',
+    backgroundColor: Colors.platinum,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
@@ -422,7 +423,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: "#2C3E50",
+    color: Colors.text.primary,
     marginBottom: 12,
   },
   emptyStateText: {
@@ -432,13 +433,13 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: Colors.text.muted,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 30,
   },
   startButton: {
-    backgroundColor: '#8B4513',
+    backgroundColor: Colors.accent.secondary,
     borderRadius: 16,
     flexDirection: 'row',
     alignItems: 'center',

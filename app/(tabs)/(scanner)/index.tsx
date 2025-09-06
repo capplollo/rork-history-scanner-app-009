@@ -20,6 +20,7 @@ import Logo from "@/components/Logo";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { mockMonuments } from "@/data/mockMonuments";
+import Colors from "@/constants/colors";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -485,7 +486,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           ) : (
             <View style={styles.placeholderContainer}>
               <View style={styles.placeholderContent}>
-                <CameraIcon size={32} color="#8B4513" />
+                <CameraIcon size={32} color={Colors.accent.secondary} />
                 <Text style={styles.placeholderText}>Ready to Discover</Text>
                 <Text style={styles.placeholderSubtext}>
                   Capture or select an image to begin
@@ -499,12 +500,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           <View style={styles.section}>
             <View style={styles.actionButtons}>
               <TouchableOpacity style={styles.actionButton} onPress={takePhoto}>
-                <CameraIcon size={20} color="#8B4513" />
+                <CameraIcon size={20} color={Colors.accent.secondary} />
                 <Text style={styles.actionButtonText}>Take Photo</Text>
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.actionButton} onPress={pickImageFromGallery}>
-                <ImageIcon size={20} color="#8B4513" />
+                <ImageIcon size={20} color={Colors.accent.secondary} />
                 <Text style={styles.actionButtonText}>From Gallery</Text>
               </TouchableOpacity>
             </View>
@@ -519,16 +520,16 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
               >
                 <View style={styles.infoToggleLeft}>
-                  <Info size={20} color="#8B4513" />
+                  <Info size={20} color={Colors.accent.secondary} />
                   <Text style={styles.infoToggleText}>Add Context</Text>
                   <View style={styles.optionalBadge}>
                     <Text style={styles.optionalText}>Optional</Text>
                   </View>
                 </View>
                 {showAdditionalInfo ? (
-                  <ChevronUp size={20} color="#8B4513" />
+                  <ChevronUp size={20} color={Colors.accent.secondary} />
                 ) : (
-                  <ChevronDown size={20} color="#8B4513" />
+                  <ChevronDown size={20} color={Colors.accent.secondary} />
                 )}
               </TouchableOpacity>
 
@@ -584,13 +585,13 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FEFEFE",
+    backgroundColor: Colors.background,
   },
   header: {
     paddingTop: 60,
     paddingBottom: 30,
     paddingHorizontal: 20,
-    backgroundColor: "#FEFEFE",
+    backgroundColor: Colors.background,
   },
   headerContainer: {
     paddingTop: 40,
@@ -616,7 +617,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: "#2C3E50",
+    color: Colors.text.primary,
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -627,7 +628,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: Colors.text.muted,
     lineHeight: 24,
     textAlign: 'center',
     maxWidth: 280,
@@ -649,7 +650,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: Colors.text.muted,
   },
   section: {
     marginTop: 20,
@@ -663,7 +664,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#2C3E50",
+    color: Colors.text.primary,
     marginBottom: 20,
   },
   selectedImageContainer: {
@@ -703,9 +704,9 @@ const styles = StyleSheet.create({
   placeholderContainer: {
     height: 240,
     borderRadius: 24,
-    backgroundColor: '#f8fafc',
+    backgroundColor: Colors.platinum,
     borderWidth: 2,
-    borderColor: '#e2e8f0',
+    borderColor: Colors.border,
     borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
@@ -729,7 +730,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#2C3E50",
+    color: Colors.text.primary,
   },
   placeholderSubtext: {
     fontSize: 14,
@@ -738,7 +739,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: Colors.text.muted,
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -748,7 +749,7 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     borderWidth: 0,
     flexDirection: 'row',
@@ -779,10 +780,10 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#8B4513",
+    color: Colors.accent.secondary,
   },
   contextCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -811,7 +812,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#2C3E50",
+    color: Colors.text.primary,
   },
   optionalBadge: {
     backgroundColor: '#f59e0b',
@@ -847,12 +848,12 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#2C3E50",
+    color: Colors.text.primary,
   },
   textInput: {
-    backgroundColor: '#f8fafc',
+    backgroundColor: Colors.platinum,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: Colors.border,
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 16,
@@ -875,11 +876,11 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: Colors.text.muted,
     marginBottom: 4,
   },
   analyzeButton: {
-    backgroundColor: '#8B4513',
+    backgroundColor: Colors.accent.secondary,
     borderRadius: 16,
     borderWidth: 0,
     paddingVertical: 18,

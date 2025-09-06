@@ -19,6 +19,7 @@ import * as ImageManipulator from "expo-image-manipulator";
 import { mockMonuments } from "@/data/mockMonuments";
 import FormattedText from "@/components/FormattedText";
 import Logo from "@/components/Logo";
+import Colors from "@/constants/colors";
 
 // Define basic types for the simplified version
 interface MonumentData {
@@ -476,11 +477,11 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             
             <View style={styles.detailsRow}>
               <View style={styles.detailItem}>
-                <MapPin size={16} color="#8B4513" />
+                <MapPin size={16} color={Colors.accent.secondary} />
                 <Text style={styles.detailText}>{monument.location}</Text>
               </View>
               <View style={styles.detailItem}>
-                <Calendar size={16} color="#8B4513" />
+                <Calendar size={16} color={Colors.accent.secondary} />
                 <Text style={styles.detailText}>{monument.period}</Text>
               </View>
             </View>
@@ -504,7 +505,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 }}
               >
                 <View style={styles.buttonContent}>
-                  <Sparkles size={18} color="#8B4513" />
+                  <Sparkles size={18} color={Colors.accent.secondary} />
                   <Text style={styles.contextButtonText}>Add Context</Text>
                 </View>
               </TouchableOpacity>
@@ -536,7 +537,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           <View style={styles.section}>
             <View style={styles.contentCard}>
               <View style={styles.cardHeader}>
-                <Sparkles size={20} color="#8B4513" />
+                <Sparkles size={20} color={Colors.accent.secondary} />
                 <Text style={styles.sectionTitle}>Key Takeaways</Text>
               </View>
               <View style={styles.factsContainer}>
@@ -556,7 +557,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           <View style={styles.section}>
             <View style={styles.contentCard}>
               <View style={styles.cardHeader}>
-                <Clock size={20} color="#8B4513" />
+                <Clock size={20} color={Colors.accent.secondary} />
                 <Text style={styles.sectionTitle}>In-Depth Context</Text>
               </View>
               <FormattedText style={styles.descriptionText}>{monument.detailedDescription.inDepthContext}</FormattedText>
@@ -569,7 +570,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           <View style={styles.section}>
             <View style={styles.contentCard}>
               <View style={styles.cardHeader}>
-                <Sparkles size={20} color="#8B4513" />
+                <Sparkles size={20} color={Colors.accent.secondary} />
                 <Text style={styles.sectionTitle}>Curiosity</Text>
               </View>
               <FormattedText style={styles.descriptionText}>{monument.detailedDescription.curiosities}</FormattedText>
@@ -642,7 +643,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   retryButton: {
-    backgroundColor: '#8B4513',
+    backgroundColor: Colors.accent.secondary,
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 12,
@@ -848,7 +849,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#8B4513',
+    backgroundColor: Colors.accent.secondary,
     marginTop: 8,
   },
   factText: {
@@ -908,10 +909,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: 16,
     borderWidth: 2,
-    borderColor: '#8B4513',
+    borderColor: Colors.accent.secondary,
     paddingVertical: 16,
     paddingHorizontal: 20,
-    shadowColor: '#8B4513',
+    shadowColor: Colors.accent.secondary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
@@ -945,7 +946,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: '500',
-    color: '#8B4513',
+    color: Colors.accent.secondary,
   },
   reanalyzeButtonSmallText: {
     fontSize: 14,

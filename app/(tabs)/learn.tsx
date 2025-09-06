@@ -12,6 +12,7 @@ import {
 import { BookOpen, Clock, Globe, Award } from "lucide-react-native";
 import Logo from "@/components/Logo";
 import { LinearGradient } from "expo-linear-gradient";
+import Colors from "@/constants/colors";
 
 const learningCategories = [
   {
@@ -78,7 +79,7 @@ export default function LearnScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <LinearGradient
-          colors={["#2C3E50", "#34495E"]}
+          colors={[Colors.accent.primary, Colors.text.secondary]}
           style={styles.headerGradient}
         >
           <Logo size={32} style={styles.logo} />
@@ -151,7 +152,7 @@ export default function LearnScreen() {
         <View style={styles.section}>
           <TouchableOpacity style={styles.quizCard}>
             <LinearGradient
-              colors={["#8B4513", "#A0522D"]}
+              colors={[Colors.accent.secondary, Colors.cinereous]}
               style={styles.quizGradient}
             >
               <View style={styles.quizContent}>
@@ -177,7 +178,7 @@ export default function LearnScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FEFEFE",
+    backgroundColor: Colors.background,
   },
   headerGradient: {
     paddingTop: 30,
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: Colors.text.muted,
   },
   section: {
     marginTop: 24,
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#2C3E50",
+    color: Colors.text.primary,
   },
   seeAllText: {
     fontSize: 14,
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#8B4513",
+    color: Colors.accent.secondary,
     fontWeight: "400",
   },
   categoriesGrid: {
@@ -317,7 +318,7 @@ const styles = StyleSheet.create({
   },
   articleCard: {
     flexDirection: "row",
-    backgroundColor: "#ffffff",
+    backgroundColor: Colors.surface,
     marginBottom: 12,
     borderRadius: 16,
     overflow: "hidden",
@@ -344,7 +345,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#2C3E50",
+    color: Colors.text.primary,
     marginBottom: 6,
   },
   articleExcerpt: {
@@ -354,7 +355,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: Colors.text.muted,
     lineHeight: 18,
   },
   articleFooter: {
@@ -370,7 +371,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "#64748b",
+    color: Colors.text.muted,
   },
   quizCard: {
     marginBottom: 30,
