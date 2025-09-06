@@ -475,30 +475,30 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         </View>
 
-        <View style={styles.section}>
-          {selectedImage ? (
+        {selectedImage ? (
+          <View style={styles.section}>
             <View style={styles.selectedImageContainer}>
               <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
               <TouchableOpacity style={styles.clearButton} onPress={clearImage}>
                 <X size={18} color="#FFF" />
               </TouchableOpacity>
             </View>
-          ) : (
-            <View style={styles.placeholderContainer}>
-              <View style={styles.placeholderContent}>
-                <Image 
-                  source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/ff6zac11m9nt36mt5cyk5' }}
-                  style={styles.monumentsIllustration}
-                  resizeMode="contain"
-                />
-                <Text style={styles.placeholderText}>Ready to Discover</Text>
-                <Text style={styles.placeholderSubtext}>
-                  Capture or select an image to begin
-                </Text>
-              </View>
+          </View>
+        ) : (
+          <View style={styles.fullWidthImageContainer}>
+            <Image 
+              source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/ff6zac11m9nt36mt5cyk5' }}
+              style={styles.fullWidthImage}
+              resizeMode="cover"
+            />
+            <View style={styles.imageOverlayContent}>
+              <Text style={styles.overlayText}>Ready to Discover</Text>
+              <Text style={styles.overlaySubtext}>
+                Capture or select an image to begin
+              </Text>
             </View>
-          )}
-        </View>
+          </View>
+        )}
 
         {!selectedImage && (
           <View style={styles.section}>
@@ -724,6 +724,48 @@ const styles = StyleSheet.create({
     width: screenWidth * 0.7,
     height: 120,
     opacity: 0.8,
+  },
+  fullWidthImageContainer: {
+    width: screenWidth,
+    height: 280,
+    position: 'relative',
+    marginLeft: -20,
+    marginRight: -20,
+    marginTop: 20,
+  },
+  fullWidthImage: {
+    width: '100%',
+    height: '100%',
+  },
+  imageOverlayContent: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 24,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    alignItems: 'center',
+  },
+  overlayText: {
+    fontSize: 22,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "600",
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  overlaySubtext: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: 'rgba(255, 255, 255, 0.9)',
+    textAlign: 'center',
   },
   placeholderGradient: {
     flex: 1,
