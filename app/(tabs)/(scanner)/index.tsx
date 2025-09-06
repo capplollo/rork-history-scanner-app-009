@@ -465,12 +465,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.headerContainer}>
-          <LinearGradient
-            colors={['#2C3E50', '#34495E']}
-            style={styles.logoBackground}
-          >
-            <Logo size={64} style={styles.logo} />
-          </LinearGradient>
+          <Logo size={64} style={styles.logo} />
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Snap into heritage</Text>
             <Text style={styles.headerSubtitle}>
@@ -605,13 +600,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FEFEFE',
   },
-  logoBackground: {
-    borderRadius: 40,
-    padding: 16,
-    marginBottom: 20,
-  },
   logo: {
-    // Logo styling handled by logoBackground container
+    marginBottom: 20,
   },
   headerContent: {
     gap: 8,

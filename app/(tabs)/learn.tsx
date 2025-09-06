@@ -78,7 +78,7 @@ export default function LearnScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <LinearGradient
-          colors={["rgba(44, 62, 80, 0.2)", "rgba(52, 73, 94, 0.2)"]}
+          colors={["#2C3E50", "#34495E"]}
           style={styles.headerGradient}
         >
           <Logo size={32} style={styles.logo} />
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: "#000000",
+    color: "#ffffff",
     marginBottom: 12,
     textAlign: 'center',
   },
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "rgba(0,0,0,0.7)",
+    color: "rgba(255,255,255,0.85)",
     lineHeight: 24,
     textAlign: 'center',
     maxWidth: 300,
