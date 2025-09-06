@@ -9,7 +9,7 @@ export const Colors = {
   
   // Semantic colors
   background: '#A49B97', // Main app background using taupeGray
-  surface: '#E1DEDC',
+  surface: '#FFFFFF',
   text: {
     primary: '#1D3557',
     secondary: '#685951',
