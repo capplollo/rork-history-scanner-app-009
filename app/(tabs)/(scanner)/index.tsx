@@ -486,7 +486,11 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           ) : (
             <View style={styles.placeholderContainer}>
               <View style={styles.placeholderContent}>
-                <CameraIcon size={32} color={Colors.accent.secondary} />
+                <Image 
+                  source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/ff6zac11m9nt36mt5cyk5' }}
+                  style={styles.monumentsIllustration}
+                  resizeMode="contain"
+                />
                 <Text style={styles.placeholderText}>Ready to Discover</Text>
                 <Text style={styles.placeholderSubtext}>
                   Capture or select an image to begin
@@ -714,7 +718,12 @@ const styles = StyleSheet.create({
   },
   placeholderContent: {
     alignItems: 'center',
-    gap: 12,
+    gap: 16,
+  },
+  monumentsIllustration: {
+    width: screenWidth * 0.7,
+    height: 120,
+    opacity: 0.8,
   },
   placeholderGradient: {
     flex: 1,
