@@ -181,13 +181,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   headerGradient: {
-    paddingTop: 30,
-    paddingBottom: 40,
-    paddingHorizontal: 24,
+    paddingTop: 34,
+    paddingBottom: 44,
+    paddingHorizontal: 28,
     alignItems: 'center',
     position: 'relative',
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
   },
   logo: {
     position: 'absolute',
@@ -226,8 +226,8 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     backgroundColor: "rgba(255,255,255,0.95)",
-    borderRadius: 16,
-    paddingHorizontal: 20,
+    borderRadius: 12,
+    paddingHorizontal: 24,
     paddingVertical: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: 24,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -281,8 +281,8 @@ const styles = StyleSheet.create({
   },
   categoryCard: {
     width: "47%",
-    height: 130,
-    borderRadius: 16,
+    height: 140,
+    borderRadius: 12,
     overflow: "hidden",
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     right: 0,
     height: "100%",
     justifyContent: "flex-end",
-    padding: 16,
+    padding: 24,
   },
   categoryContent: {
     gap: 8,
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: Colors.surface,
     marginBottom: 12,
-    borderRadius: 16,
+    borderRadius: 12,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -329,12 +329,12 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   articleImage: {
-    width: 100,
-    height: 100,
+    width: 110,
+    height: 110,
   },
   articleContent: {
     flex: 1,
-    padding: 16,
+    padding: 24,
     justifyContent: "space-between",
   },
   articleTitle: {
@@ -379,8 +379,8 @@ const styles = StyleSheet.create({
   quizGradient: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 20,
-    borderRadius: 16,
+    padding: 24,
+    borderRadius: 12,
   },
   quizContent: {
     flex: 1,
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
   },
   quizButton: {
     backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 20,
     alignSelf: "flex-start",
