@@ -107,7 +107,7 @@ export default function ProfileScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Minimal Header with Profile Info */}
         <View style={styles.headerContainer}>
-          <Logo size={32} style={styles.logo} />
+          <Logo size={32} />
           <View style={styles.headerContent}>
             <View style={styles.profileSection}>
               <View style={styles.avatarContainer}>
@@ -239,11 +239,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  logo: {
-    position: 'absolute',
-    top: 30,
-    right: 24,
-  },
+
   headerContent: {
     gap: 0,
   },

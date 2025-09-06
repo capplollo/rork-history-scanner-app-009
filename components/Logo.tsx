@@ -12,7 +12,7 @@ export default function Logo({ size = 80, style }: LogoProps) {
   const triangleHeight = size * 0.3;
   
   return (
-    <View style={[styles.container, style]}>
+    <View style={[styles.bookmarkContainer, style]}>
       <View style={{
         width: bookmarkWidth,
         height: bookmarkHeight,
@@ -25,12 +25,24 @@ export default function Logo({ size = 80, style }: LogoProps) {
             height: bookmarkHeight - triangleHeight,
           }
         ]}>
-          <Text style={[
-            styles.logoText,
-            {
-              fontSize: size * 0.35,
-            }
-          ]}>A</Text>
+          {/* Logo content - replace A with actual logo */}
+          <View style={styles.logoContainer}>
+            <View style={[
+              styles.logoCircle,
+              {
+                width: size * 0.4,
+                height: size * 0.4,
+                borderRadius: size * 0.2,
+              }
+            ]}>
+              <Text style={[
+                styles.logoText,
+                {
+                  fontSize: size * 0.2,
+                }
+              ]}>🏛️</Text>
+            </View>
+          </View>
         </View>
         
         {/* Bookmark triangle bottom */}
@@ -62,9 +74,11 @@ export default function Logo({ size = 80, style }: LogoProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
+  bookmarkContainer: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    zIndex: 10,
   },
   bookmarkBody: {
     backgroundColor: '#1D3557',
@@ -97,9 +111,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
     borderRightWidth: 0,
   },
+  logoContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoCircle: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   logoText: {
-    color: 'white',
-    fontWeight: 'bold',
     textAlign: 'center',
   },
 });
