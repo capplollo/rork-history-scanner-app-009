@@ -466,7 +466,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.headerContainer}>
-          <Logo size={64} />
+          <Logo size={100} />
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Snap into heritage</Text>
             <Text style={styles.headerSubtitle}>

@@ -6,10 +6,10 @@ interface LogoProps {
   style?: any;
 }
 
-export default function Logo({ size = 80, style }: LogoProps) {
-  const bookmarkHeight = size * 1.2;
-  const bookmarkWidth = size * 0.8;
-  const triangleHeight = size * 0.3;
+export default function Logo({ size = 120, style }: LogoProps) {
+  const bookmarkHeight = size * 1.4;
+  const bookmarkWidth = size * 0.9;
+  const triangleHeight = size * 0.35;
   
   return (
     <View style={[styles.bookmarkContainer, style]}>
@@ -76,9 +76,9 @@ export default function Logo({ size = 80, style }: LogoProps) {
 const styles = StyleSheet.create({
   bookmarkContainer: {
     position: 'absolute',
-    top: 0,
-    right: 0,
-    zIndex: 10,
+    top: -10,
+    right: -10,
+    zIndex: 1000,
   },
   bookmarkBody: {
     backgroundColor: '#1D3557',
