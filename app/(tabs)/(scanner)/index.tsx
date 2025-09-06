@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     minHeight: 160,
     alignItems: 'center',
-    backgroundColor: '#FEFEFE',
+    backgroundColor: '#1d3557',
   },
   logo: {
     marginBottom: 20,
@@ -617,7 +617,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: Colors.text.primary,
+    color: '#ffffff',
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: Colors.text.muted,
+    color: 'rgba(255,255,255,0.8)',
     lineHeight: 24,
     textAlign: 'center',
     maxWidth: 280,

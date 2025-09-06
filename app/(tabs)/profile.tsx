@@ -125,7 +125,7 @@ export default function ProfileScreen() {
                 style={styles.settingsButton}
                 onPress={() => setShowSettings(true)}
               >
-                <Settings size={22} color={Colors.accent.secondary} />
+                <Settings size={22} color="#ffffff" />
               </TouchableOpacity>
             </View>
           </View>
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
     paddingHorizontal: 24,
     position: 'relative',
-    backgroundColor: '#FEFEFE',
+    backgroundColor: '#1d3557',
   },
   logo: {
     position: 'absolute',
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: Colors.text.primary,
+    color: '#ffffff',
   },
   userEmail: {
     fontSize: 17,
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: Colors.text.muted,
+    color: 'rgba(255,255,255,0.8)',
     fontStyle: "italic",
   },
   section: {
