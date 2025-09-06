@@ -747,11 +747,11 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: 16,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
   },
   monumentCard: {
     backgroundColor: Colors.surface,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -789,7 +789,7 @@ const styles = StyleSheet.create({
   },
   contentCard: {
     backgroundColor: Colors.surface,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -865,7 +865,7 @@ const styles = StyleSheet.create({
   },
   reanalyzeButton: {
     backgroundColor: Colors.surface,
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 1.5,
     borderColor: '#dc2626',
     paddingVertical: 16,
@@ -907,7 +907,7 @@ const styles = StyleSheet.create({
   contextButton: {
     flex: 1,
     backgroundColor: Colors.surface,
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 2,
     borderColor: Colors.accent.secondary,
     paddingVertical: 16,
@@ -921,7 +921,7 @@ const styles = StyleSheet.create({
   reanalyzeButtonSmall: {
     flex: 1,
     backgroundColor: Colors.surface,
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 2,
     borderColor: '#dc2626',
     paddingVertical: 16,

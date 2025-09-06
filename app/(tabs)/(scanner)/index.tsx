@@ -600,9 +600,9 @@ const styles = StyleSheet.create({
     minHeight: 160,
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    marginHorizontal: 16,
+    marginHorizontal: 14,
     marginTop: 16,
-    borderRadius: 20,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -662,7 +662,7 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: 16,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
   },
   sectionTitle: {
     fontSize: 20,
@@ -677,7 +677,7 @@ const styles = StyleSheet.create({
   },
   selectedImageContainer: {
     position: 'relative',
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: Colors.surface,
     shadowColor: '#000',
@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
   },
   placeholderContainer: {
     height: 240,
-    borderRadius: 20,
+    borderRadius: 16,
     backgroundColor: Colors.surface,
     borderWidth: 2,
     borderColor: Colors.border,
@@ -764,7 +764,7 @@ const styles = StyleSheet.create({
   actionButton: {
     flex: 1,
     backgroundColor: Colors.surface,
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
@@ -798,7 +798,7 @@ const styles = StyleSheet.create({
   },
   contextCard: {
     backgroundColor: Colors.surface,
-    borderRadius: 20,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -895,7 +895,7 @@ const styles = StyleSheet.create({
   },
   analyzeButton: {
     backgroundColor: Colors.accent.secondary,
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 0,
     paddingVertical: 18,
     paddingHorizontal: 28,

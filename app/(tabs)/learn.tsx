@@ -183,11 +183,11 @@ const styles = StyleSheet.create({
   headerGradient: {
     paddingTop: 30,
     paddingBottom: 40,
-    paddingHorizontal: 24,
+    paddingHorizontal: 14,
     alignItems: 'center',
     position: 'relative',
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   logo: {
     position: 'absolute',
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: 24,
-    paddingHorizontal: 20,
+    paddingHorizontal: 14,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -280,9 +280,9 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   categoryCard: {
-    width: "47%",
+    width: "48.5%",
     height: 130,
-    borderRadius: 16,
+    borderRadius: 14,
     overflow: "hidden",
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: Colors.surface,
     marginBottom: 12,
-    borderRadius: 16,
+    borderRadius: 14,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
-    borderRadius: 16,
+    borderRadius: 14,
   },
   quizContent: {
     flex: 1,

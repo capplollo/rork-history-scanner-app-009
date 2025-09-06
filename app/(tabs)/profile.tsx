@@ -230,9 +230,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     position: 'relative',
     backgroundColor: Colors.surface,
-    marginHorizontal: 16,
+    marginHorizontal: 14,
     marginTop: 16,
-    borderRadius: 20,
+    borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: 16,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -336,9 +336,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   monumentCard: {
-    width: "47.5%",
-    height: 198,
-    borderRadius: 16,
+    width: "48.5%",
+    height: 164,
+    borderRadius: 14,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -406,7 +406,7 @@ const styles = StyleSheet.create({
 
   emptyState: {
     backgroundColor: Colors.surface,
-    borderRadius: 20,
+    borderRadius: 16,
     alignItems: 'center',
     paddingVertical: 40,
     paddingHorizontal: 24,
@@ -527,7 +527,7 @@ const styles = StyleSheet.create({
   },
   historyContainer: {
     backgroundColor: Colors.surface,
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
