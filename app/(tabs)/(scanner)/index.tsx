@@ -1030,8 +1030,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 20,
-    paddingHorizontal: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
   },
   infoToggleLeft: {
     flexDirection: 'row',
@@ -1039,35 +1039,36 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   infoToggleText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "500",
+    fontWeight: "400",
     color: Colors.text.primary,
   },
   optionalBadge: {
     backgroundColor: '#f59e0b',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 8,
   },
   optionalText: {
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "500",
+    fontWeight: "600",
     color: '#ffffff',
+    letterSpacing: 0.3,
   },
   infoForm: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
-    gap: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    gap: 16,
     borderTopWidth: 1,
     borderTopColor: '#f1f5f9',
   },
@@ -1075,7 +1076,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -1083,35 +1084,38 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "500",
     color: Colors.text.primary,
+    letterSpacing: 0.2,
   },
   textInput: {
     backgroundColor: Colors.platinum,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    fontSize: 15,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     color: '#2C3E50',
+    lineHeight: 20,
   },
   textArea: {
-    height: 120,
+    height: 100,
     textAlignVertical: 'top',
   },
   inputHint: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     color: Colors.text.muted,
-    marginBottom: 4,
+    marginBottom: 6,
+    lineHeight: 16,
   },
   analyzeButton: {
     backgroundColor: Colors.accent.secondary,
@@ -1299,15 +1303,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
   },
   gpsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 20,
-    paddingHorizontal: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
   },
   gpsLeft: {
     flexDirection: 'row',
@@ -1315,19 +1319,19 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   gpsText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "500",
+    fontWeight: "400",
     color: Colors.text.primary,
   },
   gpsToggle: {
-    width: 50,
-    height: 28,
-    borderRadius: 14,
+    width: 46,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: '#e2e8f0',
     padding: 2,
     justifyContent: 'center',
@@ -1336,18 +1340,18 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.accent.secondary,
   },
   gpsToggleThumb: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     backgroundColor: '#ffffff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    shadowOpacity: 0.15,
+    shadowRadius: 1.5,
     elevation: 2,
   },
   gpsToggleThumbActive: {
-    transform: [{ translateX: 22 }],
+    transform: [{ translateX: 20 }],
   },
 
 });
