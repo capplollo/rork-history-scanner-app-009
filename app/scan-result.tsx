@@ -273,23 +273,20 @@ export default function ScanResultScreen() {
         throw new Error('Failed to compress image for reanalysis');
       }
 
-      // Build reanalysis prompt with the new conservative approach
-      const promptText = `Analyze this image and identify any monuments and art including sculptures, paintings, or cultural landmarks. Include paintings that depict buildings/landmarks (identify the PAINTING, not the depicted structure).
+      // Build reanalysis prompt using the same conservative approach as scanner
+      // Default to city mode prompt (most common case for reanalysis)
+      const promptText = `Analyze this image and identify any monuments, statues, architectural landmarks, or public artworks. Include painted or sculpted depictions of landmarks (identify the artwork itself, not the building it represents).
 
-BE EXTREMELY CONSERVATIVE with identification. Many sculptures, buildings, and artworks share similar themes, poses, or subjects but are completely different works. Only identify a specific monument/artwork if you are 95% or more confident it is that exact piece.
+BE EXTREMELY CONSERVATIVE with identification. Many monuments, churches, and buildings share similar styles, layouts, or decorative elements. Only identify a specific site if you are 95% or more confident it is that exact location.
 
 For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
-- Local, regional, or smaller monuments that may look similar to famous ones
-- Religious sculptures, statues, or buildings with common iconography
-- Sculptures with common poses, themes, or subjects (angels, saints, warriors, etc.)
-- Buildings with similar architectural styles from the same period
-- Artworks with similar subjects, compositions, or artistic styles
-- Churches, chapels, and religious buildings that often share similar designs
-- Memorial statues and commemorative monuments
+- Churches, cathedrals, and chapels with nearly identical façades
+- War memorials, equestrian statues, and commemorative monuments with common designs
+- Triumphal arches, obelisks, towers, or bridges that resemble others from the same era
+- Buildings in neoclassical, Gothic, or baroque styles that repeat common features
+- Street art and murals in styles that appear across multiple cities
 
-When in doubt, mark as NOT RECOGNIZED. It's better to provide general analysis than incorrect identification. If you see common religious iconography, architectural elements, or artistic themes, do NOT assume it's a specific famous work unless you are absolutely certain.
-
-If confidence is below 95%, mark as not recognized and provide general analysis instead.
+When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis than incorrect identification. If confidence is below 95%, mark as not recognized and provide general analysis instead.
 
 Provide ALL information in ONE response. Only mark isRecognized as true if confidence is 95% or higher. Always provide the ACTUAL location, not user's location unless they match. If not 95% confident, provide general analysis of what you see without claiming specific identification.
 

@@ -270,35 +270,49 @@ export default function ScannerScreen() {
   };
   
   const processImageAnalysis = async (base64: string) => {
-      // Build the prompt
-      let promptText = `Analyze this image and identify any monuments and art including sculptures, paintings, or cultural landmarks. Include paintings that depict buildings/landmarks (identify the PAINTING, not the depicted structure).
+      // Build the prompt based on scan mode
+      let promptText = '';
+      
+      if (scanMode === 'museum') {
+        promptText = `Analyze this image and identify any artworks or cultural artifacts, including paintings, sculptures, or historical objects. Include paintings that depict buildings/landmarks (identify the painting, not the depicted structure).
 
-BE EXTREMELY CONSERVATIVE with identification. Many sculptures, buildings, and artworks share similar themes, poses, or subjects but are completely different works. Only identify a specific monument/artwork if you are 95% or more confident it is that exact piece.
+BE EXTREMELY CONSERVATIVE with identification. Many artworks, especially in museums, have close copies, replicas, or workshop versions. Only identify a specific artwork if you are 95% or more confident it is that exact piece.
 
 For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
-- Local, regional, or smaller monuments that may look similar to famous ones
-- Religious sculptures, statues, or buildings with common iconography
-- Sculptures with common poses, themes, or subjects (angels, saints, warriors, etc.)
-- Buildings with similar architectural styles from the same period
-- Artworks with similar subjects, compositions, or artistic styles
-- Churches, chapels, and religious buildings that often share similar designs
-- Memorial statues and commemorative monuments
+- Workshop copies, replicas, and similar versions of well-known paintings and sculptures
+- Religious icons, altarpieces, or portraits with common subjects and styles
+- Classical busts and sculptures with recurring poses (emperors, philosophers, deities)
+- Decorative arts and artifacts that exist in series or sets
+- Works attributed to "school of" or "circle of" an artist that look nearly identical
 
-When in doubt, mark as NOT RECOGNIZED. It's better to provide general analysis than incorrect identification. If you see common religious iconography, architectural elements, or artistic themes, do NOT assume it's a specific famous work unless you are absolutely certain.
-
-If confidence is below 95%, mark as not recognized and provide general analysis instead.`;
-      
-      // Add scan mode context
-      if (scanMode === 'museum') {
-        promptText += `\n\n**MUSEUM CONTEXT - This image was taken inside a museum or gallery. This significantly increases the likelihood that this is a notable artwork or cultural artifact. Pay special attention to:**\n- Famous paintings, sculptures, and artworks\n- Museum pieces and gallery collections\n- Historical artifacts and cultural objects\n- Well-documented artworks with known provenance`;
+When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis than incorrect identification.`;
       } else {
-        promptText += `\n\n**CITY CONTEXT - This image was taken in an urban/outdoor setting. Focus on:**\n- Public monuments and statues\n- Architectural landmarks\n- Street art and public installations\n- Historical buildings and structures`;
+        promptText = `Analyze this image and identify any monuments, statues, architectural landmarks, or public artworks. Include painted or sculpted depictions of landmarks (identify the artwork itself, not the building it represents).
+
+BE EXTREMELY CONSERVATIVE with identification. Many monuments, churches, and buildings share similar styles, layouts, or decorative elements. Only identify a specific site if you are 95% or more confident it is that exact location.
+
+For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
+- Churches, cathedrals, and chapels with nearly identical façades
+- War memorials, equestrian statues, and commemorative monuments with common designs
+- Triumphal arches, obelisks, towers, or bridges that resemble others from the same era
+- Buildings in neoclassical, Gothic, or baroque styles that repeat common features
+- Street art and murals in styles that appear across multiple cities
+
+When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis than incorrect identification.`;
       }
       
       // Add location context if GPS is enabled and location is available
       if (isGpsEnabled && userLocation) {
-        promptText += `\n\n**GPS LOCATION CONTEXT - User's current location:**\nLatitude: ${userLocation.coords.latitude}\nLongitude: ${userLocation.coords.longitude}\nAccuracy: ${userLocation.coords.accuracy}m\n\nUse this location information to:\n1. Identify nearby monuments, landmarks, and cultural sites\n2. Consider local context and regional significance\n3. Prioritize monuments and art that are geographically relevant to this location\n4. Factor in the user's proximity to known cultural sites and museums`;
+        if (scanMode === 'museum') {
+          promptText += ` If the user's location is available, only consider artworks housed in museums or galleries within a 2 km radius. Prioritize artworks verifiably in that institution's collection or exhibition, and increase confidence only if both the visual match and location align.`;
+        } else {
+          promptText += ` If the user's location is available, only consider monuments and landmarks that are known to exist within a 2 km radius of that location. Prioritize those matches and increase confidence only if both the visual details and the location confirm the identification.`;
+        }
+        promptText += `\n\n**GPS LOCATION CONTEXT - User's current location:**\nLatitude: ${userLocation.coords.latitude}\nLongitude: ${userLocation.coords.longitude}\nAccuracy: ${userLocation.coords.accuracy}m`;
       }
+      
+      // Add final confidence requirement
+      promptText += `\n\nIf confidence is below 95%, mark as not recognized and provide general analysis instead.`;
       
       // Add additional context if provided
       const hasAdditionalInfo = additionalInfo.context.trim().length > 0;
