@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
+import * as Location from "expo-location";
 import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info, Zap, Camera, MapPin } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
@@ -37,6 +38,8 @@ export default function ScannerScreen() {
   });
   const [isGpsEnabled, setIsGpsEnabled] = useState(false);
   const [photoSource, setPhotoSource] = useState<'camera' | 'gallery' | null>(null);
+  const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
+  const [locationPermission, setLocationPermission] = useState<Location.PermissionStatus | null>(null);
 
   // Handle reanalysis flow
   useEffect(() => {
@@ -47,6 +50,76 @@ export default function ScannerScreen() {
       }
     }
   }, [reanalyzeImage, showContext]);
+
+  // Request location permission on mount
+  useEffect(() => {
+    requestLocationPermission();
+  }, []);
+
+  // Get location when GPS is enabled
+  useEffect(() => {
+    if (isGpsEnabled && locationPermission === Location.PermissionStatus.GRANTED) {
+      getCurrentLocation();
+    }
+  }, [isGpsEnabled, locationPermission]);
+
+  const requestLocationPermission = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      setLocationPermission(status);
+      
+      if (status !== Location.PermissionStatus.GRANTED) {
+        console.log('Location permission denied');
+        return;
+      }
+    } catch (error) {
+      console.error('Error requesting location permission:', error);
+    }
+  };
+
+  const getCurrentLocation = async () => {
+    try {
+      if (Platform.OS === 'web') {
+        // Use web geolocation API
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const location: Location.LocationObject = {
+                coords: {
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                  altitude: position.coords.altitude,
+                  accuracy: position.coords.accuracy,
+                  altitudeAccuracy: position.coords.altitudeAccuracy,
+                  heading: position.coords.heading,
+                  speed: position.coords.speed,
+                },
+                timestamp: position.timestamp,
+              };
+              setUserLocation(location);
+              console.log('Web location obtained:', location.coords.latitude, location.coords.longitude);
+            },
+            (error) => {
+              console.error('Web geolocation error:', error);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+          );
+        } else {
+          console.log('Geolocation not supported on this browser');
+        }
+      } else {
+        // Use expo-location for mobile
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        setUserLocation(location);
+        console.log('Mobile location obtained:', location.coords.latitude, location.coords.longitude);
+      }
+    } catch (error) {
+      console.error('Error getting location:', error);
+      Alert.alert('Location Error', 'Unable to get your current location. Please try again.');
+    }
+  };
 
   const pickImageFromGallery = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -220,6 +293,11 @@ If confidence is below 95%, mark as not recognized and provide general analysis 
         promptText += `\n\n**MUSEUM CONTEXT - This image was taken inside a museum or gallery. This significantly increases the likelihood that this is a notable artwork or cultural artifact. Pay special attention to:**\n- Famous paintings, sculptures, and artworks\n- Museum pieces and gallery collections\n- Historical artifacts and cultural objects\n- Well-documented artworks with known provenance`;
       } else {
         promptText += `\n\n**CITY CONTEXT - This image was taken in an urban/outdoor setting. Focus on:**\n- Public monuments and statues\n- Architectural landmarks\n- Street art and public installations\n- Historical buildings and structures`;
+      }
+      
+      // Add location context if GPS is enabled and location is available
+      if (isGpsEnabled && userLocation) {
+        promptText += `\n\n**GPS LOCATION CONTEXT - User's current location:**\nLatitude: ${userLocation.coords.latitude}\nLongitude: ${userLocation.coords.longitude}\nAccuracy: ${userLocation.coords.accuracy}m\n\nUse this location information to:\n1. Identify nearby monuments, landmarks, and cultural sites\n2. Consider local context and regional significance\n3. Prioritize monuments and art that are geographically relevant to this location\n4. Factor in the user's proximity to known cultural sites and museums`;
       }
       
       // Add additional context if provided
@@ -629,11 +707,32 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               <View style={styles.gpsContainer}>
                 <View style={styles.gpsLeft}>
                   <MapPin size={20} color={Colors.accent.secondary} />
-                  <Text style={styles.gpsText}>Is your current location relevant?</Text>
+                  <View style={styles.gpsTextContainer}>
+                    <Text style={styles.gpsText}>Use current location</Text>
+                    {isGpsEnabled && userLocation && (
+                      <Text style={styles.gpsLocationText}>
+                        {userLocation.coords.latitude.toFixed(4)}, {userLocation.coords.longitude.toFixed(4)}
+                      </Text>
+                    )}
+                    {isGpsEnabled && !userLocation && locationPermission === Location.PermissionStatus.GRANTED && (
+                      <Text style={styles.gpsLocationText}>Getting location...</Text>
+                    )}
+                    {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
+                      <Text style={styles.gpsLocationText}>Location permission needed</Text>
+                    )}
+                  </View>
                 </View>
                 <TouchableOpacity 
                   style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
-                  onPress={() => setIsGpsEnabled(!isGpsEnabled)}
+                  onPress={() => {
+                    if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
+                      requestLocationPermission().then(() => {
+                        setIsGpsEnabled(true);
+                      });
+                    } else {
+                      setIsGpsEnabled(!isGpsEnabled);
+                    }
+                  }}
                 >
                   <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
                 </TouchableOpacity>
@@ -729,11 +828,32 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               <View style={styles.gpsContainer}>
                 <View style={styles.gpsLeft}>
                   <MapPin size={20} color={Colors.accent.secondary} />
-                  <Text style={styles.gpsText}>Is your current location relevant?</Text>
+                  <View style={styles.gpsTextContainer}>
+                    <Text style={styles.gpsText}>Use current location</Text>
+                    {isGpsEnabled && userLocation && (
+                      <Text style={styles.gpsLocationText}>
+                        {userLocation.coords.latitude.toFixed(4)}, {userLocation.coords.longitude.toFixed(4)}
+                      </Text>
+                    )}
+                    {isGpsEnabled && !userLocation && locationPermission === Location.PermissionStatus.GRANTED && (
+                      <Text style={styles.gpsLocationText}>Getting location...</Text>
+                    )}
+                    {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
+                      <Text style={styles.gpsLocationText}>Location permission needed</Text>
+                    )}
+                  </View>
                 </View>
                 <TouchableOpacity 
                   style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
-                  onPress={() => setIsGpsEnabled(!isGpsEnabled)}
+                  onPress={() => {
+                    if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
+                      requestLocationPermission().then(() => {
+                        setIsGpsEnabled(true);
+                      });
+                    } else {
+                      setIsGpsEnabled(!isGpsEnabled);
+                    }
+                  }}
                 >
                   <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
                 </TouchableOpacity>
@@ -1339,6 +1459,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
+  gpsTextContainer: {
+    flex: 1,
+  },
   gpsText: {
     fontSize: 15,
     fontFamily: Platform.select({
@@ -1348,6 +1471,16 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "400",
     color: Colors.text.primary,
+  },
+  gpsLocationText: {
+    fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: Colors.text.muted,
+    marginTop: 2,
   },
   gpsToggle: {
     width: 46,
