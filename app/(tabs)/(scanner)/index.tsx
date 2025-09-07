@@ -30,6 +30,8 @@ export default function ScannerScreen() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<string>("");
   const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
+  const [scanMode, setScanMode] = useState<'city' | 'museum'>('city');
+  const [labelImage, setLabelImage] = useState<string | null>(null);
   const [additionalInfo, setAdditionalInfo] = useState({
     context: "",
   });
@@ -207,6 +209,13 @@ When in doubt, mark as NOT RECOGNIZED. It's better to provide general analysis t
 
 If confidence is below 95%, mark as not recognized and provide general analysis instead.`;
       
+      // Add scan mode context
+      if (scanMode === 'museum') {
+        promptText += `\n\n**MUSEUM CONTEXT - This image was taken inside a museum or gallery. This significantly increases the likelihood that this is a notable artwork or cultural artifact. Pay special attention to:**\n- Famous paintings, sculptures, and artworks\n- Museum pieces and gallery collections\n- Historical artifacts and cultural objects\n- Well-documented artworks with known provenance`;
+      } else {
+        promptText += `\n\n**CITY CONTEXT - This image was taken in an urban/outdoor setting. Focus on:**\n- Public monuments and statues\n- Architectural landmarks\n- Street art and public installations\n- Historical buildings and structures`;
+      }
+      
       // Add additional context if provided
       const hasAdditionalInfo = additionalInfo.context.trim().length > 0;
       if (hasAdditionalInfo) {
@@ -249,14 +258,43 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         promptText = promptText.substring(0, 15000) + '\n\nRespond in the exact JSON format specified above.';
       }
       
+      // Prepare content array with main image
+      const contentArray: Array<{ type: 'text'; text: string } | { type: 'image'; image: string }> = [
+        { type: 'text', text: promptText },
+        { type: 'image', image: base64 }
+      ];
+      
+      // Add label image if provided (museum mode)
+      if (scanMode === 'museum' && labelImage) {
+        try {
+          setAnalysisStatus("Processing label image...");
+          const compressedLabel = await ImageManipulator.manipulateAsync(
+            labelImage,
+            [{ resize: { width: 800 } }],
+            {
+              compress: 0.7,
+              format: ImageManipulator.SaveFormat.JPEG,
+              base64: true
+            }
+          );
+          
+          if (compressedLabel.base64) {
+            contentArray.push({ 
+              type: 'text', 
+              text: '\n\n**LABEL/PLACARD IMAGE - This shows the museum label or information placard for the artwork. Use this to identify the piece name, artist, date, and other details:**' 
+            });
+            contentArray.push({ type: 'image', image: compressedLabel.base64 });
+          }
+        } catch (labelError) {
+          console.warn('Failed to process label image:', labelError);
+        }
+      }
+      
       const requestBody = {
         messages: [
           {
             role: 'user',
-            content: [
-              { type: 'text', text: promptText },
-              { type: 'image', image: base64 }
-            ]
+            content: contentArray
           }
         ]
       };
@@ -453,9 +491,53 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
 
   const clearImage = () => {
     setSelectedImage(null);
+    setLabelImage(null);
     setAdditionalInfo({
       context: "",
     });
+  };
+
+  const pickLabelImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (!permissionResult.granted) {
+      Alert.alert("Permission Required", "Please allow access to your photo library to select images.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [16, 4], // Wide aspect ratio for labels
+      quality: 0.6,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      setLabelImage(result.assets[0].uri);
+    }
+  };
+
+  const takeLabelPhoto = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    
+    if (!permissionResult.granted) {
+      Alert.alert("Permission Required", "Please allow access to your camera to take photos.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [16, 4], // Wide aspect ratio for labels
+      quality: 0.6,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      setLabelImage(result.assets[0].uri);
+    }
+  };
+
+  const clearLabelImage = () => {
+    setLabelImage(null);
   };
 
   const updateAdditionalInfo = (value: string) => {
@@ -472,6 +554,24 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             <Text style={styles.headerSubtitle}>
               Discover the living stories of art and monuments
             </Text>
+          </View>
+        </View>
+
+        {/* Scan Mode Toggle */}
+        <View style={styles.section}>
+          <View style={styles.modeToggleContainer}>
+            <TouchableOpacity 
+              style={[styles.modeButton, scanMode === 'city' && styles.modeButtonActive]}
+              onPress={() => setScanMode('city')}
+            >
+              <Text style={[styles.modeButtonText, scanMode === 'city' && styles.modeButtonTextActive]}>City</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.modeButton, scanMode === 'museum' && styles.modeButtonActive]}
+              onPress={() => setScanMode('museum')}
+            >
+              <Text style={[styles.modeButtonText, scanMode === 'museum' && styles.modeButtonTextActive]}>Museum</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -512,6 +612,46 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         )}
 
+        {/* Museum Label Image Section */}
+        {selectedImage && scanMode === 'museum' && (
+          <View style={styles.section}>
+            <View style={styles.contextCard}>
+              <View style={styles.labelHeader}>
+                <View style={styles.labelHeaderLeft}>
+                  <Camera size={20} color={Colors.accent.secondary} />
+                  <Text style={styles.labelHeaderText}>Art Label</Text>
+                  <View style={styles.requiredBadge}>
+                    <Text style={styles.requiredText}>Required</Text>
+                  </View>
+                </View>
+              </View>
+              
+              {labelImage ? (
+                <View style={styles.labelImageContainer}>
+                  <Image source={{ uri: labelImage }} style={styles.labelImage} />
+                  <TouchableOpacity style={styles.clearLabelButton} onPress={clearLabelImage}>
+                    <X size={16} color="#FFF" />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.labelPlaceholder}>
+                  <Text style={styles.labelPlaceholderText}>Add a photo of the artwork's label or placard</Text>
+                  <View style={styles.labelButtons}>
+                    <TouchableOpacity style={styles.labelButton} onPress={takeLabelPhoto}>
+                      <CameraIcon size={16} color={Colors.accent.secondary} />
+                      <Text style={styles.labelButtonText}>Take Photo</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.labelButton} onPress={pickLabelImage}>
+                      <ImageIcon size={16} color={Colors.accent.secondary} />
+                      <Text style={styles.labelButtonText}>From Gallery</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+
         {selectedImage && (
           <View style={styles.section}>
             <View style={styles.contextCard}>
@@ -537,10 +677,19 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 <View style={styles.infoForm}>
                   <View style={styles.inputGroup}>
                     <Text style={styles.inputLabel}>Context Information</Text>
-                    <Text style={styles.inputHint}>Add any helpful details like name, location, museum, or other information</Text>
+                    <Text style={styles.inputHint}>
+                      {scanMode === 'museum' 
+                        ? 'Add details like museum name, gallery section, or artist information'
+                        : 'Add details like location, neighborhood, or landmark information'
+                      }
+                    </Text>
                     <TextInput
                       style={[styles.textInput, styles.textArea]}
-                      placeholder="e.g., Mona Lisa at the Louvre Museum in Paris, or Statue of Liberty in New York, or any other details that might help identify this monument or artwork..."
+                      placeholder={
+                        scanMode === 'museum'
+                          ? 'e.g., Metropolitan Museum of Art, European Paintings gallery, Van Gogh section...'
+                          : 'e.g., Central Park NYC, Times Square, near City Hall...'
+                      }
                       placeholderTextColor="#999"
                       value={additionalInfo.context}
                       onChangeText={updateAdditionalInfo}
@@ -557,9 +706,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         {selectedImage && (
           <View style={styles.section}>
             <TouchableOpacity
-              style={[styles.analyzeButton, isAnalyzing && styles.analyzeButtonDisabled]}
+              style={[
+                styles.analyzeButton, 
+                (isAnalyzing || (scanMode === 'museum' && !labelImage)) && styles.analyzeButtonDisabled
+              ]}
               onPress={analyzeImage}
-              disabled={isAnalyzing}
+              disabled={isAnalyzing || (scanMode === 'museum' && !labelImage)}
             >
               {isAnalyzing ? (
                 <View style={styles.analyzingContainer}>
@@ -569,7 +721,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               ) : (
                 <View style={styles.analyzeContainer}>
                   <Sparkles size={20} color="#ffffff" />
-                  <Text style={styles.analyzeButtonText}>Discover History</Text>
+                  <Text style={styles.analyzeButtonText}>
+                    {scanMode === 'museum' && !labelImage 
+                      ? 'Add Label Photo to Continue'
+                      : 'Discover History'
+                    }
+                  </Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -931,6 +1088,143 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "600",
     color: "#ffffff",
+  },
+  modeToggleContainer: {
+    flexDirection: 'row',
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  modeButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modeButtonActive: {
+    backgroundColor: Colors.accent.secondary,
+  },
+  modeButtonText: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: Colors.text.secondary,
+  },
+  modeButtonTextActive: {
+    color: '#ffffff',
+    fontWeight: "600",
+  },
+  labelHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  labelHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  labelHeaderText: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: Colors.text.primary,
+  },
+  requiredBadge: {
+    backgroundColor: '#ef4444',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  requiredText: {
+    fontSize: 10,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: '#ffffff',
+  },
+  labelImageContainer: {
+    position: 'relative',
+    margin: 16,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: Colors.platinum,
+  },
+  labelImage: {
+    width: '100%',
+    height: 80,
+    resizeMode: 'cover',
+  },
+  clearLabelButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 16,
+    padding: 6,
+  },
+  labelPlaceholder: {
+    padding: 24,
+    alignItems: 'center',
+    gap: 16,
+  },
+  labelPlaceholderText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: Colors.text.muted,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  labelButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  labelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: Colors.platinum,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  labelButtonText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: Colors.accent.secondary,
   },
 
 });
