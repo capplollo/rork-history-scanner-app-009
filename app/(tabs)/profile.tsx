@@ -533,6 +533,6 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   bottomSpacer: {
-    height: 120,
+    height: 100,
   },
 });

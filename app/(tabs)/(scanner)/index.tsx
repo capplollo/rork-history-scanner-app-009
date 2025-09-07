@@ -1373,6 +1373,6 @@ const styles = StyleSheet.create({
     transform: [{ translateX: 20 }],
   },
   bottomSpacer: {
-    height: 120,
+    height: 100,
   },
 });
