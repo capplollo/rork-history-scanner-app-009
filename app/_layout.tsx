@@ -1,7 +1,9 @@
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useMemo, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Colors } from "@/constants/colors";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -92,7 +94,8 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: Colors.background }}>
+      <StatusBar style="dark" backgroundColor={Colors.background} />
       <AuthGuard />
       <RootLayoutNav />
     </GestureHandlerRootView>
