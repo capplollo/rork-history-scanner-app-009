@@ -10,7 +10,7 @@ import {
   Platform,
 } from "react-native";
 import { BookOpen, Clock, Globe, Award } from "lucide-react-native";
-import Logo from "@/components/Logo";
+
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "@/constants/colors";
 
@@ -82,7 +82,7 @@ export default function LearnScreen() {
           colors={[Colors.accent.primary, Colors.text.secondary]}
           style={styles.headerGradient}
         >
-          <Logo size={32} style={styles.logo} />
+
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Explore History</Text>
             <Text style={styles.headerSubtitle}>
@@ -190,11 +190,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
   },
-  logo: {
-    position: 'absolute',
-    top: 30,
-    right: 24,
-  },
+
   headerContent: {
     gap: 20,
   },
