@@ -558,9 +558,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         <View style={styles.headerContainer}>
           <Logo size={100} />
           <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Snap into heritage</Text>
             <Text style={styles.headerSubtitle}>
-              Discover the living stories of art and monuments
+              Discover the living stories of monuments and art
             </Text>
           </View>
         </View>
