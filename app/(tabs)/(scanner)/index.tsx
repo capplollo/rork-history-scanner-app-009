@@ -1119,15 +1119,15 @@ const styles = StyleSheet.create({
   },
   analyzeButton: {
     backgroundColor: Colors.accent.secondary,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 0,
-    paddingVertical: 18,
-    paddingHorizontal: 28,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   analyzeButtonDisabled: {
     opacity: 0.7,
@@ -1149,14 +1149,15 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   analyzeButtonText: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "600",
+    fontWeight: "500",
     color: "#ffffff",
+    letterSpacing: 0.3,
   },
   modeToggleContainer: {
     flexDirection: 'row',
