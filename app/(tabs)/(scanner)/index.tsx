@@ -16,7 +16,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info, Zap, Camera, MapPin } from "lucide-react-native";
-import Logo from "@/components/Logo";
+
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { mockMonuments } from "@/data/mockMonuments";
@@ -556,7 +556,11 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.headerContainer}>
-          <Logo size={100} />
+          <Image 
+            source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/uort3pngrpa32m7e1q7rn' }}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <View style={styles.headerContent}>
             <Text style={styles.headerSubtitle}>
               Discover the living stories of monuments and art
@@ -1373,5 +1377,10 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 100,
+  },
+  logoImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 16,
   },
 });
