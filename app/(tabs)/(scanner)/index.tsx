@@ -555,22 +555,16 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Logo Section - Same background as app */}
-        <View style={styles.logoSection}>
+        {/* Logo and Header Section - Unified background */}
+        <View style={styles.logoAndHeaderSection}>
           <Image 
             source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/uort3pngrpa32m7e1q7rn' }}
             style={styles.logoImage}
             resizeMode="contain"
           />
-        </View>
-        
-        {/* Header Content Section */}
-        <View style={styles.headerContainer}>
-          <View style={styles.headerContent}>
-            <Text style={styles.headerSubtitle}>
-              Discover the living stories of monuments and art
-            </Text>
-          </View>
+          <Text style={styles.headerSubtitle}>
+            Discover the living stories of monuments and art
+          </Text>
         </View>
 
         {/* Scan Mode Toggle */}
@@ -1383,12 +1377,14 @@ const styles = StyleSheet.create({
   bottomSpacer: {
     height: 100,
   },
-  logoSection: {
+  logoAndHeaderSection: {
     backgroundColor: Colors.background,
     paddingTop: 20,
-    paddingBottom: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 20,
   },
   logoImage: {
     width: 100,
