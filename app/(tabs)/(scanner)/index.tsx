@@ -620,6 +620,26 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         )}
 
+        {/* GPS Location Toggle - Show above art label in museum mode */}
+        {selectedImage && scanMode === 'museum' && (
+          <View style={styles.section}>
+            <View style={styles.contextCard}>
+              <View style={styles.gpsContainer}>
+                <View style={styles.gpsLeft}>
+                  <MapPin size={20} color={Colors.accent.secondary} />
+                  <Text style={styles.gpsText}>Is your current location relevant?</Text>
+                </View>
+                <TouchableOpacity 
+                  style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
+                  onPress={() => setIsGpsEnabled(!isGpsEnabled)}
+                >
+                  <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+
         {/* Museum Label Image Section */}
         {selectedImage && scanMode === 'museum' && (
           <View style={styles.section}>
@@ -665,10 +685,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                     >
                       <View style={styles.infoToggleLeft}>
                         <Info size={20} color={Colors.accent.secondary} />
-                        <Text style={styles.infoToggleText}>Add Context</Text>
-                        <View style={styles.optionalBadge}>
-                          <Text style={styles.optionalText}>Optional</Text>
-                        </View>
+                        <Text style={styles.infoToggleText}>Art label not available?</Text>
                       </View>
                       {showAdditionalInfo ? (
                         <ChevronUp size={20} color={Colors.accent.secondary} />
@@ -703,8 +720,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         )}
 
-        {/* GPS Location Toggle */}
-        {selectedImage && (
+        {/* GPS Location Toggle - Show for city mode only */}
+        {selectedImage && scanMode === 'city' && (
           <View style={styles.section}>
             <View style={styles.contextCard}>
               <View style={styles.gpsContainer}>
