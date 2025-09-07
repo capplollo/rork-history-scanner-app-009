@@ -95,7 +95,7 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: Colors.background }}>
-      <StatusBar style="dark" backgroundColor={Colors.background} translucent={false} />
+      <StatusBar style="dark" backgroundColor={Colors.background} translucent={true} />
       <AuthGuard />
       <RootLayoutNav />
     </GestureHandlerRootView>
