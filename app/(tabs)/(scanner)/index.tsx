@@ -246,12 +246,16 @@ export default function ScannerScreen() {
       
     } catch (error) {
       console.error('Error detecting monuments and art:', error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
       
       let errorMessage = 'Failed to analyze the image. Please try again.';
+      let detailedError = '';
+      
       if (error instanceof Error) {
+        detailedError = error.message;
         if (error.message.includes('too large')) {
           errorMessage = 'Image is too large. Please use a smaller image or reduce quality.';
-        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+        } else if (error.message.includes('network') || error.message.includes('fetch') || error.message.includes('Network error')) {
           errorMessage = 'Network error. Please check your internet connection and try again.';
         } else if (error.message.includes('JSON')) {
           errorMessage = 'There was an issue processing the AI response. Please try again.';
@@ -262,7 +266,16 @@ export default function ScannerScreen() {
         }
       }
       
-      Alert.alert('Analysis Failed', errorMessage);
+      console.log('Showing error alert with message:', errorMessage);
+      console.log('Detailed error:', detailedError);
+      
+      Alert.alert(
+        'Analysis Failed', 
+        `${errorMessage}\n\nTechnical details: ${detailedError}`,
+        [
+          { text: 'OK', onPress: () => console.log('User acknowledged error') }
+        ]
+      );
     } finally {
       setIsAnalyzing(false);
       setAnalysisStatus("");
@@ -356,6 +369,9 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         promptText = promptText.substring(0, 15000) + '\n\nRespond in the exact JSON format specified above.';
       }
       
+      // Log the actual prompt being sent for debugging
+      console.log('Full prompt being sent:', promptText.substring(0, 500) + '...');
+      
       // Prepare content array with main image
       const contentArray: Array<{ type: 'text'; text: string } | { type: 'image'; image: string }> = [
         { type: 'text', text: promptText },
@@ -399,14 +415,25 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
       
       console.log('Request body size:', JSON.stringify(requestBody).length, 'characters');
       console.log('Sending request to AI API...');
-      
-      const aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
+      console.log('Request structure:', {
+        messagesCount: requestBody.messages.length,
+        contentArrayLength: requestBody.messages[0].content.length,
+        hasImages: requestBody.messages[0].content.filter(c => c.type === 'image').length
       });
+      
+      let aiResponse;
+      try {
+        aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody)
+        });
+      } catch (networkError) {
+        console.error('Network error during fetch:', networkError);
+        throw new Error(`Network error: ${networkError instanceof Error ? networkError.message : 'Unknown network error'}`);
+      }
       
       console.log('AI API response status:', aiResponse.status);
       
@@ -442,6 +469,33 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         
         // Always provide a fallback response for other errors
         console.log('AI service error, using fallback response');
+        console.error('Full error details:', {
+          status: aiResponse.status,
+          statusText: aiResponse.statusText,
+          errorText,
+          errorDetails
+        });
+        
+        // Show the actual error to user for debugging
+        const errorMessage = `AI service error (${aiResponse.status}): ${errorText.substring(0, 200)}${errorText.length > 200 ? '...' : ''}`;
+        console.error('Showing error alert:', errorMessage);
+        
+        Alert.alert(
+          'Analysis Failed', 
+          errorMessage,
+          [
+            { text: 'Show Fallback', onPress: () => {
+              console.log('User chose to show fallback response');
+            } },
+            { text: 'Cancel', style: 'cancel', onPress: () => { 
+              console.log('User cancelled analysis');
+              setIsAnalyzing(false); 
+              setAnalysisStatus(''); 
+              return; 
+            } }
+          ]
+        );
+        
         setAnalysisStatus("The AI analysis service is temporarily unavailable. Please try again shortly.");
         
         // Create a fallback analysis result
@@ -486,14 +540,16 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         aiResult = await aiResponse.json();
       } catch (jsonError) {
         console.error('Failed to parse AI response as JSON:', jsonError);
-        throw new Error('AI service returned invalid response format');
+        console.error('Raw response that failed to parse:', aiResult);
+        throw new Error(`AI service returned invalid response format: ${jsonError instanceof Error ? jsonError.message : 'Unknown JSON error'}`);
       }
       
       console.log('Raw AI response:', aiResult.completion);
       
-      if (!aiResult.completion) {
-        console.error('AI response missing completion field:', aiResult);
-        throw new Error('AI service returned incomplete response');
+      if (!aiResult || !aiResult.completion) {
+        console.error('AI response missing completion field. Full response:', aiResult);
+        console.error('Response keys:', aiResult ? Object.keys(aiResult) : 'aiResult is null/undefined');
+        throw new Error(`AI service returned incomplete response. Expected 'completion' field but got: ${aiResult ? Object.keys(aiResult).join(', ') : 'null/undefined'}`);
       }
       
       setAnalysisStatus("Processing AI response...");
