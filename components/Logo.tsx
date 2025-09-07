@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 
 interface LogoProps {
   size?: number;
@@ -7,121 +7,111 @@ interface LogoProps {
 }
 
 export default function Logo({ size = 120, style }: LogoProps) {
-  const bookmarkHeight = size * 1.4;
-  const bookmarkWidth = size * 0.9;
-  const triangleHeight = size * 0.35;
+  const columnWidth = size * 0.15;
+  const columnHeight = size * 0.8;
+  const baseHeight = size * 0.12;
+  const capitalHeight = size * 0.08;
+  const bridgeHeight = size * 0.08;
+  const bridgeWidth = size * 0.4;
   
   return (
-    <View style={[styles.bookmarkContainer, style]}>
-      <View style={{
-        width: bookmarkWidth,
-        height: bookmarkHeight,
-      }}>
-        {/* Main bookmark body */}
+    <View style={[styles.logoContainer, { width: size, height: size }, style]}>
+      {/* Left Column */}
+      <View style={styles.column}>
+        {/* Capital */}
         <View style={[
-          styles.bookmarkBody,
+          styles.capital,
           {
-            width: bookmarkWidth,
-            height: bookmarkHeight - triangleHeight,
+            width: columnWidth * 1.4,
+            height: capitalHeight,
           }
-        ]}>
-          {/* Logo content - replace A with actual logo */}
-          <View style={styles.logoContainer}>
-            <View style={[
-              styles.logoCircle,
-              {
-                width: size * 0.4,
-                height: size * 0.4,
-                borderRadius: size * 0.2,
-              }
-            ]}>
-              <Text style={[
-                styles.logoText,
-                {
-                  fontSize: size * 0.2,
-                }
-              ]}>🏛️</Text>
-            </View>
-          </View>
-        </View>
-        
-        {/* Bookmark triangle bottom */}
+        ]} />
+        {/* Shaft */}
         <View style={[
-          styles.triangleContainer,
+          styles.shaft,
           {
-            width: bookmarkWidth,
-            height: triangleHeight,
+            width: columnWidth,
+            height: columnHeight - capitalHeight - baseHeight,
           }
-        ]}>
-          <View style={[
-            styles.triangleLeft,
-            {
-              borderTopWidth: triangleHeight,
-              borderRightWidth: bookmarkWidth / 2,
-            }
-          ]} />
-          <View style={[
-            styles.triangleRight,
-            {
-              borderTopWidth: triangleHeight,
-              borderLeftWidth: bookmarkWidth / 2,
-            }
-          ]} />
-        </View>
+        ]} />
+        {/* Base */}
+        <View style={[
+          styles.base,
+          {
+            width: columnWidth * 1.4,
+            height: baseHeight,
+          }
+        ]} />
+      </View>
+      
+      {/* Bridge connecting the columns */}
+      <View style={[
+        styles.bridge,
+        {
+          width: bridgeWidth,
+          height: bridgeHeight,
+          top: size * 0.35,
+        }
+      ]} />
+      
+      {/* Right Column */}
+      <View style={styles.column}>
+        {/* Capital */}
+        <View style={[
+          styles.capital,
+          {
+            width: columnWidth * 1.4,
+            height: capitalHeight,
+          }
+        ]} />
+        {/* Shaft */}
+        <View style={[
+          styles.shaft,
+          {
+            width: columnWidth,
+            height: columnHeight - capitalHeight - baseHeight,
+          }
+        ]} />
+        {/* Base */}
+        <View style={[
+          styles.base,
+          {
+            width: columnWidth * 1.4,
+            height: baseHeight,
+          }
+        ]} />
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  bookmarkContainer: {
-    position: 'absolute',
-    top: -10,
-    right: -10,
-    zIndex: 1000,
-  },
-  bookmarkBody: {
-    backgroundColor: '#1D3557',
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  triangleContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  triangleLeft: {
-    width: 0,
-    height: 0,
-    backgroundColor: 'transparent',
-    borderStyle: 'solid',
-    borderTopColor: '#1D3557',
-    borderRightColor: 'transparent',
-    borderBottomWidth: 0,
-    borderLeftWidth: 0,
-  },
-  triangleRight: {
-    width: 0,
-    height: 0,
-    backgroundColor: 'transparent',
-    borderStyle: 'solid',
-    borderTopColor: '#1D3557',
-    borderLeftColor: 'transparent',
-    borderBottomWidth: 0,
-    borderRightWidth: 0,
-  },
   logoContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    position: 'relative',
   },
-  logoCircle: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
+  column: {
     alignItems: 'center',
+    justifyContent: 'flex-end',
   },
-  logoText: {
-    textAlign: 'center',
+  capital: {
+    backgroundColor: '#D4D4D8',
+    borderRadius: 2,
+  },
+  shaft: {
+    backgroundColor: '#E4E4E7',
+    marginVertical: 1,
+  },
+  base: {
+    backgroundColor: '#D4D4D8',
+    borderRadius: 2,
+  },
+  bridge: {
+    backgroundColor: '#E4E4E7',
+    position: 'absolute',
+    left: '20%',
+    right: '20%',
   },
 });
