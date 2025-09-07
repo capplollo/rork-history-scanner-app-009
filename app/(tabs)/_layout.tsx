@@ -2,12 +2,13 @@ import { Tabs } from "expo-router";
 import { Camera, BookOpen, User } from "lucide-react-native";
 import React from "react";
 import { Platform, View } from "react-native";
+import { Colors } from "@/constants/colors";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#8B4513",
+        tabBarActiveTintColor: Colors.umber,
         tabBarInactiveTintColor: "#A0A0A0",
         tabBarStyle: {
           backgroundColor: "#FEFEFE",
@@ -52,7 +53,7 @@ export default function TabLayout() {
               width: 56,
               height: 56,
               borderRadius: 28,
-              backgroundColor: focused ? "#8B4513" : "#D4A574",
+              backgroundColor: focused ? Colors.umber : Colors.taupeGray,
               justifyContent: "center",
               alignItems: "center",
               marginBottom: 20,
