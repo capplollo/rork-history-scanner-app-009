@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
-import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info, Zap, Camera } from "lucide-react-native";
+import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info, Zap, Camera, MapPin } from "lucide-react-native";
 import Logo from "@/components/Logo";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
@@ -35,6 +35,8 @@ export default function ScannerScreen() {
   const [additionalInfo, setAdditionalInfo] = useState({
     context: "",
   });
+  const [isGpsEnabled, setIsGpsEnabled] = useState(false);
+  const [photoSource, setPhotoSource] = useState<'camera' | 'gallery' | null>(null);
 
   // Handle reanalysis flow
   useEffect(() => {
@@ -63,6 +65,8 @@ export default function ScannerScreen() {
 
     if (!result.canceled && result.assets[0]) {
       setSelectedImage(result.assets[0].uri);
+      setPhotoSource('gallery');
+      setIsGpsEnabled(false); // Default off for gallery photos
     }
   };
 
@@ -82,6 +86,8 @@ export default function ScannerScreen() {
 
     if (!result.canceled && result.assets[0]) {
       setSelectedImage(result.assets[0].uri);
+      setPhotoSource('camera');
+      setIsGpsEnabled(true); // Default on for camera photos
     }
   };
 
@@ -495,6 +501,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
     setAdditionalInfo({
       context: "",
     });
+    setIsGpsEnabled(false);
+    setPhotoSource(null);
   };
 
   const pickLabelImage = async () => {
@@ -691,6 +699,26 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                   </View>
                 </View>
               )}
+            </View>
+          </View>
+        )}
+
+        {/* GPS Location Toggle */}
+        {selectedImage && (
+          <View style={styles.section}>
+            <View style={styles.contextCard}>
+              <View style={styles.gpsContainer}>
+                <View style={styles.gpsLeft}>
+                  <MapPin size={20} color={Colors.accent.secondary} />
+                  <Text style={styles.gpsText}>Is your current location relevant?</Text>
+                </View>
+                <TouchableOpacity 
+                  style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
+                  onPress={() => setIsGpsEnabled(!isGpsEnabled)}
+                >
+                  <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         )}
@@ -1273,6 +1301,53 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 16,
     paddingHorizontal: 24,
+  },
+  gpsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+  },
+  gpsLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  gpsText: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: Colors.text.primary,
+  },
+  gpsToggle: {
+    width: 50,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#e2e8f0',
+    padding: 2,
+    justifyContent: 'center',
+  },
+  gpsToggleActive: {
+    backgroundColor: Colors.accent.secondary,
+  },
+  gpsToggleThumb: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  gpsToggleThumbActive: {
+    transform: [{ translateX: 22 }],
   },
 
 });
