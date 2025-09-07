@@ -430,6 +430,6 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   bottomSpacer: {
-    height: 100,
+    height: 120,
   },
 });
