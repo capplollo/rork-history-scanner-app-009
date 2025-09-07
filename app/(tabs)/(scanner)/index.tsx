@@ -1523,14 +1523,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 16,
     paddingHorizontal: 20,
+    minHeight: 60,
   },
   gpsLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    flex: 1,
+    marginRight: 16,
   },
   gpsTextContainer: {
     flex: 1,
+    minWidth: 0,
   },
   gpsText: {
     fontSize: 15,
