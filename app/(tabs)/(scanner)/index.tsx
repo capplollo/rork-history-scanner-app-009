@@ -634,17 +634,60 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                   </TouchableOpacity>
                 </View>
               ) : (
-                <View style={styles.labelPlaceholder}>
-                  <Text style={styles.labelPlaceholderText}>Add a photo of the artwork's label or placard</Text>
-                  <View style={styles.labelButtons}>
-                    <TouchableOpacity style={styles.labelButton} onPress={takeLabelPhoto}>
-                      <CameraIcon size={16} color={Colors.accent.secondary} />
-                      <Text style={styles.labelButtonText}>Take Photo</Text>
+                <View>
+                  <View style={styles.labelPlaceholder}>
+                    <Text style={styles.labelPlaceholderText}>Add a photo of the artwork's label or placard</Text>
+                    <View style={styles.labelButtons}>
+                      <TouchableOpacity style={styles.labelButton} onPress={takeLabelPhoto}>
+                        <CameraIcon size={16} color={Colors.accent.secondary} />
+                        <Text style={styles.labelButtonText}>Take Photo</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.labelButton} onPress={pickLabelImage}>
+                        <ImageIcon size={16} color={Colors.accent.secondary} />
+                        <Text style={styles.labelButtonText}>From Gallery</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                  
+                  {/* Add Context Section - Only when no label available */}
+                  <View style={styles.contextInLabelSection}>
+                    <TouchableOpacity 
+                      style={styles.infoToggleInLabel}
+                      onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
+                    >
+                      <View style={styles.infoToggleLeft}>
+                        <Info size={20} color={Colors.accent.secondary} />
+                        <Text style={styles.infoToggleText}>Add Context</Text>
+                        <View style={styles.optionalBadge}>
+                          <Text style={styles.optionalText}>Optional</Text>
+                        </View>
+                      </View>
+                      {showAdditionalInfo ? (
+                        <ChevronUp size={20} color={Colors.accent.secondary} />
+                      ) : (
+                        <ChevronDown size={20} color={Colors.accent.secondary} />
+                      )}
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.labelButton} onPress={pickLabelImage}>
-                      <ImageIcon size={16} color={Colors.accent.secondary} />
-                      <Text style={styles.labelButtonText}>From Gallery</Text>
-                    </TouchableOpacity>
+
+                    {showAdditionalInfo && (
+                      <View style={styles.infoForm}>
+                        <View style={styles.inputGroup}>
+                          <Text style={styles.inputLabel}>Context Information</Text>
+                          <Text style={styles.inputHint}>
+                            Add details like museum name, gallery section, or artist information
+                          </Text>
+                          <TextInput
+                            style={[styles.textInput, styles.textArea]}
+                            placeholder="e.g., Metropolitan Museum of Art, European Paintings gallery, Van Gogh section..."
+                            placeholderTextColor="#999"
+                            value={additionalInfo.context}
+                            onChangeText={updateAdditionalInfo}
+                            multiline
+                            numberOfLines={4}
+                          />
+                        </View>
+                      </View>
+                    )}
                   </View>
                 </View>
               )}
@@ -652,8 +695,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         )}
 
-        {/* Add Context Section - Only show in City mode OR Museum mode without label */}
-        {selectedImage && (scanMode === 'city' || (scanMode === 'museum' && !labelImage)) && (
+        {/* Add Context Section - Only show in City mode */}
+        {selectedImage && scanMode === 'city' && (
           <View style={styles.section}>
             <View style={styles.contextCard}>
               <TouchableOpacity 
@@ -679,18 +722,11 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                   <View style={styles.inputGroup}>
                     <Text style={styles.inputLabel}>Context Information</Text>
                     <Text style={styles.inputHint}>
-                      {scanMode === 'museum' 
-                        ? 'Add details like museum name, gallery section, or artist information'
-                        : 'Add details like location, neighborhood, or landmark information'
-                      }
+                      Add details like location, neighborhood, or landmark information
                     </Text>
                     <TextInput
                       style={[styles.textInput, styles.textArea]}
-                      placeholder={
-                        scanMode === 'museum'
-                          ? 'e.g., Metropolitan Museum of Art, European Paintings gallery, Van Gogh section...'
-                          : 'e.g., Central Park NYC, Times Square, near City Hall...'
-                      }
+                      placeholder="e.g., Central Park NYC, Times Square, near City Hall..."
                       placeholderTextColor="#999"
                       value={additionalInfo.context}
                       onChangeText={updateAdditionalInfo}
@@ -1226,6 +1262,17 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "500",
     color: Colors.accent.secondary,
+  },
+  contextInLabelSection: {
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
+  infoToggleInLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
   },
 
 });
