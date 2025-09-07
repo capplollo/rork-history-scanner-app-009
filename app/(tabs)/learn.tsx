@@ -171,6 +171,7 @@ export default function LearnScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <View style={styles.bottomSpacer} />
     </SafeAreaView>
   );
 }
@@ -427,5 +428,8 @@ const styles = StyleSheet.create({
   },
   quizIcon: {
     marginLeft: 16,
+  },
+  bottomSpacer: {
+    height: 100,
   },
 });

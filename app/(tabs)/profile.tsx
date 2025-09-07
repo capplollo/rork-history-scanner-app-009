@@ -180,6 +180,7 @@ export default function ProfileScreen() {
           </View>
         </View>
       </ScrollView>
+      <View style={styles.bottomSpacer} />
 
       {/* Settings Modal */}
       <Modal
@@ -530,5 +531,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 4,
+  },
+  bottomSpacer: {
+    height: 100,
   },
 });

@@ -817,6 +817,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
 
 
       </ScrollView>
+      <View style={styles.bottomSpacer} />
     </SafeAreaView>
   );
 }
@@ -1371,5 +1372,7 @@ const styles = StyleSheet.create({
   gpsToggleThumbActive: {
     transform: [{ translateX: 20 }],
   },
-
+  bottomSpacer: {
+    height: 100,
+  },
 });
