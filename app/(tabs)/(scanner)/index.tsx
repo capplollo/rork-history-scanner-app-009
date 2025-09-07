@@ -652,7 +652,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         )}
 
-        {selectedImage && (
+        {/* Add Context Section - Only show in City mode OR Museum mode without label */}
+        {selectedImage && (scanMode === 'city' || (scanMode === 'museum' && !labelImage)) && (
           <View style={styles.section}>
             <View style={styles.contextCard}>
               <TouchableOpacity 
