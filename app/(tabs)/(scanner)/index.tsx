@@ -829,11 +829,15 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 </View>
               ) : (
                 <View style={styles.placeholderContent}>
-                  <CameraIcon size={32} color={Colors.accent.secondary} />
-                  <Text style={styles.placeholderText}>Ready to Discover</Text>
-                  <Text style={styles.placeholderSubtext}>
-                    Capture or select an image to begin
-                  </Text>
+                  <View style={styles.illustrationContainer}>
+                    <Image 
+                      source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/s13kduj5rxyy2aakvte6r' }}
+                      style={styles.museumIllustration}
+                      resizeMode="contain"
+                      onError={(error) => console.log('Museum image load error:', error)}
+                      onLoad={() => console.log('Museum image loaded successfully')}
+                    />
+                  </View>
                 </View>
               )}
             </View>
@@ -1761,5 +1765,9 @@ const styles = StyleSheet.create({
   monumentsIllustration: {
     width: 476,
     height: 340,
+  },
+  museumIllustration: {
+    width: 400,
+    height: 300,
   },
 });
