@@ -1728,9 +1728,8 @@ const styles = StyleSheet.create({
     height: 50,
   },
   subtleLine: {
-    width: 60,
+    width: 320,
     height: 1,
-    backgroundColor: Colors.border,
-    opacity: 0.3,
+    backgroundColor: 'rgba(0,0,0,0.06)',
   },
 });
