@@ -584,42 +584,23 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 Adding context information like location, name, or museum can significantly improve identification accuracy.
               </Text>
               
-              <View style={styles.feedbackButtonsContainer}>
-                <TouchableOpacity
-                  style={styles.addContextButton}
-                  onPress={() => {
-                    router.push({
-                      pathname: '/(tabs)/(scanner)' as any,
-                      params: {
-                        reanalyzeImage: monument.scannedImage,
-                        showContext: 'true'
-                      }
-                    });
-                  }}
-                >
-                  <View style={styles.buttonContent}>
-                    <Sparkles size={18} color={Colors.accent.secondary} />
-                    <Text style={styles.addContextButtonText}>Add Context Info</Text>
-                  </View>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[styles.reanalyzeButtonFeedback, isReanalyzing && styles.reanalyzeButtonDisabled]}
-                  onPress={performReanalysis}
-                  disabled={isReanalyzing}
-                >
-                  <View style={styles.buttonContent}>
-                    {isReanalyzing ? (
-                      <ActivityIndicator size="small" color="#dc2626" />
-                    ) : (
-                      <RefreshCw size={18} color="#dc2626" />
-                    )}
-                    <Text style={styles.reanalyzeButtonFeedbackText}>
-                      {isReanalyzing ? 'Reanalyzing...' : 'Reanalyze Now'}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                style={styles.backToScannerButton}
+                onPress={() => {
+                  router.push({
+                    pathname: '/(tabs)/(scanner)' as any,
+                    params: {
+                      reanalyzeImage: monument.scannedImage,
+                      showContext: 'true'
+                    }
+                  });
+                }}
+              >
+                <View style={styles.buttonContent}>
+                  <Sparkles size={18} color="#ffffff" />
+                  <Text style={styles.backToScannerButtonText}>Add Context & Reanalyze</Text>
+                </View>
+              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -1016,16 +997,9 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 20,
   },
-  feedbackButtonsContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  addContextButton: {
-    flex: 1,
-    backgroundColor: Colors.surface,
+  backToScannerButton: {
+    backgroundColor: Colors.accent.secondary,
     borderRadius: 16,
-    borderWidth: 2,
-    borderColor: Colors.accent.secondary,
     paddingVertical: 16,
     paddingHorizontal: 20,
     shadowColor: Colors.accent.secondary,
@@ -1033,39 +1007,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 6,
+    marginTop: 8,
   },
-  addContextButtonText: {
-    fontSize: 14,
+  backToScannerButtonText: {
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: '500',
-    color: Colors.accent.secondary,
-  },
-  reanalyzeButtonFeedback: {
-    flex: 1,
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#dc2626',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    shadowColor: '#dc2626',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  reanalyzeButtonFeedbackText: {
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: '500',
-    color: '#dc2626',
+    color: '#ffffff',
   },
 });
