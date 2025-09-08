@@ -1224,7 +1224,7 @@ const styles = StyleSheet.create({
   placeholderContainer: {
     aspectRatio: 1.15,
     borderRadius: 16,
-    backgroundColor: Colors.surface,
+    backgroundColor: Colors.background,
     borderWidth: 2,
     borderColor: Colors.border,
     borderStyle: 'dashed',
