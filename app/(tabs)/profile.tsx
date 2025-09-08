@@ -109,7 +109,7 @@ export default function ProfileScreen() {
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
-              <User size={41} color={Colors.accent.secondary} />
+              <User size={32} color={Colors.accent.secondary} />
             </View>
           </View>
           
@@ -122,7 +122,7 @@ export default function ProfileScreen() {
             style={styles.settingsButton}
             onPress={() => setShowSettings(true)}
           >
-            <Settings size={22} color={Colors.accent.secondary} />
+            <Settings size={20} color={Colors.accent.secondary} />
           </TouchableOpacity>
         </View>
 
@@ -240,26 +240,30 @@ const styles = StyleSheet.create({
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 20,
+    gap: 16,
     paddingHorizontal: 24,
-    paddingTop: 30,
-    paddingBottom: 20,
+    paddingTop: 24,
+    paddingBottom: 24,
     position: 'relative',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.06)',
   },
   statsSection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingHorizontal: 24,
-    paddingVertical: 20,
-    marginBottom: 10,
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.06)',
+    marginBottom: 24,
   },
   statItem: {
     alignItems: 'center',
     flex: 1,
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -267,10 +271,10 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "600",
     color: Colors.text.primary,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -281,39 +285,39 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    height: 40,
-    backgroundColor: Colors.border,
-    marginHorizontal: 10,
+    height: 32,
+    backgroundColor: 'rgba(0,0,0,0.08)',
+    marginHorizontal: 8,
   },
   settingsButton: {
     position: 'absolute',
-    top: 30,
+    top: 24,
     right: 24,
-    padding: 11,
+    padding: 8,
   },
   avatarContainer: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   avatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.platinum,
-    borderWidth: 2,
-    borderColor: Colors.border,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.08)',
   },
   profileInfo: {
     flex: 1,
-    gap: 7,
+    gap: 4,
   },
   userName: {
-    fontSize: 22,
+    fontSize: 18,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -323,14 +327,13 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
   },
   userEmail: {
-    fontSize: 17,
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     color: Colors.text.muted,
-    fontStyle: "italic",
   },
   section: {
     marginTop: 0,
