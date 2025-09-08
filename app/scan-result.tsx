@@ -224,14 +224,8 @@ export default function ScanResultScreen() {
             text: 'Add Context',
             onPress: () => {
               setIsReanalyzing(false);
-              // Navigate back to scanner with the current image and context form open
-              router.push({
-                pathname: '/(tabs)/(scanner)' as any,
-                params: {
-                  reanalyzeImage: monument.scannedImage,
-                  showContext: 'true'
-                }
-              });
+              // Go back to previous scanner page
+              router.back();
             }
           },
           {
@@ -519,13 +513,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               <TouchableOpacity
                 style={styles.addContextButton}
                 onPress={() => {
-                  router.push({
-                    pathname: '/(tabs)/(scanner)' as any,
-                    params: {
-                      reanalyzeImage: monument.scannedImage,
-                      showContext: 'true'
-                    }
-                  });
+                  // Go back to previous scanner page
+                  router.back();
                 }}
               >
                 <View style={styles.buttonContent}>
@@ -597,13 +586,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               <TouchableOpacity
                 style={styles.backToScannerButton}
                 onPress={() => {
-                  router.push({
-                    pathname: '/(tabs)/(scanner)' as any,
-                    params: {
-                      reanalyzeImage: monument.scannedImage,
-                      showContext: 'true'
-                    }
-                  });
+                  // Go back to previous scanner page
+                  router.back();
                 }}
               >
                 <View style={styles.buttonContent}>
