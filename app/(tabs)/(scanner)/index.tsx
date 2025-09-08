@@ -776,39 +776,37 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         {selectedImage && scanMode === 'museum' && (
           <View style={styles.section}>
             <View style={styles.contextCard}>
-              <View style={styles.gpsContainer}>
+              <TouchableOpacity 
+                style={styles.gpsContainerMuseum}
+                onPress={() => {
+                  if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
+                    requestLocationPermission().then(() => {
+                      setIsGpsEnabled(true);
+                    });
+                  } else {
+                    setIsGpsEnabled(!isGpsEnabled);
+                  }
+                }}
+              >
                 <View style={styles.gpsLeft}>
-                  <MapPin size={20} color={Colors.accent.secondary} />
-                  <View style={styles.gpsTextContainer}>
-                    <Text style={styles.gpsText}>Use current location</Text>
-                    {isGpsEnabled && userLocation && (
-                      <Text style={styles.gpsLocationText}>
-                        {userLocation.coords.latitude.toFixed(4)}, {userLocation.coords.longitude.toFixed(4)}
-                      </Text>
-                    )}
-                    {isGpsEnabled && !userLocation && locationPermission === Location.PermissionStatus.GRANTED && (
-                      <Text style={styles.gpsLocationText}>Getting location...</Text>
-                    )}
-                    {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
-                      <Text style={styles.gpsLocationText}>Location permission needed</Text>
-                    )}
-                  </View>
+                  <MapPin size={16} color={Colors.accent.secondary} />
+                  <Text style={styles.gpsTextMuseum}>Use current location</Text>
                 </View>
-                <TouchableOpacity 
-                  style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
-                  onPress={() => {
-                    if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
-                      requestLocationPermission().then(() => {
-                        setIsGpsEnabled(true);
-                      });
-                    } else {
-                      setIsGpsEnabled(!isGpsEnabled);
-                    }
-                  }}
-                >
-                  <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
-                </TouchableOpacity>
-              </View>
+                <View style={[styles.gpsToggleSmall, isGpsEnabled && styles.gpsToggleSmallActive]}>
+                  <View style={[styles.gpsToggleThumbSmall, isGpsEnabled && styles.gpsToggleThumbSmallActive]} />
+                </View>
+              </TouchableOpacity>
+              {isGpsEnabled && userLocation && (
+                <Text style={styles.gpsLocationTextMuseum}>
+                  {userLocation.coords.latitude.toFixed(4)}, {userLocation.coords.longitude.toFixed(4)}
+                </Text>
+              )}
+              {isGpsEnabled && !userLocation && locationPermission === Location.PermissionStatus.GRANTED && (
+                <Text style={styles.gpsLocationTextMuseum}>Getting location...</Text>
+              )}
+              {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
+                <Text style={styles.gpsLocationTextMuseum}>Location permission needed</Text>
+              )}
             </View>
           </View>
         )}
@@ -872,11 +870,11 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                         <View style={styles.inputGroup}>
                           <Text style={styles.inputLabel}>Context Information</Text>
                           <Text style={styles.inputHint}>
-                            Add details like museum name, gallery section, or artist information
+                            Add details like name of the artwork, artist name, gallery section, or museum name
                           </Text>
                           <TextInput
                             style={[styles.textInput, styles.textArea]}
-                            placeholder="e.g., Metropolitan Museum of Art, European Paintings gallery, Van Gogh section..."
+                            placeholder="e.g., The Starry Night, Van Gogh, MoMA Modern Art gallery..."
                             placeholderTextColor="#999"
                             value={additionalInfo.context}
                             onChangeText={updateAdditionalInfo}
@@ -1583,6 +1581,61 @@ const styles = StyleSheet.create({
   },
   gpsToggleThumbActive: {
     transform: [{ translateX: 20 }],
+  },
+  gpsContainerMuseum: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    minHeight: 44,
+  },
+  gpsTextMuseum: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "400",
+    color: Colors.text.primary,
+    marginLeft: 8,
+  },
+  gpsLocationTextMuseum: {
+    fontSize: 11,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: Colors.text.muted,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  gpsToggleSmall: {
+    width: 36,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#e2e8f0',
+    padding: 2,
+    justifyContent: 'center',
+  },
+  gpsToggleSmallActive: {
+    backgroundColor: Colors.accent.secondary,
+  },
+  gpsToggleThumbSmall: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 1.5,
+    elevation: 2,
+  },
+  gpsToggleThumbSmallActive: {
+    transform: [{ translateX: 16 }],
   },
   bottomSpacer: {
     height: 100,
