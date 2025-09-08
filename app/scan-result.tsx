@@ -575,26 +575,52 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         )}
 
-        {/* Action Button - Only show when recognized */}
+        {/* Recognition Feedback Section - Only show when recognized */}
         {monument.isRecognized && (
           <View style={styles.section}>
-            <TouchableOpacity
-              style={[styles.reanalyzeButton, isReanalyzing && styles.reanalyzeButtonDisabled]}
-              onPress={handleReanalyze}
-              disabled={isReanalyzing}
-            >
-              {isReanalyzing ? (
-                <View style={styles.reanalyzeContent}>
-                  <ActivityIndicator size="small" color="#dc2626" />
-                  <Text style={styles.reanalyzeText}>Reanalyzing...</Text>
-                </View>
-              ) : (
-                <View style={styles.reanalyzeContent}>
-                  <RefreshCw size={18} color="#dc2626" />
-                  <Text style={styles.reanalyzeText}>Reanalyze Monument</Text>
-                </View>
-              )}
-            </TouchableOpacity>
+            <View style={styles.feedbackCard}>
+              <Text style={styles.feedbackQuestion}>Recognition is not correct?</Text>
+              <Text style={styles.feedbackSubtext}>
+                Adding context information like location, name, or museum can significantly improve identification accuracy.
+              </Text>
+              
+              <View style={styles.feedbackButtonsContainer}>
+                <TouchableOpacity
+                  style={styles.addContextButton}
+                  onPress={() => {
+                    router.push({
+                      pathname: '/(tabs)/(scanner)' as any,
+                      params: {
+                        reanalyzeImage: monument.scannedImage,
+                        showContext: 'true'
+                      }
+                    });
+                  }}
+                >
+                  <View style={styles.buttonContent}>
+                    <Sparkles size={18} color={Colors.accent.secondary} />
+                    <Text style={styles.addContextButtonText}>Add Context Info</Text>
+                  </View>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.reanalyzeButtonFeedback, isReanalyzing && styles.reanalyzeButtonDisabled]}
+                  onPress={performReanalysis}
+                  disabled={isReanalyzing}
+                >
+                  <View style={styles.buttonContent}>
+                    {isReanalyzing ? (
+                      <ActivityIndicator size="small" color="#dc2626" />
+                    ) : (
+                      <RefreshCw size={18} color="#dc2626" />
+                    )}
+                    <Text style={styles.reanalyzeButtonFeedbackText}>
+                      {isReanalyzing ? 'Reanalyzing...' : 'Reanalyze Now'}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
         )}
       </ScrollView>
@@ -946,6 +972,93 @@ const styles = StyleSheet.create({
     color: Colors.accent.secondary,
   },
   reanalyzeButtonSmallText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: '#dc2626',
+  },
+  feedbackCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    marginBottom: 24,
+  },
+  feedbackQuestion: {
+    fontSize: 18,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: '#2C3E50',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  feedbackSubtext: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  feedbackButtonsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  addContextButton: {
+    flex: 1,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: Colors.accent.secondary,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    shadowColor: Colors.accent.secondary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  addContextButtonText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: Colors.accent.secondary,
+  },
+  reanalyzeButtonFeedback: {
+    flex: 1,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#dc2626',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    shadowColor: '#dc2626',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  reanalyzeButtonFeedbackText: {
     fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
