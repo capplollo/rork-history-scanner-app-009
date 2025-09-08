@@ -1591,12 +1591,12 @@ const styles = StyleSheet.create({
   },
   logoAndHeaderSection: {
     paddingTop: 10,
-    paddingBottom: 10,
+    paddingBottom: 5,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    minHeight: 120,
+    gap: 4,
+    minHeight: 60,
   },
   logoImage: {
     width: 100,
