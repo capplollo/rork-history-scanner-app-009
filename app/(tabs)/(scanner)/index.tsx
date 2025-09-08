@@ -707,12 +707,14 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         <View style={styles.logoAndHeaderSection}>
           <Image 
             source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/1zbfrsea9c1ypxnlt6yaz' }}
-            style={styles.logoImage}
+            style={selectedImage ? styles.logoImageSmall : styles.logoImage}
             resizeMode="contain"
           />
-          <Text style={styles.headerSubtitle} numberOfLines={1}>
-            Discover the living stories of monuments and art
-          </Text>
+          {!selectedImage && (
+            <Text style={styles.headerSubtitle} numberOfLines={1}>
+              Discover the living stories of monuments and art
+            </Text>
+          )}
         </View>
 
         {/* Scan Mode Toggle */}
@@ -1120,7 +1122,7 @@ const styles = StyleSheet.create({
   },
   selectedImage: {
     width: '100%',
-    height: 240,
+    aspectRatio: 1,
     resizeMode: 'cover',
   },
   imageOverlay: {
@@ -1142,7 +1144,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   placeholderContainer: {
-    height: 240,
+    aspectRatio: 1,
     borderRadius: 16,
     backgroundColor: Colors.surface,
     borderWidth: 2,
@@ -1597,5 +1599,9 @@ const styles = StyleSheet.create({
   logoImage: {
     width: 100,
     height: 100,
+  },
+  logoImageSmall: {
+    width: 50,
+    height: 50,
   },
 });
