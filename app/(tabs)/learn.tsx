@@ -259,10 +259,11 @@ const styles = StyleSheet.create({
   categoriesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 16,
+    justifyContent: "space-between",
+    gap: 12,
   },
   categoryCard: {
-    width: "48.5%",
+    width: "48%",
     height: 130,
     borderRadius: 14,
     overflow: "hidden",
@@ -271,6 +272,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 4,
+    marginBottom: 12,
   },
   categoryImage: {
     width: "100%",
