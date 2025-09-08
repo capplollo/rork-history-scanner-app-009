@@ -1596,6 +1596,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+    minHeight: 120,
   },
   logoImage: {
     width: 100,
