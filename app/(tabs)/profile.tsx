@@ -148,10 +148,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Horizontal subtle lines */}
-        <View style={styles.subtleLinesContainer}>
-          <View style={styles.subtleLine} />
-        </View>
+
 
         {/* Sort Menu */}
         <View style={styles.sortSection}>
@@ -277,6 +274,8 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.06)',
+    alignSelf: 'center',
+    width: 320,
   },
   statsSection: {
     flexDirection: 'row',
@@ -584,15 +583,7 @@ const styles = StyleSheet.create({
   bottomSpacer: {
     height: 100,
   },
-  subtleLinesContainer: {
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  subtleLine: {
-    width: 320,
-    height: 1,
-    backgroundColor: 'rgba(0,0,0,0.06)',
-  },
+
   sortSection: {
     paddingHorizontal: 24,
     paddingBottom: 24,
