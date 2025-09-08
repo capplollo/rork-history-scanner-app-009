@@ -367,12 +367,12 @@ For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPEC
 
 When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis than incorrect identification.`;
       } else {
-        promptText = `Analyze this image and identify any monuments, statues, architectural landmarks, or public artworks. Include painted or sculpted depictions of landmarks (identify the artwork itself, not the building it represents).
+        promptText = `Analyze this image and identify any monuments, statues, architectural landmarks, or public artworks. Include painted or sculpted depictions of landmarks.
 
-BE EXTREMELY CONSERVATIVE with identification. Many monuments, churches, and buildings share similar styles, layouts, or decorative elements. Only identify a specific site if you are 95% or more confident it is that exact location.
+BE EXTREMELY CONSERVATIVE with identification. Many monuments, churches, and buildings share similar styles, layouts, or decorative programs. Only identify a specific site if you are 95% or more confident it is that exact location.
 
 For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
-- Churches, cathedrals, and chapels with nearly identical façades
+- Churches, cathedrals, and chapels with near-identical façades
 - War memorials, equestrian statues, and commemorative monuments with common designs
 - Triumphal arches, obelisks, towers, or bridges that resemble others from the same era
 - Buildings in neoclassical, Gothic, or baroque styles that repeat common features
@@ -386,7 +386,7 @@ When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis 
         if (scanMode === 'museum') {
           promptText += ` If the user's location is available, only consider artworks in museums/galleries within a 4 km radius. Prioritize matches where label/context, artwork details, and location all align.`;
         } else {
-          promptText += ` If the user's location is available, only consider monuments and landmarks that are known to exist within a 2 km radius of that location. Prioritize those matches and increase confidence only if both the visual details and the location confirm the identification.`;
+          promptText += ` If the user's location is available, only consider monuments and landmarks within a 4 km radius of that location. Prioritize matches where both the visual details and the location align.`;
         }
         promptText += `\n\n**GPS LOCATION CONTEXT - User's current location:**\nLatitude: ${userLocation.coords.latitude}\nLongitude: ${userLocation.coords.longitude}\nAccuracy: ${userLocation.coords.accuracy}m`;
       }
