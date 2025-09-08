@@ -105,8 +105,12 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Profile Info directly on background */}
-        <View style={styles.profileSection}>
+        <LinearGradient
+          colors={['#1d3557', '#4A5B7A', '#77839D', '#A4ABC0', '#D1D3E3', Colors.background]}
+          style={styles.headerGradient}
+        >
+          {/* Profile Info directly on background */}
+          <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
               <User size={41} color={Colors.accent.secondary} />
@@ -122,9 +126,10 @@ export default function ProfileScreen() {
             style={styles.settingsButton}
             onPress={() => setShowSettings(true)}
           >
-            <Settings size={22} color={Colors.accent.secondary} />
+            <Settings size={22} color="#ffffff" />
           </TouchableOpacity>
-        </View>
+          </View>
+        </LinearGradient>
 
         {/* Discovery History directly on background */}
         <View style={styles.section}>
@@ -218,20 +223,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
+  headerGradient: {
+    paddingTop: 30,
+    paddingBottom: 40,
+    paddingHorizontal: 24,
+    position: 'relative',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
 
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 20,
-    paddingHorizontal: 24,
-    paddingTop: 30,
-    paddingBottom: 30,
     position: 'relative',
   },
   settingsButton: {
     position: 'absolute',
-    top: 30,
-    right: 24,
+    top: 0,
+    right: 0,
     padding: 11,
   },
   avatarContainer: {
@@ -263,7 +273,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: Colors.text.primary,
+    color: "#ffffff",
   },
   userEmail: {
     fontSize: 17,
@@ -272,7 +282,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: Colors.text.muted,
+    color: "rgba(255,255,255,0.85)",
     fontStyle: "italic",
   },
   section: {
