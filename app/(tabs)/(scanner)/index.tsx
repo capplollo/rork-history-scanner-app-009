@@ -818,7 +818,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               {scanMode === 'city' ? (
                 <View style={styles.placeholderContent}>
                   <Image 
-                    source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/cgwsc0fi5d2p09741weqt' }}
+                    source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/m8gu1dnbplmvqr48qmq6u' }}
                     style={styles.monumentsIllustration}
                     resizeMode="contain"
                   />
