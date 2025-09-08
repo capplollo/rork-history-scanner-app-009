@@ -701,12 +701,14 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      {/* Status bar background */}
+      <View style={styles.statusBarBackground} />
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Logo and Header Section - Gradient background */}
+        {/* Logo Section - Gradient background */}
         <LinearGradient
           colors={['#1d3557', Colors.background]}
-          style={styles.logoAndHeaderSection}
+          style={styles.logoSection}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
         >
@@ -715,10 +717,14 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             style={styles.logoImage}
             resizeMode="contain"
           />
+        </LinearGradient>
+        
+        {/* Header Subtitle - On background color */}
+        <View style={styles.headerSubtitleSection}>
           <Text style={styles.headerSubtitle}>
             Discover the living stories of monuments and art
           </Text>
-        </LinearGradient>
+        </View>
 
         {/* Scan Mode Toggle */}
         <View style={styles.section}>
@@ -1015,7 +1021,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
 
       </ScrollView>
       <View style={styles.bottomSpacer} />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -1589,17 +1595,31 @@ const styles = StyleSheet.create({
   bottomSpacer: {
     height: 100,
   },
-  logoAndHeaderSection: {
-    paddingTop: 10,
-    paddingBottom: 5,
+  statusBarBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 50,
+    backgroundColor: '#1d3557',
+    zIndex: 1000,
+  },
+  logoSection: {
+    paddingTop: 50,
+    paddingBottom: 10,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
-    minHeight: 60,
+    minHeight: 80,
   },
   logoImage: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
+  },
+  headerSubtitleSection: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    alignItems: 'center',
+    backgroundColor: Colors.background,
   },
 });
