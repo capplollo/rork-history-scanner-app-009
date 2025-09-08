@@ -5,10 +5,11 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
   Image,
   Platform,
+  StatusBar,
 } from "react-native";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BookOpen, Clock, Globe, Award } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
@@ -75,14 +76,16 @@ const featuredArticles = [
 ];
 
 export default function LearnScreen() {
+  const insets = useSafeAreaInsets();
+  
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#1d3557" translucent />
       <ScrollView showsVerticalScrollIndicator={false}>
         <LinearGradient
           colors={['#1d3557', '#4A5B7A', '#77839D', '#A4ABC0', '#D1D3E3', Colors.background]}
-          style={styles.headerGradient}
+          style={[styles.headerGradient, { paddingTop: insets.top + 30 }]}
         >
-
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Explore History</Text>
             <Text style={styles.headerSubtitle}>
@@ -172,7 +175,7 @@ export default function LearnScreen() {
         </View>
       </ScrollView>
       <View style={styles.bottomSpacer} />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -182,7 +185,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   headerGradient: {
-    paddingTop: 30,
     paddingBottom: 40,
     paddingHorizontal: 14,
     alignItems: 'center',
