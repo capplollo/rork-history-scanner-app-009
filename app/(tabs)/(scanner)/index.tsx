@@ -817,13 +817,15 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             <View style={styles.placeholderContainer}>
               {scanMode === 'city' ? (
                 <View style={styles.placeholderContent}>
-                  <Image 
-                    source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/xzknuf9vr64gaw3fyx65q' }}
-                    style={styles.monumentsIllustration}
-                    resizeMode="contain"
-                    onError={(error) => console.log('Image load error:', error)}
-                    onLoad={() => console.log('Image loaded successfully')}
-                  />
+                  <View style={styles.illustrationContainer}>
+                    <Image 
+                      source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/xzknuf9vr64gaw3fyx65q' }}
+                      style={styles.monumentsIllustration}
+                      resizeMode="contain"
+                      onError={(error) => console.log('Image load error:', error)}
+                      onLoad={() => console.log('Image loaded successfully')}
+                    />
+                  </View>
                 </View>
               ) : (
                 <View style={styles.placeholderContent}>
@@ -1745,10 +1747,19 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: 'rgba(0,0,0,0.06)',
   },
+  illustrationContainer: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
   monumentsIllustration: {
-    width: '90%',
-    height: '90%',
-    maxWidth: 280,
-    maxHeight: 200,
+    width: 280,
+    height: 200,
   },
 });
