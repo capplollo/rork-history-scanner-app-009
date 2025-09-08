@@ -819,7 +819,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 <View style={styles.placeholderContent}>
                   <View style={styles.illustrationContainer}>
                     <Image 
-                      source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/axwbdwqf2xqfnuy0tkme1' }}
+                      source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/i63tdvana8fphtczbk4my' }}
                       style={styles.monumentsIllustration}
                       resizeMode="contain"
                       onError={(error) => console.log('Image load error:', error)}
