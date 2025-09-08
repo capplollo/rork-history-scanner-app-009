@@ -137,21 +137,22 @@ export default function ScannerScreen() {
         );
         const data = await response.json();
         
-        // Extract district and city
+        // Extract district, city, and country in proper format
         const district = data.locality || data.principalSubdivision || '';
-        const city = data.city || data.countryName || '';
+        const city = data.city || '';
+        const country = data.countryName || '';
         
+        // Format as "district, city, country"
         let addressString = '';
-        if (district && city && district !== city) {
-          addressString = `${district}, ${city}`;
-        } else if (city) {
-          addressString = city;
-        } else if (district) {
-          addressString = district;
-        }
+        const parts = [];
+        if (district) parts.push(district);
+        if (city && city !== district) parts.push(city);
+        if (country) parts.push(country);
+        
+        addressString = parts.join(', ');
         
         setLocationAddress(addressString || 'Location detected');
-        console.log('Address obtained:', addressString);
+        console.log('Address obtained (district, city, country):', addressString);
       } else {
         // Use expo-location reverse geocoding for mobile
         const addresses = await Location.reverseGeocodeAsync({
@@ -162,21 +163,22 @@ export default function ScannerScreen() {
         if (addresses && addresses.length > 0) {
           const address = addresses[0];
           
-          // Extract district and city
+          // Extract district, city, and country in proper format
           const district = address.district || address.subregion || '';
-          const city = address.city || address.region || address.country || '';
+          const city = address.city || address.region || '';
+          const country = address.country || '';
           
+          // Format as "district, city, country"
           let addressString = '';
-          if (district && city && district !== city) {
-            addressString = `${district}, ${city}`;
-          } else if (city) {
-            addressString = city;
-          } else if (district) {
-            addressString = district;
-          }
+          const parts = [];
+          if (district) parts.push(district);
+          if (city && city !== district) parts.push(city);
+          if (country) parts.push(country);
+          
+          addressString = parts.join(', ');
           
           setLocationAddress(addressString || 'Location detected');
-          console.log('Address obtained:', addressString);
+          console.log('Address obtained (district, city, country):', addressString);
         } else {
           setLocationAddress('Location detected');
         }
@@ -388,7 +390,18 @@ When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis 
         } else {
           promptText += ` If the user's location is available, only consider monuments and landmarks within a 4 km radius of that location. Prioritize matches where both the visual details and the location align.`;
         }
-        promptText += `\n\n**GPS LOCATION CONTEXT - User's current location:**\nLatitude: ${userLocation.coords.latitude}\nLongitude: ${userLocation.coords.longitude}\nAccuracy: ${userLocation.coords.accuracy}m`;
+        
+        // Include formatted location address if available
+        let locationContext = `\n\n**GPS LOCATION CONTEXT - User's current location:**\nLatitude: ${userLocation.coords.latitude}\nLongitude: ${userLocation.coords.longitude}\nAccuracy: ${userLocation.coords.accuracy}m`;
+        
+        if (locationAddress && locationAddress !== 'Location detected') {
+          locationContext += `\nFormatted Address: ${locationAddress}`;
+        }
+        
+        promptText += locationContext;
+        console.log('🗺️ Location context added to AI prompt:', locationAddress);
+      } else {
+        console.log('🗺️ Location not included - GPS disabled or location unavailable');
       }
       
       // Add final confidence requirement
