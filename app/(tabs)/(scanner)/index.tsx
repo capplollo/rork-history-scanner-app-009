@@ -778,9 +778,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             resizeMode="contain"
           />
           {!selectedImage && (
-            <Text style={styles.headerSubtitle} numberOfLines={1}>
-              Discover the living stories of monuments and art
-            </Text>
+            <>
+              <View style={styles.subtleLine} />
+              <Text style={styles.headerSubtitle} numberOfLines={1}>
+                Discover the living stories of monuments and art
+              </Text>
+            </>
           )}
         </View>
 
@@ -1723,5 +1726,11 @@ const styles = StyleSheet.create({
   logoImageSmall: {
     width: 50,
     height: 50,
+  },
+  subtleLine: {
+    width: 60,
+    height: 1,
+    backgroundColor: Colors.border,
+    opacity: 0.3,
   },
 });
