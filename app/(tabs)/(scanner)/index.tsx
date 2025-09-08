@@ -1767,7 +1767,9 @@ const styles = StyleSheet.create({
     height: 340,
   },
   museumIllustration: {
-    width: 400,
-    height: 300,
+    width: '90%',
+    height: '80%',
+    maxWidth: 400,
+    maxHeight: 300,
   },
 });
