@@ -22,7 +22,10 @@ import {
   Clock,
   X,
   History,
-  Share2
+  Share2,
+  Calendar,
+  Globe,
+  Heart
 } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
@@ -31,6 +34,7 @@ import Colors from "@/constants/colors";
 
 export default function ProfileScreen() {
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [sortMode, setSortMode] = useState<'date' | 'country' | 'favourites'>('date');
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -144,6 +148,38 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+        {/* Horizontal subtle lines */}
+        <View style={styles.subtleLinesContainer}>
+          <View style={styles.subtleLine} />
+        </View>
+
+        {/* Sort Menu */}
+        <View style={styles.sortSection}>
+          <View style={styles.sortToggleContainer}>
+            <TouchableOpacity 
+              style={[styles.sortButton, sortMode === 'date' && styles.sortButtonActive]}
+              onPress={() => setSortMode('date')}
+            >
+              <Calendar size={16} color={sortMode === 'date' ? '#ffffff' : Colors.text.secondary} />
+              <Text style={[styles.sortButtonText, sortMode === 'date' && styles.sortButtonTextActive]}>Date</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.sortButton, sortMode === 'country' && styles.sortButtonActive]}
+              onPress={() => setSortMode('country')}
+            >
+              <Globe size={16} color={sortMode === 'country' ? '#ffffff' : Colors.text.secondary} />
+              <Text style={[styles.sortButtonText, sortMode === 'country' && styles.sortButtonTextActive]}>Country</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.sortButton, sortMode === 'favourites' && styles.sortButtonActive]}
+              onPress={() => setSortMode('favourites')}
+            >
+              <Heart size={16} color={sortMode === 'favourites' ? '#ffffff' : Colors.text.secondary} />
+              <Text style={[styles.sortButtonText, sortMode === 'favourites' && styles.sortButtonTextActive]}>Favourites</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Discovery History directly on background */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -254,9 +290,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingHorizontal: 24,
     paddingVertical: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.06)',
-    marginBottom: 24,
   },
   statItem: {
     alignItems: 'center',
@@ -556,5 +589,56 @@ const styles = StyleSheet.create({
 
   bottomSpacer: {
     height: 100,
+  },
+  subtleLinesContainer: {
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  subtleLine: {
+    width: 320,
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.06)',
+  },
+  sortSection: {
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  sortToggleContainer: {
+    flexDirection: 'row',
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  sortButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 6,
+  },
+  sortButtonActive: {
+    backgroundColor: Colors.accent.secondary,
+  },
+  sortButtonText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: Colors.text.secondary,
+  },
+  sortButtonTextActive: {
+    color: '#ffffff',
+    fontWeight: "600",
   },
 });
