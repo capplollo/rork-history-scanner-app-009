@@ -710,7 +710,9 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             style={styles.logoImage}
             resizeMode="contain"
           />
-
+          <Text style={styles.headerSubtitle}>
+            Discover the living stories of monuments and art
+          </Text>
         </View>
 
         {/* Scan Mode Toggle */}
