@@ -703,10 +703,10 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Logo and Header Section - Gradient background */}
+        {/* Logo Section - Gradient background */}
         <LinearGradient
           colors={['#1d3557', Colors.background]}
-          style={styles.logoAndHeaderSection}
+          style={styles.logoSection}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
         >
@@ -715,9 +715,6 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             style={styles.logoImage}
             resizeMode="contain"
           />
-          <Text style={styles.headerSubtitle}>
-            Discover the living stories of monuments and art
-          </Text>
         </LinearGradient>
 
         {/* Scan Mode Toggle */}
@@ -1589,17 +1586,16 @@ const styles = StyleSheet.create({
   bottomSpacer: {
     height: 100,
   },
-  logoAndHeaderSection: {
-    paddingTop: 10,
-    paddingBottom: 5,
+  logoSection: {
+    paddingTop: 5,
+    paddingBottom: 2,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
-    minHeight: 60,
+    minHeight: 30,
   },
   logoImage: {
-    width: 100,
-    height: 100,
+    width: 50,
+    height: 50,
   },
 });
