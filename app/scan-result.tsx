@@ -485,12 +485,39 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         </View>
 
-        {/* Context and Reanalyze Buttons - Only show when not recognized */}
+        {/* Not Recognized Section - Enhanced feedback and options */}
         {!monument.isRecognized && (
           <View style={styles.section}>
-            <View style={styles.actionButtonsContainer}>
+            <View style={styles.notRecognizedCard}>
+              <View style={styles.notRecognizedHeader}>
+                <AlertCircle size={24} color="#f59e0b" />
+                <Text style={styles.notRecognizedTitle}>Monument Not Recognized</Text>
+              </View>
+              
+              <Text style={styles.notRecognizedDescription}>
+                We couldn&apos;t identify this specific monument or artwork. This could be due to lighting conditions, angle, or it might be a lesser-known piece.
+              </Text>
+              
+              <View style={styles.helpSection}>
+                <Text style={styles.helpTitle}>How to improve recognition:</Text>
+                <View style={styles.helpList}>
+                  <View style={styles.helpItem}>
+                    <View style={styles.helpDot} />
+                    <Text style={styles.helpText}>Add context information (location, name, museum)</Text>
+                  </View>
+                  <View style={styles.helpItem}>
+                    <View style={styles.helpDot} />
+                    <Text style={styles.helpText}>Take a clearer photo with better lighting</Text>
+                  </View>
+                  <View style={styles.helpItem}>
+                    <View style={styles.helpDot} />
+                    <Text style={styles.helpText}>Include any visible plaques or labels</Text>
+                  </View>
+                </View>
+              </View>
+              
               <TouchableOpacity
-                style={styles.contextButton}
+                style={styles.addContextButton}
                 onPress={() => {
                   router.push({
                     pathname: '/(tabs)/(scanner)' as any,
@@ -502,25 +529,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 }}
               >
                 <View style={styles.buttonContent}>
-                  <Sparkles size={18} color={Colors.accent.secondary} />
-                  <Text style={styles.contextButtonText}>Add Context</Text>
-                </View>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={[styles.reanalyzeButtonSmall, isReanalyzing && styles.reanalyzeButtonDisabled]}
-                onPress={performReanalysis}
-                disabled={isReanalyzing}
-              >
-                <View style={styles.buttonContent}>
-                  {isReanalyzing ? (
-                    <ActivityIndicator size="small" color="#dc2626" />
-                  ) : (
-                    <RefreshCw size={18} color="#dc2626" />
-                  )}
-                  <Text style={styles.reanalyzeButtonSmallText}>
-                    {isReanalyzing ? 'Reanalyzing...' : 'Reanalyze'}
-                  </Text>
+                  <Sparkles size={20} color="#ffffff" />
+                  <Text style={styles.addContextButtonText}>Add Context & Try Again</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -748,6 +758,106 @@ const styles = StyleSheet.create({
     }),
     fontWeight: '500',
     color: '#FF9800',
+  },
+  notRecognizedCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    borderLeftWidth: 4,
+    borderLeftColor: '#f59e0b',
+  },
+  notRecognizedHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+  notRecognizedTitle: {
+    fontSize: 18,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '600',
+    color: '#2C3E50',
+  },
+  notRecognizedDescription: {
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    lineHeight: 22,
+    color: '#64748b',
+    marginBottom: 20,
+  },
+  helpSection: {
+    marginBottom: 24,
+  },
+  helpTitle: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: '#2C3E50',
+    marginBottom: 12,
+  },
+  helpList: {
+    gap: 8,
+  },
+  helpItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  helpDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#f59e0b',
+    marginTop: 8,
+  },
+  helpText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    lineHeight: 20,
+    color: '#64748b',
+  },
+  addContextButton: {
+    backgroundColor: Colors.accent.secondary,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    shadowColor: Colors.accent.secondary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  addContextButtonText: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: '#ffffff',
   },
   section: {
     marginTop: 16,
