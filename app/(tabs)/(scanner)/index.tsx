@@ -707,7 +707,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         <LinearGradient
           colors={['#1d3557', Colors.background]}
           style={styles.logoAndHeaderSection}
-          start={{ x: 0, y: 0 }}
+          start={{ x: 0, y: 0.5 }}
           end={{ x: 0, y: 1 }}
         >
           <Image 
