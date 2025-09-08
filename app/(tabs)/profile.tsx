@@ -25,7 +25,9 @@ import {
   Share2,
   Calendar,
   Globe,
-  Heart
+  Heart,
+  Trash2,
+  MessageSquare
 } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
@@ -68,7 +70,45 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleDeleteHistory = async () => {
+    Alert.alert(
+      'Delete Discovery History',
+      'Are you sure you want to delete all your discovery history? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            // Here you would implement the actual deletion logic
+            console.log('Deleting discovery history...');
+            Alert.alert('Success', 'Discovery history has been deleted.');
+          },
+        },
+      ]
+    );
+  };
+
+  const handleViewAllPhrases = () => {
+    // Navigate to a phrases view or show modal with all phrases
+    Alert.alert(
+      'All Phrases',
+      'Here you would see all the phrases and descriptions from your discoveries. This feature shows all the historical information and descriptions you\'ve collected.',
+      [
+        {
+          text: 'OK',
+          style: 'default',
+        },
+      ]
+    );
+  };
+
   const menuItems = [
+    { icon: MessageSquare, label: "View All Phrases", action: handleViewAllPhrases },
+    { icon: Trash2, label: "Delete Discovery History", action: handleDeleteHistory },
     { icon: LogOut, label: "Sign Out", action: handleSignOut },
   ];
 
