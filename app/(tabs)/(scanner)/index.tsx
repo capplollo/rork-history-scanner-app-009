@@ -1763,13 +1763,15 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   monumentsIllustration: {
-    width: 476,
-    height: 340,
+    width: screenWidth * 0.85,
+    height: screenWidth * 0.6,
+    maxWidth: 400,
+    maxHeight: 280,
   },
   museumIllustration: {
-    width: '90%',
-    height: '80%',
+    width: screenWidth * 0.85,
+    height: screenWidth * 0.6,
     maxWidth: 400,
-    maxHeight: 300,
+    maxHeight: 280,
   },
 });
