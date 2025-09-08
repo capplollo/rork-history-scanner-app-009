@@ -1094,7 +1094,7 @@ const styles = StyleSheet.create({
     color: Colors.text.muted,
   },
   section: {
-    marginTop: 16,
+    marginTop: 12,
     paddingHorizontal: 14,
   },
   sectionTitle: {
@@ -1122,7 +1122,7 @@ const styles = StyleSheet.create({
   },
   selectedImage: {
     width: '100%',
-    aspectRatio: 1,
+    aspectRatio: 1.15,
     resizeMode: 'cover',
   },
   imageOverlay: {
@@ -1144,7 +1144,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   placeholderContainer: {
-    aspectRatio: 1,
+    aspectRatio: 1.15,
     borderRadius: 16,
     backgroundColor: Colors.surface,
     borderWidth: 2,
@@ -1590,11 +1590,11 @@ const styles = StyleSheet.create({
   logoAndHeaderSection: {
     backgroundColor: Colors.background,
     paddingTop: 20,
-    paddingBottom: 40,
+    paddingBottom: 20,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 20,
+    gap: 12,
   },
   logoImage: {
     width: 100,
