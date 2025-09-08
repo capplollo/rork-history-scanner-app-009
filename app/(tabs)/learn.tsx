@@ -12,9 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BookOpen, Clock, Globe, Award } from "lucide-react-native";
 
-import { LinearGradient } from "expo-linear-gradient";
 import Colors from "@/constants/colors";
-import Logo from "@/components/Logo";
 
 const learningCategories = [
   {
@@ -83,14 +81,7 @@ export default function LearnScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#1d3557" translucent />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <LinearGradient
-          colors={['#1d3557', Colors.background]}
-          style={[styles.headerGradient, { paddingTop: insets.top + 20 }]}
-        >
-          <Logo size={50} style={styles.logo} />
-        </LinearGradient>
-
-        <View style={styles.titleSection}>
+        <View style={[styles.titleSection, { paddingTop: insets.top + 20 }]}>
           <Text style={styles.headerTitle}>Explore History</Text>
           <Text style={styles.headerSubtitle}>
             Discover the stories behind the world's greatest monuments and art
@@ -117,15 +108,12 @@ export default function LearnScreen() {
               return (
                 <TouchableOpacity key={category.id} style={styles.categoryCard}>
                   <Image source={{ uri: category.image }} style={styles.categoryImage} />
-                  <LinearGradient
-                    colors={["transparent", "rgba(0,0,0,0.8)"]}
-                    style={styles.categoryOverlay}
-                  >
+                  <View style={styles.categoryOverlay}>
                     <View style={styles.categoryContent}>
                       <Icon size={24} color="#ffffff" />
                       <Text style={styles.categoryTitle}>{category.title}</Text>
                     </View>
-                  </LinearGradient>
+                  </View>
                 </TouchableOpacity>
               );
             })}
@@ -157,10 +145,7 @@ export default function LearnScreen() {
 
         <View style={styles.section}>
           <TouchableOpacity style={styles.quizCard}>
-            <LinearGradient
-              colors={[Colors.accent.secondary, Colors.cinereous]}
-              style={styles.quizGradient}
-            >
+            <View style={styles.quizGradient}>
               <View style={styles.quizContent}>
                 <Text style={styles.quizTitle}>Daily Challenge</Text>
                 <Text style={styles.quizDescription}>
@@ -173,7 +158,7 @@ export default function LearnScreen() {
               <View style={styles.quizIcon}>
                 <Award size={40} color="rgba(255,255,255,0.3)" />
               </View>
-            </LinearGradient>
+            </View>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -187,18 +172,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  headerGradient: {
-    paddingBottom: 20,
-    paddingHorizontal: 14,
-    alignItems: 'center',
-    position: 'relative',
-  },
-  logo: {
-    marginBottom: 10,
-  },
+
   titleSection: {
     paddingHorizontal: 14,
-    paddingTop: 20,
     paddingBottom: 20,
     alignItems: 'center',
     gap: 20,
@@ -308,6 +284,7 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "flex-end",
     padding: 16,
+    backgroundColor: "rgba(0,0,0,0.4)",
   },
   categoryContent: {
     gap: 8,
@@ -387,6 +364,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     borderRadius: 14,
+    backgroundColor: Colors.accent.secondary,
   },
   quizContent: {
     flex: 1,

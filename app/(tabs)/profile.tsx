@@ -126,6 +126,24 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Stats Counters */}
+        <View style={styles.statsSection}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>12</Text>
+            <Text style={styles.statLabel}>Monuments</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>5</Text>
+            <Text style={styles.statLabel}>Countries</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>3</Text>
+            <Text style={styles.statLabel}>Level</Text>
+          </View>
+        </View>
+
         {/* Discovery History directly on background */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -225,8 +243,47 @@ const styles = StyleSheet.create({
     gap: 20,
     paddingHorizontal: 24,
     paddingTop: 30,
-    paddingBottom: 30,
+    paddingBottom: 20,
     position: 'relative',
+  },
+  statsSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    marginBottom: 10,
+  },
+  statItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  statNumber: {
+    fontSize: 24,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "600",
+    color: Colors.text.primary,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: Colors.text.muted,
+    textAlign: 'center',
+  },
+  statDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: Colors.border,
+    marginHorizontal: 10,
   },
   settingsButton: {
     position: 'absolute',
