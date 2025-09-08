@@ -13,12 +13,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Mail, ArrowLeft } from 'lucide-react-native';
-import { useAuth } from '@/components/AuthContext';
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const { resetPassword, isLoading } = useAuth();
 
   const handleResetPassword = async () => {
     setErrorMessage('');
@@ -35,9 +34,12 @@ export default function ForgotPasswordScreen() {
       return;
     }
 
-    const result = await resetPassword(email);
+    setIsLoading(true);
     
-    if (result.success) {
+    // Simulate password reset process
+    setTimeout(() => {
+      setIsLoading(false);
+      
       Alert.alert(
         'Reset Email Sent',
         'If an account with that email exists, we\'ve sent a password reset link to your email address.',
@@ -48,9 +50,7 @@ export default function ForgotPasswordScreen() {
           }
         ]
       );
-    } else {
-      setErrorMessage(result.error || 'Password reset failed');
-    }
+    }, 1000);
   };
 
   const navigateBack = () => {
