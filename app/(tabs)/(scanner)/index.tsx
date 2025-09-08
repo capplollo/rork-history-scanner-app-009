@@ -1049,10 +1049,10 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             <TouchableOpacity
               style={[
                 styles.analyzeButton, 
-                (isAnalyzing || (scanMode === 'museum' && !labelImage)) && styles.analyzeButtonDisabled
+                (isAnalyzing || (scanMode === 'museum' && !labelImage && !additionalInfo.context.trim())) && styles.analyzeButtonDisabled
               ]}
               onPress={analyzeImage}
-              disabled={isAnalyzing || (scanMode === 'museum' && !labelImage)}
+              disabled={isAnalyzing || (scanMode === 'museum' && !labelImage && !additionalInfo.context.trim())}
             >
               {isAnalyzing ? (
                 <View style={styles.analyzingContainer}>
@@ -1063,8 +1063,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 <View style={styles.analyzeContainer}>
                   <Sparkles size={20} color="#ffffff" />
                   <Text style={styles.analyzeButtonText}>
-                    {scanMode === 'museum' && !labelImage 
-                      ? 'Add Label Photo to Continue'
+                    {scanMode === 'museum' && !labelImage && !additionalInfo.context.trim()
+                      ? 'Add Label Photo or Context to Continue'
                       : 'Discover History'
                     }
                   </Text>
