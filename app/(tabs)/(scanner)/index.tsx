@@ -815,13 +815,23 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             </View>
           ) : (
             <View style={styles.placeholderContainer}>
-              <View style={styles.placeholderContent}>
-                <CameraIcon size={32} color={Colors.accent.secondary} />
-                <Text style={styles.placeholderText}>Ready to Discover</Text>
-                <Text style={styles.placeholderSubtext}>
-                  Capture or select an image to begin
-                </Text>
-              </View>
+              {scanMode === 'city' ? (
+                <View style={styles.placeholderContent}>
+                  <Image 
+                    source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/cgwsc0fi5d2p09741weqt' }}
+                    style={styles.monumentsIllustration}
+                    resizeMode="contain"
+                  />
+                </View>
+              ) : (
+                <View style={styles.placeholderContent}>
+                  <CameraIcon size={32} color={Colors.accent.secondary} />
+                  <Text style={styles.placeholderText}>Ready to Discover</Text>
+                  <Text style={styles.placeholderSubtext}>
+                    Capture or select an image to begin
+                  </Text>
+                </View>
+              )}
             </View>
           )}
         </View>
@@ -1731,5 +1741,11 @@ const styles = StyleSheet.create({
     width: 320,
     height: 1,
     backgroundColor: 'rgba(0,0,0,0.06)',
+  },
+  monumentsIllustration: {
+    width: '100%',
+    height: '100%',
+    maxWidth: 280,
+    maxHeight: 200,
   },
 });
