@@ -710,7 +710,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             style={styles.logoImage}
             resizeMode="contain"
           />
-          <Text style={styles.headerSubtitle}>
+          <Text style={styles.headerSubtitle} numberOfLines={1}>
             Discover the living stories of monuments and art
           </Text>
         </View>
@@ -1066,10 +1066,11 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
+    fontStyle: 'italic',
     color: Colors.text.muted,
     lineHeight: 24,
     textAlign: 'center',
-    maxWidth: 280,
+    maxWidth: 320,
   },
   headerStats: {
     flexDirection: "row",
