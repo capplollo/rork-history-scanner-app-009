@@ -180,14 +180,8 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Discovery History directly on background */}
+        {/* History Cards directly on background */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Discovery History</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>View all</Text>
-            </TouchableOpacity>
-          </View>
           
           {scanHistory.length > 0 ? (
             <View style={styles.historyGrid}>
@@ -592,7 +586,7 @@ const styles = StyleSheet.create({
   },
   subtleLinesContainer: {
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 8,
   },
   subtleLine: {
     width: 320,
