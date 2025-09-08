@@ -1590,12 +1590,12 @@ const styles = StyleSheet.create({
     height: 100,
   },
   logoAndHeaderSection: {
-    paddingTop: 20,
-    paddingBottom: 40,
+    paddingTop: 10,
+    paddingBottom: 20,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 20,
+    gap: 10,
   },
   logoImage: {
     width: 100,
