@@ -14,6 +14,7 @@ import { BookOpen, Clock, Globe, Award } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
 import Colors from "@/constants/colors";
+import Logo from "@/components/Logo";
 
 const learningCategories = [
   {
@@ -83,22 +84,24 @@ export default function LearnScreen() {
       <StatusBar barStyle="light-content" backgroundColor="#1d3557" translucent />
       <ScrollView showsVerticalScrollIndicator={false}>
         <LinearGradient
-          colors={['#1d3557', '#4A5B7A', '#77839D', '#A4ABC0', '#D1D3E3', Colors.background]}
-          style={[styles.headerGradient, { paddingTop: insets.top + 30 }]}
+          colors={['#1d3557', Colors.background]}
+          style={[styles.headerGradient, { paddingTop: insets.top + 20 }]}
         >
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Explore History</Text>
-            <Text style={styles.headerSubtitle}>
-              Discover the stories behind the world's greatest monuments and art
-            </Text>
-            
-            <View style={styles.searchContainer}>
-              <View style={styles.searchBar}>
-                <Text style={styles.searchPlaceholder}>What would you like to learn?</Text>
-              </View>
+          <Logo size={50} style={styles.logo} />
+        </LinearGradient>
+
+        <View style={styles.titleSection}>
+          <Text style={styles.headerTitle}>Explore History</Text>
+          <Text style={styles.headerSubtitle}>
+            Discover the stories behind the world's greatest monuments and art
+          </Text>
+          
+          <View style={styles.searchContainer}>
+            <View style={styles.searchBar}>
+              <Text style={styles.searchPlaceholder}>What would you like to learn?</Text>
             </View>
           </View>
-        </LinearGradient>
+        </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -185,15 +188,19 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   headerGradient: {
-    paddingBottom: 40,
+    paddingBottom: 20,
     paddingHorizontal: 14,
     alignItems: 'center',
     position: 'relative',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
   },
-
-  headerContent: {
+  logo: {
+    marginBottom: 10,
+  },
+  titleSection: {
+    paddingHorizontal: 14,
+    paddingTop: 20,
+    paddingBottom: 20,
+    alignItems: 'center',
     gap: 20,
   },
   headerTitle: {
@@ -204,7 +211,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: "#ffffff",
+    color: Colors.text.primary,
     marginBottom: 12,
     textAlign: 'center',
   },
@@ -215,7 +222,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: "rgba(255,255,255,0.85)",
+    color: Colors.text.muted,
     lineHeight: 24,
     textAlign: 'center',
     maxWidth: 300,
@@ -224,7 +231,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   searchBar: {
-    backgroundColor: "rgba(255,255,255,0.95)",
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 16,
