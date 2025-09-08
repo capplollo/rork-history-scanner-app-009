@@ -79,7 +79,7 @@ export default function LearnScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <LinearGradient
-          colors={['#4A90E2', '#6BA3E8', '#8BB6ED', '#ABC9F2', '#CBDCF7', Colors.background]}
+          colors={['#1d3557', '#4A5B7A', '#77839D', '#A4ABC0', '#D1D3E3', Colors.background]}
           style={styles.headerGradient}
         >
 
