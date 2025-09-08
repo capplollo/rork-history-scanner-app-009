@@ -148,10 +148,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Horizontal subtle lines */}
-        <View style={styles.subtleLinesContainer}>
-          <View style={styles.subtleLine} />
-        </View>
+
 
         {/* Sort Menu */}
         <View style={styles.sortSection}>
