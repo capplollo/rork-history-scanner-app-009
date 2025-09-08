@@ -819,7 +819,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 <View style={styles.placeholderContent}>
                   <View style={styles.illustrationContainer}>
                     <Image 
-                      source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/xzknuf9vr64gaw3fyx65q' }}
+                      source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/axwbdwqf2xqfnuy0tkme1' }}
                       style={styles.monumentsIllustration}
                       resizeMode="contain"
                       onError={(error) => console.log('Image load error:', error)}
@@ -1759,7 +1759,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   monumentsIllustration: {
-    width: 476,
-    height: 340,
+    width: 809,
+    height: 578,
   },
 });
