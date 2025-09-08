@@ -1245,6 +1245,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
     overflow: 'hidden',
+    position: 'relative',
   },
   placeholderContent: {
     alignItems: 'center',
@@ -1752,15 +1753,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.06)',
   },
   illustrationContainer: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
   },
   monumentsIllustration: {
     width: screenWidth * 0.85,
