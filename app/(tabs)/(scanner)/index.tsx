@@ -701,26 +701,15 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
   };
 
   return (
-    <View style={styles.container}>
-      {/* Status bar background */}
-      <View style={styles.statusBarBackground} />
+    <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Logo Section - Gradient background */}
-        <LinearGradient
-          colors={['#1d3557', Colors.background]}
-          style={styles.logoSection}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-        >
+        {/* Logo and Header Section - Unified background */}
+        <View style={styles.logoAndHeaderSection}>
           <Image 
             source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/uort3pngrpa32m7e1q7rn' }}
             style={styles.logoImage}
             resizeMode="contain"
           />
-        </LinearGradient>
-        
-        {/* Header Subtitle - On background color */}
-        <View style={styles.headerSubtitleSection}>
           <Text style={styles.headerSubtitle}>
             Discover the living stories of monuments and art
           </Text>
@@ -1021,7 +1010,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
 
       </ScrollView>
       <View style={styles.bottomSpacer} />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -1595,31 +1584,17 @@ const styles = StyleSheet.create({
   bottomSpacer: {
     height: 100,
   },
-  statusBarBackground: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 50,
-    backgroundColor: '#1d3557',
-    zIndex: 1000,
-  },
-  logoSection: {
-    paddingTop: 50,
-    paddingBottom: 10,
+  logoAndHeaderSection: {
+    backgroundColor: Colors.background,
+    paddingTop: 20,
+    paddingBottom: 40,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 80,
+    gap: 20,
   },
   logoImage: {
-    width: 80,
-    height: 80,
-  },
-  headerSubtitleSection: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    alignItems: 'center',
-    backgroundColor: Colors.background,
+    width: 100,
+    height: 100,
   },
 });
