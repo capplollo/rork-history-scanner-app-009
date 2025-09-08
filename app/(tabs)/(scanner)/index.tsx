@@ -40,6 +40,7 @@ export default function ScannerScreen() {
   const [photoSource, setPhotoSource] = useState<'camera' | 'gallery' | null>(null);
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
   const [locationPermission, setLocationPermission] = useState<Location.PermissionStatus | null>(null);
+  const [locationAddress, setLocationAddress] = useState<string | null>(null);
 
   // Handle reanalysis flow
   useEffect(() => {
@@ -83,7 +84,7 @@ export default function ScannerScreen() {
         // Use web geolocation API
         if ('geolocation' in navigator) {
           navigator.geolocation.getCurrentPosition(
-            (position) => {
+            async (position) => {
               const location: Location.LocationObject = {
                 coords: {
                   latitude: position.coords.latitude,
@@ -98,6 +99,9 @@ export default function ScannerScreen() {
               };
               setUserLocation(location);
               console.log('Web location obtained:', location.coords.latitude, location.coords.longitude);
+              
+              // Get address from coordinates
+              await getAddressFromCoordinates(location.coords.latitude, location.coords.longitude);
             },
             (error) => {
               console.error('Web geolocation error:', error);
@@ -114,10 +118,72 @@ export default function ScannerScreen() {
         });
         setUserLocation(location);
         console.log('Mobile location obtained:', location.coords.latitude, location.coords.longitude);
+        
+        // Get address from coordinates
+        await getAddressFromCoordinates(location.coords.latitude, location.coords.longitude);
       }
     } catch (error) {
       console.error('Error getting location:', error);
       Alert.alert('Location Error', 'Unable to get your current location. Please try again.');
+    }
+  };
+
+  const getAddressFromCoordinates = async (latitude: number, longitude: number) => {
+    try {
+      if (Platform.OS === 'web') {
+        // Use a reverse geocoding service for web
+        const response = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+        );
+        const data = await response.json();
+        
+        // Extract district and city
+        const district = data.locality || data.principalSubdivision || '';
+        const city = data.city || data.countryName || '';
+        
+        let addressString = '';
+        if (district && city && district !== city) {
+          addressString = `${district}, ${city}`;
+        } else if (city) {
+          addressString = city;
+        } else if (district) {
+          addressString = district;
+        }
+        
+        setLocationAddress(addressString || 'Location detected');
+        console.log('Address obtained:', addressString);
+      } else {
+        // Use expo-location reverse geocoding for mobile
+        const addresses = await Location.reverseGeocodeAsync({
+          latitude,
+          longitude,
+        });
+        
+        if (addresses && addresses.length > 0) {
+          const address = addresses[0];
+          
+          // Extract district and city
+          const district = address.district || address.subregion || '';
+          const city = address.city || address.region || address.country || '';
+          
+          let addressString = '';
+          if (district && city && district !== city) {
+            addressString = `${district}, ${city}`;
+          } else if (city) {
+            addressString = city;
+          } else if (district) {
+            addressString = district;
+          }
+          
+          setLocationAddress(addressString || 'Location detected');
+          console.log('Address obtained:', addressString);
+        } else {
+          setLocationAddress('Location detected');
+        }
+      }
+    } catch (error) {
+      console.error('Error getting address:', error);
+      setLocationAddress('Location detected');
     }
   };
 
@@ -651,6 +717,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
     });
     setIsGpsEnabled(false);
     setPhotoSource(null);
+    setLocationAddress(null);
   };
 
   const pickLabelImage = async () => {
@@ -796,12 +863,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                   <View style={[styles.gpsToggleThumbSmall, isGpsEnabled && styles.gpsToggleThumbSmallActive]} />
                 </View>
               </TouchableOpacity>
-              {isGpsEnabled && userLocation && (
+              {isGpsEnabled && locationAddress && (
                 <Text style={styles.gpsLocationTextMuseum}>
-                  {userLocation.coords.latitude.toFixed(4)}, {userLocation.coords.longitude.toFixed(4)}
+                  {locationAddress}
                 </Text>
               )}
-              {isGpsEnabled && !userLocation && locationPermission === Location.PermissionStatus.GRANTED && (
+              {isGpsEnabled && !locationAddress && locationPermission === Location.PermissionStatus.GRANTED && (
                 <Text style={styles.gpsLocationTextMuseum}>Getting location...</Text>
               )}
               {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
@@ -900,12 +967,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                   <MapPin size={20} color={Colors.accent.secondary} />
                   <View style={styles.gpsTextContainer}>
                     <Text style={styles.gpsText}>Use current location</Text>
-                    {isGpsEnabled && userLocation && (
+                    {isGpsEnabled && locationAddress && (
                       <Text style={styles.gpsLocationText}>
-                        {userLocation.coords.latitude.toFixed(4)}, {userLocation.coords.longitude.toFixed(4)}
+                        {locationAddress}
                       </Text>
                     )}
-                    {isGpsEnabled && !userLocation && locationPermission === Location.PermissionStatus.GRANTED && (
+                    {isGpsEnabled && !locationAddress && locationPermission === Location.PermissionStatus.GRANTED && (
                       <Text style={styles.gpsLocationText}>Getting location...</Text>
                     )}
                     {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
