@@ -1759,7 +1759,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   monumentsIllustration: {
-    width: 809,
-    height: 578,
+    width: 476,
+    height: 340,
   },
 });
