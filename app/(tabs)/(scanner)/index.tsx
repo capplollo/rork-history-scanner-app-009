@@ -353,16 +353,17 @@ export default function ScannerScreen() {
       let promptText = '';
       
       if (scanMode === 'museum') {
-        promptText = `Analyze this image and identify any artworks or cultural artifacts, including paintings, sculptures, or historical objects. Include paintings that depict buildings/landmarks (identify the painting, not the depicted structure).
+        promptText = `Analyze the label photo or other context information first, then analyze the artwork image. Identify any artworks or cultural artifacts, including paintings, sculptures, or historical objects. Include paintings that depict buildings/landmarks (identify the painting, not the depicted structure).
 
-BE EXTREMELY CONSERVATIVE with identification. Many artworks, especially in museums, have close copies, replicas, or workshop versions. Only identify a specific artwork if you are 95% or more confident it is that exact piece.
+From the label/context, extract title, artist/culture, date, medium, museum/collection, gallery/room, or inventory number. Use this as the starting point for recognition. Only confirm recognition if the label/context details and the artwork image visually align (composition, materials, aspect ratio, inscriptions, distinctive features). Minor OCR errors are acceptable, but if label/context and visuals conflict, mark as not recognized.
+
+BE EXTREMELY CONSERVATIVE with identification. Many artworks have close copies, replicas, workshop variants, or period copies. Only identify a specific artwork if you are 95% or more confident it is that exact piece.
 
 For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
-- Workshop copies, replicas, and similar versions of well-known paintings and sculptures
-- Religious icons, altarpieces, or portraits with common subjects and styles
-- Classical busts and sculptures with recurring poses (emperors, philosophers, deities)
-- Decorative arts and artifacts that exist in series or sets
-- Works attributed to "school of" or "circle of" an artist that look nearly identical
+- Workshop copies, replicas, or casts that look nearly identical
+- Religious icons, altarpieces, and portraits with repeated styles or subjects
+- Busts and sculptures of emperors, philosophers, or deities with recurring typologies
+- Decorative arts in series or sets; "school of" / "circle of" attributions
 
 When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis than incorrect identification.`;
       } else {
@@ -383,7 +384,7 @@ When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis 
       // Add location context if GPS is enabled and location is available
       if (isGpsEnabled && userLocation) {
         if (scanMode === 'museum') {
-          promptText += ` If the user's location is available, only consider artworks housed in museums or galleries within a 2 km radius. Prioritize artworks verifiably in that institution's collection or exhibition, and increase confidence only if both the visual match and location align.`;
+          promptText += ` If the user's location is available, only consider artworks in museums/galleries within a 4 km radius. Prioritize matches where label/context, artwork details, and location all align.`;
         } else {
           promptText += ` If the user's location is available, only consider monuments and landmarks that are known to exist within a 2 km radius of that location. Prioritize those matches and increase confidence only if both the visual details and the location confirm the identification.`;
         }
