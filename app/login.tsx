@@ -8,19 +8,19 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
 import Logo from '@/components/Logo';
+import { useAuth } from '@/components/AuthContext';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const { login, isLoading } = useAuth();
 
   const handleLogin = async () => {
     setErrorMessage('');
@@ -30,19 +30,12 @@ export default function LoginScreen() {
       return;
     }
 
-    setIsLoading(true);
+    const result = await login(email, password);
     
-    // Simulate login process
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      // For demo purposes, accept any email/password
-      if (email && password) {
-        router.replace('/(tabs)');
-      } else {
-        setErrorMessage('Invalid email or password');
-      }
-    }, 1000);
+    if (!result.success) {
+      setErrorMessage(result.error || 'Login failed');
+    }
+    // If successful, AuthGuard will handle navigation
   };
 
   const navigateToSignUp = () => {

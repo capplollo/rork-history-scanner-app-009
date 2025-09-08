@@ -31,10 +31,12 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import Colors from "@/constants/colors";
+import { useAuth } from "@/components/AuthContext";
 
 export default function ProfileScreen() {
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [sortMode, setSortMode] = useState<'date' | 'country' | 'favourites'>('date');
+  const { user, logout } = useAuth();
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -48,9 +50,10 @@ export default function ProfileScreen() {
         {
           text: 'Sign Out',
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
             setShowSettings(false);
-            router.replace('/login');
+            await logout();
+            // AuthGuard will handle navigation to login
           },
         },
       ]
@@ -118,8 +121,8 @@ export default function ProfileScreen() {
           </View>
           
           <View style={styles.profileInfo}>
-            <Text style={styles.userName}>Demo User</Text>
-            <Text style={styles.userEmail}>demo@example.com</Text>
+            <Text style={styles.userName}>{user?.fullName || 'Demo User'}</Text>
+            <Text style={styles.userEmail}>{user?.email || 'demo@example.com'}</Text>
           </View>
           
           <TouchableOpacity 

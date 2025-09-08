@@ -10,11 +10,12 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { Mail, ArrowLeft, RefreshCw, CheckCircle } from 'lucide-react-native';
+import { useAuth } from '@/components/AuthContext';
 
 export default function EmailConfirmationScreen() {
   const [isResending, setIsResending] = useState(false);
-  const [isCheckingConfirmation, setIsCheckingConfirmation] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const { confirmEmail, isLoading } = useAuth();
 
   const handleResendConfirmation = async () => {
     setIsResending(true);
@@ -45,24 +46,19 @@ export default function EmailConfirmationScreen() {
   };
 
   const handleCheckEmail = async () => {
-    setIsCheckingConfirmation(true);
-    try {
-      // Simulate checking email confirmation
+    const result = await confirmEmail('demo-token');
+    
+    if (result.success) {
+      setIsConfirmed(true);
       setTimeout(() => {
-        Alert.alert(
-          'Email Not Confirmed Yet',
-          'Please check your email inbox (and spam folder) for the confirmation link. Click the link to verify your account.',
-          [{ text: 'OK', style: 'default' }]
-        );
-      }, 1000);
-    } catch {
+        // AuthGuard will handle navigation to main app
+      }, 2000);
+    } else {
       Alert.alert(
-        'Check Your Email',
-        'Please check your email inbox (and spam folder) for the confirmation link. Click the link to verify your account.',
+        'Confirmation Failed',
+        result.error || 'Please check your email inbox (and spam folder) for the confirmation link.',
         [{ text: 'OK', style: 'default' }]
       );
-    } finally {
-      setIsCheckingConfirmation(false);
     }
   };
 
@@ -119,9 +115,9 @@ export default function EmailConfirmationScreen() {
             <TouchableOpacity 
               style={styles.primaryButton} 
               onPress={handleCheckEmail}
-              disabled={isCheckingConfirmation}
+              disabled={isLoading}
             >
-              {isCheckingConfirmation ? (
+              {isLoading ? (
                 <ActivityIndicator size="small" color="#FFFFFF" />
               ) : (
                 <Text style={styles.primaryButtonText}>I've Confirmed My Email</Text>
