@@ -10,8 +10,10 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { Mail, ArrowLeft, RefreshCw, CheckCircle } from 'lucide-react-native';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function EmailConfirmationScreen() {
+  const { user } = useAuth();
   const [isResending, setIsResending] = useState(false);
   const [isCheckingConfirmation, setIsCheckingConfirmation] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
