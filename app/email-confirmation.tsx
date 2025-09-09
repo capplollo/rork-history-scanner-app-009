@@ -93,7 +93,7 @@ export default function EmailConfirmationScreen() {
               Your email has been successfully confirmed!
             </Text>
             
-            <Text style={styles.email}>user@example.com</Text>
+            <Text style={styles.email}>{user?.email || 'your-email@example.com'}</Text>
 
             <Text style={styles.description}>
               Redirecting you to the app...
@@ -105,7 +105,7 @@ export default function EmailConfirmationScreen() {
               We've sent a confirmation link to:
             </Text>
             
-            <Text style={styles.email}>user@example.com</Text>
+            <Text style={styles.email}>{user?.email || 'your-email@example.com'}</Text>
 
             <Text style={styles.description}>
               Please check your email and click the confirmation link to verify your account. 

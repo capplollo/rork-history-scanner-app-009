@@ -1,114 +1,219 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Session, User, AuthError } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
 import createContextHook from '@nkzw/create-context-hook';
-import { router } from 'expo-router';
+import { supabase } from '@/lib/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface AuthContextType {
-  session: Session | null;
+interface AuthState {
   user: User | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
-  signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  session: Session | null;
+  isLoading: boolean;
+  isInitialized: boolean;
 }
 
+interface AuthActions {
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: AuthError | null }>;
+  signOut: () => Promise<{ error: AuthError | null }>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  resendConfirmation: (email: string) => Promise<{ error: AuthError | null }>;
+}
+
+type AuthContextType = AuthState & AuthActions;
+
 export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => {
-  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        console.log('Initializing auth...');
+        
+        // Get initial session
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting initial session:', error);
+        } else if (mounted) {
+          console.log('Initial session:', initialSession?.user?.email || 'No session');
+          setSession(initialSession);
+          setUser(initialSession?.user ?? null);
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+      } finally {
+        if (mounted) {
+          setIsInitialized(true);
+        }
+      }
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Auth state changed:', _event, session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+        
+        console.log('Auth state changed:', event, session?.user?.email || 'No session');
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Store user info for offline access
+          await AsyncStorage.setItem('user_email', session.user.email || '');
+        } else if (event === 'SIGNED_OUT') {
+          // Clear stored user info
+          await AsyncStorage.removeItem('user_email');
+        }
+      }
+    );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    console.log('Attempting sign in for:', email);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (error) {
-      console.error('Sign in error:', error.message);
-    } else {
-      console.log('Sign in successful');
+    setIsLoading(true);
+    try {
+      console.log('Signing in user:', email);
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+      
+      if (error) {
+        console.error('Sign in error:', error.message);
+      } else {
+        console.log('Sign in successful');
+      }
+      
+      return { error };
+    } catch (error) {
+      console.error('Sign in exception:', error);
+      return { error: error as AuthError };
+    } finally {
+      setIsLoading(false);
     }
-    
-    return { error };
   }, []);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
-    console.log('Attempting sign up for:', email);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
+    setIsLoading(true);
+    try {
+      console.log('Signing up user:', email);
+      const { error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+        options: {
+          data: {
+            full_name: fullName.trim(),
+          },
         },
-      },
-    });
-    
-    if (error) {
-      console.error('Sign up error:', error.message);
-    } else {
-      console.log('Sign up successful');
+      });
+      
+      if (error) {
+        console.error('Sign up error:', error.message);
+      } else {
+        console.log('Sign up successful - confirmation email sent');
+      }
+      
+      return { error };
+    } catch (error) {
+      console.error('Sign up exception:', error);
+      return { error: error as AuthError };
+    } finally {
+      setIsLoading(false);
     }
-    
-    return { error };
   }, []);
 
   const signOut = useCallback(async () => {
-    console.log('Signing out');
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Sign out error:', error.message);
-    } else {
-      console.log('Sign out successful');
-      router.replace('/login');
+    setIsLoading(true);
+    try {
+      console.log('Signing out user');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Sign out error:', error.message);
+      } else {
+        console.log('Sign out successful');
+      }
+      
+      return { error };
+    } catch (error) {
+      console.error('Sign out exception:', error);
+      return { error: error as AuthError };
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
-    console.log('Requesting password reset for:', email);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.EXPO_PUBLIC_SITE_URL}/reset-password`,
-    });
-    
-    if (error) {
-      console.error('Password reset error:', error.message);
-    } else {
-      console.log('Password reset email sent');
+    setIsLoading(true);
+    try {
+      console.log('Resetting password for:', email);
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        email.trim().toLowerCase(),
+        {
+          redirectTo: 'your-app://reset-password',
+        }
+      );
+      
+      if (error) {
+        console.error('Reset password error:', error.message);
+      } else {
+        console.log('Reset password email sent');
+      }
+      
+      return { error };
+    } catch (error) {
+      console.error('Reset password exception:', error);
+      return { error: error as AuthError };
+    } finally {
+      setIsLoading(false);
     }
-    
-    return { error };
+  }, []);
+
+  const resendConfirmation = useCallback(async (email: string) => {
+    setIsLoading(true);
+    try {
+      console.log('Resending confirmation for:', email);
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email.trim().toLowerCase(),
+      });
+      
+      if (error) {
+        console.error('Resend confirmation error:', error.message);
+      } else {
+        console.log('Confirmation email resent');
+      }
+      
+      return { error };
+    } catch (error) {
+      console.error('Resend confirmation exception:', error);
+      return { error: error as AuthError };
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   return useMemo(() => ({
-    session,
     user,
-    loading,
+    session,
+    isLoading,
+    isInitialized,
     signIn,
     signUp,
     signOut,
     resetPassword,
-  }), [session, user, loading, signIn, signUp, signOut, resetPassword]);
+    resendConfirmation,
+  }), [user, session, isLoading, isInitialized, signIn, signUp, signOut, resetPassword, resendConfirmation]);
 });

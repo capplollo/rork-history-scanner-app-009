@@ -1,15 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
-import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || process.env.EXPO_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = Constants.expoConfig?.extra?.supabaseAnonKey || process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co';
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
+    storage: AsyncStorage,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
@@ -19,40 +16,28 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 export type Database = {
   public: {
     Tables: {
-      scan_history: {
+      profiles: {
         Row: {
           id: string;
-          user_id: string;
-          monument_name: string;
-          location: string;
-          period: string;
-          image_url: string;
-          description: string;
-          confidence: number;
+          email: string;
+          full_name: string | null;
+          avatar_url: string | null;
           created_at: string;
           updated_at: string;
         };
         Insert: {
-          id?: string;
-          user_id: string;
-          monument_name: string;
-          location: string;
-          period: string;
-          image_url: string;
-          description: string;
-          confidence: number;
+          id: string;
+          email: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: {
           id?: string;
-          user_id?: string;
-          monument_name?: string;
-          location?: string;
-          period?: string;
-          image_url?: string;
-          description?: string;
-          confidence?: number;
+          email?: string;
+          full_name?: string | null;
+          avatar_url?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -60,5 +45,3 @@ export type Database = {
     };
   };
 };
-
-export type ScanHistoryItem = Database['public']['Tables']['scan_history']['Row'];

@@ -8,19 +8,20 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
 import Logo from '@/components/Logo';
+import { useAuth } from '@/contexts/AuthContext';
+import { Colors } from '@/constants/colors';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const { signIn, isLoading } = useAuth();
 
   const handleLogin = async () => {
     setErrorMessage('');
@@ -30,19 +31,18 @@ export default function LoginScreen() {
       return;
     }
 
-    setIsLoading(true);
+    const { error } = await signIn(email, password);
     
-    // Simulate login process
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      // For demo purposes, accept any email/password
-      if (email && password) {
-        router.replace('/(tabs)');
-      } else {
+    if (error) {
+      if (error.message.includes('Invalid login credentials')) {
         setErrorMessage('Invalid email or password');
+      } else if (error.message.includes('Email not confirmed')) {
+        setErrorMessage('Please check your email and confirm your account');
+        router.push('/email-confirmation');
+      } else {
+        setErrorMessage(error.message || 'An error occurred during sign in');
       }
-    }, 1000);
+    }
   };
 
   const navigateToSignUp = () => {
@@ -129,7 +129,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
+            <Text style={styles.footerText}>Don&apos;t have an account? </Text>
             <TouchableOpacity onPress={navigateToSignUp}>
               <Text style={styles.signUpText}>Sign Up</Text>
             </TouchableOpacity>
@@ -143,7 +143,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FEFEFE',
+    backgroundColor: Colors.background,
   },
   keyboardView: {
     flex: 1,
@@ -162,29 +162,27 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#2C2C2C',
+    fontWeight: 'bold' as const,
+    color: Colors.text.primary,
     marginBottom: 10,
-    fontFamily: 'Times New Roman',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    fontFamily: 'Times New Roman',
+    color: Colors.text.secondary,
+    textAlign: 'center' as const,
   },
   form: {
     marginBottom: 30,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8F9FA',
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     marginBottom: 16,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: Colors.border,
   },
   inputIcon: {
     marginRight: 12,
@@ -193,8 +191,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 16,
     fontSize: 16,
-    color: '#2C2C2C',
-    fontFamily: 'Times New Roman',
+    color: Colors.text.primary,
   },
   eyeIcon: {
     padding: 4,
@@ -203,16 +200,15 @@ const styles = StyleSheet.create({
     color: '#DC3545',
     fontSize: 14,
     marginBottom: 16,
-    textAlign: 'center',
-    fontFamily: 'Times New Roman',
+    textAlign: 'center' as const,
   },
   loginButton: {
-    backgroundColor: '#8B4513',
+    backgroundColor: Colors.accent.primary,
     paddingVertical: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: 'center' as const,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -222,34 +218,30 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   loginButtonText: {
-    color: '#FFFFFF',
+    color: Colors.surface,
     fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'Times New Roman',
+    fontWeight: '600' as const,
   },
   forgotPasswordButton: {
-    alignItems: 'center',
+    alignItems: 'center' as const,
     paddingVertical: 8,
   },
   forgotPasswordText: {
-    color: '#007AFF',
+    color: Colors.accent.primary,
     fontSize: 16,
-    fontFamily: 'Times New Roman',
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: 'row' as const,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
   },
   footerText: {
     fontSize: 16,
-    color: '#666',
-    fontFamily: 'Times New Roman',
+    color: Colors.text.muted,
   },
   signUpText: {
     fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
-    fontFamily: 'Times New Roman',
+    color: Colors.accent.primary,
+    fontWeight: '600' as const,
   },
 });

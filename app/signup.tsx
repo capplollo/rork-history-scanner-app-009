@@ -8,12 +8,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react-native';
 import Logo from '@/components/Logo';
+import { useAuth } from '@/contexts/AuthContext';
+import { Colors } from '@/constants/colors';
 
 export default function SignUpScreen() {
   const [fullName, setFullName] = useState<string>('');
@@ -22,8 +23,8 @@ export default function SignUpScreen() {
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const { signUp, isLoading } = useAuth();
 
   const handleSignUp = async () => {
     setErrorMessage('');
@@ -43,24 +44,19 @@ export default function SignUpScreen() {
       return;
     }
 
-    setIsLoading(true);
+    const { error } = await signUp(email, password, fullName);
     
-    // Simulate signup process
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      // For demo purposes, accept any valid input
-      Alert.alert(
-        'Account Created',
-        'Your account has been created successfully! Please check your email to confirm your account.',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.replace('/email-confirmation')
-          }
-        ]
-      );
-    }, 1000);
+    if (error) {
+      if (error.message.includes('User already registered')) {
+        setErrorMessage('An account with this email already exists');
+      } else if (error.message.includes('Password should be at least 6 characters')) {
+        setErrorMessage('Password must be at least 6 characters long');
+      } else {
+        setErrorMessage(error.message || 'An error occurred during sign up');
+      }
+    } else {
+      router.replace('/email-confirmation');
+    }
   };
 
   const navigateToLogin = () => {
@@ -182,18 +178,18 @@ export default function SignUpScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FEFEFE',
+    backgroundColor: Colors.background,
   },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: 'center' as const,
     paddingHorizontal: 30,
   },
   header: {
-    alignItems: 'center',
+    alignItems: 'center' as const,
     marginBottom: 40,
   },
   logo: {
@@ -201,29 +197,27 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#2C2C2C',
+    fontWeight: 'bold' as const,
+    color: Colors.text.primary,
     marginBottom: 10,
-    fontFamily: 'Times New Roman',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    fontFamily: 'Times New Roman',
+    color: Colors.text.secondary,
+    textAlign: 'center' as const,
   },
   form: {
     marginBottom: 30,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8F9FA',
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    backgroundColor: Colors.surface,
     borderRadius: 12,
     marginBottom: 16,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#E9ECEF',
+    borderColor: Colors.border,
   },
   inputIcon: {
     marginRight: 12,
@@ -232,8 +226,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 16,
     fontSize: 16,
-    color: '#2C2C2C',
-    fontFamily: 'Times New Roman',
+    color: Colors.text.primary,
   },
   eyeIcon: {
     padding: 4,
@@ -242,16 +235,15 @@ const styles = StyleSheet.create({
     color: '#DC3545',
     fontSize: 14,
     marginBottom: 16,
-    textAlign: 'center',
-    fontFamily: 'Times New Roman',
+    textAlign: 'center' as const,
   },
   signUpButton: {
-    backgroundColor: '#8B4513',
+    backgroundColor: Colors.accent.primary,
     paddingVertical: 16,
     borderRadius: 12,
-    alignItems: 'center',
+    alignItems: 'center' as const,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -261,25 +253,22 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   signUpButtonText: {
-    color: '#FFFFFF',
+    color: Colors.surface,
     fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'Times New Roman',
+    fontWeight: '600' as const,
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: 'row' as const,
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
   },
   footerText: {
     fontSize: 16,
-    color: '#666',
-    fontFamily: 'Times New Roman',
+    color: Colors.text.muted,
   },
   loginText: {
     fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
-    fontFamily: 'Times New Roman',
+    color: Colors.accent.primary,
+    fontWeight: '600' as const,
   },
 });
