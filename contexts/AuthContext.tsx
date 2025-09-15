@@ -11,7 +11,6 @@ interface ScanHistoryItem {
   period: string;
   image: string;
   scannedAt: string;
-  confidence: number;
   description: string;
   userId: string;
 }
@@ -79,7 +78,6 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
             period: item.period,
             image: item.image,
             scanned_at: item.scannedAt,
-            confidence: item.confidence,
             description: item.description
           });
         
@@ -158,7 +156,6 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
           period: item.period,
           image: item.image || '', // Ensure image is never null
           scannedAt: item.scanned_at,
-          confidence: item.confidence || 0, // Ensure confidence is never null
           description: item.description || '',
           userId: item.user_id
         }));
@@ -339,7 +336,6 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
           period: newScan.period,
           image: newScan.image || '', // Ensure image is never null
           scanned_at: newScan.scannedAt,
-          confidence: newScan.confidence || 0, // Ensure confidence is never null
           description: newScan.description || ''
         });
       

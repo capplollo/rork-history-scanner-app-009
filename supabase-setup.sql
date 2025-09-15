@@ -10,7 +10,6 @@ CREATE TABLE scan_history (
   period TEXT NOT NULL,
   image TEXT NOT NULL,
   scanned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  confidence INTEGER DEFAULT 0,
   description TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

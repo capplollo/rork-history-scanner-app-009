@@ -716,7 +716,6 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             location: analysisResult.location,
             period: analysisResult.period,
             image: selectedImage || '',
-            confidence: analysisResult.confidence,
             description: analysisResult.detailedDescription.inDepthContext.substring(0, 200) + '...'
           });
           console.log('✅ Scan saved to history successfully');
