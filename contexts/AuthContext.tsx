@@ -344,12 +344,7 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
         });
       
       if (supabaseError) {
-        console.error('❌ Error saving to Supabase:', {
-          message: supabaseError.message,
-          details: supabaseError.details,
-          hint: supabaseError.hint,
-          code: supabaseError.code
-        });
+        console.error('❌ Error saving to Supabase:', supabaseError.message || 'Unknown error');
         // Continue with local storage as fallback - don't throw error
         console.log('⚠️ Continuing with local storage fallback');
       } else {

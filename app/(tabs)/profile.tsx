@@ -307,14 +307,26 @@ export default function ProfileScreen() {
                     style={styles.monumentOverlay}
                   >
                     <View style={styles.monumentInfo}>
-                      <Text style={styles.monumentName}>
-                        {monument.name.length > 20 ? `${monument.name.substring(0, 20)}...` : monument.name}
+                      <Text style={styles.monumentName} numberOfLines={2}>
+                        {monument.name}
                       </Text>
                       <View style={styles.monumentDetails}>
                         <MapPin size={10} color="rgba(255,255,255,0.8)" />
-                        <Text style={styles.monumentLocation}>{monument.location}</Text>
+                        <Text style={styles.monumentLocation}>
+                          {(() => {
+                            const parts = monument.location.split(',');
+                            if (parts.length >= 2) {
+                              const city = parts[0].trim();
+                              const country = parts[parts.length - 1].trim();
+                              return `${city}, ${country}`;
+                            }
+                            return monument.location;
+                          })()}
+                        </Text>
                       </View>
-                      <Text style={styles.monumentPeriod}>{monument.period}</Text>
+                      <Text style={styles.monumentPeriod}>
+                        {monument.period.length > 15 ? `${monument.period.substring(0, 15)}...` : monument.period}
+                      </Text>
                     </View>
                   </LinearGradient>
                 </TouchableOpacity>

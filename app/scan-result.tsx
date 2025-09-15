@@ -321,7 +321,7 @@ Provide 4 key takeaways as bullet points and one interesting curiosity about thi
     };
     
     loadMonumentData();
-  }, [monumentId, scanData, resultId, historyItemId, monumentName, location, period, scannedImage, regenerate, artworkName, confidence, isRecognized, keyTakeaways, inDepthContext, curiosities, regenerateContentFromHistory]);
+  }, [monumentId, scanData, resultId, historyItemId, monumentName, location, period, scannedImage, regenerate, artworkName, confidence, isRecognized, keyTakeaways, inDepthContext, curiosities]);
 
   const handleReanalyze = async () => {
     if (!monument?.scannedImage) {
