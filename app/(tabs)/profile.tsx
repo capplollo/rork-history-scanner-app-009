@@ -35,9 +35,10 @@ import Colors from "@/constants/colors";
 import { useAuth, type ScanHistoryItem } from "@/contexts/AuthContext";
 
 export default function ProfileScreen() {
-  const { user, signOut, scanHistory, userStats, addScanToHistory } = useAuth();
+  const { user, signOut, scanHistory, userStats, addScanToHistory, refreshScanHistory } = useAuth();
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [sortMode, setSortMode] = useState<'date' | 'country' | 'favourites'>('date');
+  const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -91,6 +92,20 @@ export default function ProfileScreen() {
         isRecognized: 'true'
       }
     });
+  };
+  
+  const handleRefresh = async () => {
+    if (!user) return;
+    
+    setRefreshing(true);
+    try {
+      console.log('🔄 Manually refreshing scan history...');
+      await refreshScanHistory();
+    } catch (error) {
+      console.error('Error refreshing:', error);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   // Add demo data for testing
@@ -252,6 +267,19 @@ export default function ProfileScreen() {
 
         {/* History Cards directly on background */}
         <View style={styles.section}>
+          {/* Refresh Button */}
+          <View style={styles.refreshContainer}>
+            <TouchableOpacity 
+              style={[styles.refreshButton, refreshing && styles.refreshButtonDisabled]}
+              onPress={handleRefresh}
+              disabled={refreshing}
+            >
+              <RefreshCw size={16} color={refreshing ? Colors.text.muted : Colors.accent.secondary} />
+              <Text style={[styles.refreshButtonText, refreshing && styles.refreshButtonTextDisabled]}>
+                {refreshing ? 'Refreshing...' : 'Refresh History'}
+              </Text>
+            </TouchableOpacity>
+          </View>
           
           {sortedHistory.length > 0 ? (
             <View style={styles.historyGrid}>
@@ -261,7 +289,19 @@ export default function ProfileScreen() {
                   style={styles.monumentCard}
                   onPress={() => handleHistoryCardPress(monument)}
                 >
-                  <Image source={{ uri: monument.image }} style={styles.monumentImage} />
+                  {monument.image ? (
+                    <Image 
+                      source={{ uri: monument.image }} 
+                      style={styles.monumentImage}
+                      onError={(error) => {
+                        console.log('Image failed to load:', monument.image, error);
+                      }}
+                    />
+                  ) : (
+                    <View style={[styles.monumentImage, styles.placeholderImage]}>
+                      <Camera size={24} color={Colors.text.muted} />
+                    </View>
+                  )}
                   <LinearGradient
                     colors={["transparent", "rgba(0,0,0,0.7)"]}
                     style={styles.monumentOverlay}
@@ -710,5 +750,47 @@ const styles = StyleSheet.create({
   sortButtonTextActive: {
     color: '#ffffff',
     fontWeight: "600",
+  },
+  refreshContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  refreshButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: Colors.surface,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.accent.secondary,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  refreshButtonDisabled: {
+    opacity: 0.6,
+    borderColor: Colors.text.muted,
+  },
+  refreshButtonText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: Colors.accent.secondary,
+  },
+  refreshButtonTextDisabled: {
+    color: Colors.text.muted,
+  },
+  placeholderImage: {
+    backgroundColor: Colors.platinum,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

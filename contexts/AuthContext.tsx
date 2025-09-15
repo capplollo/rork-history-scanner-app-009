@@ -33,6 +33,7 @@ interface AuthContextType {
   signOut: () => Promise<{ error: AuthError | null }>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
   addScanToHistory: (scan: Omit<ScanHistoryItem, 'id' | 'userId' | 'scannedAt'>) => Promise<void>;
+  refreshScanHistory: () => Promise<void>;
   clearUserData: () => Promise<void>;
 }
 
@@ -146,6 +147,8 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
         return;
       }
       
+      console.log('📊 Loaded scan history from Supabase:', historyData?.length || 0, 'items');
+      
       if (historyData && historyData.length > 0) {
         // Convert Supabase data to our format
         const history: ScanHistoryItem[] = historyData.map(item => ({
@@ -153,9 +156,9 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
           name: item.name,
           location: item.location,
           period: item.period,
-          image: item.image,
+          image: item.image || '', // Ensure image is never null
           scannedAt: item.scanned_at,
-          confidence: item.confidence,
+          confidence: item.confidence || 0, // Ensure confidence is never null
           description: item.description || '',
           userId: item.user_id
         }));
@@ -182,6 +185,13 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
   
 
 
+  // Refresh scan history
+  const refreshScanHistory = useCallback(async () => {
+    if (!user) return;
+    console.log('🔄 Refreshing scan history for user:', user.email);
+    await loadUserData(user.id);
+  }, [user, loadUserData]);
+  
   // Clear user data
   const clearUserData = useCallback(async () => {
     setScanHistory([]);
@@ -208,8 +218,10 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          console.log('🔄 Auth state changed - loading user data for:', session.user.email);
           await loadUserData(session.user.id);
         } else {
+          console.log('🔄 Auth state changed - user signed out, clearing data');
           await clearUserData();
         }
         setLoading(false);
@@ -301,9 +313,14 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
 
   // Add scan to history
   const addScanToHistory = useCallback(async (scan: Omit<ScanHistoryItem, 'id' | 'userId' | 'scannedAt'>) => {
-    if (!user) return;
+    if (!user) {
+      console.error('❌ Cannot add scan to history: user not logged in');
+      return;
+    }
     
     try {
+      console.log('💾 Adding scan to history:', scan.name);
+      
       const newScan: ScanHistoryItem = {
         ...scan,
         id: Date.now().toString(),
@@ -320,15 +337,17 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
           name: newScan.name,
           location: newScan.location,
           period: newScan.period,
-          image: newScan.image,
+          image: newScan.image || '', // Ensure image is never null
           scanned_at: newScan.scannedAt,
-          confidence: newScan.confidence,
-          description: newScan.description
+          confidence: newScan.confidence || 0, // Ensure confidence is never null
+          description: newScan.description || ''
         });
       
       if (supabaseError) {
-        console.error('Error saving to Supabase:', supabaseError);
+        console.error('❌ Error saving to Supabase:', supabaseError);
         // Continue with local storage as fallback
+      } else {
+        console.log('✅ Successfully saved to Supabase');
       }
       
       const updatedHistory = [newScan, ...scanHistory];
@@ -351,8 +370,10 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
         AsyncStorage.setItem(historyKey, JSON.stringify(updatedHistory)),
         AsyncStorage.setItem(statsKey, JSON.stringify(newStats))
       ]);
+      
+      console.log('✅ Scan added to history successfully. Total scans:', updatedHistory.length);
     } catch (error) {
-      console.error('Error adding scan to history:', error);
+      console.error('❌ Error adding scan to history:', error);
     }
   }, [user, scanHistory]);
 
@@ -367,8 +388,9 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
     signOut,
     resetPassword,
     addScanToHistory,
+    refreshScanHistory,
     clearUserData,
-  }), [user, session, loading, scanHistory, userStats, signUp, signIn, signOut, resetPassword, addScanToHistory, clearUserData]);
+  }), [user, session, loading, scanHistory, userStats, signUp, signIn, signOut, resetPassword, addScanToHistory, refreshScanHistory, clearUserData]);
 });
 
 // Export types for use in other components

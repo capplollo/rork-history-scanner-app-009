@@ -22,11 +22,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { mockMonuments } from "@/data/mockMonuments";
 import Colors from "@/constants/colors";
+import { useAuth } from "@/contexts/AuthContext";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 export default function ScannerScreen() {
   const { reanalyzeImage, showContext } = useLocalSearchParams();
+  const { addScanToHistory } = useAuth();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<string>("");
@@ -705,6 +707,23 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
       }
       
       setAnalysisStatus("Analysis complete! Preparing results...");
+      
+      // Save to scan history if recognized
+      if (analysisResult.isRecognized && analysisResult.confidence >= 75) {
+        try {
+          await addScanToHistory({
+            name: analysisResult.artworkName,
+            location: analysisResult.location,
+            period: analysisResult.period,
+            image: selectedImage || '',
+            confidence: analysisResult.confidence,
+            description: analysisResult.detailedDescription.inDepthContext.substring(0, 200) + '...'
+          });
+          console.log('✅ Scan saved to history successfully');
+        } catch (error) {
+          console.error('❌ Failed to save scan to history:', error);
+        }
+      }
       
       // Navigate to scan result with AI analysis data
       router.push({
