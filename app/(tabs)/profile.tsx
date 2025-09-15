@@ -267,13 +267,14 @@ export default function ProfileScreen() {
                     style={styles.monumentOverlay}
                   >
                     <View style={styles.monumentInfo}>
-                      <Text style={styles.monumentName}>{monument.name}</Text>
+                      <Text style={styles.monumentName}>
+                        {monument.name.length > 20 ? `${monument.name.substring(0, 20)}...` : monument.name}
+                      </Text>
                       <View style={styles.monumentDetails}>
                         <MapPin size={10} color="rgba(255,255,255,0.8)" />
                         <Text style={styles.monumentLocation}>{monument.location}</Text>
                       </View>
                       <Text style={styles.monumentPeriod}>{monument.period}</Text>
-                      <Text style={styles.monumentScanned}>{formatScanDate(monument.scannedAt)}</Text>
                     </View>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -538,16 +539,7 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     color: "rgba(255,255,255,0.8)",
   },
-  monumentScanned: {
-    fontSize: 10,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "rgba(255,255,255,0.7)",
-    marginTop: 2,
-  },
+
 
 
   emptyState: {
