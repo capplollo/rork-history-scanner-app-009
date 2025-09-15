@@ -20,6 +20,12 @@ CREATE INDEX IF NOT EXISTS idx_scan_history_scanned_at ON scan_history(scanned_a
 -- Enable Row Level Security (RLS)
 ALTER TABLE scan_history ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (to avoid conflicts)
+DROP POLICY IF EXISTS "Users can view their own scan history" ON scan_history;
+DROP POLICY IF EXISTS "Users can insert their own scan history" ON scan_history;
+DROP POLICY IF EXISTS "Users can update their own scan history" ON scan_history;
+DROP POLICY IF EXISTS "Users can delete their own scan history" ON scan_history;
+
 -- Create policy to allow users to only see their own scan history
 CREATE POLICY "Users can view their own scan history" ON scan_history
   FOR SELECT USING (auth.uid() = user_id);
