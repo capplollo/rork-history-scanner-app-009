@@ -12,7 +12,7 @@ import {
   Platform,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { MapPin, Calendar, Share2, CheckCircle, AlertCircle, RefreshCw, ArrowLeft, Sparkles, Clock } from "lucide-react-native";
+import { MapPin, Calendar, Share2, CheckCircle, AlertCircle, RefreshCw, ArrowLeft, Sparkles, Clock, Volume2, VolumeX, Pause, Play } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImageManipulator from "expo-image-manipulator";
 
@@ -63,6 +63,8 @@ export default function ScanResultScreen() {
   } = useLocalSearchParams();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isReanalyzing, setIsReanalyzing] = useState<boolean>(false);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [currentAudio, setCurrentAudio] = useState<any>(null);
 
   
   const [monument, setMonument] = useState<MonumentData | undefined>(undefined);
@@ -395,6 +397,196 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
     Alert.alert('Share', 'Share functionality will be implemented when backend is ready.');
   };
 
+  const handlePlayTTS = async (text: string) => {
+    if (isPlaying) {
+      // Stop current playback
+      if (currentAudio) {
+        try {
+          if (Platform.OS === 'web') {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+          } else {
+            await currentAudio.stopAsync();
+            await currentAudio.unloadAsync();
+          }
+        } catch (error) {
+          console.error('Error stopping audio:', error);
+        }
+      }
+      setIsPlaying(false);
+      setCurrentAudio(null);
+      return;
+    }
+
+    try {
+      setIsPlaying(true);
+      
+      // Clean text for TTS (remove markdown formatting)
+      const cleanText = text
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold formatting
+        .replace(/\*(.*?)\*/g, '$1')     // Remove italic formatting
+        .replace(/\n\n/g, '. ')          // Replace double line breaks with periods
+        .replace(/\n/g, ' ')            // Replace single line breaks with spaces
+        .trim();
+
+      // Charles voice ID from ElevenLabs
+      const charlesVoiceId = 'IKne3meq5aSn9XLyUdCD';
+      
+      // Try ElevenLabs API first (with proper error handling)
+      try {
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${charlesVoiceId}`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'audio/mpeg',
+            'Content-Type': 'application/json',
+            'xi-api-key': process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY || 'demo-key'
+          },
+          body: JSON.stringify({
+            text: cleanText,
+            model_id: 'eleven_monolingual_v1',
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.75,
+              style: 0.0,
+              use_speaker_boost: true
+            }
+          })
+        });
+
+        if (response.ok) {
+          const audioBlob = await response.blob();
+          
+          if (Platform.OS === 'web') {
+            // For web, create audio element
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            
+            audio.onended = () => {
+              setIsPlaying(false);
+              setCurrentAudio(null);
+              URL.revokeObjectURL(audioUrl);
+            };
+            
+            audio.onerror = () => {
+              setIsPlaying(false);
+              setCurrentAudio(null);
+              URL.revokeObjectURL(audioUrl);
+              console.error('Audio playback error');
+            };
+            
+            await audio.play();
+            setCurrentAudio(audio);
+            return;
+          } else {
+            // For mobile, convert blob to base64 and use expo-av
+            const { Audio } = await import('expo-av');
+            
+            // Set audio mode for playback
+            await Audio.setAudioModeAsync({
+              allowsRecordingIOS: false,
+              staysActiveInBackground: false,
+              playsInSilentModeIOS: true,
+              shouldDuckAndroid: true,
+              playThroughEarpieceAndroid: false,
+            });
+            
+            // Convert blob to base64
+            const reader = new FileReader();
+            reader.onload = async () => {
+              try {
+                const base64Audio = reader.result as string;
+                const { sound } = await Audio.Sound.createAsync(
+                  { uri: base64Audio },
+                  { shouldPlay: true }
+                );
+                
+                sound.setOnPlaybackStatusUpdate((status: any) => {
+                  if (status.didJustFinish) {
+                    setIsPlaying(false);
+                    setCurrentAudio(null);
+                  }
+                });
+                
+                setCurrentAudio(sound);
+              } catch (audioError) {
+                console.error('Audio creation error:', audioError);
+                throw audioError;
+              }
+            };
+            reader.readAsDataURL(audioBlob);
+            return;
+          }
+        } else {
+          throw new Error(`ElevenLabs API error: ${response.status}`);
+        }
+      } catch (elevenLabsError) {
+        console.log('ElevenLabs failed, falling back to expo-speech:', elevenLabsError);
+        throw elevenLabsError;
+      }
+      
+    } catch (error) {
+      console.error('TTS Error:', error);
+      setIsPlaying(false);
+      setCurrentAudio(null);
+      
+      // Fallback to expo-speech
+      try {
+        if (Platform.OS !== 'web') {
+          const Speech = await import('expo-speech');
+          const cleanTextForSpeech = text
+            .replace(/\*\*(.*?)\*\*/g, '$1')
+            .replace(/\*(.*?)\*/g, '$1')
+            .replace(/\n\n/g, '. ')
+            .replace(/\n/g, ' ')
+            .trim();
+          
+          Speech.speak(cleanTextForSpeech, {
+            language: 'en-US',
+            pitch: 1.0,
+            rate: 0.85,
+            onDone: () => {
+              setIsPlaying(false);
+            },
+            onError: () => {
+              setIsPlaying(false);
+            }
+          });
+          setIsPlaying(true);
+        } else {
+          // Web fallback using SpeechSynthesis API
+          if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text
+              .replace(/\*\*(.*?)\*\*/g, '$1')
+              .replace(/\*(.*?)\*/g, '$1')
+              .replace(/\n\n/g, '. ')
+              .replace(/\n/g, ' ')
+              .trim());
+            
+            utterance.rate = 0.85;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+            
+            utterance.onend = () => {
+              setIsPlaying(false);
+            };
+            
+            utterance.onerror = () => {
+              setIsPlaying(false);
+            };
+            
+            speechSynthesis.speak(utterance);
+            setCurrentAudio({ cancel: () => speechSynthesis.cancel() });
+          } else {
+            console.error('Speech synthesis not supported');
+          }
+        }
+      } catch (fallbackError) {
+        console.error('Fallback TTS failed:', fallbackError);
+        setIsPlaying(false);
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -555,6 +747,16 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               <View style={styles.cardHeader}>
                 <Clock size={20} color={Colors.accent.secondary} />
                 <Text style={styles.sectionTitle}>In-Depth Context</Text>
+                <TouchableOpacity
+                  style={styles.ttsButton}
+                  onPress={() => handlePlayTTS(monument.detailedDescription!.inDepthContext)}
+                >
+                  {isPlaying ? (
+                    <Pause size={18} color={Colors.accent.secondary} />
+                  ) : (
+                    <Volume2 size={18} color={Colors.accent.secondary} />
+                  )}
+                </TouchableOpacity>
               </View>
               <FormattedText style={styles.descriptionText}>{monument.detailedDescription.inDepthContext}</FormattedText>
             </View>
@@ -910,6 +1112,13 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "500",
     color: "#2C3E50",
+    flex: 1,
+  },
+  ttsButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(139, 69, 19, 0.1)',
+    marginLeft: 12,
   },
   subsection: {
     marginTop: 20,
