@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   StyleSheet,
   Text,
@@ -31,8 +31,10 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import Colors from "@/constants/colors";
+import { useAuth, type ScanHistoryItem } from "@/contexts/AuthContext";
 
 export default function ProfileScreen() {
+  const { user, signOut, scanHistory, userStats, addScanToHistory } = useAuth();
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [sortMode, setSortMode] = useState<'date' | 'country' | 'favourites'>('date');
 
@@ -48,9 +50,12 @@ export default function ProfileScreen() {
         {
           text: 'Sign Out',
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
             setShowSettings(false);
-            router.replace('/login');
+            const { error } = await signOut();
+            if (error) {
+              Alert.alert('Error', 'Failed to sign out. Please try again.');
+            }
           },
         },
       ]
@@ -68,43 +73,91 @@ export default function ProfileScreen() {
     }
   };
 
+  // Add demo data for testing
+  const addDemoData = async () => {
+    const demoScans = [
+      {
+        name: "Colosseum",
+        location: "Rome, Italy",
+        period: "72-80 AD",
+        image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400",
+        confidence: 95,
+        description: "The largest amphitheatre ever built, a testament to Roman engineering prowess."
+      },
+      {
+        name: "Eiffel Tower",
+        location: "Paris, France",
+        period: "1887-1889",
+        image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=400",
+        confidence: 98,
+        description: "An iron lattice tower that became the symbol of Paris and French ingenuity."
+      },
+      {
+        name: "Taj Mahal",
+        location: "Agra, India",
+        period: "1632-1653",
+        image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400",
+        confidence: 92,
+        description: "A white marble mausoleum, considered the jewel of Muslim art in India."
+      }
+    ];
+
+    for (const scan of demoScans) {
+      await addScanToHistory(scan);
+      // Add small delay to ensure different timestamps
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  };
+
   const menuItems = [
     { icon: LogOut, label: "Sign Out", action: handleSignOut },
   ];
 
-  // Mock scan history data - replace with real data
-  const scanHistory = [
-    {
-      id: "1",
-      name: "Colosseum",
-      location: "Rome, Italy",
-      period: "72-80 AD",
-      image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400",
-      scannedAt: "2 days ago",
-      confidence: 95,
-      description: "The largest amphitheatre ever built, a testament to Roman engineering prowess."
-    },
-    {
-      id: "2",
-      name: "Eiffel Tower",
-      location: "Paris, France",
-      period: "1887-1889",
-      image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=400",
-      scannedAt: "1 week ago",
-      confidence: 98,
-      description: "An iron lattice tower that became the symbol of Paris and French ingenuity."
-    },
-    {
-      id: "3",
-      name: "Taj Mahal",
-      location: "Agra, India",
-      period: "1632-1653",
-      image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400",
-      scannedAt: "2 weeks ago",
-      confidence: 92,
-      description: "A white marble mausoleum, considered the jewel of Muslim art in India."
-    },
-  ];
+  // Add demo data option for testing (only show if no history)
+  if (scanHistory.length === 0) {
+    menuItems.unshift({
+      icon: Camera,
+      label: "Add Demo Data",
+      action: async () => {
+        setShowSettings(false);
+        await addDemoData();
+      }
+    });
+  }
+
+  // Format scan date for display
+  const formatScanDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 14) return '1 week ago';
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return `${Math.floor(diffDays / 30)} months ago`;
+  };
+
+  // Sort scan history based on selected mode
+  const sortedHistory = useMemo(() => {
+    const history = [...scanHistory];
+    switch (sortMode) {
+      case 'date':
+        return history.sort((a, b) => new Date(b.scannedAt).getTime() - new Date(a.scannedAt).getTime());
+      case 'country':
+        return history.sort((a, b) => {
+          const countryA = a.location.split(',').pop()?.trim() || '';
+          const countryB = b.location.split(',').pop()?.trim() || '';
+          return countryA.localeCompare(countryB);
+        });
+      case 'favourites':
+        // For now, sort by confidence as a proxy for favorites
+        return history.sort((a, b) => b.confidence - a.confidence);
+      default:
+        return history;
+    }
+  }, [scanHistory, sortMode]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -118,8 +171,8 @@ export default function ProfileScreen() {
           </View>
           
           <View style={styles.profileInfo}>
-            <Text style={styles.userName}>Demo User</Text>
-            <Text style={styles.userEmail}>demo@example.com</Text>
+            <Text style={styles.userName}>{user?.user_metadata?.full_name || 'User'}</Text>
+            <Text style={styles.userEmail}>{user?.email || 'No email'}</Text>
           </View>
           
           <TouchableOpacity 
@@ -133,17 +186,17 @@ export default function ProfileScreen() {
         {/* Stats Counters */}
         <View style={styles.statsSection}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>12</Text>
+            <Text style={styles.statNumber}>{userStats.totalScans}</Text>
             <Text style={styles.statLabel}>Monuments</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>5</Text>
+            <Text style={styles.statNumber}>{userStats.uniqueCountries}</Text>
             <Text style={styles.statLabel}>Countries</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>3</Text>
+            <Text style={styles.statNumber}>{userStats.level}</Text>
             <Text style={styles.statLabel}>Level</Text>
           </View>
         </View>
@@ -180,9 +233,9 @@ export default function ProfileScreen() {
         {/* History Cards directly on background */}
         <View style={styles.section}>
           
-          {scanHistory.length > 0 ? (
+          {sortedHistory.length > 0 ? (
             <View style={styles.historyGrid}>
-              {scanHistory.map((monument) => (
+              {sortedHistory.map((monument: ScanHistoryItem) => (
                 <TouchableOpacity key={monument.id} style={styles.monumentCard}>
                   <Image source={{ uri: monument.image }} style={styles.monumentImage} />
                   <LinearGradient
@@ -196,6 +249,7 @@ export default function ProfileScreen() {
                         <Text style={styles.monumentLocation}>{monument.location}</Text>
                       </View>
                       <Text style={styles.monumentPeriod}>{monument.period}</Text>
+                      <Text style={styles.monumentScanned}>{formatScanDate(monument.scannedAt)}</Text>
                     </View>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -459,7 +513,16 @@ const styles = StyleSheet.create({
     }),
     fontStyle: "italic",
     color: "rgba(255,255,255,0.8)",
-    marginBottom: 4,
+  },
+  monumentScanned: {
+    fontSize: 10,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: "rgba(255,255,255,0.7)",
+    marginTop: 2,
   },
 
 
