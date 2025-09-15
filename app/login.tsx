@@ -8,13 +8,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react-native';
 import Logo from '@/components/Logo';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState<string>('');
@@ -22,8 +21,6 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
-
-  const { signIn } = useAuth();
 
   const handleLogin = async () => {
     setErrorMessage('');
@@ -35,21 +32,17 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     
-    try {
-      const { error } = await signIn(email, password);
-      
-      if (error) {
-        setErrorMessage(error.message || 'Login failed');
-      } else {
-        // AuthGuard will handle navigation
-        console.log('Login successful');
-      }
-    } catch (error) {
-      setErrorMessage('An unexpected error occurred');
-      console.error('Login error:', error);
-    } finally {
+    // Simulate login process
+    setTimeout(() => {
       setIsLoading(false);
-    }
+      
+      // For demo purposes, accept any email/password
+      if (email && password) {
+        router.replace('/(tabs)');
+      } else {
+        setErrorMessage('Invalid email or password');
+      }
+    }, 1000);
   };
 
   const navigateToSignUp = () => {
@@ -136,7 +129,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don&apos;t have an account? </Text>
+            <Text style={styles.footerText}>Don't have an account? </Text>
             <TouchableOpacity onPress={navigateToSignUp}>
               <Text style={styles.signUpText}>Sign Up</Text>
             </TouchableOpacity>

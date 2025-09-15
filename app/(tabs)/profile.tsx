@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -25,20 +25,16 @@ import {
   Share2,
   Calendar,
   Globe,
-  Heart,
-  RefreshCw
+  Heart
 } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import Colors from "@/constants/colors";
-import { useAuth, type ScanHistoryItem } from "@/contexts/AuthContext";
 
 export default function ProfileScreen() {
-  const { user, signOut, scanHistory, userStats, addScanToHistory, refreshScanHistory } = useAuth();
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [sortMode, setSortMode] = useState<'date' | 'country' | 'favourites'>('date');
-  const [refreshing, setRefreshing] = useState<boolean>(false);
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -52,12 +48,9 @@ export default function ProfileScreen() {
         {
           text: 'Sign Out',
           style: 'destructive',
-          onPress: async () => {
+          onPress: () => {
             setShowSettings(false);
-            const { error } = await signOut();
-            if (error) {
-              Alert.alert('Error', 'Failed to sign out. Please try again.');
-            }
+            router.replace('/login');
           },
         },
       ]
@@ -75,124 +68,43 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleHistoryCardPress = (monument: ScanHistoryItem) => {
-    console.log('History card pressed:', monument.name);
-    
-    // Navigate to scan-result page with regeneration parameters
-    router.push({
-      pathname: '/scan-result',
-      params: {
-        regenerate: 'true',
-        historyItemId: monument.id,
-        monumentName: monument.name,
-        location: monument.location,
-        period: monument.period,
-        scannedImage: monument.image,
-        confidence: (monument.confidence ?? 0).toString(),
-        isRecognized: 'true'
-      }
-    });
-  };
-  
-  const handleRefresh = async () => {
-    if (!user) return;
-    
-    setRefreshing(true);
-    try {
-      console.log('🔄 Manually refreshing scan history...');
-      await refreshScanHistory();
-    } catch (error) {
-      console.error('Error refreshing:', error);
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
-  // Add demo data for testing
-  const addDemoData = async () => {
-    const demoScans = [
-      {
-        name: "Colosseum",
-        location: "Rome, Italy",
-        period: "72-80 AD",
-        image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400",
-        confidence: 95,
-        description: "The largest amphitheatre ever built, a testament to Roman engineering prowess."
-      },
-      {
-        name: "Eiffel Tower",
-        location: "Paris, France",
-        period: "1887-1889",
-        image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=400",
-        confidence: 98,
-        description: "An iron lattice tower that became the symbol of Paris and French ingenuity."
-      },
-      {
-        name: "Taj Mahal",
-        location: "Agra, India",
-        period: "1632-1653",
-        image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400",
-        confidence: 92,
-        description: "A white marble mausoleum, considered the jewel of Muslim art in India."
-      }
-    ];
-
-    for (const scan of demoScans) {
-      await addScanToHistory(scan);
-      // Add small delay to ensure different timestamps
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-  };
-
   const menuItems = [
     { icon: LogOut, label: "Sign Out", action: handleSignOut },
   ];
 
-  // Add demo data option for testing (only show if no history)
-  if (scanHistory.length === 0) {
-    menuItems.unshift({
-      icon: Camera,
-      label: "Add Demo Data",
-      action: async () => {
-        setShowSettings(false);
-        await addDemoData();
-      }
-    });
-  }
-
-  // Format scan date for display
-  const formatScanDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) return '1 day ago';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 14) return '1 week ago';
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    return `${Math.floor(diffDays / 30)} months ago`;
-  };
-
-  // Sort scan history based on selected mode
-  const sortedHistory = useMemo(() => {
-    const history = [...scanHistory];
-    switch (sortMode) {
-      case 'date':
-        return history.sort((a, b) => new Date(b.scannedAt).getTime() - new Date(a.scannedAt).getTime());
-      case 'country':
-        return history.sort((a, b) => {
-          const countryA = a.location.split(',').pop()?.trim() || '';
-          const countryB = b.location.split(',').pop()?.trim() || '';
-          return countryA.localeCompare(countryB);
-        });
-      case 'favourites':
-        // For now, sort by confidence as a proxy for favorites
-        return history.sort((a, b) => b.confidence - a.confidence);
-      default:
-        return history;
-    }
-  }, [scanHistory, sortMode]);
+  // Mock scan history data - replace with real data
+  const scanHistory = [
+    {
+      id: "1",
+      name: "Colosseum",
+      location: "Rome, Italy",
+      period: "72-80 AD",
+      image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400",
+      scannedAt: "2 days ago",
+      confidence: 95,
+      description: "The largest amphitheatre ever built, a testament to Roman engineering prowess."
+    },
+    {
+      id: "2",
+      name: "Eiffel Tower",
+      location: "Paris, France",
+      period: "1887-1889",
+      image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=400",
+      scannedAt: "1 week ago",
+      confidence: 98,
+      description: "An iron lattice tower that became the symbol of Paris and French ingenuity."
+    },
+    {
+      id: "3",
+      name: "Taj Mahal",
+      location: "Agra, India",
+      period: "1632-1653",
+      image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400",
+      scannedAt: "2 weeks ago",
+      confidence: 92,
+      description: "A white marble mausoleum, considered the jewel of Muslim art in India."
+    },
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -206,8 +118,8 @@ export default function ProfileScreen() {
           </View>
           
           <View style={styles.profileInfo}>
-            <Text style={styles.userName}>{user?.user_metadata?.full_name || 'User'}</Text>
-            <Text style={styles.userEmail}>{user?.email || 'No email'}</Text>
+            <Text style={styles.userName}>Demo User</Text>
+            <Text style={styles.userEmail}>demo@example.com</Text>
           </View>
           
           <TouchableOpacity 
@@ -221,17 +133,17 @@ export default function ProfileScreen() {
         {/* Stats Counters */}
         <View style={styles.statsSection}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{userStats.totalScans}</Text>
+            <Text style={styles.statNumber}>12</Text>
             <Text style={styles.statLabel}>Monuments</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{userStats.uniqueCountries}</Text>
+            <Text style={styles.statNumber}>5</Text>
             <Text style={styles.statLabel}>Countries</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{userStats.level}</Text>
+            <Text style={styles.statNumber}>3</Text>
             <Text style={styles.statLabel}>Level</Text>
           </View>
         </View>
@@ -267,66 +179,23 @@ export default function ProfileScreen() {
 
         {/* History Cards directly on background */}
         <View style={styles.section}>
-          {/* Refresh Button */}
-          <View style={styles.refreshContainer}>
-            <TouchableOpacity 
-              style={[styles.refreshButton, refreshing && styles.refreshButtonDisabled]}
-              onPress={handleRefresh}
-              disabled={refreshing}
-            >
-              <RefreshCw size={16} color={refreshing ? Colors.text.muted : Colors.accent.secondary} />
-              <Text style={[styles.refreshButtonText, refreshing && styles.refreshButtonTextDisabled]}>
-                {refreshing ? 'Refreshing...' : 'Refresh History'}
-              </Text>
-            </TouchableOpacity>
-          </View>
           
-          {sortedHistory.length > 0 ? (
+          {scanHistory.length > 0 ? (
             <View style={styles.historyGrid}>
-              {sortedHistory.map((monument: ScanHistoryItem) => (
-                <TouchableOpacity 
-                  key={monument.id} 
-                  style={styles.monumentCard}
-                  onPress={() => handleHistoryCardPress(monument)}
-                >
-                  {monument.image ? (
-                    <Image 
-                      source={{ uri: monument.image }} 
-                      style={styles.monumentImage}
-                      onError={(error) => {
-                        console.log('Image failed to load:', monument.image, error);
-                      }}
-                    />
-                  ) : (
-                    <View style={[styles.monumentImage, styles.placeholderImage]}>
-                      <Camera size={24} color={Colors.text.muted} />
-                    </View>
-                  )}
+              {scanHistory.map((monument) => (
+                <TouchableOpacity key={monument.id} style={styles.monumentCard}>
+                  <Image source={{ uri: monument.image }} style={styles.monumentImage} />
                   <LinearGradient
                     colors={["transparent", "rgba(0,0,0,0.7)"]}
                     style={styles.monumentOverlay}
                   >
                     <View style={styles.monumentInfo}>
-                      <Text style={styles.monumentName} numberOfLines={2}>
-                        {monument.name}
-                      </Text>
+                      <Text style={styles.monumentName}>{monument.name}</Text>
                       <View style={styles.monumentDetails}>
                         <MapPin size={10} color="rgba(255,255,255,0.8)" />
-                        <Text style={styles.monumentLocation}>
-                          {(() => {
-                            const parts = monument.location.split(',');
-                            if (parts.length >= 2) {
-                              const city = parts[0].trim();
-                              const country = parts[parts.length - 1].trim();
-                              return `${city}, ${country}`;
-                            }
-                            return monument.location;
-                          })()}
-                        </Text>
+                        <Text style={styles.monumentLocation}>{monument.location}</Text>
                       </View>
-                      <Text style={styles.monumentPeriod}>
-                        {monument.period.length > 15 ? `${monument.period.substring(0, 15)}...` : monument.period}
-                      </Text>
+                      <Text style={styles.monumentPeriod}>{monument.period}</Text>
                     </View>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -590,8 +459,8 @@ const styles = StyleSheet.create({
     }),
     fontStyle: "italic",
     color: "rgba(255,255,255,0.8)",
+    marginBottom: 4,
   },
-
 
 
   emptyState: {
@@ -762,47 +631,5 @@ const styles = StyleSheet.create({
   sortButtonTextActive: {
     color: '#ffffff',
     fontWeight: "600",
-  },
-  refreshContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  refreshButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: Colors.surface,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.accent.secondary,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  refreshButtonDisabled: {
-    opacity: 0.6,
-    borderColor: Colors.text.muted,
-  },
-  refreshButtonText: {
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-    color: Colors.accent.secondary,
-  },
-  refreshButtonTextDisabled: {
-    color: Colors.text.muted,
-  },
-  placeholderImage: {
-    backgroundColor: Colors.platinum,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });

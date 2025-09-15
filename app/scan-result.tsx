@@ -15,7 +15,6 @@ import { useLocalSearchParams, router } from "expo-router";
 import { MapPin, Calendar, Share2, CheckCircle, AlertCircle, RefreshCw, ArrowLeft, Sparkles, Clock } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImageManipulator from "expo-image-manipulator";
-import { useAuth } from "@/contexts/AuthContext";
 
 import { mockMonuments } from "@/data/mockMonuments";
 import FormattedText from "@/components/FormattedText";
@@ -68,119 +67,6 @@ export default function ScanResultScreen() {
   
   const [monument, setMonument] = useState<MonumentData | undefined>(undefined);
   
-  // Function to regenerate content from history using AI API
-  const regenerateContentFromHistory = async (name: string, loc: string, per: string, image: string) => {
-    try {
-      console.log('🤖 Calling AI API to regenerate content for:', name);
-      
-      // Build the regeneration prompt
-      const promptText = `Write exactly 3 condensed paragraphs (together totaling around 1200 words) about ${name}. Separate paragraphs with double line breaks only. Use bold highlights for key terms. Be specific, vivid, and deeply engaging — avoid generalizations. The text should be very interesting, weaving in short stories or anecdotes that both open and close within paragraphs to create a dynamic, narrative flow. Start in medias res with an anecdote or striking detail so it feels like a story.
-
-First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context.
-
-Second paragraph: Visually guide the reader across the artwork/monument — describe it step by step (from top to bottom, left to right, or foreground to background). Detail artistic/architectural elements, materials used, techniques, style characteristics, dimensions, and unique features as if the reader is standing in front of it.
-
-Third paragraph: Discuss cultural impact, significance over the years, and notable events or stories associated with it. Keep the tone vivid, narrative, and engaging, while remaining concise.
-
-Additional context:
-- Monument/Artwork: ${name}
-- Location: ${loc}
-- Period: ${per}
-
-Provide 4 key takeaways as bullet points and one interesting curiosity about this monument.`;
-
-      const requestBody = {
-        messages: [
-          {
-            role: 'user',
-            content: promptText
-          }
-        ]
-      };
-
-      const aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      if (!aiResponse.ok) {
-        throw new Error(`AI API error: ${aiResponse.status}`);
-      }
-
-      const aiResult = await aiResponse.json();
-      
-      if (!aiResult.completion) {
-        throw new Error('AI service returned incomplete response');
-      }
-
-      // Parse the response to extract key takeaways and content
-      const content = aiResult.completion;
-      
-      // Extract key takeaways (look for bullet points or numbered lists)
-      const keyTakeawaysMatch = content.match(/(?:Key takeaways?|Key points?|Important facts?):[\s\S]*?(?:\n\n|$)/i);
-      let keyTakeaways: string[] = [];
-      
-      if (keyTakeawaysMatch) {
-        const takeawaysText = keyTakeawaysMatch[0];
-        keyTakeaways = takeawaysText
-          .split('\n')
-          .filter((line: string) => line.trim().match(/^[•\-\*]|^\d+\./)) // Match bullet points or numbered lists
-          .map((line: string) => line.replace(/^[•\-\*]\s*|^\d+\.\s*/, '').trim())
-          .filter((line: string) => line.length > 0)
-          .slice(0, 4); // Take first 4
-      }
-      
-      // If no structured takeaways found, create them from the content
-      if (keyTakeaways.length === 0) {
-        keyTakeaways = [
-          `${name} is a significant historical monument located in ${loc}`,
-          `Built during ${per}, representing the architectural style of its era`,
-          'This monument holds important cultural and historical significance',
-          'The site continues to attract visitors and researchers from around the world'
-        ];
-      }
-      
-      // Extract curiosity (look for interesting facts or anecdotes)
-      const curiosityMatch = content.match(/(?:Curiosity|Interesting fact|Did you know)[:\s]*([^\n]+)/i);
-      const curiosity = curiosityMatch ? curiosityMatch[1].trim() : 
-        'This monument has fascinating stories and details that continue to be discovered by historians and visitors.';
-      
-      // Create the regenerated monument data
-      const regeneratedMonument: MonumentData = {
-        id: (historyItemId as string) || 'regenerated',
-        name: name,
-        location: loc,
-        country: '',
-        period: per,
-        description: content.substring(0, 200) + '...', // First part as description
-        significance: `This monument holds profound historical and cultural significance in ${loc}.`,
-        facts: keyTakeaways,
-        image: image,
-        scannedImage: image,
-        scannedAt: new Date().toISOString(),
-        confidence: 90,
-        isRecognized: true,
-        detailedDescription: {
-          keyTakeaways: keyTakeaways,
-          inDepthContext: content,
-          curiosities: curiosity
-        }
-      };
-      
-      setMonument(regeneratedMonument);
-      setIsLoading(false);
-      
-      console.log('✅ Content regeneration completed successfully');
-      
-    } catch (error) {
-      console.error('❌ Error regenerating content:', error);
-      throw error; // Re-throw to trigger fallback
-    }
-  };
-
   // Load monument data on component mount
   useEffect(() => {
     const loadMonumentData = async () => {
@@ -238,12 +124,7 @@ Provide 4 key takeaways as bullet points and one interesting curiosity about thi
         console.log('🔄 Regenerating content for history item:', monumentName);
         
         try {
-          // Call AI API to regenerate content for this monument
-          await regenerateContentFromHistory(monumentName as string, location as string, period as string, scannedImage as string);
-          return; // Exit early as regenerateContentFromHistory will set the monument state
-        } catch (error) {
-          console.error('Error during content regeneration:', error);
-          // Fallback to basic monument data
+          // Create basic monument data since backend services are not available
           loadedMonument = {
             id: (historyItemId as string) || 'history-item',
             name: monumentName as string,
@@ -275,6 +156,8 @@ Provide 4 key takeaways as bullet points and one interesting curiosity about thi
               curiosities: 'This monument has been preserved through various historical periods and continues to attract visitors from around the world.'
             }
           };
+        } catch (error) {
+          console.error('Error during content regeneration:', error);
         }
       } else {
         // Try to load from mock data or create basic data
@@ -415,7 +298,7 @@ Respond in this exact JSON format (ensure all strings are properly escaped and n
   "Third key takeaway bullet point - must be specific and informative",
   "Fourth key takeaway bullet point - must be specific and informative"
 ],
-"inDepthContext": "Write exactly 3 condensed paragraphs (together totaling around 1200 words) about [TOPIC]. Separate paragraphs with double line breaks only. Use bold highlights for key terms. Be specific, vivid, and deeply engaging — avoid generalizations. The text should be very interesting, weaving in short stories or anecdotes that both open and close within paragraphs to create a dynamic, narrative flow. Start in medias res with an anecdote or striking detail so it feels like a story.\n First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context.\n Second paragraph: Visually guide the reader across the artwork/monument — describe it step by step (from top to bottom, left to right, or foreground to background). Detail artistic/architectural elements, materials used, techniques, style characteristics, dimensions, and unique features as if the reader is standing in front of it.\n* Third paragraph: Discuss cultural impact, significance over the years, and notable events or stories associated with it. Keep the tone vivid, narrative, and engaging, while remaining concise.",
+"inDepthContext": "Write exactly 3 condensed paragraphs (together totaling around 1375 words) about [TOPIC]. Separate paragraphs with double line breaks only. Use bold highlights for key terms. Be specific, vivid, and deeply engaging — avoid generalizations. The text should be very interesting, weaving in short stories or anecdotes that both open and close within paragraphs to create a dynamic, narrative flow.\n First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context.\n Second paragraph: Visually guide the reader across the artwork/monument — describe it step by step (from top to bottom, left to right, or foreground to background). Detail artistic/architectural elements, materials used, techniques, style characteristics, dimensions, and unique features as if the reader is standing in front of it.\n* Third paragraph: Discuss cultural impact, significance over the years, and notable events or stories associated with it. Keep the tone vivid, narrative, and engaging, while remaining concise.",
 "curiosities": "ONE interesting anecdote, lesser-known fact, or unusual story. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"
 }
 }
@@ -564,7 +447,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                     <>
                       <CheckCircle size={16} color="#4CAF50" />
                       <Text style={styles.recognitionText}>Recognized</Text>
-                      <Text style={styles.confidenceText}>{monument.confidence?.toString() || '0'}%</Text>
+                      <Text style={styles.confidenceText}>{monument.confidence}%</Text>
                     </>
                   ) : (
                     <>

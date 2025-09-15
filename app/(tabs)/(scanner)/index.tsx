@@ -22,13 +22,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { mockMonuments } from "@/data/mockMonuments";
 import Colors from "@/constants/colors";
-import { useAuth } from "@/contexts/AuthContext";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 export default function ScannerScreen() {
   const { reanalyzeImage, showContext } = useLocalSearchParams();
-  const { addScanToHistory } = useAuth();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<string>("");
@@ -431,7 +429,7 @@ Respond in this exact JSON format (ensure all strings are properly escaped and n
     "Third key takeaway bullet point - must be specific and informative",
     "Fourth key takeaway bullet point - must be specific and informative"
   ],
-  "inDepthContext": "Write exactly 3 condensed paragraphs (together totaling around 1200 words) about [TOPIC]. Separate paragraphs with double line breaks only. Use bold highlights for key terms. Be specific, vivid, and deeply engaging — avoid generalizations. The text should be very interesting, weaving in short stories or anecdotes that both open and close within paragraphs to create a dynamic, narrative flow. Start in medias res with an anecdote or striking detail so it feels like a story.\n First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context.\n Second paragraph: Visually guide the reader across the artwork/monument — describe it step by step (from top to bottom, left to right, or foreground to background). Detail artistic/architectural elements, materials used, techniques, style characteristics, dimensions, and unique features as if the reader is standing in front of it.\n* Third paragraph: Discuss cultural impact, significance over the years, and notable events or stories associated with it. Keep the tone vivid, narrative, and engaging, while remaining concise.",
+  "inDepthContext": "Write exactly 3 condensed paragraphs (together totaling around 1375 words) about [TOPIC]. Separate paragraphs with double line breaks only. Use bold highlights for key terms. Be specific, vivid, and deeply engaging — avoid generalizations. The text should be very interesting, weaving in short stories or anecdotes that both open and close within paragraphs to create a dynamic, narrative flow.\n First paragraph: Focus on historical origins, creation context, artist/architect background, and period significance with specific dates and historical context.\n Second paragraph: Visually guide the reader across the artwork/monument — describe it step by step (from top to bottom, left to right, or foreground to background). Detail artistic/architectural elements, materials used, techniques, style characteristics, dimensions, and unique features as if the reader is standing in front of it.\n* Third paragraph: Discuss cultural impact, significance over the years, and notable events or stories associated with it. Keep the tone vivid, narrative, and engaging, while remaining concise.",
   "curiosities": "ONE interesting anecdote, lesser-known fact, or unusual story. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"
 }
 }
@@ -707,23 +705,6 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
       }
       
       setAnalysisStatus("Analysis complete! Preparing results...");
-      
-      // Save to scan history if recognized
-      if (analysisResult.isRecognized && analysisResult.confidence >= 75) {
-        try {
-          await addScanToHistory({
-            name: analysisResult.artworkName,
-            location: analysisResult.location,
-            period: analysisResult.period,
-            image: selectedImage || '',
-            description: analysisResult.detailedDescription.inDepthContext.substring(0, 200) + '...'
-          });
-          console.log('✅ Scan saved to history successfully');
-        } catch (error) {
-          console.error('❌ Error saving to Supabase:', error instanceof Error ? error.message : 'Unknown error');
-          // Don't prevent navigation to scan result page
-        }
-      }
       
       // Navigate to scan result with AI analysis data
       router.push({
