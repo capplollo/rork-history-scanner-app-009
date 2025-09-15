@@ -25,7 +25,8 @@ import {
   Share2,
   Calendar,
   Globe,
-  Heart
+  Heart,
+  RefreshCw
 } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
@@ -71,6 +72,25 @@ export default function ProfileScreen() {
     } catch (error) {
       console.log('Error sharing:', error);
     }
+  };
+
+  const handleHistoryCardPress = (monument: ScanHistoryItem) => {
+    console.log('History card pressed:', monument.name);
+    
+    // Navigate to scan-result page with regeneration parameters
+    router.push({
+      pathname: '/scan-result',
+      params: {
+        regenerate: 'true',
+        historyItemId: monument.id,
+        monumentName: monument.name,
+        location: monument.location,
+        period: monument.period,
+        scannedImage: monument.image,
+        confidence: monument.confidence.toString(),
+        isRecognized: 'true'
+      }
+    });
   };
 
   // Add demo data for testing
@@ -236,7 +256,11 @@ export default function ProfileScreen() {
           {sortedHistory.length > 0 ? (
             <View style={styles.historyGrid}>
               {sortedHistory.map((monument: ScanHistoryItem) => (
-                <TouchableOpacity key={monument.id} style={styles.monumentCard}>
+                <TouchableOpacity 
+                  key={monument.id} 
+                  style={styles.monumentCard}
+                  onPress={() => handleHistoryCardPress(monument)}
+                >
                   <Image source={{ uri: monument.image }} style={styles.monumentImage} />
                   <LinearGradient
                     colors={["transparent", "rgba(0,0,0,0.7)"]}

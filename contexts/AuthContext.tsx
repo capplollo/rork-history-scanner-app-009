@@ -47,8 +47,54 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
     level: 1
   });
 
-  // Load user data from AsyncStorage
-  const loadUserData = useCallback(async (userId: string) => {
+  // Create scan_history table if it doesn't exist
+  const createScanHistoryTable = useCallback(async () => {
+    try {
+      // This will create the table if it doesn't exist
+      // Note: In production, you should create tables via Supabase dashboard or migrations
+      const { error } = await supabase.rpc('create_scan_history_table_if_not_exists');
+      if (error && !error.message.includes('already exists')) {
+        console.log('Table creation result:', error);
+      }
+    } catch (error) {
+      // Table might already exist or RPC might not be available
+      console.log('Table creation attempt:', error);
+    }
+  }, []);
+  
+  // Migrate AsyncStorage data to Supabase
+  const migrateToSupabase = useCallback(async (history: ScanHistoryItem[], userId: string) => {
+    try {
+      console.log('Migrating', history.length, 'items to Supabase');
+      
+      for (const item of history) {
+        const { error } = await supabase
+          .from('scan_history')
+          .insert({
+            id: item.id,
+            user_id: userId,
+            name: item.name,
+            location: item.location,
+            period: item.period,
+            image: item.image,
+            scanned_at: item.scannedAt,
+            confidence: item.confidence,
+            description: item.description
+          });
+        
+        if (error && !error.message.includes('duplicate key')) {
+          console.error('Error migrating item:', error);
+        }
+      }
+      
+      console.log('Migration completed');
+    } catch (error) {
+      console.error('Error during migration:', error);
+    }
+  }, []);
+  
+  // Fallback function to load from AsyncStorage
+  const loadFromAsyncStorage = useCallback(async (userId: string) => {
     try {
       const historyKey = `scanHistory_${userId}`;
       const statsKey = `userStats_${userId}`;
@@ -61,6 +107,8 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
       if (historyData) {
         const history = JSON.parse(historyData) as ScanHistoryItem[];
         setScanHistory(history);
+        // Migrate to Supabase in background
+        migrateToSupabase(history, userId);
       }
       
       if (statsData) {
@@ -70,12 +118,69 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
         // Initialize default stats for new users
         const defaultStats = { totalScans: 0, uniqueCountries: 0, level: 1 };
         setUserStats(defaultStats);
-        await AsyncStorage.setItem(statsKey, JSON.stringify(defaultStats));
+      }
+    } catch (error) {
+      console.error('Error loading from AsyncStorage:', error);
+    }
+  }, [migrateToSupabase]);
+
+  // Load user data from Supabase and fallback to AsyncStorage
+  const loadUserData = useCallback(async (userId: string) => {
+    try {
+      console.log('Loading user data for:', userId);
+      
+      // First, try to create the scan_history table if it doesn't exist
+      await createScanHistoryTable();
+      
+      // Load scan history from Supabase
+      const { data: historyData, error: historyError } = await supabase
+        .from('scan_history')
+        .select('*')
+        .eq('user_id', userId)
+        .order('scanned_at', { ascending: false });
+      
+      if (historyError) {
+        console.error('Error loading history from Supabase:', historyError);
+        // Fallback to AsyncStorage
+        await loadFromAsyncStorage(userId);
+        return;
+      }
+      
+      if (historyData && historyData.length > 0) {
+        // Convert Supabase data to our format
+        const history: ScanHistoryItem[] = historyData.map(item => ({
+          id: item.id,
+          name: item.name,
+          location: item.location,
+          period: item.period,
+          image: item.image,
+          scannedAt: item.scanned_at,
+          confidence: item.confidence,
+          description: item.description || '',
+          userId: item.user_id
+        }));
+        setScanHistory(history);
+        
+        // Calculate stats from history
+        const countries = new Set(history.map(item => item.location.split(',').pop()?.trim()));
+        const newStats: UserStats = {
+          totalScans: history.length,
+          uniqueCountries: countries.size,
+          level: Math.floor(history.length / 5) + 1
+        };
+        setUserStats(newStats);
+      } else {
+        // No data in Supabase, try AsyncStorage migration
+        await loadFromAsyncStorage(userId);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
+      // Fallback to AsyncStorage
+      await loadFromAsyncStorage(userId);
     }
-  }, []);
+  }, [createScanHistoryTable, loadFromAsyncStorage]);
+  
+
 
   // Clear user data
   const clearUserData = useCallback(async () => {
@@ -206,6 +311,26 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
         scannedAt: new Date().toISOString()
       };
       
+      // Save to Supabase first
+      const { error: supabaseError } = await supabase
+        .from('scan_history')
+        .insert({
+          id: newScan.id,
+          user_id: user.id,
+          name: newScan.name,
+          location: newScan.location,
+          period: newScan.period,
+          image: newScan.image,
+          scanned_at: newScan.scannedAt,
+          confidence: newScan.confidence,
+          description: newScan.description
+        });
+      
+      if (supabaseError) {
+        console.error('Error saving to Supabase:', supabaseError);
+        // Continue with local storage as fallback
+      }
+      
       const updatedHistory = [newScan, ...scanHistory];
       setScanHistory(updatedHistory);
       
@@ -218,7 +343,7 @@ export const [AuthProvider, useAuth] = createContextHook<AuthContextType>(() => 
       };
       setUserStats(newStats);
       
-      // Save to AsyncStorage
+      // Also save to AsyncStorage as backup
       const historyKey = `scanHistory_${user.id}`;
       const statsKey = `userStats_${user.id}`;
       
