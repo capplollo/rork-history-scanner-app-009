@@ -20,11 +20,27 @@ CREATE INDEX IF NOT EXISTS idx_scan_history_scanned_at ON scan_history(scanned_a
 -- Enable Row Level Security (RLS)
 ALTER TABLE scan_history ENABLE ROW LEVEL SECURITY;
 
--- Drop existing policies if they exist (to avoid conflicts)
-DROP POLICY IF EXISTS "Users can view their own scan history" ON scan_history;
-DROP POLICY IF EXISTS "Users can insert their own scan history" ON scan_history;
-DROP POLICY IF EXISTS "Users can update their own scan history" ON scan_history;
-DROP POLICY IF EXISTS "Users can delete their own scan history" ON scan_history;
+-- First, check if policies exist and drop them
+DO $
+BEGIN
+  -- Drop policies if they exist
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'scan_history' AND policyname = 'Users can view their own scan history') THEN
+    DROP POLICY "Users can view their own scan history" ON scan_history;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'scan_history' AND policyname = 'Users can insert their own scan history') THEN
+    DROP POLICY "Users can insert their own scan history" ON scan_history;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'scan_history' AND policyname = 'Users can update their own scan history') THEN
+    DROP POLICY "Users can update their own scan history" ON scan_history;
+  END IF;
+  
+  IF EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'scan_history' AND policyname = 'Users can delete their own scan history') THEN
+    DROP POLICY "Users can delete their own scan history" ON scan_history;
+  END IF;
+END
+$;
 
 -- Create policy to allow users to only see their own scan history
 CREATE POLICY "Users can view their own scan history" ON scan_history
