@@ -721,7 +721,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           });
           console.log('✅ Scan saved to history successfully');
         } catch (error) {
-          console.error('❌ Failed to save scan to history:', error);
+          console.error('❌ Error saving to Supabase:', error instanceof Error ? error.message : String(error));
+          // Don't prevent navigation to scan result page
         }
       }
       
