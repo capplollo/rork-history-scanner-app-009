@@ -88,7 +88,7 @@ export default function ProfileScreen() {
         location: monument.location,
         period: monument.period,
         scannedImage: monument.image,
-        confidence: (monument.confidence || 0).toString(),
+        confidence: (monument.confidence ?? 0).toString(),
         isRecognized: 'true'
       }
     });

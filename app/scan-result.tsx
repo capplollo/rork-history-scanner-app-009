@@ -564,7 +564,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                     <>
                       <CheckCircle size={16} color="#4CAF50" />
                       <Text style={styles.recognitionText}>Recognized</Text>
-                      <Text style={styles.confidenceText}>{monument.confidence ? monument.confidence.toString() : '0'}%</Text>
+                      <Text style={styles.confidenceText}>{monument.confidence?.toString() || '0'}%</Text>
                     </>
                   ) : (
                     <>

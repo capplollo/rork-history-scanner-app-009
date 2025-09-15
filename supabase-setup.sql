@@ -1,5 +1,8 @@
+-- Drop existing table if it exists to ensure clean schema
+DROP TABLE IF EXISTS scan_history;
+
 -- Create scan_history table for storing user scan history
-CREATE TABLE IF NOT EXISTS scan_history (
+CREATE TABLE scan_history (
   id TEXT PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
