@@ -20,27 +20,11 @@ CREATE INDEX IF NOT EXISTS idx_scan_history_scanned_at ON scan_history(scanned_a
 -- Enable Row Level Security (RLS)
 ALTER TABLE scan_history ENABLE ROW LEVEL SECURITY;
 
--- First, check if policies exist and drop them
-DO $
-BEGIN
-  -- Drop policies if they exist
-  IF EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'scan_history' AND policyname = 'Users can view their own scan history') THEN
-    DROP POLICY "Users can view their own scan history" ON scan_history;
-  END IF;
-  
-  IF EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'scan_history' AND policyname = 'Users can insert their own scan history') THEN
-    DROP POLICY "Users can insert their own scan history" ON scan_history;
-  END IF;
-  
-  IF EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'scan_history' AND policyname = 'Users can update their own scan history') THEN
-    DROP POLICY "Users can update their own scan history" ON scan_history;
-  END IF;
-  
-  IF EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'scan_history' AND policyname = 'Users can delete their own scan history') THEN
-    DROP POLICY "Users can delete their own scan history" ON scan_history;
-  END IF;
-END
-$;
+-- Drop existing policies if they exist (ignore errors if they don't exist)
+DROP POLICY IF EXISTS "Users can view their own scan history" ON scan_history;
+DROP POLICY IF EXISTS "Users can insert their own scan history" ON scan_history;
+DROP POLICY IF EXISTS "Users can update their own scan history" ON scan_history;
+DROP POLICY IF EXISTS "Users can delete their own scan history" ON scan_history;
 
 -- Create policy to allow users to only see their own scan history
 CREATE POLICY "Users can view their own scan history" ON scan_history
@@ -54,28 +38,3 @@ CREATE POLICY "Users can update their own scan history" ON scan_history
 
 CREATE POLICY "Users can delete their own scan history" ON scan_history
   FOR DELETE USING (auth.uid() = user_id);
-
--- Create function to handle updated_at timestamp
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ language 'plpgsql';
-
--- Create trigger to automatically update updated_at
-CREATE TRIGGER update_scan_history_updated_at
-  BEFORE UPDATE ON scan_history
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
-
--- Optional: Create a function to create the table if it doesn't exist (for the RPC call)
-CREATE OR REPLACE FUNCTION create_scan_history_table_if_not_exists()
-RETURNS void AS $$
-BEGIN
-  -- This function is mainly for the app to call, but the table should already exist
-  -- Just return success
-  RETURN;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
