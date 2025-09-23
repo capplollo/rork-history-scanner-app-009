@@ -12,6 +12,7 @@ import {
   Dimensions,
   TextInput,
   SafeAreaView,
+  Modal,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
@@ -22,6 +23,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { mockMonuments } from "@/data/mockMonuments";
 import Colors from "@/constants/colors";
+import CustomCamera from "@/components/CustomCamera";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -41,6 +43,7 @@ export default function ScannerScreen() {
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
   const [locationPermission, setLocationPermission] = useState<Location.PermissionStatus | null>(null);
   const [locationAddress, setLocationAddress] = useState<string | null>(null);
+  const [showCustomCamera, setShowCustomCamera] = useState(false);
 
   // Handle reanalysis flow
   useEffect(() => {
@@ -212,24 +215,41 @@ export default function ScannerScreen() {
   };
 
   const takePhoto = async () => {
-    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-    
-    if (!permissionResult.granted) {
-      Alert.alert("Permission Required", "Please allow access to your camera to take photos.");
-      return;
-    }
+    if (Platform.OS === 'web') {
+      // Fallback to ImagePicker for web
+      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+      
+      if (!permissionResult.granted) {
+        Alert.alert("Permission Required", "Please allow access to your camera to take photos.");
+        return;
+      }
 
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.6,
-    });
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.6,
+      });
 
-    if (!result.canceled && result.assets[0]) {
-      setSelectedImage(result.assets[0].uri);
-      setPhotoSource('camera');
-      setIsGpsEnabled(true); // Default on for camera photos
+      if (!result.canceled && result.assets[0]) {
+        setSelectedImage(result.assets[0].uri);
+        setPhotoSource('camera');
+        setIsGpsEnabled(true); // Default on for camera photos
+      }
+    } else {
+      // Use custom camera for mobile
+      setShowCustomCamera(true);
     }
+  };
+
+  const handleCustomCameraPhoto = (uri: string) => {
+    setSelectedImage(uri);
+    setPhotoSource('camera');
+    setIsGpsEnabled(true); // Default on for camera photos
+    setShowCustomCamera(false);
+  };
+
+  const handleCustomCameraClose = () => {
+    setShowCustomCamera(false);
   };
 
   const analyzeImage = async () => {
@@ -873,6 +893,19 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             </View>
           </View>
         )}
+
+        {/* Custom Camera Modal */}
+        <Modal
+          visible={showCustomCamera}
+          animationType="slide"
+          presentationStyle="fullScreen"
+          statusBarTranslucent
+        >
+          <CustomCamera
+            onClose={handleCustomCameraClose}
+            onPhotoTaken={handleCustomCameraPhoto}
+          />
+        </Modal>
 
         {/* GPS Location Toggle - Show above art label in museum mode */}
         {selectedImage && scanMode === 'museum' && (
