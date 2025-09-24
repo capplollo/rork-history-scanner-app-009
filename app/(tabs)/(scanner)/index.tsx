@@ -260,18 +260,16 @@ export default function ScannerScreen() {
     setIsAnalyzing(true);
     setAnalysisStatus("Preparing image...");
     
-    // Start the progressive animation
+    // Start the progressive animation - 10 seconds timed animation
     progressAnimation.setValue(0);
     const progressTimer = Animated.timing(progressAnimation, {
       toValue: 1,
-      duration: 12000, // 12 seconds for more realistic progress
+      duration: 10000, // 10 seconds timed animation
       useNativeDriver: false,
     });
     progressTimer.start();
     
     try {
-      // Update progress to 10%
-      progressAnimation.setValue(0.1);
       setAnalysisStatus("Compressing image...");
       
       // Compress image to reduce size for API
@@ -294,12 +292,8 @@ export default function ScannerScreen() {
       
       const base64 = compressedImage.base64;
       
-      // Update progress to 25%
-      progressAnimation.setValue(0.25);
       setAnalysisStatus("Image compressed successfully...");
 
-      // Update progress to 40%
-      progressAnimation.setValue(0.4);
       setAnalysisStatus("Analyzing monuments and art with AI...");
       
       // Validate base64 data
@@ -482,8 +476,6 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
       console.log('Prompt length:', promptText.length, 'characters');
       console.log('Base64 length:', base64.length, 'characters');
       
-      // Update progress to 60%
-      progressAnimation.setValue(0.6);
       setAnalysisStatus("Sending to AI for analysis...");
       
       // Validate prompt length (API might have limits)
@@ -675,8 +667,6 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         throw new Error(`AI service returned incomplete response. Expected 'completion' field but got: ${aiResult ? Object.keys(aiResult).join(', ') : 'null/undefined'}`);
       }
       
-      // Update progress to 85%
-      progressAnimation.setValue(0.85);
       setAnalysisStatus("Processing AI response...");
       
       // Clean and parse the AI response
@@ -749,8 +739,6 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         }
       }
       
-      // Update progress to 100%
-      progressAnimation.setValue(1);
       setAnalysisStatus("Analysis complete! Preparing results...");
       
       // Navigate to scan result with AI analysis data
