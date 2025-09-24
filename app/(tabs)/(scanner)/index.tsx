@@ -1441,14 +1441,7 @@ const styles = StyleSheet.create({
   },
   artLabelInputGroup: {
     gap: 16,
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: 'transparent',
     marginBottom: 16,
   },
   artLabelPlaceholderText: {
@@ -1810,6 +1803,8 @@ const styles = StyleSheet.create({
   labelButtons: {
     flexDirection: 'row',
     gap: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   labelButton: {
     flexDirection: 'row',
