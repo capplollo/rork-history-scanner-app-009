@@ -47,7 +47,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
         throw new Error('Failed to capture photo');
       }
 
-      // Crop to 1:1 aspect ratio for all photos
+      // Crop to 1:1 aspect ratio and resize to 1024x1024 for all photos
       const croppedPhoto = await ImageManipulator.manipulateAsync(
         photo.uri,
         [
@@ -57,6 +57,12 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
               originY: (photo.height - photo.width) / 2,
               width: photo.width,
               height: photo.width, // Make it square (1:1)
+            },
+          },
+          {
+            resize: {
+              width: 1024,
+              height: 1024,
             },
           },
         ],
@@ -109,14 +115,14 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
   
   const getInstructionText = () => {
     if (!isMuseumMode) {
-      return 'Position the monument or artwork in the square frame. The photo will be cropped to 1:1 ratio.';
+      return 'Position the monument or artwork in the square frame. The photo will be cropped to 1:1 ratio and compressed to 1024x1024 pixels.';
     }
     
     switch (currentStep) {
       case 'artwork':
-        return 'First, take a square photo of the artwork itself. Make sure the entire piece is visible and well-lit.';
+        return 'First, take a square photo of the artwork itself. Make sure the entire piece is visible and well-lit. Photo will be compressed to 1024x1024 pixels.';
       case 'label':
-        return 'Now, take a square photo of the artwork\'s information label or placard. This helps with identification.';
+        return 'Now, take a square photo of the artwork\'s information label or placard. This helps with identification. Photo will be compressed to 1024x1024 pixels.';
       default:
         return '';
     }
