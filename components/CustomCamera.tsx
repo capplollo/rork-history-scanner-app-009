@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   },
   cameraViewContainer: {
     width: screenWidth - 40,
-    height: screenWidth - 40,
+    height: (screenWidth - 40) * 1.25, // 25% taller to show more environment
     borderRadius: 20,
     overflow: 'hidden',
     backgroundColor: '#000',
