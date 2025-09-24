@@ -936,7 +936,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         {/* GPS Location Toggle - Show above art label in museum mode */}
         {selectedImage && scanMode === 'museum' && (
           <View style={styles.section}>
-            <View style={styles.gpsContainer}>
+            <View style={[styles.cityControlsContainer]}>
+              <View style={styles.gpsContainer}>
               <View style={styles.gpsLeft}>
                 <MapPin size={20} color={Colors.accent.secondary} />
                 <View style={styles.gpsTextContainer}>
@@ -968,6 +969,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               >
                 <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
               </TouchableOpacity>
+              </View>
             </View>
           </View>
         )}
@@ -975,7 +977,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         {/* Museum Label Image Section */}
         {selectedImage && scanMode === 'museum' && (
           <View style={styles.section}>
-            <View style={styles.artLabelContainer}>
+            <View style={[styles.cityControlsContainer]}>
+              <View style={styles.artLabelContainer}>
               <TouchableOpacity 
                 style={styles.artLabelToggle}
                 onPress={() => setShowArtLabel(!showArtLabel)}
@@ -1056,6 +1059,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                   )}
                 </View>
               )}
+              </View>
             </View>
           </View>
         )}
@@ -1285,7 +1289,7 @@ const styles = StyleSheet.create({
   controlsSeparator: {
     height: 1,
     backgroundColor: 'rgba(0,0,0,0.06)',
-    marginVertical: 6, // Reduced from 8 to 6 to bring buttons closer
+    marginVertical: 4, // Further reduced to bring buttons closer
   },
   sectionTitle: {
     fontSize: 20,
@@ -1489,9 +1493,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12, // Reduced from 16 to 12 to bring buttons closer
+    paddingVertical: 10, // Further reduced to bring buttons closer
     paddingHorizontal: 0,
-    minHeight: 56, // Reduced from 60 to 56
+    minHeight: 52, // Further reduced
     backgroundColor: 'transparent',
   },
   contextToggleLeft: {
@@ -1687,6 +1691,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -14,
     left: -24,
+    right: -24,
     bottom: -14,
     backgroundColor: '#685951',
     borderRadius: 12,
@@ -1917,9 +1922,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12, // Reduced from 16 to 12 to bring buttons closer
+    paddingVertical: 10, // Further reduced to bring buttons closer
     paddingHorizontal: 0,
-    minHeight: 56, // Reduced from 60 to 56
+    minHeight: 52, // Further reduced to match context toggle
     backgroundColor: 'transparent',
   },
   gpsLeft: {
