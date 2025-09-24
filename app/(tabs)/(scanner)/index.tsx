@@ -1083,14 +1083,14 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         {/* Add Context Section - Only show in City mode */}
         {selectedImage && scanMode === 'city' && (
           <View style={styles.section}>
-            <View style={styles.contextCard}>
+            <View style={styles.contextDrawer}>
               <TouchableOpacity 
-                style={styles.infoToggle}
+                style={styles.contextToggle}
                 onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
               >
-                <View style={styles.infoToggleLeft}>
+                <View style={styles.contextToggleLeft}>
                   <Info size={20} color={Colors.accent.secondary} />
-                  <Text style={styles.infoToggleText}>Add Context</Text>
+                  <Text style={styles.contextToggleText}>Add Context</Text>
                   <View style={styles.optionalBadge}>
                     <Text style={styles.optionalText}>Optional</Text>
                   </View>
@@ -1103,14 +1103,14 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               </TouchableOpacity>
 
               {showAdditionalInfo && (
-                <View style={styles.infoForm}>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Context Information</Text>
-                    <Text style={styles.inputHint}>
+                <View style={styles.contextForm}>
+                  <View style={styles.contextInputGroup}>
+                    <Text style={styles.contextInputLabel}>Context Information</Text>
+                    <Text style={styles.contextInputHint}>
                       Add details like location, neighborhood, or landmark information
                     </Text>
                     <TextInput
-                      style={[styles.textInput, styles.textArea]}
+                      style={styles.contextTextInput}
                       placeholder="e.g., Central Park NYC, Times Square, near City Hall..."
                       placeholderTextColor="#999"
                       value={additionalInfo.context}
@@ -1400,6 +1400,86 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
     overflow: 'hidden',
+  },
+  contextDrawer: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'rgba(104, 89, 81, 0.15)',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  contextToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    backgroundColor: 'transparent',
+  },
+  contextToggleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  contextToggleText: {
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "400",
+    color: Colors.text.primary,
+  },
+  contextForm: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: 'transparent',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(104, 89, 81, 0.1)',
+  },
+  contextInputGroup: {
+    gap: 8,
+  },
+  contextInputLabel: {
+    fontSize: 13,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: Colors.text.primary,
+    letterSpacing: 0.2,
+  },
+  contextInputHint: {
+    fontSize: 11,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: Colors.text.muted,
+    marginBottom: 6,
+    lineHeight: 16,
+  },
+  contextTextInput: {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(104, 89, 81, 0.2)',
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: '#2C3E50',
+    lineHeight: 20,
+    height: 100,
+    textAlignVertical: 'top',
   },
   infoToggle: {
     flexDirection: 'row',
