@@ -1524,7 +1524,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     bottom: 0,
-    backgroundColor: '#8B4513', // Brown color
+    backgroundColor: Colors.accent.secondary, // Same brown as button
     borderRadius: 12,
   },
   buttonContent: {
