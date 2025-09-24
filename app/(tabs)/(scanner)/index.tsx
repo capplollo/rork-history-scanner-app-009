@@ -1508,7 +1508,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   analyzeButtonDisabled: {
-    opacity: 0.7,
+    backgroundColor: 'rgba(104, 89, 81, 0.3)', // Semi-transparent brown when disabled
   },
   analyzeGradient: {
     paddingVertical: 20,
@@ -1524,7 +1524,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     bottom: 0,
-    backgroundColor: Colors.accent.secondary, // Same brown as button
+    backgroundColor: '#685951', // Full opacity brown color
     borderRadius: 12,
   },
   buttonContent: {
