@@ -250,6 +250,14 @@ export default function ScannerScreen() {
     setIsGpsEnabled(true); // Default on for camera photos
     setShowCustomCamera(false);
   };
+  
+  const handleTwoPhotosTaken = (artworkUri: string, labelUri: string) => {
+    setSelectedImage(artworkUri);
+    setLabelImage(labelUri);
+    setPhotoSource('camera');
+    setIsGpsEnabled(true); // Default on for camera photos
+    setShowCustomCamera(false);
+  };
 
   const handleCustomCameraClose = () => {
     setShowCustomCamera(false);
@@ -920,6 +928,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           <CustomCamera
             onClose={handleCustomCameraClose}
             onPhotoTaken={handleCustomCameraPhoto}
+            onTwoPhotosTaken={handleTwoPhotosTaken}
+            isMuseumMode={scanMode === 'museum'}
           />
         </Modal>
 
