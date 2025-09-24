@@ -1666,6 +1666,7 @@ const styles = StyleSheet.create({
     elevation: 2,
     overflow: 'hidden',
     position: 'relative',
+    minHeight: 50,
   },
   analyzeButtonDisabled: {
     backgroundColor: 'rgba(104, 89, 81, 0.3)', // Semi-transparent brown when disabled
@@ -1677,24 +1678,26 @@ const styles = StyleSheet.create({
   analyzingContainer: {
     position: 'relative',
     width: '100%',
-    height: '100%',
+    minHeight: 22,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   progressBackground: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    backgroundColor: '#685951', // Full opacity brown color - same as button background
+    top: -14,
+    left: -24,
+    bottom: -14,
+    backgroundColor: '#685951',
     borderRadius: 12,
-    height: '100%',
+    zIndex: 0,
   },
   buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
-    position: 'relative',
-    zIndex: 1,
+    zIndex: 2,
   },
   analyzeContainer: {
     flexDirection: 'row',
