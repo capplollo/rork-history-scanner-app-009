@@ -1526,10 +1526,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    right: 0,
     bottom: 0,
     backgroundColor: '#685951', // Full opacity brown color - same as button background
     borderRadius: 12,
+    height: '100%',
   },
   buttonContent: {
     flexDirection: 'row',
