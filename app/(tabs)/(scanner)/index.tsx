@@ -1139,13 +1139,6 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 )}
               </View>
             </View>
-
-            {/* Subtitle moved closer to controls */}
-            <View style={styles.subtitleContainer}>
-              <Text style={styles.headerSubtitle} numberOfLines={1}>
-                Discover the living stories of monuments and art
-              </Text>
-            </View>
           </View>
         )}
 
@@ -1292,11 +1285,7 @@ const styles = StyleSheet.create({
   controlsSeparator: {
     height: 1,
     backgroundColor: 'rgba(0,0,0,0.06)',
-    marginVertical: 8,
-  },
-  subtitleContainer: {
-    alignItems: 'center',
-    marginTop: 16,
+    marginVertical: 6, // Reduced from 8 to 6 to bring buttons closer
   },
   sectionTitle: {
     fontSize: 20,
@@ -1500,9 +1489,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
+    paddingVertical: 12, // Reduced from 16 to 12 to bring buttons closer
     paddingHorizontal: 0,
-    minHeight: 60,
+    minHeight: 56, // Reduced from 60 to 56
     backgroundColor: 'transparent',
   },
   contextToggleLeft: {
@@ -1925,9 +1914,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
+    paddingVertical: 12, // Reduced from 16 to 12 to bring buttons closer
     paddingHorizontal: 0,
-    minHeight: 60,
+    minHeight: 56, // Reduced from 60 to 56
     backgroundColor: 'transparent',
   },
   gpsLeft: {
