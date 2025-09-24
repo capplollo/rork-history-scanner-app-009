@@ -815,44 +815,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         )}
 
-        {/* Discovery History Button - Show for all monuments */}
-        <View style={styles.section}>
-          <View style={styles.discoveryCard}>
-            <Text style={styles.discoveryTitle}>Discover Historical Context</Text>
-            <Text style={styles.discoverySubtext}>
-              Explore related monuments, historical events, and cultural connections from this time period and location.
-            </Text>
-            
-            <TouchableOpacity
-              style={[styles.discoveryButton, isDiscovering && styles.discoveryButtonActive]}
-              onPress={handleDiscoverHistory}
-              disabled={isDiscovering}
-            >
-              <View style={styles.discoveryButtonContainer}>
-                {/* Background progress bar */}
-                <Animated.View 
-                  style={[
-                    styles.discoveryProgressBar,
-                    {
-                      width: progressAnimation.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0%', '100%'],
-                      }),
-                    }
-                  ]} 
-                />
-                
-                {/* Button content */}
-                <View style={styles.discoveryButtonContent}>
-                  <Clock size={18} color={isDiscovering ? "#ffffff" : Colors.accent.secondary} />
-                  <Text style={[styles.discoveryButtonText, isDiscovering && styles.discoveryButtonTextActive]}>
-                    {isDiscovering ? 'Discovering...' : 'Discover History'}
-                  </Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
+
 
         {/* Recognition Feedback Section - Only show when recognized */}
         {monument.isRecognized && (
