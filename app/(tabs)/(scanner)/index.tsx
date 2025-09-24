@@ -933,51 +933,49 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           />
         </Modal>
 
-        {/* GPS Location Toggle - Show above art label in museum mode */}
+        {/* GPS Location and Art Label Section - Museum Mode */}
         {selectedImage && scanMode === 'museum' && (
-          <View style={styles.section}>
+          <View style={styles.cityControlsSection}>
             <View style={[styles.cityControlsContainer]}>
+              {/* GPS Location Toggle */}
               <View style={styles.gpsContainer}>
-              <View style={styles.gpsLeft}>
-                <MapPin size={20} color={Colors.accent.secondary} />
-                <View style={styles.gpsTextContainer}>
-                  <Text style={styles.gpsText}>Use current location</Text>
-                  {isGpsEnabled && locationAddress && (
-                    <Text style={styles.gpsLocationText}>
-                      {locationAddress}
-                    </Text>
-                  )}
-                  {isGpsEnabled && !locationAddress && locationPermission === Location.PermissionStatus.GRANTED && (
-                    <Text style={styles.gpsLocationText}>Getting location...</Text>
-                  )}
-                  {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
-                    <Text style={styles.gpsLocationText}>Location permission needed</Text>
-                  )}
+                <View style={styles.gpsLeft}>
+                  <MapPin size={20} color={Colors.accent.secondary} />
+                  <View style={styles.gpsTextContainer}>
+                    <Text style={styles.gpsText}>Use current location</Text>
+                    {isGpsEnabled && locationAddress && (
+                      <Text style={styles.gpsLocationText}>
+                        {locationAddress}
+                      </Text>
+                    )}
+                    {isGpsEnabled && !locationAddress && locationPermission === Location.PermissionStatus.GRANTED && (
+                      <Text style={styles.gpsLocationText}>Getting location...</Text>
+                    )}
+                    {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
+                      <Text style={styles.gpsLocationText}>Location permission needed</Text>
+                    )}
+                  </View>
                 </View>
+                <TouchableOpacity 
+                  style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
+                  onPress={() => {
+                    if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
+                      requestLocationPermission().then(() => {
+                        setIsGpsEnabled(true);
+                      });
+                    } else {
+                      setIsGpsEnabled(!isGpsEnabled);
+                    }
+                  }}
+                >
+                  <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity 
-                style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
-                onPress={() => {
-                  if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
-                    requestLocationPermission().then(() => {
-                      setIsGpsEnabled(true);
-                    });
-                  } else {
-                    setIsGpsEnabled(!isGpsEnabled);
-                  }
-                }}
-              >
-                <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
-              </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        )}
 
-        {/* Museum Label Image Section */}
-        {selectedImage && scanMode === 'museum' && (
-          <View style={styles.section}>
-            <View style={[styles.cityControlsContainer]}>
+              {/* Subtle separator line */}
+              <View style={styles.controlsSeparator} />
+
+              {/* Art Label Section */}
               <View style={styles.artLabelContainer}>
               <TouchableOpacity 
                 style={styles.artLabelToggle}
@@ -1443,9 +1441,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
+    paddingVertical: 10, // Match contextToggle spacing
     paddingHorizontal: 0,
-    minHeight: 60,
+    minHeight: 52, // Match contextToggle height
     backgroundColor: 'transparent',
   },
   artLabelToggleLeft: {
