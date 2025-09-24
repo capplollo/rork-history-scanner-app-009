@@ -7,12 +7,11 @@ import {
   Platform,
   Alert,
   SafeAreaView,
-  Image,
   Dimensions,
 } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { X, Camera, CheckCircle, ArrowRight, RotateCcw } from 'lucide-react-native';
+import { X, Camera, CheckCircle, RotateCcw } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -26,9 +25,8 @@ interface CustomCameraProps {
 
 export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, isMuseumMode = false }: CustomCameraProps) {
   const [isCapturing, setIsCapturing] = useState(false);
-  const [currentStep, setCurrentStep] = useState<'artwork' | 'label' | 'complete'>('artwork');
+  const [currentStep, setCurrentStep] = useState<'artwork' | 'label'>('artwork');
   const [artworkPhoto, setArtworkPhoto] = useState<string | null>(null);
-  const [labelPhoto, setLabelPhoto] = useState<string | null>(null);
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
@@ -71,7 +69,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
       const photoUri = croppedPhoto.uri;
       
       if (!isMuseumMode) {
-        // Single photo mode
+        // Single photo mode - directly import
         onPhotoTaken(photoUri);
         return;
       }
@@ -81,8 +79,10 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
         setArtworkPhoto(photoUri);
         setCurrentStep('label');
       } else if (currentStep === 'label') {
-        setLabelPhoto(photoUri);
-        setCurrentStep('complete');
+        // Directly import both photos without review
+        if (artworkPhoto && onTwoPhotosTaken) {
+          onTwoPhotosTaken(artworkPhoto, photoUri);
+        }
       }
     } catch (error) {
       console.error('Error taking picture:', error);
@@ -92,21 +92,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
     }
   };
   
-  const handleComplete = () => {
-    if (artworkPhoto && labelPhoto && onTwoPhotosTaken) {
-      onTwoPhotosTaken(artworkPhoto, labelPhoto);
-    }
-  };
-  
-  const handleRetakePhoto = (photoType: 'artwork' | 'label') => {
-    if (photoType === 'artwork') {
-      setArtworkPhoto(null);
-      setCurrentStep('artwork');
-    } else {
-      setLabelPhoto(null);
-      setCurrentStep('label');
-    }
-  };
+
   
   const getStepTitle = () => {
     if (!isMuseumMode) return 'Take Photo';
@@ -116,8 +102,6 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
         return 'Step 1: Artwork Photo';
       case 'label':
         return 'Step 2: Label Photo';
-      case 'complete':
-        return 'Photos Complete';
       default:
         return 'Take Photos';
     }
@@ -133,8 +117,6 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
         return 'First, take a square photo of the artwork itself. Make sure the entire piece is visible and well-lit.';
       case 'label':
         return 'Now, take a square photo of the artwork\'s information label or placard. This helps with identification.';
-      case 'complete':
-        return 'Great! You\'ve captured both photos. Review them below and tap "Use Photos" to continue.';
       default:
         return '';
     }
@@ -149,8 +131,6 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
         return 'Take Artwork Photo';
       case 'label':
         return 'Take Label Photo';
-      case 'complete':
-        return 'Use Photos';
       default:
         return 'Capture Photo';
     }
@@ -217,46 +197,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
           </TouchableOpacity>
         </View>
         
-        {isMuseumMode && currentStep === 'complete' ? (
-          <View style={styles.reviewSection}>
-            <View style={styles.photoReviewContainer}>
-              <View style={styles.photoReviewItem}>
-                <Text style={styles.photoReviewTitle}>Artwork Photo</Text>
-                {artworkPhoto && (
-                  <View style={styles.photoContainer}>
-                    <Image source={{ uri: artworkPhoto }} style={styles.reviewPhoto} />
-                    <TouchableOpacity 
-                      style={styles.retakeButton}
-                      onPress={() => handleRetakePhoto('artwork')}
-                    >
-                      <Text style={styles.retakeButtonText}>Retake</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-              
-              <View style={styles.photoReviewItem}>
-                <Text style={styles.photoReviewTitle}>Label Photo</Text>
-                {labelPhoto && (
-                  <View style={styles.photoContainer}>
-                    <Image source={{ uri: labelPhoto }} style={styles.reviewPhoto} />
-                    <TouchableOpacity 
-                      style={styles.retakeButton}
-                      onPress={() => handleRetakePhoto('label')}
-                    >
-                      <Text style={styles.retakeButtonText}>Retake</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
-            </View>
-            
-            <Text style={styles.instructionText}>
-              {getInstructionText()}
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.cameraContainer}>
+        <View style={styles.cameraContainer}>
             {isMuseumMode && (
               <View style={styles.stepIndicator}>
                 <View style={[styles.stepDot, currentStep === 'artwork' ? styles.stepDotActive : styles.stepDotComplete]}>
@@ -267,12 +208,8 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
                   )}
                 </View>
                 <View style={styles.stepLine} />
-                <View style={[styles.stepDot, currentStep === 'label' ? styles.stepDotActive : (currentStep === 'complete' ? styles.stepDotComplete : styles.stepDotInactive)]}>
-                  {currentStep === 'complete' ? (
-                    <CheckCircle size={16} color="#ffffff" />
-                  ) : (
-                    <Text style={[styles.stepNumber, currentStep !== 'label' && styles.stepNumberInactive]}>2</Text>
-                  )}
+                <View style={[styles.stepDot, currentStep === 'label' ? styles.stepDotActive : styles.stepDotInactive]}>
+                  <Text style={[styles.stepNumber, currentStep !== 'label' && styles.stepNumberInactive]}>2</Text>
                 </View>
               </View>
             )}
@@ -293,20 +230,15 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
             <Text style={styles.instructionText}>
               {getInstructionText()}
             </Text>
-          </View>
-        )}
+        </View>
         
         <View style={styles.bottomSection}>
           <TouchableOpacity
             style={[styles.captureButton, isCapturing && styles.captureButtonDisabled]}
-            onPress={currentStep === 'complete' ? handleComplete : takePicture}
+            onPress={takePicture}
             disabled={isCapturing}
           >
-            {currentStep === 'complete' ? (
-              <ArrowRight size={24} color="#ffffff" />
-            ) : (
-              <Camera size={24} color="#ffffff" />
-            )}
+            <Camera size={24} color="#ffffff" />
             <Text style={styles.captureButtonText}>
               {getButtonText()}
             </Text>
