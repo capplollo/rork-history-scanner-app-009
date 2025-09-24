@@ -1060,82 +1060,91 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         )}
 
-        {/* GPS Location Toggle - Show for city mode only */}
+        {/* GPS Location and Context Section - Show for city mode only */}
         {selectedImage && scanMode === 'city' && (
-          <View style={styles.section}>
-            <View style={styles.gpsContainer}>
-              <View style={styles.gpsLeft}>
-                <MapPin size={20} color={Colors.accent.secondary} />
-                <View style={styles.gpsTextContainer}>
-                  <Text style={styles.gpsText}>Use current location</Text>
-                  {isGpsEnabled && locationAddress && (
-                    <Text style={styles.gpsLocationText}>
-                      {locationAddress}
-                    </Text>
-                  )}
-                  {isGpsEnabled && !locationAddress && locationPermission === Location.PermissionStatus.GRANTED && (
-                    <Text style={styles.gpsLocationText}>Getting location...</Text>
-                  )}
-                  {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
-                    <Text style={styles.gpsLocationText}>Location permission needed</Text>
-                  )}
+          <View style={styles.cityControlsSection}>
+            <View style={styles.cityControlsContainer}>
+              {/* GPS Location Toggle */}
+              <View style={styles.gpsContainer}>
+                <View style={styles.gpsLeft}>
+                  <MapPin size={20} color={Colors.accent.secondary} />
+                  <View style={styles.gpsTextContainer}>
+                    <Text style={styles.gpsText}>Use current location</Text>
+                    {isGpsEnabled && locationAddress && (
+                      <Text style={styles.gpsLocationText}>
+                        {locationAddress}
+                      </Text>
+                    )}
+                    {isGpsEnabled && !locationAddress && locationPermission === Location.PermissionStatus.GRANTED && (
+                      <Text style={styles.gpsLocationText}>Getting location...</Text>
+                    )}
+                    {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
+                      <Text style={styles.gpsLocationText}>Location permission needed</Text>
+                    )}
+                  </View>
                 </View>
+                <TouchableOpacity 
+                  style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
+                  onPress={() => {
+                    if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
+                      requestLocationPermission().then(() => {
+                        setIsGpsEnabled(true);
+                      });
+                    } else {
+                      setIsGpsEnabled(!isGpsEnabled);
+                    }
+                  }}
+                >
+                  <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity 
-                style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
-                onPress={() => {
-                  if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
-                    requestLocationPermission().then(() => {
-                      setIsGpsEnabled(true);
-                    });
-                  } else {
-                    setIsGpsEnabled(!isGpsEnabled);
-                  }
-                }}
-              >
-                <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
 
-        {/* Add Context Section - Only show in City mode */}
-        {selectedImage && scanMode === 'city' && (
-          <View style={styles.section}>
-            <View style={styles.contextContainer}>
-              <TouchableOpacity 
-                style={styles.contextToggle}
-                onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
-              >
-                <View style={styles.contextToggleLeft}>
-                  <Info size={20} color={Colors.accent.secondary} />
-                  <Text style={styles.contextToggleText}>Add Context</Text>
-                  <View style={styles.optionalBadge}>
-                    <Text style={styles.optionalText}>Optional</Text>
+              {/* Subtle separator line */}
+              <View style={styles.controlsSeparator} />
+
+              {/* Add Context Section */}
+              <View style={styles.contextContainer}>
+                <TouchableOpacity 
+                  style={styles.contextToggle}
+                  onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
+                >
+                  <View style={styles.contextToggleLeft}>
+                    <Info size={20} color={Colors.accent.secondary} />
+                    <Text style={styles.contextToggleText}>Add Context</Text>
+                    <View style={styles.optionalBadge}>
+                      <Text style={styles.optionalText}>Optional</Text>
+                    </View>
                   </View>
-                </View>
-                {showAdditionalInfo ? (
-                  <ChevronUp size={20} color={Colors.accent.secondary} />
-                ) : (
-                  <ChevronDown size={20} color={Colors.accent.secondary} />
+                  {showAdditionalInfo ? (
+                    <ChevronUp size={20} color={Colors.accent.secondary} />
+                  ) : (
+                    <ChevronDown size={20} color={Colors.accent.secondary} />
+                  )}
+                </TouchableOpacity>
+
+                {showAdditionalInfo && (
+                  <View style={styles.contextForm}>
+                    <View style={styles.contextInputGroup}>
+                      <TextInput
+                        style={styles.contextTextInput}
+                        placeholder="Add details like location, neighborhood, or landmark information"
+                        placeholderTextColor="#999"
+                        value={additionalInfo.context}
+                        onChangeText={updateAdditionalInfo}
+                        multiline
+                        numberOfLines={4}
+                      />
+                    </View>
+                  </View>
                 )}
-              </TouchableOpacity>
+              </View>
+            </View>
 
-              {showAdditionalInfo && (
-                <View style={styles.contextForm}>
-                  <View style={styles.contextInputGroup}>
-                    <TextInput
-                      style={styles.contextTextInput}
-                      placeholder="Add details like location, neighborhood, or landmark information"
-                      placeholderTextColor="#999"
-                      value={additionalInfo.context}
-                      onChangeText={updateAdditionalInfo}
-                      multiline
-                      numberOfLines={4}
-                    />
-                  </View>
-                </View>
-              )}
+            {/* Subtitle moved closer to controls */}
+            <View style={styles.subtitleContainer}>
+              <Text style={styles.headerSubtitle} numberOfLines={1}>
+                Discover the living stories of monuments and art
+              </Text>
             </View>
           </View>
         )}
@@ -1271,6 +1280,23 @@ const styles = StyleSheet.create({
   section: {
     marginTop: 12,
     paddingHorizontal: 14,
+  },
+  cityControlsSection: {
+    marginTop: 6,
+    paddingHorizontal: 14,
+  },
+  cityControlsContainer: {
+    width: '90%', // 10% less width
+    alignSelf: 'center',
+  },
+  controlsSeparator: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    marginVertical: 8,
+  },
+  subtitleContainer: {
+    alignItems: 'center',
+    marginTop: 16,
   },
   sectionTitle: {
     fontSize: 20,
