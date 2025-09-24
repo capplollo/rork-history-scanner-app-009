@@ -1013,12 +1013,12 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                   {!labelImage && (
                     <View style={styles.contextInLabelSection}>
                       <TouchableOpacity 
-                        style={styles.infoToggleInLabel}
+                        style={styles.artLabelNotAvailableToggle}
                         onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
                       >
-                        <View style={styles.infoToggleLeft}>
+                        <View style={styles.artLabelNotAvailableToggleLeft}>
                           <Info size={20} color={Colors.accent.secondary} />
-                          <Text style={styles.infoToggleText}>Art label not available?</Text>
+                          <Text style={styles.artLabelNotAvailableToggleText}>Art label not available?</Text>
                         </View>
                         {showAdditionalInfo ? (
                           <ChevronUp size={20} color={Colors.accent.secondary} />
@@ -1028,11 +1028,11 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                       </TouchableOpacity>
 
                       {showAdditionalInfo && (
-                        <View style={styles.infoForm}>
-                          <View style={styles.inputGroup}>
+                        <View style={styles.artLabelContextForm}>
+                          <View style={styles.artLabelContextInputGroup}>
                             <TextInput
-                              style={[styles.textInput, styles.textArea]}
-                              placeholder="Add details like location, neighborhood, or landmark information"
+                              style={styles.artLabelContextTextInput}
+                              placeholder="Add details like author, artwork name, museum gallery collection..."
                               placeholderTextColor="#999"
                               value={additionalInfo.context}
                               onChangeText={updateAdditionalInfo}
@@ -1835,12 +1835,60 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#f1f5f9',
   },
-  infoToggleInLabel: {
+  artLabelNotAvailableToggle: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 0,
+    minHeight: 60,
+    backgroundColor: 'transparent',
+  },
+  artLabelNotAvailableToggleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  artLabelNotAvailableToggleText: {
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "400",
+    color: Colors.text.primary,
+  },
+  artLabelContextForm: {
+    paddingHorizontal: 0,
+    paddingTop: 16,
+    backgroundColor: 'transparent',
+  },
+  artLabelContextInputGroup: {
+    gap: 8,
+  },
+  artLabelContextTextInput: {
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 12,
+    paddingHorizontal: 16,
     paddingVertical: 14,
-    paddingHorizontal: 20,
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: '#2C3E50',
+    lineHeight: 20,
+    height: 100,
+    textAlignVertical: 'top',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   gpsContainer: {
     flexDirection: 'row',
