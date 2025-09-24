@@ -1461,6 +1461,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
+    right: 0,
+    bottom: 0,
     height: '100%',
     backgroundColor: Colors.accent.secondary, // Use the same brown as the button border
     borderRadius: 14,
