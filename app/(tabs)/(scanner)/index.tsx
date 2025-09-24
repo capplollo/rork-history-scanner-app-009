@@ -925,40 +925,38 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         {/* GPS Location Toggle - Show above art label in museum mode */}
         {selectedImage && scanMode === 'museum' && (
           <View style={styles.section}>
-            <View style={styles.contextCard}>
-              <View style={styles.gpsContainer}>
-                <View style={styles.gpsLeft}>
-                  <MapPin size={20} color={Colors.accent.secondary} />
-                  <View style={styles.gpsTextContainer}>
-                    <Text style={styles.gpsText}>Use current location</Text>
-                    {isGpsEnabled && locationAddress && (
-                      <Text style={styles.gpsLocationText}>
-                        {locationAddress}
-                      </Text>
-                    )}
-                    {isGpsEnabled && !locationAddress && locationPermission === Location.PermissionStatus.GRANTED && (
-                      <Text style={styles.gpsLocationText}>Getting location...</Text>
-                    )}
-                    {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
-                      <Text style={styles.gpsLocationText}>Location permission needed</Text>
-                    )}
-                  </View>
+            <View style={styles.gpsContainer}>
+              <View style={styles.gpsLeft}>
+                <MapPin size={20} color={Colors.accent.secondary} />
+                <View style={styles.gpsTextContainer}>
+                  <Text style={styles.gpsText}>Use current location</Text>
+                  {isGpsEnabled && locationAddress && (
+                    <Text style={styles.gpsLocationText}>
+                      {locationAddress}
+                    </Text>
+                  )}
+                  {isGpsEnabled && !locationAddress && locationPermission === Location.PermissionStatus.GRANTED && (
+                    <Text style={styles.gpsLocationText}>Getting location...</Text>
+                  )}
+                  {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
+                    <Text style={styles.gpsLocationText}>Location permission needed</Text>
+                  )}
                 </View>
-                <TouchableOpacity 
-                  style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
-                  onPress={() => {
-                    if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
-                      requestLocationPermission().then(() => {
-                        setIsGpsEnabled(true);
-                      });
-                    } else {
-                      setIsGpsEnabled(!isGpsEnabled);
-                    }
-                  }}
-                >
-                  <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
-                </TouchableOpacity>
               </View>
+              <TouchableOpacity 
+                style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
+                onPress={() => {
+                  if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
+                    requestLocationPermission().then(() => {
+                      setIsGpsEnabled(true);
+                    });
+                  } else {
+                    setIsGpsEnabled(!isGpsEnabled);
+                  }
+                }}
+              >
+                <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
+              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -1046,40 +1044,38 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         {/* GPS Location Toggle - Show for city mode only */}
         {selectedImage && scanMode === 'city' && (
           <View style={styles.section}>
-            <View style={styles.contextCard}>
-              <View style={styles.gpsContainer}>
-                <View style={styles.gpsLeft}>
-                  <MapPin size={20} color={Colors.accent.secondary} />
-                  <View style={styles.gpsTextContainer}>
-                    <Text style={styles.gpsText}>Use current location</Text>
-                    {isGpsEnabled && locationAddress && (
-                      <Text style={styles.gpsLocationText}>
-                        {locationAddress}
-                      </Text>
-                    )}
-                    {isGpsEnabled && !locationAddress && locationPermission === Location.PermissionStatus.GRANTED && (
-                      <Text style={styles.gpsLocationText}>Getting location...</Text>
-                    )}
-                    {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
-                      <Text style={styles.gpsLocationText}>Location permission needed</Text>
-                    )}
-                  </View>
+            <View style={styles.gpsContainer}>
+              <View style={styles.gpsLeft}>
+                <MapPin size={20} color={Colors.accent.secondary} />
+                <View style={styles.gpsTextContainer}>
+                  <Text style={styles.gpsText}>Use current location</Text>
+                  {isGpsEnabled && locationAddress && (
+                    <Text style={styles.gpsLocationText}>
+                      {locationAddress}
+                    </Text>
+                  )}
+                  {isGpsEnabled && !locationAddress && locationPermission === Location.PermissionStatus.GRANTED && (
+                    <Text style={styles.gpsLocationText}>Getting location...</Text>
+                  )}
+                  {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
+                    <Text style={styles.gpsLocationText}>Location permission needed</Text>
+                  )}
                 </View>
-                <TouchableOpacity 
-                  style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
-                  onPress={() => {
-                    if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
-                      requestLocationPermission().then(() => {
-                        setIsGpsEnabled(true);
-                      });
-                    } else {
-                      setIsGpsEnabled(!isGpsEnabled);
-                    }
-                  }}
-                >
-                  <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
-                </TouchableOpacity>
               </View>
+              <TouchableOpacity 
+                style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
+                onPress={() => {
+                  if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
+                    requestLocationPermission().then(() => {
+                      setIsGpsEnabled(true);
+                    });
+                  } else {
+                    setIsGpsEnabled(!isGpsEnabled);
+                  }
+                }}
+              >
+                <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
+              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -1711,6 +1707,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 20,
     minHeight: 60,
+    backgroundColor: 'transparent',
   },
   gpsLeft: {
     flexDirection: 'row',
