@@ -34,6 +34,7 @@ export default function ScannerScreen() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<string>("");
   const [showAdditionalInfo, setShowAdditionalInfo] = useState(false);
+  const [showArtLabel, setShowArtLabel] = useState(false);
   const [scanMode, setScanMode] = useState<'city' | 'museum'>('city');
   const [labelImage, setLabelImage] = useState<string | null>(null);
   const [additionalInfo, setAdditionalInfo] = useState({
@@ -964,77 +965,85 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         {/* Museum Label Image Section */}
         {selectedImage && scanMode === 'museum' && (
           <View style={styles.section}>
-            <View style={styles.contextCard}>
-              <View style={styles.labelHeader}>
-                <View style={styles.labelHeaderLeft}>
+            <View style={styles.artLabelContainer}>
+              <TouchableOpacity 
+                style={styles.artLabelToggle}
+                onPress={() => setShowArtLabel(!showArtLabel)}
+              >
+                <View style={styles.artLabelToggleLeft}>
                   <Camera size={20} color={Colors.accent.secondary} />
-                  <Text style={styles.labelHeaderText}>Art Label</Text>
+                  <Text style={styles.artLabelToggleText}>Art Label</Text>
                   <View style={styles.requiredBadge}>
                     <Text style={styles.requiredText}>Required</Text>
                   </View>
                 </View>
-              </View>
-              
-              {labelImage ? (
-                <View style={styles.labelImageContainer}>
-                  <Image source={{ uri: labelImage }} style={styles.labelImage} />
-                  <TouchableOpacity style={styles.clearLabelButton} onPress={clearLabelImage}>
-                    <X size={16} color="#FFF" />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <View>
-                  <View style={styles.labelPlaceholder}>
-                    <Text style={styles.labelPlaceholderText}>Add a photo of the artwork's label or placard</Text>
-                    <View style={styles.labelButtons}>
-                      <TouchableOpacity style={styles.labelButton} onPress={takeLabelPhoto}>
-                        <CameraIcon size={16} color={Colors.accent.secondary} />
-                        <Text style={styles.labelButtonText}>Take Photo</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={styles.labelButton} onPress={pickLabelImage}>
-                        <ImageIcon size={16} color={Colors.accent.secondary} />
-                        <Text style={styles.labelButtonText}>From Gallery</Text>
+                {showArtLabel ? (
+                  <ChevronUp size={20} color={Colors.accent.secondary} />
+                ) : (
+                  <ChevronDown size={20} color={Colors.accent.secondary} />
+                )}
+              </TouchableOpacity>
+
+              {showArtLabel && (
+                <View style={styles.artLabelForm}>
+                  {labelImage ? (
+                    <View style={styles.labelImageContainer}>
+                      <Image source={{ uri: labelImage }} style={styles.labelImage} />
+                      <TouchableOpacity style={styles.clearLabelButton} onPress={clearLabelImage}>
+                        <X size={16} color="#FFF" />
                       </TouchableOpacity>
                     </View>
-                  </View>
+                  ) : (
+                    <View style={styles.artLabelInputGroup}>
+                      <Text style={styles.artLabelPlaceholderText}>Add a photo of the artwork's label or placard</Text>
+                      <View style={styles.labelButtons}>
+                        <TouchableOpacity style={styles.labelButton} onPress={takeLabelPhoto}>
+                          <CameraIcon size={16} color={Colors.accent.secondary} />
+                          <Text style={styles.labelButtonText}>Take Photo</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.labelButton} onPress={pickLabelImage}>
+                          <ImageIcon size={16} color={Colors.accent.secondary} />
+                          <Text style={styles.labelButtonText}>From Gallery</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  )}
                   
                   {/* Add Context Section - Only when no label available */}
-                  <View style={styles.contextInLabelSection}>
-                    <TouchableOpacity 
-                      style={styles.infoToggleInLabel}
-                      onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
-                    >
-                      <View style={styles.infoToggleLeft}>
-                        <Info size={20} color={Colors.accent.secondary} />
-                        <Text style={styles.infoToggleText}>Art label not available?</Text>
-                      </View>
-                      {showAdditionalInfo ? (
-                        <ChevronUp size={20} color={Colors.accent.secondary} />
-                      ) : (
-                        <ChevronDown size={20} color={Colors.accent.secondary} />
-                      )}
-                    </TouchableOpacity>
-
-                    {showAdditionalInfo && (
-                      <View style={styles.infoForm}>
-                        <View style={styles.inputGroup}>
-                          <Text style={styles.inputLabel}>Context Information</Text>
-                          <Text style={styles.inputHint}>
-                            Add details like name of the artwork, artist name, gallery section, or museum name
-                          </Text>
-                          <TextInput
-                            style={[styles.textInput, styles.textArea]}
-                            placeholder="e.g., The Starry Night, Van Gogh, MoMA Modern Art gallery..."
-                            placeholderTextColor="#999"
-                            value={additionalInfo.context}
-                            onChangeText={updateAdditionalInfo}
-                            multiline
-                            numberOfLines={4}
-                          />
+                  {!labelImage && (
+                    <View style={styles.contextInLabelSection}>
+                      <TouchableOpacity 
+                        style={styles.infoToggleInLabel}
+                        onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
+                      >
+                        <View style={styles.infoToggleLeft}>
+                          <Info size={20} color={Colors.accent.secondary} />
+                          <Text style={styles.infoToggleText}>Art label not available?</Text>
                         </View>
-                      </View>
-                    )}
-                  </View>
+                        {showAdditionalInfo ? (
+                          <ChevronUp size={20} color={Colors.accent.secondary} />
+                        ) : (
+                          <ChevronDown size={20} color={Colors.accent.secondary} />
+                        )}
+                      </TouchableOpacity>
+
+                      {showAdditionalInfo && (
+                        <View style={styles.infoForm}>
+                          <View style={styles.inputGroup}>
+                            <TextInput
+                              style={[styles.textInput, styles.textArea]}
+                              placeholder="Add details like location, neighborhood, or landmark information"
+                              placeholderTextColor="#999"
+                              value={additionalInfo.context}
+                              onChangeText={updateAdditionalInfo}
+                              multiline
+                              numberOfLines={4}
+                            />
+                          </View>
+                        </View>
+                      )}
+                    </View>
+                  )}
                 </View>
               )}
             </View>
@@ -1396,6 +1405,63 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
     overflow: 'hidden',
+  },
+  artLabelContainer: {
+    backgroundColor: 'transparent',
+    overflow: 'hidden',
+  },
+  artLabelToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 0,
+    minHeight: 60,
+    backgroundColor: 'transparent',
+  },
+  artLabelToggleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  artLabelToggleText: {
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "400",
+    color: Colors.text.primary,
+  },
+  artLabelForm: {
+    paddingHorizontal: 0,
+    paddingTop: 16,
+    backgroundColor: 'transparent',
+  },
+  artLabelInputGroup: {
+    gap: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    marginBottom: 16,
+  },
+  artLabelPlaceholderText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: Colors.text.muted,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 8,
   },
   contextContainer: {
     backgroundColor: 'transparent',
