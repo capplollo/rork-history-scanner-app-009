@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,10 +8,14 @@ import {
   Alert,
   SafeAreaView,
   Image,
+  Dimensions,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { X, Camera, CheckCircle, ArrowRight } from 'lucide-react-native';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import * as ImageManipulator from 'expo-image-manipulator';
+import { X, Camera, CheckCircle, ArrowRight, RotateCcw } from 'lucide-react-native';
 import Colors from '@/constants/colors';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 interface CustomCameraProps {
   onClose: () => void;
@@ -25,46 +29,60 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
   const [currentStep, setCurrentStep] = useState<'artwork' | 'label' | 'complete'>('artwork');
   const [artworkPhoto, setArtworkPhoto] = useState<string | null>(null);
   const [labelPhoto, setLabelPhoto] = useState<string | null>(null);
+  const [facing, setFacing] = useState<CameraType>('back');
+  const [permission, requestPermission] = useCameraPermissions();
+  const cameraRef = useRef<CameraView>(null);
 
   const takePicture = async () => {
-    if (isCapturing) return;
+    if (isCapturing || !cameraRef.current) return;
 
     try {
       setIsCapturing(true);
       
-      // Request camera permissions
-      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-      
-      if (!permissionResult.granted) {
-        Alert.alert("Permission Required", "Please allow access to your camera to take photos.");
-        return;
-      }
-
-      // Launch camera with appropriate aspect ratio
-      const aspectRatio: [number, number] = currentStep === 'label' ? [16, 4] : [4, 3];
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        aspect: aspectRatio,
+      // Take photo with camera
+      const photo = await cameraRef.current.takePictureAsync({
         quality: 0.8,
+        base64: false,
       });
 
-      if (!result.canceled && result.assets[0]) {
-        const photoUri = result.assets[0].uri;
-        
-        if (!isMuseumMode) {
-          // Single photo mode
-          onPhotoTaken(photoUri);
-          return;
+      if (!photo) {
+        throw new Error('Failed to capture photo');
+      }
+
+      // Crop to 1:1 aspect ratio for all photos
+      const croppedPhoto = await ImageManipulator.manipulateAsync(
+        photo.uri,
+        [
+          {
+            crop: {
+              originX: 0,
+              originY: (photo.height - photo.width) / 2,
+              width: photo.width,
+              height: photo.width, // Make it square (1:1)
+            },
+          },
+        ],
+        {
+          compress: 0.8,
+          format: ImageManipulator.SaveFormat.JPEG,
         }
-        
-        // Museum mode - two photo process
-        if (currentStep === 'artwork') {
-          setArtworkPhoto(photoUri);
-          setCurrentStep('label');
-        } else if (currentStep === 'label') {
-          setLabelPhoto(photoUri);
-          setCurrentStep('complete');
-        }
+      );
+
+      const photoUri = croppedPhoto.uri;
+      
+      if (!isMuseumMode) {
+        // Single photo mode
+        onPhotoTaken(photoUri);
+        return;
+      }
+      
+      // Museum mode - two photo process
+      if (currentStep === 'artwork') {
+        setArtworkPhoto(photoUri);
+        setCurrentStep('label');
+      } else if (currentStep === 'label') {
+        setLabelPhoto(photoUri);
+        setCurrentStep('complete');
       }
     } catch (error) {
       console.error('Error taking picture:', error);
@@ -107,14 +125,14 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
   
   const getInstructionText = () => {
     if (!isMuseumMode) {
-      return 'Position the monument or artwork in the frame for best results';
+      return 'Position the monument or artwork in the square frame. The photo will be cropped to 1:1 ratio.';
     }
     
     switch (currentStep) {
       case 'artwork':
-        return 'First, take a clear photo of the artwork itself. Make sure the entire piece is visible and well-lit.';
+        return 'First, take a square photo of the artwork itself. Make sure the entire piece is visible and well-lit.';
       case 'label':
-        return 'Now, take a photo of the artwork\'s information label or placard. This helps with identification.';
+        return 'Now, take a square photo of the artwork\'s information label or placard. This helps with identification.';
       case 'complete':
         return 'Great! You\'ve captured both photos. Review them below and tap "Use Photos" to continue.';
       default:
@@ -123,8 +141,8 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
   };
   
   const getButtonText = () => {
-    if (isCapturing) return 'Opening Camera...';
-    if (!isMuseumMode) return 'Open Camera';
+    if (isCapturing) return 'Capturing...';
+    if (!isMuseumMode) return 'Capture Photo';
     
     switch (currentStep) {
       case 'artwork':
@@ -134,9 +152,54 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
       case 'complete':
         return 'Use Photos';
       default:
-        return 'Take Photo';
+        return 'Capture Photo';
     }
   };
+
+  // Check permissions
+  if (!permission) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <X size={24} color={Colors.text.primary} />
+            </TouchableOpacity>
+            <Text style={styles.title}>Loading Camera</Text>
+            <View style={styles.placeholder} />
+          </View>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Loading camera...</Text>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!permission.granted) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <X size={24} color={Colors.text.primary} />
+            </TouchableOpacity>
+            <Text style={styles.title}>Camera Permission</Text>
+            <View style={styles.placeholder} />
+          </View>
+          <View style={styles.permissionContainer}>
+            <Camera size={80} color={Colors.text.muted} />
+            <Text style={styles.permissionText}>
+              We need your permission to show the camera
+            </Text>
+            <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+              <Text style={styles.permissionButtonText}>Grant Permission</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -146,7 +209,12 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
             <X size={24} color={Colors.text.primary} />
           </TouchableOpacity>
           <Text style={styles.title}>{getStepTitle()}</Text>
-          <View style={styles.placeholder} />
+          <TouchableOpacity 
+            style={styles.flipButton} 
+            onPress={() => setFacing(current => (current === 'back' ? 'front' : 'back'))}
+          >
+            <RotateCcw size={24} color={Colors.text.primary} />
+          </TouchableOpacity>
         </View>
         
         {isMuseumMode && currentStep === 'complete' ? (
@@ -171,7 +239,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
                 <Text style={styles.photoReviewTitle}>Label Photo</Text>
                 {labelPhoto && (
                   <View style={styles.photoContainer}>
-                    <Image source={{ uri: labelPhoto }} style={styles.reviewPhotoLabel} />
+                    <Image source={{ uri: labelPhoto }} style={styles.reviewPhoto} />
                     <TouchableOpacity 
                       style={styles.retakeButton}
                       onPress={() => handleRetakePhoto('label')}
@@ -188,7 +256,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
             </Text>
           </View>
         ) : (
-          <View style={styles.cameraPlaceholder}>
+          <View style={styles.cameraContainer}>
             {isMuseumMode && (
               <View style={styles.stepIndicator}>
                 <View style={[styles.stepDot, currentStep === 'artwork' ? styles.stepDotActive : styles.stepDotComplete]}>
@@ -209,10 +277,19 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
               </View>
             )}
             
-            <Camera size={80} color={Colors.text.muted} />
-            <Text style={styles.placeholderText}>
-              Tap the button below to open your camera
-            </Text>
+            <View style={styles.cameraViewContainer}>
+              <CameraView 
+                ref={cameraRef}
+                style={styles.cameraView} 
+                facing={facing}
+              >
+                {/* Square overlay for 1:1 ratio guidance */}
+                <View style={styles.cameraOverlay}>
+                  <View style={styles.squareFrame} />
+                </View>
+              </CameraView>
+            </View>
+            
             <Text style={styles.instructionText}>
               {getInstructionText()}
             </Text>
@@ -273,12 +350,85 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 32,
   },
-  cameraPlaceholder: {
+  cameraContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    gap: 20,
+  },
+  cameraViewContainer: {
+    width: screenWidth - 40,
+    height: screenWidth - 40,
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: '#000',
+  },
+  cameraView: {
+    flex: 1,
+  },
+  cameraOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  squareFrame: {
+    width: screenWidth - 80,
+    height: screenWidth - 80,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 10,
+    backgroundColor: 'transparent',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: Colors.text.muted,
+  },
+  permissionContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
     gap: 20,
+  },
+  permissionText: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: Colors.text.primary,
+    textAlign: 'center',
+  },
+  permissionButton: {
+    backgroundColor: Colors.accent.secondary,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+  },
+  permissionButtonText: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: '#ffffff',
+  },
+  flipButton: {
+    padding: 8,
   },
   placeholderText: {
     fontSize: 18,
@@ -409,13 +559,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   reviewPhoto: {
-    width: 200,
+    width: 150,
     height: 150,
-    resizeMode: 'cover',
-  },
-  reviewPhotoLabel: {
-    width: 200,
-    height: 50,
     resizeMode: 'cover',
   },
   retakeButton: {

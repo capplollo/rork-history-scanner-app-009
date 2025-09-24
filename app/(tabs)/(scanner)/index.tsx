@@ -206,7 +206,7 @@ export default function ScannerScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [1, 1], // 1:1 aspect ratio
       quality: 0.6,
     });
 
@@ -229,7 +229,7 @@ export default function ScannerScreen() {
 
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
-        aspect: [4, 3],
+        aspect: [1, 1], // 1:1 aspect ratio
         quality: 0.6,
       });
 
@@ -789,7 +789,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [16, 4], // Wide aspect ratio for labels
+      aspect: [1, 1], // 1:1 aspect ratio for labels too
       quality: 0.6,
     });
 
@@ -808,7 +808,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
 
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
-      aspect: [16, 4], // Wide aspect ratio for labels
+      aspect: [1, 1], // 1:1 aspect ratio for labels too
       quality: 0.6,
     });
 
@@ -1297,7 +1297,7 @@ const styles = StyleSheet.create({
   },
   selectedImage: {
     width: '100%',
-    aspectRatio: 1.15,
+    aspectRatio: 1, // 1:1 aspect ratio
     resizeMode: 'cover',
   },
   imageOverlay: {
@@ -1319,7 +1319,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   placeholderContainer: {
-    aspectRatio: 1.15,
+    aspectRatio: 1, // 1:1 aspect ratio
     borderRadius: 16,
     backgroundColor: Colors.background,
     borderWidth: 2,
@@ -1783,7 +1783,7 @@ const styles = StyleSheet.create({
   },
   labelImage: {
     width: '100%',
-    height: 80,
+    aspectRatio: 1, // 1:1 aspect ratio for label images too
     resizeMode: 'cover',
   },
   clearLabelButton: {
