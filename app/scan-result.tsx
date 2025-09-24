@@ -601,7 +601,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
     // Start progressive animation from left to right
     Animated.timing(progressAnimation, {
       toValue: 1,
-      duration: 3000, // 3 seconds for recognition simulation
+      duration: 2500, // 2.5 seconds for recognition simulation
       useNativeDriver: false,
     }).start(() => {
       // Animation complete - redirect to history or show results
@@ -1455,14 +1455,16 @@ const styles = StyleSheet.create({
     borderColor: Colors.accent.secondary,
     borderRadius: 16,
     overflow: 'hidden',
+    minHeight: 56, // Ensure consistent height
   },
   discoveryProgressBar: {
     position: 'absolute',
     top: 0,
     left: 0,
     height: '100%',
-    backgroundColor: Colors.umber,
+    backgroundColor: '#8B4513', // Saddle brown color for better visibility
     borderRadius: 14,
+    zIndex: 0,
   },
   discoveryButtonContent: {
     flexDirection: 'row',
@@ -1472,7 +1474,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 20,
     position: 'relative',
-    zIndex: 1,
+    zIndex: 2, // Higher z-index to ensure text stays on top
   },
   discoveryButtonText: {
     fontSize: 16,
