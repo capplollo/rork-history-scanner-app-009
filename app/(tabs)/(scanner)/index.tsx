@@ -984,8 +984,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 <View style={styles.artLabelToggleLeft}>
                   <Camera size={20} color={Colors.accent.secondary} />
                   <Text style={styles.artLabelToggleText}>Art Label</Text>
-                  <View style={styles.requiredBadge}>
-                    <Text style={styles.requiredText}>Required</Text>
+                  <View style={[styles.requiredBadge, labelImage && styles.uploadedBadge]}>
+                    <Text style={styles.requiredText}>{labelImage ? 'Uploaded' : 'Required'}</Text>
                   </View>
                 </View>
                 {showArtLabel ? (
@@ -1784,6 +1784,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
+  },
+  uploadedBadge: {
+    backgroundColor: '#22c55e', // Green color for uploaded state
   },
   requiredText: {
     fontSize: 10,
