@@ -1046,88 +1046,86 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         {/* GPS Location Toggle - Show for city mode only */}
         {selectedImage && scanMode === 'city' && (
           <View style={styles.section}>
-            <TouchableOpacity 
-              style={styles.seamlessLocationButton}
-              onPress={() => {
-                if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
-                  requestLocationPermission().then(() => {
-                    setIsGpsEnabled(true);
-                  });
-                } else {
-                  setIsGpsEnabled(!isGpsEnabled);
-                }
-              }}
-            >
-              <View style={styles.seamlessButtonContent}>
-                <View style={[styles.seamlessIconContainer, isGpsEnabled && styles.seamlessIconContainerActive]}>
-                  <MapPin size={18} color={isGpsEnabled ? '#ffffff' : Colors.accent.secondary} />
+            <View style={styles.contextCard}>
+              <View style={styles.gpsContainer}>
+                <View style={styles.gpsLeft}>
+                  <MapPin size={20} color={Colors.accent.secondary} />
+                  <View style={styles.gpsTextContainer}>
+                    <Text style={styles.gpsText}>Use current location</Text>
+                    {isGpsEnabled && locationAddress && (
+                      <Text style={styles.gpsLocationText}>
+                        {locationAddress}
+                      </Text>
+                    )}
+                    {isGpsEnabled && !locationAddress && locationPermission === Location.PermissionStatus.GRANTED && (
+                      <Text style={styles.gpsLocationText}>Getting location...</Text>
+                    )}
+                    {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
+                      <Text style={styles.gpsLocationText}>Location permission needed</Text>
+                    )}
+                  </View>
                 </View>
-                <View style={styles.seamlessTextContainer}>
-                  <Text style={[styles.seamlessButtonText, isGpsEnabled && styles.seamlessButtonTextActive]}>Use current location</Text>
-                  {isGpsEnabled && locationAddress && (
-                    <Text style={styles.seamlessLocationText}>
-                      {locationAddress}
-                    </Text>
-                  )}
-                  {isGpsEnabled && !locationAddress && locationPermission === Location.PermissionStatus.GRANTED && (
-                    <Text style={styles.seamlessLocationText}>Getting location...</Text>
-                  )}
-                  {isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED && (
-                    <Text style={styles.seamlessLocationText}>Location permission needed</Text>
-                  )}
-                </View>
-                <View style={[styles.seamlessToggleIndicator, isGpsEnabled && styles.seamlessToggleIndicatorActive]} />
+                <TouchableOpacity 
+                  style={[styles.gpsToggle, isGpsEnabled && styles.gpsToggleActive]}
+                  onPress={() => {
+                    if (!isGpsEnabled && locationPermission !== Location.PermissionStatus.GRANTED) {
+                      requestLocationPermission().then(() => {
+                        setIsGpsEnabled(true);
+                      });
+                    } else {
+                      setIsGpsEnabled(!isGpsEnabled);
+                    }
+                  }}
+                >
+                  <View style={[styles.gpsToggleThumb, isGpsEnabled && styles.gpsToggleThumbActive]} />
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
+            </View>
           </View>
         )}
 
         {/* Add Context Section - Only show in City mode */}
         {selectedImage && scanMode === 'city' && (
           <View style={styles.section}>
-            <TouchableOpacity 
-              style={styles.seamlessContextButton}
-              onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
-            >
-              <View style={styles.seamlessButtonContent}>
-                <View style={[styles.seamlessIconContainer, showAdditionalInfo && styles.seamlessIconContainerActive]}>
-                  <Info size={18} color={showAdditionalInfo ? '#ffffff' : Colors.accent.secondary} />
-                </View>
-                <View style={styles.seamlessTextContainer}>
-                  <Text style={[styles.seamlessButtonText, showAdditionalInfo && styles.seamlessButtonTextActive]}>Add Context</Text>
-                  <View style={styles.seamlessOptionalBadge}>
-                    <Text style={styles.seamlessOptionalText}>Optional</Text>
+            <View style={styles.contextCard}>
+              <TouchableOpacity 
+                style={styles.infoToggle}
+                onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
+              >
+                <View style={styles.infoToggleLeft}>
+                  <Info size={20} color={Colors.accent.secondary} />
+                  <Text style={styles.infoToggleText}>Add Context</Text>
+                  <View style={styles.optionalBadge}>
+                    <Text style={styles.optionalText}>Optional</Text>
                   </View>
                 </View>
-                <View style={styles.seamlessChevronContainer}>
-                  {showAdditionalInfo ? (
-                    <ChevronUp size={18} color={showAdditionalInfo ? Colors.accent.secondary : '#94a3b8'} />
-                  ) : (
-                    <ChevronDown size={18} color={showAdditionalInfo ? Colors.accent.secondary : '#94a3b8'} />
-                  )}
-                </View>
-              </View>
-            </TouchableOpacity>
+                {showAdditionalInfo ? (
+                  <ChevronUp size={20} color={Colors.accent.secondary} />
+                ) : (
+                  <ChevronDown size={20} color={Colors.accent.secondary} />
+                )}
+              </TouchableOpacity>
 
-            {showAdditionalInfo && (
-              <View style={styles.seamlessContextForm}>
-                <View style={styles.seamlessInputGroup}>
-                  <Text style={styles.seamlessInputLabel}>Context Information</Text>
-                  <Text style={styles.seamlessInputHint}>
-                    Add details like location, neighborhood, or landmark information
-                  </Text>
-                  <TextInput
-                    style={styles.seamlessTextInput}
-                    placeholder="e.g., Central Park NYC, Times Square, near City Hall..."
-                    placeholderTextColor="#94a3b8"
-                    value={additionalInfo.context}
-                    onChangeText={updateAdditionalInfo}
-                    multiline
-                    numberOfLines={4}
-                  />
+              {showAdditionalInfo && (
+                <View style={styles.infoForm}>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.inputLabel}>Context Information</Text>
+                    <Text style={styles.inputHint}>
+                      Add details like location, neighborhood, or landmark information
+                    </Text>
+                    <TextInput
+                      style={[styles.textInput, styles.textArea]}
+                      placeholder="e.g., Central Park NYC, Times Square, near City Hall..."
+                      placeholderTextColor="#999"
+                      value={additionalInfo.context}
+                      onChangeText={updateAdditionalInfo}
+                      multiline
+                      numberOfLines={4}
+                    />
+                  </View>
                 </View>
-              </View>
-            )}
+              )}
+            </View>
           </View>
         )}
 
@@ -1827,160 +1825,6 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 100,
-  },
-  // Seamless button styles
-  seamlessLocationButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.2)',
-    backgroundColor: 'rgba(248, 250, 252, 0.6)',
-  },
-  seamlessContextButton: {
-    paddingVertical: 16,
-    paddingHorizontal: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.2)',
-    backgroundColor: 'rgba(248, 250, 252, 0.6)',
-  },
-  seamlessButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    gap: 12,
-  },
-  seamlessIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(104, 89, 81, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  seamlessIconContainerActive: {
-    backgroundColor: Colors.accent.secondary,
-  },
-  seamlessTextContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  seamlessButtonText: {
-    fontSize: 15,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-    color: Colors.text.primary,
-  },
-  seamlessButtonTextActive: {
-    color: Colors.text.primary,
-    fontWeight: "600",
-  },
-  seamlessLocationText: {
-    fontSize: 12,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: Colors.text.muted,
-    marginTop: 2,
-  },
-  seamlessToggleIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#e2e8f0',
-  },
-  seamlessToggleIndicatorActive: {
-    backgroundColor: Colors.accent.secondary,
-  },
-  seamlessOptionalBadge: {
-    backgroundColor: 'rgba(245, 158, 11, 0.15)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.3)',
-  },
-  seamlessOptionalText: {
-    fontSize: 9,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-    color: '#d97706',
-    letterSpacing: 0.2,
-  },
-  seamlessChevronContainer: {
-    width: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  seamlessContextForm: {
-    marginTop: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderRadius: 12,
-    backgroundColor: 'rgba(248, 250, 252, 0.8)',
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.15)',
-  },
-  seamlessInputGroup: {
-    gap: 8,
-  },
-  seamlessInputLabel: {
-    fontSize: 13,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-    color: Colors.text.primary,
-    letterSpacing: 0.2,
-  },
-  seamlessInputHint: {
-    fontSize: 11,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: Colors.text.muted,
-    lineHeight: 16,
-  },
-  seamlessTextInput: {
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: 'rgba(148, 163, 184, 0.25)',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: '#2C3E50',
-    lineHeight: 20,
-    height: 100,
-    textAlignVertical: 'top',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
   },
   logoAndHeaderSection: {
     backgroundColor: Colors.background,
