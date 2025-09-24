@@ -46,6 +46,8 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
       if (!photo) {
         throw new Error('Failed to capture photo');
       }
+      
+      console.log('Photo captured successfully:', photo.uri);
 
       // Crop to 1:1 aspect ratio and resize to 1024x1024 for all photos
       const croppedPhoto = await ImageManipulator.manipulateAsync(

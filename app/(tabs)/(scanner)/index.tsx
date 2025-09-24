@@ -218,30 +218,8 @@ export default function ScannerScreen() {
   };
 
   const takePhoto = async () => {
-    if (Platform.OS === 'web') {
-      // Fallback to ImagePicker for web
-      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-      
-      if (!permissionResult.granted) {
-        Alert.alert("Permission Required", "Please allow access to your camera to take photos.");
-        return;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        aspect: [1, 1], // 1:1 aspect ratio
-        quality: 0.6,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        setSelectedImage(result.assets[0].uri);
-        setPhotoSource('camera');
-        setIsGpsEnabled(true); // Default on for camera photos
-      }
-    } else {
-      // Use custom camera for mobile
-      setShowCustomCamera(true);
-    }
+    // Always try to use custom camera first, including on web
+    setShowCustomCamera(true);
   };
 
   const handleCustomCameraPhoto = (uri: string) => {
