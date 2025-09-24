@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,6 +10,7 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  Animated,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { MapPin, Calendar, Share2, CheckCircle, AlertCircle, RefreshCw, ArrowLeft, Sparkles, Clock, Volume2, VolumeX, Pause, Play } from "lucide-react-native";
@@ -65,6 +66,8 @@ export default function ScanResultScreen() {
   const [isReanalyzing, setIsReanalyzing] = useState<boolean>(false);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentAudio, setCurrentAudio] = useState<any>(null);
+  const [isDiscovering, setIsDiscovering] = useState<boolean>(false);
+  const progressAnimation = useRef(new Animated.Value(0)).current;
 
   
   const [monument, setMonument] = useState<MonumentData | undefined>(undefined);
@@ -587,6 +590,42 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
     }
   };
 
+  const handleDiscoverHistory = () => {
+    if (isDiscovering) return;
+    
+    setIsDiscovering(true);
+    
+    // Reset animation
+    progressAnimation.setValue(0);
+    
+    // Start progressive animation from left to right
+    Animated.timing(progressAnimation, {
+      toValue: 1,
+      duration: 3000, // 3 seconds for recognition simulation
+      useNativeDriver: false,
+    }).start(() => {
+      // Animation complete - redirect to history or show results
+      setIsDiscovering(false);
+      Alert.alert(
+        'Discovery Complete!',
+        'Historical context and related monuments have been discovered.',
+        [
+          {
+            text: 'View History',
+            onPress: () => {
+              // Navigate to history or show discovered content
+              console.log('Navigate to discovered history');
+            }
+          },
+          {
+            text: 'OK',
+            style: 'default'
+          }
+        ]
+      );
+    });
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -775,6 +814,45 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             </View>
           </View>
         )}
+
+        {/* Discovery History Button - Show for all monuments */}
+        <View style={styles.section}>
+          <View style={styles.discoveryCard}>
+            <Text style={styles.discoveryTitle}>Discover Historical Context</Text>
+            <Text style={styles.discoverySubtext}>
+              Explore related monuments, historical events, and cultural connections from this time period and location.
+            </Text>
+            
+            <TouchableOpacity
+              style={[styles.discoveryButton, isDiscovering && styles.discoveryButtonActive]}
+              onPress={handleDiscoverHistory}
+              disabled={isDiscovering}
+            >
+              <View style={styles.discoveryButtonContainer}>
+                {/* Background progress bar */}
+                <Animated.View 
+                  style={[
+                    styles.discoveryProgressBar,
+                    {
+                      width: progressAnimation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0%', '100%'],
+                      }),
+                    }
+                  ]} 
+                />
+                
+                {/* Button content */}
+                <View style={styles.discoveryButtonContent}>
+                  <Clock size={18} color={isDiscovering ? "#ffffff" : Colors.accent.secondary} />
+                  <Text style={[styles.discoveryButtonText, isDiscovering && styles.discoveryButtonTextActive]}>
+                    {isDiscovering ? 'Discovering...' : 'Discover History'}
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
 
         {/* Recognition Feedback Section - Only show when recognized */}
         {monument.isRecognized && (
@@ -1320,6 +1398,93 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: '500',
+    color: '#ffffff',
+  },
+  discoveryCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    marginBottom: 16,
+  },
+  discoveryTitle: {
+    fontSize: 18,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: '#2C3E50',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  discoverySubtext: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  discoveryButton: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: Colors.accent.secondary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  discoveryButtonActive: {
+    shadowColor: Colors.umber,
+    shadowOpacity: 0.25,
+  },
+  discoveryButtonContainer: {
+    position: 'relative',
+    backgroundColor: Colors.surface,
+    borderWidth: 2,
+    borderColor: Colors.accent.secondary,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  discoveryProgressBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: '100%',
+    backgroundColor: Colors.umber,
+    borderRadius: 14,
+  },
+  discoveryButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    position: 'relative',
+    zIndex: 1,
+  },
+  discoveryButtonText: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: Colors.accent.secondary,
+  },
+  discoveryButtonTextActive: {
     color: '#ffffff',
   },
 });
