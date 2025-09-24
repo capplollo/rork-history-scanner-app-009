@@ -1462,9 +1462,10 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     height: '100%',
-    backgroundColor: '#8B4513', // Saddle brown color for better visibility
+    backgroundColor: Colors.accent.secondary, // Use the same brown as the button border
     borderRadius: 14,
-    zIndex: 0,
+    zIndex: 1,
+    opacity: 1, // Ensure progress bar is never transparent
   },
   discoveryButtonContent: {
     flexDirection: 'row',
