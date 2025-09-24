@@ -1,19 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
-  Dimensions,
   Platform,
   Alert,
   SafeAreaView,
 } from 'react-native';
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import { X, RotateCcw, Zap, ZapOff } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { X, Camera } from 'lucide-react-native';
 import Colors from '@/constants/colors';
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 interface CustomCameraProps {
   onClose: () => void;
@@ -21,70 +18,31 @@ interface CustomCameraProps {
 }
 
 export default function CustomCamera({ onClose, onPhotoTaken }: CustomCameraProps) {
-  const [facing, setFacing] = useState<CameraType>('back');
-  const [permission, requestPermission] = useCameraPermissions();
-  const [flash, setFlash] = useState<'off' | 'on'>('off');
   const [isCapturing, setIsCapturing] = useState(false);
-  const cameraRef = useRef<CameraView>(null);
-
-  useEffect(() => {
-    if (!permission?.granted) {
-      requestPermission();
-    }
-  }, [permission]);
-
-  if (!permission) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading camera...</Text>
-        </View>
-      </View>
-    );
-  }
-
-  if (!permission.granted) {
-    return (
-      <View style={styles.container}>
-        <SafeAreaView style={styles.permissionContainer}>
-          <View style={styles.permissionContent}>
-            <Text style={styles.permissionTitle}>Camera Permission Required</Text>
-            <Text style={styles.permissionText}>
-              We need access to your camera to take photos of monuments and artworks.
-            </Text>
-            <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
-              <Text style={styles.permissionButtonText}>Grant Permission</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      </View>
-    );
-  }
-
-  const toggleCameraFacing = () => {
-    setFacing(current => (current === 'back' ? 'front' : 'back'));
-  };
-
-  const toggleFlash = () => {
-    setFlash(current => (current === 'off' ? 'on' : 'off'));
-  };
 
   const takePicture = async () => {
-    if (!cameraRef.current || isCapturing) return;
+    if (isCapturing) return;
 
     try {
       setIsCapturing(true);
-      const photo = await cameraRef.current.takePictureAsync({
+      
+      // Request camera permissions
+      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+      
+      if (!permissionResult.granted) {
+        Alert.alert("Permission Required", "Please allow access to your camera to take photos.");
+        return;
+      }
+
+      // Launch camera
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
         quality: 0.8,
-        base64: false,
-        exif: false,
       });
 
-      if (photo?.uri) {
-        onPhotoTaken(photo.uri);
+      if (!result.canceled && result.assets[0]) {
+        onPhotoTaken(result.assets[0].uri);
       }
     } catch (error) {
       console.error('Error taking picture:', error);
@@ -95,96 +53,65 @@ export default function CustomCamera({ onClose, onPhotoTaken }: CustomCameraProp
   };
 
   return (
-    <View style={styles.container}>
-      <CameraView
-        ref={cameraRef}
-        style={styles.camera}
-        facing={facing}
-        flash={flash}
-      >
-        {/* Top Controls */}
-        <SafeAreaView style={styles.topControls}>
-          <TouchableOpacity style={styles.topButton} onPress={onClose}>
-            <X size={24} color="#ffffff" />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <X size={24} color={Colors.text.primary} />
           </TouchableOpacity>
-          
-          <View style={styles.topRightControls}>
-            <TouchableOpacity 
-              style={[styles.topButton, flash === 'on' && styles.flashActive]} 
-              onPress={toggleFlash}
-            >
-              {flash === 'on' ? (
-                <Zap size={24} color="#ffffff" />
-              ) : (
-                <ZapOff size={24} color="#ffffff" />
-              )}
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.topButton} onPress={toggleCameraFacing}>
-              <RotateCcw size={24} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-
-        {/* Bottom Controls */}
-        <View style={styles.bottomControls}>
-          <View style={styles.captureContainer}>
-            <TouchableOpacity
-              style={[styles.captureButton, isCapturing && styles.captureButtonDisabled]}
-              onPress={takePicture}
-              disabled={isCapturing}
-            >
-              <View style={styles.captureButtonInner} />
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.instructionContainer}>
-            <Text style={styles.instructionText}>
-              Position the monument or artwork in the frame
-            </Text>
-          </View>
+          <Text style={styles.title}>Take Photo</Text>
+          <View style={styles.placeholder} />
         </View>
-      </CameraView>
-    </View>
+        
+        <View style={styles.cameraPlaceholder}>
+          <Camera size={80} color={Colors.text.muted} />
+          <Text style={styles.placeholderText}>
+            Tap the button below to open your camera
+          </Text>
+          <Text style={styles.instructionText}>
+            Position the monument or artwork in the frame for best results
+          </Text>
+        </View>
+        
+        <View style={styles.bottomSection}>
+          <TouchableOpacity
+            style={[styles.captureButton, isCapturing && styles.captureButtonDisabled]}
+            onPress={takePicture}
+            disabled={isCapturing}
+          >
+            <Camera size={24} color="#ffffff" />
+            <Text style={styles.captureButtonText}>
+              {isCapturing ? 'Opening Camera...' : 'Open Camera'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
-  },
-  camera: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: Colors.background,
   },
-  loadingText: {
-    fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: Colors.text.primary,
-  },
-  permissionContainer: {
+  content: {
     flex: 1,
-    backgroundColor: Colors.background,
+    paddingHorizontal: 20,
   },
-  permissionContent: {
-    flex: 1,
-    justifyContent: 'center',
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 32,
-    gap: 24,
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
   },
-  permissionTitle: {
-    fontSize: 24,
+  closeButton: {
+    padding: 8,
+  },
+  title: {
+    fontSize: 18,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -192,117 +119,27 @@ const styles = StyleSheet.create({
     }),
     fontWeight: '600',
     color: Colors.text.primary,
-    textAlign: 'center',
   },
-  permissionText: {
-    fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: Colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: 24,
+  placeholder: {
+    width: 32,
   },
-  permissionButton: {
-    backgroundColor: Colors.accent.secondary,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    minWidth: 200,
+  cameraPlaceholder: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    gap: 20,
   },
-  permissionButtonText: {
-    fontSize: 16,
+  placeholderText: {
+    fontSize: 18,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: '500',
-    color: '#ffffff',
+    color: Colors.text.primary,
     textAlign: 'center',
-  },
-  cancelButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: Colors.text.muted,
-    textAlign: 'center',
-  },
-  topControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingHorizontal: 20,
-    paddingTop: 10,
-  },
-  topRightControls: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  topButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  flashActive: {
-    backgroundColor: Colors.accent.secondary,
-  },
-  bottomControls: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
-    paddingHorizontal: 20,
-  },
-  captureContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  captureButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 4,
-    borderColor: '#ffffff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 8,
-  },
-  captureButtonDisabled: {
-    opacity: 0.6,
-  },
-  captureButtonInner: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: Colors.accent.secondary,
-  },
-  instructionContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    alignItems: 'center',
   },
   instructionText: {
     fontSize: 14,
@@ -311,7 +148,41 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: '#ffffff',
+    color: Colors.text.muted,
     textAlign: 'center',
+    lineHeight: 20,
+  },
+  bottomSection: {
+    paddingVertical: 30,
+    alignItems: 'center',
+  },
+  captureButton: {
+    backgroundColor: Colors.accent.secondary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 16,
+    gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    minWidth: 200,
+  },
+  captureButtonDisabled: {
+    opacity: 0.6,
+  },
+  captureButtonText: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: '#ffffff',
   },
 });

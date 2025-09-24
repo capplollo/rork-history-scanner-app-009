@@ -1,8 +1,8 @@
 import { Tabs } from "expo-router";
 import { Camera, BookOpen, User } from "lucide-react-native";
 import React from "react";
-import { Platform, View } from "react-native";
-import { Colors } from "@/constants/colors";
+import { Platform, View, StyleSheet } from "react-native";
+import Colors from "@/constants/colors";
 
 export default function TabLayout() {
   return (
@@ -49,20 +49,10 @@ export default function TabLayout() {
         options={{
           title: "Discover",
           tabBarIcon: ({ color, focused }) => (
-            <View style={{
-              width: 56,
-              height: 56,
-              borderRadius: 28,
-              backgroundColor: focused ? Colors.umber : Colors.taupeGray,
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: 10,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.2,
-              shadowRadius: 8,
-              elevation: 8,
-            }}>
+            <View style={[
+              styles.cameraIconContainer,
+              { backgroundColor: focused ? Colors.umber : Colors.taupeGray }
+            ]}>
               <Camera size={28} color="#ffffff" />
             </View>
           ),
@@ -79,3 +69,19 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  cameraIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+});
