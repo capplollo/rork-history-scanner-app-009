@@ -1083,7 +1083,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         {/* Add Context Section - Only show in City mode */}
         {selectedImage && scanMode === 'city' && (
           <View style={styles.section}>
-            <View style={styles.contextDrawer}>
+            <View style={styles.contextContainer}>
               <TouchableOpacity 
                 style={styles.contextToggle}
                 onPress={() => setShowAdditionalInfo(!showAdditionalInfo)}
@@ -1105,13 +1105,9 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               {showAdditionalInfo && (
                 <View style={styles.contextForm}>
                   <View style={styles.contextInputGroup}>
-                    <Text style={styles.contextInputLabel}>Context Information</Text>
-                    <Text style={styles.contextInputHint}>
-                      Add details like location, neighborhood, or landmark information
-                    </Text>
                     <TextInput
                       style={styles.contextTextInput}
-                      placeholder="e.g., Central Park NYC, Times Square, near City Hall..."
+                      placeholder="Add details like location, neighborhood, or landmark information"
                       placeholderTextColor="#999"
                       value={additionalInfo.context}
                       onChangeText={updateAdditionalInfo}
@@ -1401,11 +1397,8 @@ const styles = StyleSheet.create({
     elevation: 4,
     overflow: 'hidden',
   },
-  contextDrawer: {
+  contextContainer: {
     backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: 'rgba(104, 89, 81, 0.15)',
-    borderRadius: 12,
     overflow: 'hidden',
   },
   contextToggle: {
@@ -1413,7 +1406,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     backgroundColor: 'transparent',
   },
   contextToggleLeft: {
@@ -1432,11 +1425,9 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
   },
   contextForm: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: 0,
+    paddingTop: 16,
     backgroundColor: 'transparent',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(104, 89, 81, 0.1)',
   },
   contextInputGroup: {
     gap: 8,
@@ -1464,10 +1455,10 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   contextTextInput: {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: 'rgba(104, 89, 81, 0.2)',
-    borderRadius: 10,
+    borderColor: Colors.border,
+    borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 14,
@@ -1480,6 +1471,11 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     height: 100,
     textAlignVertical: 'top',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   infoToggle: {
     flexDirection: 'row',
