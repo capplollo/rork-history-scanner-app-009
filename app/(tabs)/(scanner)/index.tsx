@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -13,6 +13,7 @@ import {
   TextInput,
   SafeAreaView,
   Modal,
+  Animated,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
@@ -44,6 +45,7 @@ export default function ScannerScreen() {
   const [locationPermission, setLocationPermission] = useState<Location.PermissionStatus | null>(null);
   const [locationAddress, setLocationAddress] = useState<string | null>(null);
   const [showCustomCamera, setShowCustomCamera] = useState(false);
+  const progressAnimation = useRef(new Animated.Value(0)).current;
 
   // Handle reanalysis flow
   useEffect(() => {
@@ -258,6 +260,14 @@ export default function ScannerScreen() {
     setIsAnalyzing(true);
     setAnalysisStatus("Preparing image...");
     
+    // Start the progressive animation
+    progressAnimation.setValue(0);
+    Animated.timing(progressAnimation, {
+      toValue: 1,
+      duration: 8000, // 8 seconds for the full animation
+      useNativeDriver: false,
+    }).start();
+    
     try {
       setAnalysisStatus("Compressing image...");
       
@@ -367,6 +377,8 @@ export default function ScannerScreen() {
     } finally {
       setIsAnalyzing(false);
       setAnalysisStatus("");
+      // Reset animation
+      progressAnimation.setValue(0);
     }
   };
   
@@ -1126,8 +1138,22 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             >
               {isAnalyzing ? (
                 <View style={styles.analyzingContainer}>
-                  <ActivityIndicator size="small" color="#ffffff" />
-                  <Text style={styles.analyzeButtonText}>{analysisStatus}</Text>
+                  {/* Progressive brown background */}
+                  <Animated.View 
+                    style={[
+                      styles.progressBackground,
+                      {
+                        width: progressAnimation.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0%', '100%'],
+                        }),
+                      }
+                    ]} 
+                  />
+                  <View style={styles.buttonContent}>
+                    <ActivityIndicator size="small" color="#ffffff" />
+                    <Text style={styles.analyzeButtonText}>{analysisStatus}</Text>
+                  </View>
                 </View>
               ) : (
                 <View style={styles.analyzeContainer}>
@@ -1478,6 +1504,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
+    overflow: 'hidden',
+    position: 'relative',
   },
   analyzeButtonDisabled: {
     opacity: 0.7,
@@ -1487,10 +1515,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   analyzingContainer: {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+  },
+  progressBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    backgroundColor: '#8B4513', // Brown color
+    borderRadius: 12,
+  },
+  buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
+    position: 'relative',
+    zIndex: 1,
   },
   analyzeContainer: {
     flexDirection: 'row',
