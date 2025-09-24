@@ -1407,6 +1407,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 16,
     paddingHorizontal: 0,
+    minHeight: 60,
     backgroundColor: 'transparent',
   },
   contextToggleLeft: {
@@ -1781,7 +1782,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     minHeight: 60,
     backgroundColor: 'transparent',
   },
