@@ -67,11 +67,33 @@ export default function ScanResultScreen() {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentAudio, setCurrentAudio] = useState<any>(null);
   const [isDiscovering, setIsDiscovering] = useState<boolean>(false);
+  const [isInitialAnalysis, setIsInitialAnalysis] = useState<boolean>(true);
   const progressAnimation = useRef(new Animated.Value(0)).current;
+  const initialProgressAnimation = useRef(new Animated.Value(0)).current;
 
   
   const [monument, setMonument] = useState<MonumentData | undefined>(undefined);
   
+  // Start initial scanning animation when coming from analysis
+  useEffect(() => {
+    if (artworkName && typeof artworkName === 'string') {
+      // This means we're coming from a fresh analysis, show scanning animation
+      setIsInitialAnalysis(true);
+      initialProgressAnimation.setValue(0);
+      
+      // Start the scanning line animation
+      Animated.timing(initialProgressAnimation, {
+        toValue: 1,
+        duration: 3000, // 3 seconds for initial analysis visualization
+        useNativeDriver: false,
+      }).start(() => {
+        setIsInitialAnalysis(false);
+      });
+    } else {
+      setIsInitialAnalysis(false);
+    }
+  }, [artworkName]);
+
   // Load monument data on component mount
   useEffect(() => {
     const loadMonumentData = async () => {
@@ -658,13 +680,13 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           <View style={styles.imageSection}>
             <Image source={{ uri: monument.scannedImage }} style={styles.monumentImage} />
             
-            {/* Scanning line overlay - only show when discovering */}
-            {isDiscovering && (
+            {/* Scanning line overlay - show when discovering or during initial analysis */}
+            {(isDiscovering || isInitialAnalysis) && (
               <Animated.View 
                 style={[
                   styles.scanningLine,
                   {
-                    left: progressAnimation.interpolate({
+                    left: (isDiscovering ? progressAnimation : initialProgressAnimation).interpolate({
                       inputRange: [0, 1],
                       outputRange: ['0%', '95%'], // Stop at 95% to keep line visible
                     }),
