@@ -854,7 +854,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                     {
                       left: progressAnimation.interpolate({
                         inputRange: [0, 1],
-                        outputRange: ['-4px', '100%'],
+                        outputRange: [-4, screenWidth],
                       }),
                     }
                   ]} 
