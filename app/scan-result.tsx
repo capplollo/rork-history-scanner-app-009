@@ -658,6 +658,21 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           <View style={styles.imageSection}>
             <Image source={{ uri: monument.scannedImage }} style={styles.monumentImage} />
             
+            {/* Scanning line overlay - only show when discovering */}
+            {isDiscovering && (
+              <Animated.View 
+                style={[
+                  styles.scanningLine,
+                  {
+                    left: progressAnimation.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0%', '100%'],
+                    }),
+                  }
+                ]}
+              />
+            )}
+            
             {/* Header overlay on top of image */}
             <View style={styles.headerOverlay}>
               <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
@@ -841,6 +856,55 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             </View>
           </View>
         )}
+
+        {/* Discover History Section */}
+        <View style={styles.section}>
+          <View style={styles.discoveryCard}>
+            <Text style={styles.discoveryTitle}>Discover Historical Context</Text>
+            <Text style={styles.discoverySubtext}>
+              Explore related monuments, historical events, and cultural connections in this area.
+            </Text>
+            
+            <TouchableOpacity
+              style={[
+                styles.discoveryButton,
+                isDiscovering && styles.discoveryButtonActive
+              ]}
+              onPress={handleDiscoverHistory}
+              disabled={isDiscovering}
+            >
+              <View style={styles.discoveryButtonContainer}>
+                {/* Progress bar background */}
+                <Animated.View 
+                  style={[
+                    styles.discoveryProgressBar,
+                    {
+                      width: progressAnimation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0%', '100%'],
+                      }),
+                    }
+                  ]}
+                />
+                
+                {/* Button content */}
+                <View style={styles.discoveryButtonContent}>
+                  {isDiscovering ? (
+                    <>
+                      <ActivityIndicator size="small" color="#ffffff" />
+                      <Text style={[styles.discoveryButtonText, styles.discoveryButtonTextActive]}>Discovering...</Text>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={20} color={Colors.accent.secondary} />
+                      <Text style={styles.discoveryButtonText}>Start Scanning</Text>
+                    </>
+                  )}
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
       </ScrollView>
     </View>
   );
@@ -1454,5 +1518,18 @@ const styles = StyleSheet.create({
   },
   discoveryButtonTextActive: {
     color: '#ffffff',
+  },
+  scanningLine: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 3,
+    backgroundColor: Colors.accent.secondary,
+    zIndex: 5,
+    shadowColor: Colors.accent.secondary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 8,
   },
 });
