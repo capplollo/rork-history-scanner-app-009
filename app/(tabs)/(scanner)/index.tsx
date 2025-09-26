@@ -1681,10 +1681,9 @@ const styles = StyleSheet.create({
   },
   progressBackground: {
     position: 'absolute',
-    top: -14,
-    left: -24,
-    right: -24,
-    bottom: -14,
+    top: 0,
+    left: 0,
+    bottom: 0,
     backgroundColor: '#685951',
     borderRadius: 12,
     zIndex: 0,
