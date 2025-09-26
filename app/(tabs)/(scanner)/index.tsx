@@ -912,7 +912,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         </Modal>
 
         {/* GPS Location and Art Label Section - Museum Mode */}
-        {selectedImage && scanMode === 'museum' && (
+        {selectedImage && scanMode === 'museum' && !isAnalyzing && (
           <View style={styles.cityControlsSection}>
             <View style={[styles.cityControlsContainer]}>
               {/* GPS Location Toggle */}
@@ -1041,7 +1041,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         )}
 
         {/* GPS Location and Context Section - Show for city mode only */}
-        {selectedImage && scanMode === 'city' && (
+        {selectedImage && scanMode === 'city' && !isAnalyzing && (
           <View style={styles.cityControlsSection}>
             <View style={styles.cityControlsContainer}>
               {/* GPS Location Toggle */}
