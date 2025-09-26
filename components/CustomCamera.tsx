@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
-  SafeAreaView,
   Dimensions,
 } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
@@ -117,165 +116,157 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
   
   const getInstructionText = () => {
     if (!isMuseumMode) {
-      return 'Position the monument or artwork in the square frame. The photo will be cropped to 1:1 ratio and compressed to 1024x1024 pixels.';
+      return 'Position the monument or artwork in the square frame.';
     }
     
     switch (currentStep) {
       case 'artwork':
-        return 'First, take a square photo of the artwork itself. Make sure the entire piece is visible and well-lit. Photo will be compressed to 1024x1024 pixels.';
+        return 'First, take a square photo of the artwork itself. Make sure the entire piece is visible and well-lit.';
       case 'label':
-        return 'Now, take a square photo of the artwork\'s information label or placard. This helps with identification. Photo will be compressed to 1024x1024 pixels.';
+        return 'Now, take a square photo of the artwork\'s information label or placard. This helps with identification.';
       default:
         return '';
     }
   };
   
-  const getButtonText = () => {
-    if (isCapturing) return 'Capturing...';
-    if (!isMuseumMode) return 'Capture Photo';
-    
-    switch (currentStep) {
-      case 'artwork':
-        return 'Take Artwork Photo';
-      case 'label':
-        return 'Take Label Photo';
-      default:
-        return 'Capture Photo';
-    }
-  };
+
 
   // Check permissions
   if (!permission) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <X size={24} color={Colors.text.primary} />
-            </TouchableOpacity>
-            <Text style={styles.title}>Loading Camera</Text>
-            <View style={styles.placeholder} />
-          </View>
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading camera...</Text>
-          </View>
+      <View style={styles.container}>
+        <View style={styles.headerOverlay}>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <X size={24} color="#ffffff" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Loading Camera</Text>
+          <View style={styles.placeholder} />
         </View>
-      </SafeAreaView>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading camera...</Text>
+        </View>
+      </View>
     );
   }
 
   if (!permission.granted) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <X size={24} color={Colors.text.primary} />
-            </TouchableOpacity>
-            <Text style={styles.title}>Camera Permission</Text>
-            <View style={styles.placeholder} />
-          </View>
-          <View style={styles.permissionContainer}>
-            <Camera size={80} color={Colors.text.muted} />
-            <Text style={styles.permissionText}>
-              We need your permission to show the camera
-            </Text>
-            <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
-              <Text style={styles.permissionButtonText}>Grant Permission</Text>
-            </TouchableOpacity>
-          </View>
+      <View style={styles.container}>
+        <View style={styles.headerOverlay}>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <X size={24} color="#ffffff" />
+          </TouchableOpacity>
+          <Text style={styles.title}>Camera Permission</Text>
+          <View style={styles.placeholder} />
         </View>
-      </SafeAreaView>
+        <View style={styles.permissionContainer}>
+          <Camera size={80} color="rgba(255, 255, 255, 0.7)" />
+          <Text style={styles.permissionText}>
+            We need your permission to show the camera
+          </Text>
+          <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+            <Text style={styles.permissionButtonText}>Grant Permission</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.header}>
+    <View style={styles.container}>
+      {/* Camera View - Full Screen */}
+      <CameraView 
+        ref={cameraRef}
+        style={styles.cameraView} 
+        facing={facing}
+      >
+        {/* Header Overlay */}
+        <View style={styles.headerOverlay}>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <X size={24} color={Colors.text.primary} />
+            <X size={24} color="#ffffff" />
           </TouchableOpacity>
           <Text style={styles.title}>{getStepTitle()}</Text>
           <TouchableOpacity 
             style={styles.flipButton} 
             onPress={() => setFacing(current => (current === 'back' ? 'front' : 'back'))}
           >
-            <RotateCcw size={24} color={Colors.text.primary} />
+            <RotateCcw size={24} color="#ffffff" />
           </TouchableOpacity>
         </View>
         
-        <View style={styles.cameraContainer}>
-            {isMuseumMode && (
-              <View style={styles.stepIndicator}>
-                <View style={[styles.stepDot, currentStep === 'artwork' ? styles.stepDotActive : styles.stepDotComplete]}>
-                  {currentStep === 'artwork' ? (
-                    <Text style={styles.stepNumber}>1</Text>
-                  ) : (
-                    <CheckCircle size={16} color="#ffffff" />
-                  )}
-                </View>
-                <View style={styles.stepLine} />
-                <View style={[styles.stepDot, currentStep === 'label' ? styles.stepDotActive : styles.stepDotInactive]}>
-                  <Text style={[styles.stepNumber, currentStep !== 'label' && styles.stepNumberInactive]}>2</Text>
-                </View>
-              </View>
-            )}
-            
-            <View style={styles.cameraViewContainer}>
-              <CameraView 
-                ref={cameraRef}
-                style={styles.cameraView} 
-                facing={facing}
-              >
-                {/* Square overlay for 1:1 ratio guidance */}
-                <View style={styles.cameraOverlay}>
-                  <View style={styles.squareFrame} />
-                </View>
-              </CameraView>
-            </View>
-            
-            <Text style={styles.instructionText}>
-              {getInstructionText()}
-            </Text>
+        {/* Square overlay for 1:1 ratio guidance */}
+        <View style={styles.cameraOverlay}>
+          <View style={styles.squareFrame} />
         </View>
         
-        <View style={styles.bottomSection}>
+        {/* Bottom Overlay with Controls */}
+        <View style={styles.bottomOverlay}>
+          {isMuseumMode && (
+            <View style={styles.stepIndicator}>
+              <View style={[styles.stepDot, currentStep === 'artwork' ? styles.stepDotActive : styles.stepDotComplete]}>
+                {currentStep === 'artwork' ? (
+                  <Text style={styles.stepNumber}>1</Text>
+                ) : (
+                  <CheckCircle size={16} color="#ffffff" />
+                )}
+              </View>
+              <View style={styles.stepLine} />
+              <View style={[styles.stepDot, currentStep === 'label' ? styles.stepDotActive : styles.stepDotInactive]}>
+                <Text style={[styles.stepNumber, currentStep !== 'label' && styles.stepNumberInactive]}>2</Text>
+              </View>
+            </View>
+          )}
+          
+          <Text style={styles.instructionText}>
+            {getInstructionText()}
+          </Text>
+          
+          {/* Classic Circle Capture Button */}
           <TouchableOpacity
-            style={[styles.captureButton, isCapturing && styles.captureButtonDisabled]}
+            style={[styles.circleButton, isCapturing && styles.circleButtonDisabled]}
             onPress={takePicture}
             disabled={isCapturing}
           >
-            <Camera size={24} color="#ffffff" />
-            <Text style={styles.captureButtonText}>
-              {getButtonText()}
-            </Text>
+            <View style={styles.circleButtonInner}>
+              {isCapturing ? (
+                <View style={styles.capturingIndicator} />
+              ) : (
+                <View style={styles.captureIndicator} />
+              )}
+            </View>
           </TouchableOpacity>
         </View>
-      </View>
-    </SafeAreaView>
+      </CameraView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#000',
   },
-  content: {
+  cameraView: {
     flex: 1,
-    paddingHorizontal: 20,
   },
-  header: {
+  headerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    paddingTop: 60,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    zIndex: 10,
   },
   closeButton: {
     padding: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 20,
   },
   title: {
     fontSize: 18,
@@ -285,32 +276,23 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: '600',
-    color: Colors.text.primary,
+    color: '#ffffff',
+    textAlign: 'center',
   },
-  placeholder: {
-    width: 32,
-  },
-  cameraContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    gap: 20,
-  },
-  cameraViewContainer: {
-    width: screenWidth - 40,
-    height: (screenWidth - 40) * 1.25, // 25% taller to show more environment
+  flipButton: {
+    padding: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: 20,
-    overflow: 'hidden',
-    backgroundColor: '#000',
-  },
-  cameraView: {
-    flex: 1,
   },
   cameraOverlay: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 5,
   },
   squareFrame: {
     width: screenWidth - 80,
@@ -319,6 +301,18 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: 10,
     backgroundColor: 'transparent',
+  },
+  bottomOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    paddingBottom: 50,
+    paddingTop: 30,
+    paddingHorizontal: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    zIndex: 10,
   },
   loadingContainer: {
     flex: 1,
@@ -332,7 +326,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: Colors.text.muted,
+    color: '#ffffff',
   },
   permissionContainer: {
     flex: 1,
@@ -348,7 +342,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: Colors.text.primary,
+    color: '#ffffff',
     textAlign: 'center',
   },
   permissionButton: {
@@ -367,9 +361,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#ffffff',
   },
-  flipButton: {
-    padding: 8,
-  },
+
   placeholderText: {
     fontSize: 18,
     fontFamily: Platform.select({
@@ -378,7 +370,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: '500',
-    color: Colors.text.primary,
+    color: '#ffffff',
     textAlign: 'center',
   },
   instructionText: {
@@ -388,47 +380,58 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: Colors.text.muted,
+    color: '#ffffff',
     textAlign: 'center',
     lineHeight: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    maxWidth: screenWidth - 40,
   },
-  bottomSection: {
-    paddingVertical: 30,
-    alignItems: 'center',
-  },
-  captureButton: {
-    backgroundColor: Colors.accent.secondary,
-    flexDirection: 'row',
+  circleButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderWidth: 4,
+    borderColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 16,
-    gap: 12,
+    marginTop: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
-    minWidth: 200,
   },
-  captureButtonDisabled: {
+  circleButtonDisabled: {
     opacity: 0.6,
   },
-  captureButtonText: {
-    fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: '500',
-    color: '#ffffff',
+  circleButtonInner: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  captureIndicator: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: Colors.accent.secondary,
+  },
+  capturingIndicator: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#ef4444',
   },
   stepIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 20,
   },
   stepDot: {
     width: 32,
@@ -444,12 +447,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#10b981',
   },
   stepDotInactive: {
-    backgroundColor: Colors.border,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
   stepLine: {
     width: 40,
     height: 2,
-    backgroundColor: Colors.border,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
     marginHorizontal: 8,
   },
   stepNumber: {
@@ -463,7 +466,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   stepNumberInactive: {
-    color: Colors.text.muted,
+    color: 'rgba(255, 255, 255, 0.7)',
   },
   reviewSection: {
     flex: 1,
@@ -521,5 +524,8 @@ const styles = StyleSheet.create({
     }),
     fontWeight: '500',
     color: '#ffffff',
+  },
+  placeholder: {
+    width: 40,
   },
 });
