@@ -680,20 +680,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           <View style={styles.imageSection}>
             <Image source={{ uri: monument.scannedImage }} style={styles.monumentImage} />
             
-            {/* Scanning line overlay - show when discovering or during initial analysis */}
-            {(isDiscovering || isInitialAnalysis) && (
-              <Animated.View 
-                style={[
-                  styles.scanningLine,
-                  {
-                    left: (isDiscovering ? progressAnimation : initialProgressAnimation).interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ['0%', '95%'], // Stop at 95% to keep line visible
-                    }),
-                  }
-                ]}
-              />
-            )}
+
             
             {/* Header overlay on top of image */}
             <View style={styles.headerOverlay}>
@@ -1541,18 +1528,5 @@ const styles = StyleSheet.create({
   discoveryButtonTextActive: {
     color: '#ffffff',
   },
-  scanningLine: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 4, // Made slightly wider for better visibility
-    backgroundColor: Colors.accent.secondary,
-    zIndex: 5,
-    shadowColor: Colors.accent.secondary,
-    shadowOffset: { width: 2, height: 0 }, // Added horizontal shadow
-    shadowOpacity: 1.0, // Increased opacity
-    shadowRadius: 6, // Increased shadow radius
-    elevation: 10, // Increased elevation for Android
-    opacity: 0.9, // Ensure it's visible
-  },
+
 });

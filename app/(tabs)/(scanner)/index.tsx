@@ -2064,4 +2064,18 @@ const styles = StyleSheet.create({
     maxWidth: 500,
     maxHeight: 350,
   },
+  scanningLine: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 4, // Made slightly wider for better visibility
+    backgroundColor: Colors.accent.secondary,
+    zIndex: 5,
+    shadowColor: Colors.accent.secondary,
+    shadowOffset: { width: 2, height: 0 }, // Added horizontal shadow
+    shadowOpacity: 1.0, // Increased opacity
+    shadowRadius: 6, // Increased shadow radius
+    elevation: 10, // Increased elevation for Android
+    opacity: 0.9, // Ensure it's visible
+  },
 });
