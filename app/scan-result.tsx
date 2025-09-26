@@ -666,7 +666,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                   {
                     left: progressAnimation.interpolate({
                       inputRange: [0, 1],
-                      outputRange: ['0%', '100%'],
+                      outputRange: ['0%', '95%'], // Stop at 95% to keep line visible
                     }),
                   }
                 ]}
@@ -1523,13 +1523,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     bottom: 0,
-    width: 3,
+    width: 4, // Made slightly wider for better visibility
     backgroundColor: Colors.accent.secondary,
     zIndex: 5,
     shadowColor: Colors.accent.secondary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
-    elevation: 8,
+    shadowOffset: { width: 2, height: 0 }, // Added horizontal shadow
+    shadowOpacity: 1.0, // Increased opacity
+    shadowRadius: 6, // Increased shadow radius
+    elevation: 10, // Increased elevation for Android
+    opacity: 0.9, // Ensure it's visible
   },
 });
