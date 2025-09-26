@@ -845,6 +845,22 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           {selectedImage ? (
             <View style={styles.selectedImageContainer}>
               <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
+              
+              {/* Scanning line animation during analysis */}
+              {isAnalyzing && (
+                <Animated.View 
+                  style={[
+                    styles.scanningLine,
+                    {
+                      left: progressAnimation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['-4px', '100%'],
+                      }),
+                    }
+                  ]} 
+                />
+              )}
+              
               <TouchableOpacity style={styles.clearButton} onPress={clearImage}>
                 <X size={18} color="#FFF" />
               </TouchableOpacity>
