@@ -823,23 +823,25 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           )}
         </View>
 
-        {/* Scan Mode Toggle */}
-        <View style={styles.section}>
-          <View style={styles.modeToggleContainer}>
-            <TouchableOpacity 
-              style={[styles.modeButton, scanMode === 'city' && styles.modeButtonActive]}
-              onPress={() => setScanMode('city')}
-            >
-              <Text style={[styles.modeButtonText, scanMode === 'city' && styles.modeButtonTextActive]}>City</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.modeButton, scanMode === 'museum' && styles.modeButtonActive]}
-              onPress={() => setScanMode('museum')}
-            >
-              <Text style={[styles.modeButtonText, scanMode === 'museum' && styles.modeButtonTextActive]}>Museum</Text>
-            </TouchableOpacity>
+        {/* Scan Mode Toggle - Hide when photo is added */}
+        {!selectedImage && (
+          <View style={styles.section}>
+            <View style={styles.modeToggleContainer}>
+              <TouchableOpacity 
+                style={[styles.modeButton, scanMode === 'city' && styles.modeButtonActive]}
+                onPress={() => setScanMode('city')}
+              >
+                <Text style={[styles.modeButtonText, scanMode === 'city' && styles.modeButtonTextActive]}>City</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.modeButton, scanMode === 'museum' && styles.modeButtonActive]}
+                onPress={() => setScanMode('museum')}
+              >
+                <Text style={[styles.modeButtonText, scanMode === 'museum' && styles.modeButtonTextActive]}>Museum</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        )}
 
         <View style={styles.section}>
           {selectedImage ? (
