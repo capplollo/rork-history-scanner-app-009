@@ -25,6 +25,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { mockMonuments } from "@/data/mockMonuments";
 import Colors from "@/constants/colors";
 import CustomCamera from "@/components/CustomCamera";
+import Logo from "@/components/Logo";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -808,10 +809,9 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Logo and Header Section - Unified background */}
         <View style={styles.logoAndHeaderSection}>
-          <Image 
-            source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/1zbfrsea9c1ypxnlt6yaz' }}
+          <Logo 
+            size={selectedImage ? 50 : 100}
             style={selectedImage ? styles.logoImageSmall : styles.logoImage}
-            resizeMode="contain"
           />
           {!selectedImage && (
             <>
