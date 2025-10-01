@@ -6,7 +6,7 @@ interface LogoProps {
   style?: any;
 }
 
-export default function Logo({ size = 120, style }: LogoProps) {
+export default function Logo({ size = 84, style }: LogoProps) {
   return (
     <Image
       source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/h3ve8g8jkt71sbu6jwrlr' }}
