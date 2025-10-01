@@ -2040,8 +2040,8 @@ const styles = StyleSheet.create({
   },
   logoAndHeaderSection: {
     backgroundColor: Colors.background,
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingTop: 0,
+    paddingBottom: 0,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
