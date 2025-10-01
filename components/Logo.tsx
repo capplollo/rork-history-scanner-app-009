@@ -20,5 +20,6 @@ const styles = StyleSheet.create({
   logo: {
     margin: 0,
     padding: 0,
+    paddingVertical: 10,
   },
 });
