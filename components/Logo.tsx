@@ -18,6 +18,7 @@ export default function Logo({ size = 120, style }: LogoProps) {
 
 const styles = StyleSheet.create({
   logo: {
-    // Image will maintain aspect ratio with resizeMode="contain"
+    margin: 0,
+    padding: 0,
   },
 });

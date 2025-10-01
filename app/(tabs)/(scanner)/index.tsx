@@ -2042,14 +2042,20 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 0,
+    marginVertical: 0,
   },
   logoImage: {
     width: 250,
     height: 250,
+    marginVertical: 0,
+    paddingVertical: 0,
   },
   logoImageSmall: {
     width: 125,
     height: 125,
+    marginVertical: 0,
+    paddingVertical: 0,
   },
   subtleLine: {
     width: 320,
