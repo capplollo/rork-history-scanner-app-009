@@ -2040,10 +2040,8 @@ const styles = StyleSheet.create({
   },
   logoAndHeaderSection: {
     backgroundColor: Colors.background,
-    paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
   },
   logoImage: {
     width: 250,
