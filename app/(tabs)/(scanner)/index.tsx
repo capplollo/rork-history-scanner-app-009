@@ -810,7 +810,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         {/* Logo and Header Section - Unified background */}
         <View style={styles.logoAndHeaderSection}>
           <Logo 
-            size={selectedImage ? 50 : 100}
+            size={selectedImage ? 125 : 250}
             style={selectedImage ? styles.logoImageSmall : styles.logoImage}
           />
           {!selectedImage && (
@@ -2048,12 +2048,12 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   logoImage: {
-    width: 100,
-    height: 100,
+    width: 250,
+    height: 250,
   },
   logoImageSmall: {
-    width: 50,
-    height: 50,
+    width: 125,
+    height: 125,
   },
   subtleLine: {
     width: 320,
