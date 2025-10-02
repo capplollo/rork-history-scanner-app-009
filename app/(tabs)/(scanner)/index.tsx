@@ -55,7 +55,9 @@ export default function ScannerScreen() {
     const parent = navigation.getParent();
     if (parent) {
       parent.setOptions({
-        tabBarStyle: selectedImage ? undefined : {
+        tabBarStyle: selectedImage ? {
+          display: 'none'
+        } : {
           backgroundColor: "#FEFEFE",
           borderTopWidth: 0,
           borderRadius: 25,

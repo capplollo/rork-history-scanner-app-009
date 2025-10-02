@@ -80,7 +80,9 @@ export default function ScanResultScreen() {
     const parent = navigation.getParent();
     if (parent) {
       parent.setOptions({
-        tabBarStyle: undefined
+        tabBarStyle: {
+          display: 'none'
+        }
       });
     }
     
