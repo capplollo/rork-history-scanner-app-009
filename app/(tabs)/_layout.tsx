@@ -11,7 +11,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors.umber,
         tabBarInactiveTintColor: "#A0A0A0",
         tabBarStyle: {
-          backgroundColor: "#FEFEFE",
+          backgroundColor: "transparent",
           borderTopWidth: 0,
           borderRadius: 25,
           marginHorizontal: 20,
@@ -19,12 +19,25 @@ export default function TabLayout() {
           paddingBottom: 0,
           height: Platform.OS === "ios" ? 65 : 50,
           position: "absolute",
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.15,
-          shadowRadius: 12,
-          elevation: 12,
+          shadowColor: "transparent",
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0,
+          shadowRadius: 0,
+          elevation: 0,
         },
+        tabBarBackground: () => (
+          <View style={{
+            flex: 1,
+            backgroundColor: "#FEFEFE",
+            borderRadius: 25,
+            marginHorizontal: 0,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 12,
+            elevation: 12,
+          }} />
+        ),
         tabBarLabelStyle: {
           fontFamily: Platform.select({
             ios: "Times New Roman",
