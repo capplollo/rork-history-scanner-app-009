@@ -12,7 +12,7 @@ import {
   Platform,
   Animated,
 } from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
+import { useLocalSearchParams, router, useNavigation } from "expo-router";
 import { MapPin, Calendar, Share2, CheckCircle, AlertCircle, RefreshCw, ArrowLeft, Sparkles, Clock, Volume2, VolumeX, Pause, Play } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImageManipulator from "expo-image-manipulator";
@@ -70,9 +70,19 @@ export default function ScanResultScreen() {
   const [isInitialAnalysis, setIsInitialAnalysis] = useState<boolean>(true);
   const progressAnimation = useRef(new Animated.Value(0)).current;
   const initialProgressAnimation = useRef(new Animated.Value(0)).current;
+  const navigation = useNavigation();
 
   
   const [monument, setMonument] = useState<MonumentData | undefined>(undefined);
+
+  // Hide tab bar on scan result page
+  useEffect(() => {
+    navigation.setOptions({
+      tabBarStyle: {
+        display: 'none',
+      },
+    });
+  }, [navigation]);
   
   // Start initial scanning animation when coming from analysis
   useEffect(() => {

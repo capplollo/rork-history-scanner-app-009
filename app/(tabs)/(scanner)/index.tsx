@@ -21,7 +21,7 @@ import * as Location from "expo-location";
 import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info, Zap, Camera, MapPin } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { mockMonuments } from "@/data/mockMonuments";
 import Colors from "@/constants/colors";
 import CustomCamera from "@/components/CustomCamera";
@@ -48,6 +48,16 @@ export default function ScannerScreen() {
   const [locationAddress, setLocationAddress] = useState<string | null>(null);
   const [showCustomCamera, setShowCustomCamera] = useState(false);
   const progressAnimation = useRef(new Animated.Value(0)).current;
+  const navigation = useNavigation();
+
+  // Hide tab bar when image is selected
+  useEffect(() => {
+    navigation.setOptions({
+      tabBarStyle: {
+        display: selectedImage ? 'none' : 'flex',
+      },
+    });
+  }, [selectedImage, navigation]);
 
   // Handle reanalysis flow
   useEffect(() => {
@@ -810,8 +820,8 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         {/* Logo and Header Section - Unified background */}
         <View style={styles.logoAndHeaderSection}>
           <Logo 
-            size={selectedImage ? 150 : 300}
-            style={selectedImage ? styles.logoImageSmall : styles.logoImage}
+            size={300}
+            style={styles.logoImage}
           />
           {!selectedImage && (
             <>
