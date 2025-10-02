@@ -77,9 +77,34 @@ export default function ScanResultScreen() {
   
   // Hide tab bar on scan result page
   useEffect(() => {
-    navigation.setOptions({
-      tabBarStyle: { display: 'none' }
-    });
+    const parent = navigation.getParent();
+    if (parent) {
+      parent.setOptions({
+        tabBarStyle: undefined
+      });
+    }
+    
+    return () => {
+      if (parent) {
+        parent.setOptions({
+          tabBarStyle: {
+            backgroundColor: "#FEFEFE",
+            borderTopWidth: 0,
+            borderRadius: 25,
+            marginHorizontal: 20,
+            marginBottom: Platform.OS === "ios" ? 34 : 20,
+            paddingBottom: 0,
+            height: Platform.OS === "ios" ? 65 : 50,
+            position: "absolute",
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 12,
+            elevation: 12,
+          }
+        });
+      }
+    };
   }, [navigation]);
 
   // Start initial scanning animation when coming from analysis

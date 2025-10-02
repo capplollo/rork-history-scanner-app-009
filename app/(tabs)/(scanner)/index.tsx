@@ -52,23 +52,48 @@ export default function ScannerScreen() {
 
   // Hide/show tab bar based on selectedImage state
   useEffect(() => {
-    navigation.setOptions({
-      tabBarStyle: selectedImage ? { display: 'none' } : {
-        backgroundColor: "#FEFEFE",
-        borderTopWidth: 0,
-        borderRadius: 25,
-        marginHorizontal: 20,
-        marginBottom: Platform.OS === "ios" ? 34 : 20,
-        paddingBottom: 0,
-        height: Platform.OS === "ios" ? 65 : 50,
-        position: "absolute",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
-        elevation: 12,
+    const parent = navigation.getParent();
+    if (parent) {
+      parent.setOptions({
+        tabBarStyle: selectedImage ? undefined : {
+          backgroundColor: "#FEFEFE",
+          borderTopWidth: 0,
+          borderRadius: 25,
+          marginHorizontal: 20,
+          marginBottom: Platform.OS === "ios" ? 34 : 20,
+          paddingBottom: 0,
+          height: Platform.OS === "ios" ? 65 : 50,
+          position: "absolute",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 12,
+          elevation: 12,
+        }
+      });
+    }
+    
+    return () => {
+      if (parent) {
+        parent.setOptions({
+          tabBarStyle: {
+            backgroundColor: "#FEFEFE",
+            borderTopWidth: 0,
+            borderRadius: 25,
+            marginHorizontal: 20,
+            marginBottom: Platform.OS === "ios" ? 34 : 20,
+            paddingBottom: 0,
+            height: Platform.OS === "ios" ? 65 : 50,
+            position: "absolute",
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 12,
+            elevation: 12,
+          }
+        });
       }
-    });
+    };
   }, [selectedImage, navigation]);
 
   // Handle reanalysis flow
