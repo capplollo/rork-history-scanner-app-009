@@ -27,10 +27,13 @@ export default function TabLayout() {
         },
         tabBarBackground: () => (
           <View style={{
-            flex: 1,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             backgroundColor: "#FEFEFE",
             borderRadius: 25,
-            marginHorizontal: 0,
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.15,
