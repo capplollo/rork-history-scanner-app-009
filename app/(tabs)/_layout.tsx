@@ -28,14 +28,14 @@ export default function TabLayout() {
         tabBarBackground: () => (
           <View style={{
             flex: 1,
-            backgroundColor: "#FEFEFE",
+            backgroundColor: "transparent",
             borderRadius: 25,
             marginHorizontal: 0,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.15,
-            shadowRadius: 12,
-            elevation: 12,
+            shadowColor: "transparent",
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0,
+            shadowRadius: 0,
+            elevation: 0,
           }} />
         ),
         tabBarLabelStyle: {
