@@ -21,7 +21,7 @@ import * as Location from "expo-location";
 import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info, Zap, Camera, MapPin } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { mockMonuments } from "@/data/mockMonuments";
 import Colors from "@/constants/colors";
 import CustomCamera from "@/components/CustomCamera";
@@ -48,6 +48,28 @@ export default function ScannerScreen() {
   const [locationAddress, setLocationAddress] = useState<string | null>(null);
   const [showCustomCamera, setShowCustomCamera] = useState(false);
   const progressAnimation = useRef(new Animated.Value(0)).current;
+  const navigation = useNavigation();
+
+  // Hide/show tab bar based on selectedImage state
+  useEffect(() => {
+    navigation.setOptions({
+      tabBarStyle: selectedImage ? { display: 'none' } : {
+        backgroundColor: "#FEFEFE",
+        borderTopWidth: 0,
+        borderRadius: 25,
+        marginHorizontal: 20,
+        marginBottom: Platform.OS === "ios" ? 34 : 20,
+        paddingBottom: 0,
+        height: Platform.OS === "ios" ? 65 : 50,
+        position: "absolute",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        elevation: 12,
+      }
+    });
+  }, [selectedImage, navigation]);
 
   // Handle reanalysis flow
   useEffect(() => {
