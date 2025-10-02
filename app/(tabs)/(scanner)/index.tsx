@@ -854,8 +854,9 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <View style={{ flex: 1, backgroundColor: Colors.background }}>
+      <SafeAreaView style={styles.container}>
+        <ScrollView showsVerticalScrollIndicator={false}>
         {/* Logo and Header Section - Unified background */}
         <View style={styles.logoAndHeaderSection}>
           <Logo 
@@ -1234,16 +1235,17 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         )}
 
 
-      </ScrollView>
-      <View style={styles.bottomSpacer} />
-    </SafeAreaView>
+        </ScrollView>
+        <View style={styles.bottomSpacer} />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: 'transparent',
   },
   header: {
     paddingTop: 60,
