@@ -1320,7 +1320,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
