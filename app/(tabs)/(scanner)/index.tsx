@@ -2134,6 +2134,7 @@ const styles = StyleSheet.create({
     marginVertical: 0,
     paddingTop: 0,
     paddingBottom: 0,
+    maxHeight: 180,
   },
   logoImage: {
     marginVertical: 0,
