@@ -957,7 +957,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                     <Image 
                       source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/jvjvctukol4nt8adpt330' }}
                       style={styles.museumIllustration}
-                      resizeMode="contain"
+                      resizeMode="cover"
                       onError={(error) => console.log('Image load error:', error)}
                       onLoad={() => console.log('Image loaded successfully')}
                     />
@@ -969,7 +969,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                     <Image 
                       source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/6istmr6mh56zb726qphxo' }}
                       style={styles.museumIllustration}
-                      resizeMode="contain"
+                      resizeMode="cover"
                       onError={(error) => console.log('Museum image load error:', error)}
                       onLoad={() => console.log('Museum image loaded successfully')}
                     />
@@ -2166,10 +2166,9 @@ const styles = StyleSheet.create({
     maxHeight: 350,
   },
   museumIllustration: {
-    width: screenWidth * 1.0625,
-    height: screenWidth * 0.75,
-    maxWidth: 500,
-    maxHeight: 350,
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
   },
   scanningLine: {
     position: 'absolute',
