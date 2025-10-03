@@ -2151,7 +2151,7 @@ const styles = StyleSheet.create({
     width: 320,
     height: 1,
     backgroundColor: 'rgba(0,0,0,0.06)',
-    marginTop: 8,
+    marginTop: 2,
   },
   illustrationContainer: {
     width: '100%',
