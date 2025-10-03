@@ -2152,14 +2152,10 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   illustrationContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    width: '100%',
+    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1,
   },
   monumentsIllustration: {
     width: screenWidth * 1.0625,
@@ -2170,7 +2166,7 @@ const styles = StyleSheet.create({
   museumIllustration: {
     width: '100%',
     height: '100%',
-    borderRadius: 16,
+    borderRadius: 14,
   },
   scanningLine: {
     position: 'absolute',
