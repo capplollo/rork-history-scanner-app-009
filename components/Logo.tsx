@@ -21,7 +21,7 @@ export default function Logo({ size = 191, style }: LogoProps) {
 const styles = StyleSheet.create({
   container: {
     paddingTop: 10,
-    paddingBottom: 10,
+    paddingBottom: 4,
   },
   logo: {
     margin: 0,
