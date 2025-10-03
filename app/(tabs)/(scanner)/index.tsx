@@ -1327,12 +1327,13 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontStyle: 'italic',
+    fontWeight: "700",
     color: Colors.text.muted,
     lineHeight: 24,
     textAlign: 'center',
     maxWidth: 320,
-    marginTop: 12,
-    marginBottom: 12,
+    marginTop: 16,
+    marginBottom: 16,
   },
   headerStats: {
     flexDirection: "row",
@@ -2148,6 +2149,7 @@ const styles = StyleSheet.create({
     width: 320,
     height: 1,
     backgroundColor: 'rgba(0,0,0,0.06)',
+    marginTop: 8,
   },
   illustrationContainer: {
     position: 'absolute',
