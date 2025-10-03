@@ -955,7 +955,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 <View style={styles.placeholderContent}>
                   <View style={styles.illustrationContainer}>
                     <Image 
-                      source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/hcc96th30caiexyglikb9' }}
+                      source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/jvjvctukol4nt8adpt330' }}
                       style={styles.museumIllustration}
                       resizeMode="contain"
                       onError={(error) => console.log('Image load error:', error)}
@@ -967,7 +967,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 <View style={styles.placeholderContent}>
                   <View style={styles.illustrationContainer}>
                     <Image 
-                      source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/s13kduj5rxyy2aakvte6r' }}
+                      source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/6istmr6mh56zb726qphxo' }}
                       style={styles.museumIllustration}
                       resizeMode="contain"
                       onError={(error) => console.log('Museum image load error:', error)}
