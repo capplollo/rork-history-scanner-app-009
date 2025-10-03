@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'transparent',
     zIndex: 10,
   },
   closeButton: {
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
     paddingBottom: 50,
     paddingTop: 30,
     paddingHorizontal: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'transparent',
     zIndex: 10,
   },
   loadingContainer: {
