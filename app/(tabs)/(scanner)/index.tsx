@@ -1436,8 +1436,10 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   placeholderContent: {
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
-    gap: 12,
+    justifyContent: 'center',
   },
   placeholderGradient: {
     flex: 1,
@@ -2154,6 +2156,11 @@ const styles = StyleSheet.create({
   illustrationContainer: {
     width: '100%',
     height: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
   },
