@@ -11,6 +11,8 @@ import {
   ActivityIndicator,
   Platform,
   Animated,
+  PanResponder,
+  Dimensions,
 } from "react-native";
 import { useLocalSearchParams, router, useNavigation } from "expo-router";
 import { MapPin, Calendar, Share2, CheckCircle, AlertCircle, RefreshCw, ArrowLeft, Sparkles, Clock, Volume2, VolumeX, Pause, Play } from "lucide-react-native";
@@ -68,8 +70,10 @@ export default function ScanResultScreen() {
   const [currentAudio, setCurrentAudio] = useState<any>(null);
   const [isDiscovering, setIsDiscovering] = useState<boolean>(false);
   const [isInitialAnalysis, setIsInitialAnalysis] = useState<boolean>(true);
+  const [activeTab, setActiveTab] = useState<'takeaways' | 'summary'>('takeaways');
   const progressAnimation = useRef(new Animated.Value(0)).current;
   const initialProgressAnimation = useRef(new Animated.Value(0)).current;
+  const slideAnimation = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
 
   
@@ -818,33 +822,77 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
 
 
 
-        {/* Key Takeaways - Only show when recognized */}
+        {/* Key Takeaways / Short Summary - Only show when recognized */}
         {monument.isRecognized && monument.detailedDescription && monument.detailedDescription.keyTakeaways && (
           <View style={styles.section}>
             <View style={styles.contentCard}>
               <View style={styles.cardHeader}>
                 <Sparkles size={20} color={Colors.accent.secondary} />
-                <Text style={styles.sectionTitle}>Key Takeaways</Text>
+                <Text style={styles.sectionTitle}>
+                  {activeTab === 'takeaways' ? 'Key Takeaways' : 'Short Summary'}
+                </Text>
               </View>
-              <View style={styles.factsContainer}>
-                {monument.detailedDescription.keyTakeaways.map((takeaway, index) => (
-                  <View key={index} style={styles.factItem}>
-                    <View style={styles.factDot} />
-                    <Text style={styles.factText}>{takeaway}</Text>
-                  </View>
-                ))}
+              
+              {/* Tab Switcher */}
+              <View style={styles.tabSwitcher}>
+                <TouchableOpacity
+                  style={[styles.tab, activeTab === 'takeaways' && styles.activeTab]}
+                  onPress={() => {
+                    setActiveTab('takeaways');
+                    Animated.spring(slideAnimation, {
+                      toValue: 0,
+                      useNativeDriver: true,
+                    }).start();
+                  }}
+                >
+                  <Text style={[styles.tabText, activeTab === 'takeaways' && styles.activeTabText]}>
+                    Key Takeaways
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.tab, activeTab === 'summary' && styles.activeTab]}
+                  onPress={() => {
+                    setActiveTab('summary');
+                    Animated.spring(slideAnimation, {
+                      toValue: 1,
+                      useNativeDriver: true,
+                    }).start();
+                  }}
+                >
+                  <Text style={[styles.tabText, activeTab === 'summary' && styles.activeTabText]}>
+                    Short Summary
+                  </Text>
+                </TouchableOpacity>
               </View>
+              
+              {/* Content */}
+              {activeTab === 'takeaways' ? (
+                <View style={styles.factsContainer}>
+                  {monument.detailedDescription.keyTakeaways.map((takeaway, index) => (
+                    <View key={index} style={styles.factItem}>
+                      <View style={styles.factDot} />
+                      <Text style={styles.factText}>{takeaway}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <View style={styles.summaryContainer}>
+                  <Text style={styles.summaryText}>
+                    {monument.detailedDescription.keyTakeaways.slice(0, 2).join(' ')}
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
         )}
 
-        {/* In-Depth Context - Only show when recognized */}
+        {/* Immersive History - Only show when recognized */}
         {monument.isRecognized && monument.detailedDescription && monument.detailedDescription.inDepthContext && (
           <View style={styles.section}>
             <View style={styles.contentCard}>
               <View style={styles.cardHeader}>
                 <Clock size={20} color={Colors.accent.secondary} />
-                <Text style={styles.sectionTitle}>In-Depth Context</Text>
+                <Text style={styles.sectionTitle}>Immersive History</Text>
                 <TouchableOpacity
                   style={styles.ttsButton}
                   onPress={() => handlePlayTTS(monument.detailedDescription!.inDepthContext)}
@@ -1562,6 +1610,51 @@ const styles = StyleSheet.create({
   },
   discoveryButtonTextActive: {
     color: '#ffffff',
+  },
+  tabSwitcher: {
+    flexDirection: 'row',
+    backgroundColor: '#f1f5f9',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 16,
+    gap: 4,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activeTab: {
+    backgroundColor: Colors.accent.secondary,
+  },
+  tabText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: '#64748b',
+  },
+  activeTabText: {
+    color: '#ffffff',
+  },
+  summaryContainer: {
+    paddingTop: 4,
+  },
+  summaryText: {
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    lineHeight: 22,
+    color: '#64748b',
   },
 
 });
