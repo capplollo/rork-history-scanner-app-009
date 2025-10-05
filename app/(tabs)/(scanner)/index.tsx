@@ -892,11 +892,18 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         {/* Header Section */}
         {!selectedImage && (
           <View style={styles.headerSection}>
+            <LinearGradient
+              colors={['rgba(118, 104, 96, 0.36)', 'rgba(225, 222, 220, 0.36)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.headerGradient}
+            />
             <View style={styles.headerContent}>
               <Text style={styles.mainTitle}>Snap into Heritage</Text>
               <Text style={styles.headerSubtitle}>
                 Discover the living stories of art and monuments
               </Text>
+              <View style={styles.headerDivider} />
             </View>
             <TouchableOpacity style={styles.cameraIconButton}>
               <View style={styles.cameraIconFrame}>
@@ -1298,15 +1305,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   headerSubtitle: {
-    fontSize: 15,
+    fontSize: 27,
     fontFamily: "Lora_400Regular",
     fontStyle: 'italic',
-    fontWeight: "700",
-    color: Colors.text.muted,
-    lineHeight: 24,
-    textAlign: 'center',
-    maxWidth: 320,
-    marginTop: 16,
+    fontWeight: "400",
+    color: '#173248',
+    lineHeight: 34,
+    textAlign: 'left',
+    marginTop: 0,
     marginBottom: 16,
   },
   headerStats: {
@@ -1995,21 +2001,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    position: 'relative',
   },
   headerContent: {
     flex: 1,
     paddingRight: 20,
   },
   mainTitle: {
-    fontSize: 48,
+    fontSize: 50,
     fontFamily: "Lora_400Regular",
     fontWeight: "700",
-    color: Colors.accent.secondary,
+    color: '#173248',
     marginBottom: 8,
     lineHeight: 56,
   },
   cameraIconButton: {
     marginTop: 8,
+    zIndex: 2,
   },
   cameraIconFrame: {
     width: 60,
@@ -2019,6 +2027,20 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  headerGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
+  },
+  headerDivider: {
+    height: 1,
+    backgroundColor: '#173248',
+    opacity: 0.2,
+    marginTop: 8,
   },
   cardsSection: {
     paddingHorizontal: 20,
