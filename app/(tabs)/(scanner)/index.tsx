@@ -1309,11 +1309,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "600",
     color: Colors.text.primary,
     marginBottom: 8,
@@ -1321,11 +1317,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 15,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontStyle: 'italic',
     fontWeight: "700",
     color: Colors.text.muted,
@@ -1347,11 +1339,7 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 13,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     color: Colors.text.muted,
   },
   section: {
@@ -1373,11 +1361,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "500",
     color: Colors.text.primary,
     marginBottom: 20,
@@ -1449,21 +1433,13 @@ const styles = StyleSheet.create({
   },
   placeholderText: {
     fontSize: 18,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "500",
     color: Colors.text.primary,
   },
   placeholderSubtext: {
     fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     color: Colors.text.muted,
     textAlign: 'center',
     lineHeight: 20,
@@ -1499,11 +1475,7 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "500",
     color: Colors.accent.secondary,
   },
@@ -1537,11 +1509,7 @@ const styles = StyleSheet.create({
   },
   artLabelToggleText: {
     fontSize: 15,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "400",
     color: Colors.text.primary,
   },
@@ -1557,11 +1525,7 @@ const styles = StyleSheet.create({
   },
   artLabelPlaceholderText: {
     fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     color: Colors.text.muted,
     textAlign: 'center',
     lineHeight: 20,
@@ -1587,11 +1551,7 @@ const styles = StyleSheet.create({
   },
   contextToggleText: {
     fontSize: 15,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "400",
     color: Colors.text.primary,
   },
@@ -1605,22 +1565,14 @@ const styles = StyleSheet.create({
   },
   contextInputLabel: {
     fontSize: 13,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "500",
     color: Colors.text.primary,
     letterSpacing: 0.2,
   },
   contextInputHint: {
     fontSize: 11,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     color: Colors.text.muted,
     marginBottom: 6,
     lineHeight: 16,
@@ -1633,11 +1585,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     color: '#2C3E50',
     lineHeight: 20,
     height: 100,
@@ -1662,11 +1610,7 @@ const styles = StyleSheet.create({
   },
   infoToggleText: {
     fontSize: 15,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "400",
     color: Colors.text.primary,
   },
@@ -1678,11 +1622,7 @@ const styles = StyleSheet.create({
   },
   optionalText: {
     fontSize: 9,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "600",
     color: '#ffffff',
     letterSpacing: 0.3,
@@ -1699,11 +1639,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 13,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "500",
     color: Colors.text.primary,
     letterSpacing: 0.2,
@@ -1716,11 +1652,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     color: '#2C3E50',
     lineHeight: 20,
   },
@@ -1730,11 +1662,7 @@ const styles = StyleSheet.create({
   },
   inputHint: {
     fontSize: 11,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     color: Colors.text.muted,
     marginBottom: 6,
     lineHeight: 16,
@@ -1794,11 +1722,7 @@ const styles = StyleSheet.create({
   },
   analyzeButtonText: {
     fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "500",
     color: "#ffffff",
     letterSpacing: 0.3,
@@ -1827,11 +1751,7 @@ const styles = StyleSheet.create({
   },
   modeButtonText: {
     fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "500",
     color: Colors.text.secondary,
   },
@@ -1855,11 +1775,7 @@ const styles = StyleSheet.create({
   },
   labelHeaderText: {
     fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "500",
     color: Colors.text.primary,
   },
@@ -1874,11 +1790,7 @@ const styles = StyleSheet.create({
   },
   requiredText: {
     fontSize: 10,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "500",
     color: '#ffffff',
   },
@@ -1909,11 +1821,7 @@ const styles = StyleSheet.create({
   },
   labelPlaceholderText: {
     fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     color: Colors.text.muted,
     textAlign: 'center',
     lineHeight: 20,
@@ -1936,11 +1844,7 @@ const styles = StyleSheet.create({
   },
   labelButtonText: {
     fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "500",
     color: Colors.accent.secondary,
   },
@@ -1964,11 +1868,7 @@ const styles = StyleSheet.create({
   },
   artLabelNotAvailableToggleText: {
     fontSize: 15,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "400",
     color: Colors.text.primary,
   },
@@ -1988,11 +1888,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     color: '#2C3E50',
     lineHeight: 20,
     height: 100,
@@ -2025,21 +1921,13 @@ const styles = StyleSheet.create({
   },
   gpsText: {
     fontSize: 15,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "400",
     color: Colors.text.primary,
   },
   gpsLocationText: {
     fontSize: 12,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     color: Colors.text.muted,
     marginTop: 2,
   },
@@ -2078,22 +1966,14 @@ const styles = StyleSheet.create({
   },
   gpsTextMuseum: {
     fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     fontWeight: "400",
     color: Colors.text.primary,
     marginLeft: 8,
   },
   gpsLocationTextMuseum: {
     fontSize: 11,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
+    fontFamily: "Lora_400Regular",
     color: Colors.text.muted,
     paddingHorizontal: 16,
     paddingBottom: 12,

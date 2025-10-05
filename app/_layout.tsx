@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Colors from "@/constants/colors";
+import { useFonts, Lora_400Regular, Lora_500Medium, Lora_600SemiBold, Lora_700Bold } from '@expo-google-fonts/lora';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -80,6 +81,13 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Lora_400Regular,
+    Lora_500Medium,
+    Lora_600SemiBold,
+    Lora_700Bold,
+  });
+
   useEffect(() => {
     const initializeApp = async () => {
       try {
@@ -87,12 +95,18 @@ export default function RootLayout() {
       } catch (error) {
         console.error('App initialization failed:', error);
       } finally {
-        SplashScreen.hideAsync();
+        if (fontsLoaded) {
+          SplashScreen.hideAsync();
+        }
       }
     };
     
     initializeApp();
-  }, []);
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <GestureHandlerRootView style={styles.container}>
