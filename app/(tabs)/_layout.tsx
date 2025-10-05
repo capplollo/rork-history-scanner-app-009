@@ -8,16 +8,16 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.umber,
-        tabBarInactiveTintColor: "#A0A0A0",
+        tabBarActiveTintColor: "#FFFFFF",
+        tabBarInactiveTintColor: Colors.iconGray,
         tabBarStyle: {
           backgroundColor: "transparent",
           borderTopWidth: 0,
-          borderRadius: 25,
-          marginHorizontal: 20,
-          marginBottom: Platform.OS === "ios" ? 34 : 20,
+          borderRadius: 38,
+          marginHorizontal: 24,
+          marginBottom: Platform.OS === "ios" ? 16 : 16,
           paddingBottom: 0,
-          height: Platform.OS === "ios" ? 65 : 50,
+          height: 76,
           position: "absolute",
           shadowColor: "transparent",
           shadowOffset: { width: 0, height: 0 },
@@ -32,12 +32,12 @@ export default function TabLayout() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "#FEFEFE",
-            borderRadius: 25,
+            backgroundColor: Colors.navBar,
+            borderRadius: 38,
             shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.15,
-            shadowRadius: 12,
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.25,
+            shadowRadius: 24,
             elevation: 12,
           }} />
         ),
@@ -56,20 +56,20 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+          title: "",
+          tabBarIcon: ({ color }) => <User size={26} color={color} />,
         }}
       />
       <Tabs.Screen
         name="(scanner)"
         options={{
-          title: "Discover",
-          tabBarIcon: ({ color, focused }) => (
+          title: "",
+          tabBarIcon: ({ focused }) => (
             <View style={[
               styles.cameraIconContainer,
-              { backgroundColor: focused ? Colors.umber : Colors.taupeGray }
+              { backgroundColor: focused ? "#FFFFFF" : Colors.iconGray }
             ]}>
-              <Camera size={28} color="#ffffff" />
+              <Camera size={32} color={Colors.navBar} />
             </View>
           ),
           tabBarLabel: () => null,
@@ -78,8 +78,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="learn"
         options={{
-          title: "Learn",
-          tabBarIcon: ({ color, size }) => <BookOpen size={size} color={color} />,
+          title: "",
+          tabBarIcon: ({ color }) => <BookOpen size={26} color={color} />,
         }}
       />
     </Tabs>
@@ -93,11 +93,11 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
+    marginBottom: 8,
+    shadowColor: "rgba(0,0,0,0.15)",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 4,
+    elevation: 4,
   },
 });
