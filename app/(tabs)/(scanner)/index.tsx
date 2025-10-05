@@ -889,48 +889,78 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <SafeAreaView style={styles.container}>
         <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Logo and Header Section - Unified background */}
-        <View style={styles.logoAndHeaderSection}>
-          <Logo 
-            size={300}
-            style={styles.logoImage}
-          />
-          {!selectedImage && (
-            <>
-              <View style={styles.subtleLine} />
-              <Text style={styles.headerSubtitle} numberOfLines={1}>
-                Discover the living stories of monuments and art
-              </Text>
-            </>
-          )}
-        </View>
-
-        {/* Scan Mode Toggle - Hide when photo is added */}
+        {/* Header Section */}
         {!selectedImage && (
-          <View style={styles.section}>
-            <View style={styles.modeToggleContainer}>
-              <TouchableOpacity 
-                style={[styles.modeButton, scanMode === 'city' && styles.modeButtonActive]}
-                onPress={() => setScanMode('city')}
-              >
-                <Text style={[styles.modeButtonText, scanMode === 'city' && styles.modeButtonTextActive]}>City</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.modeButton, scanMode === 'museum' && styles.modeButtonActive]}
-                onPress={() => setScanMode('museum')}
-              >
-                <Text style={[styles.modeButtonText, scanMode === 'museum' && styles.modeButtonTextActive]}>Museum</Text>
-              </TouchableOpacity>
+          <View style={styles.headerSection}>
+            <View style={styles.headerContent}>
+              <Text style={styles.mainTitle}>Snap into Heritage</Text>
+              <Text style={styles.headerSubtitle}>
+                Discover the living stories of art and monuments
+              </Text>
             </View>
+            <TouchableOpacity style={styles.cameraIconButton}>
+              <View style={styles.cameraIconFrame}>
+                <CameraIcon size={32} color={Colors.accent.secondary} strokeWidth={1.5} />
+              </View>
+            </TouchableOpacity>
           </View>
         )}
 
-        <View style={styles.section}>
-          {selectedImage ? (
+
+
+        {!selectedImage ? (
+          <View style={styles.cardsSection}>
+            <TouchableOpacity 
+              style={styles.modeCard}
+              onPress={() => {
+                setScanMode('city');
+                takePhoto();
+              }}
+            >
+              <Image 
+                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/jvjvctukol4nt8adpt330' }}
+                style={styles.cardImage}
+                resizeMode="cover"
+              />
+              <View style={styles.cardOverlay}>
+                <View style={styles.scanFrame}>
+                  <View style={[styles.scanCorner, styles.scanCornerTL]} />
+                  <View style={[styles.scanCorner, styles.scanCornerTR]} />
+                  <View style={[styles.scanCorner, styles.scanCornerBL]} />
+                  <View style={[styles.scanCorner, styles.scanCornerBR]} />
+                </View>
+                <Text style={styles.cardLabel}>Outdoor</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.modeCard}
+              onPress={() => {
+                setScanMode('museum');
+                takePhoto();
+              }}
+            >
+              <Image 
+                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/6istmr6mh56zb726qphxo' }}
+                style={styles.cardImage}
+                resizeMode="cover"
+              />
+              <View style={styles.cardOverlay}>
+                <View style={styles.scanFrame}>
+                  <View style={[styles.scanCorner, styles.scanCornerTL]} />
+                  <View style={[styles.scanCorner, styles.scanCornerTR]} />
+                  <View style={[styles.scanCorner, styles.scanCornerBL]} />
+                  <View style={[styles.scanCorner, styles.scanCornerBR]} />
+                </View>
+                <Text style={styles.cardLabel}>Museum</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.section}>
             <View style={styles.selectedImageContainer}>
               <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
               
-              {/* Scanning line animation during analysis */}
               {isAnalyzing && (
                 <Animated.View 
                   style={[
@@ -947,50 +977,6 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               
               <TouchableOpacity style={styles.clearButton} onPress={clearImage}>
                 <X size={18} color="#FFF" />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View style={styles.placeholderContainer}>
-              {scanMode === 'city' ? (
-                <View style={styles.placeholderContent}>
-                  <View style={styles.illustrationContainer}>
-                    <Image 
-                      source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/jvjvctukol4nt8adpt330' }}
-                      style={styles.museumIllustration}
-                      resizeMode="cover"
-                      onError={(error) => console.log('Image load error:', error)}
-                      onLoad={() => console.log('Image loaded successfully')}
-                    />
-                  </View>
-                </View>
-              ) : (
-                <View style={styles.placeholderContent}>
-                  <View style={styles.illustrationContainer}>
-                    <Image 
-                      source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/6istmr6mh56zb726qphxo' }}
-                      style={styles.museumIllustration}
-                      resizeMode="cover"
-                      onError={(error) => console.log('Museum image load error:', error)}
-                      onLoad={() => console.log('Museum image loaded successfully')}
-                    />
-                  </View>
-                </View>
-              )}
-            </View>
-          )}
-        </View>
-
-        {!selectedImage && (
-          <View style={styles.section}>
-            <View style={styles.actionButtons}>
-              <TouchableOpacity style={styles.actionButton} onPress={takePhoto}>
-                <CameraIcon size={20} color={Colors.accent.secondary} />
-                <Text style={styles.actionButtonText}>Take Photo</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity style={styles.actionButton} onPress={pickImageFromGallery}>
-                <ImageIcon size={20} color={Colors.accent.secondary} />
-                <Text style={styles.actionButtonText}>From Gallery</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1302,11 +1288,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
 
-  headerContent: {
-    gap: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
   headerTitle: {
     fontSize: 28,
     fontFamily: "Lora_400Regular",
@@ -2006,33 +1988,118 @@ const styles = StyleSheet.create({
   bottomSpacer: {
     height: 100,
   },
-  logoAndHeaderSection: {
-    backgroundColor: Colors.background,
-    alignItems: 'center',
+  headerSection: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 30,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  headerContent: {
+    flex: 1,
+    paddingRight: 20,
+  },
+  mainTitle: {
+    fontSize: 48,
+    fontFamily: "Lora_400Regular",
+    fontWeight: "700",
+    color: Colors.accent.secondary,
+    marginBottom: 8,
+    lineHeight: 56,
+  },
+  cameraIconButton: {
+    marginTop: 8,
+  },
+  cameraIconFrame: {
+    width: 60,
+    height: 60,
+    borderWidth: 2,
+    borderColor: Colors.accent.secondary,
+    borderRadius: 12,
     justifyContent: 'center',
-    paddingVertical: 0,
-    marginVertical: 0,
-    paddingTop: 0,
-    paddingBottom: 0,
-    maxHeight: 180,
+    alignItems: 'center',
   },
-  logoImage: {
-    marginVertical: 0,
-    paddingVertical: 0,
-    marginTop: 0,
-    marginBottom: 0,
+  cardsSection: {
+    paddingHorizontal: 20,
+    gap: 24,
   },
-  logoImageSmall: {
-    marginVertical: 0,
-    paddingVertical: 0,
-    marginTop: 0,
-    marginBottom: 0,
+  modeCard: {
+    width: '100%',
+    height: screenWidth * 0.85,
+    borderRadius: 24,
+    overflow: 'hidden',
+    backgroundColor: Colors.surface,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  subtleLine: {
-    width: 320,
-    height: 1,
-    backgroundColor: 'rgba(0,0,0,0.06)',
-    marginTop: 2,
+  cardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  cardOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+  },
+  scanFrame: {
+    width: '70%',
+    height: '50%',
+    position: 'relative',
+  },
+  scanCorner: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    borderWidth: 3,
+  },
+  scanCornerTL: {
+    top: 0,
+    left: 0,
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
+    borderTopLeftRadius: 8,
+  },
+  scanCornerTR: {
+    top: 0,
+    right: 0,
+    borderLeftWidth: 0,
+    borderBottomWidth: 0,
+    borderTopRightRadius: 8,
+  },
+  scanCornerBL: {
+    bottom: 0,
+    left: 0,
+    borderRightWidth: 0,
+    borderTopWidth: 0,
+    borderBottomLeftRadius: 8,
+  },
+  scanCornerBR: {
+    bottom: 0,
+    right: 0,
+    borderLeftWidth: 0,
+    borderTopWidth: 0,
+    borderBottomRightRadius: 8,
+  },
+  cardLabel: {
+    fontSize: 42,
+    fontFamily: "Lora_400Regular",
+    fontWeight: "700",
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginTop: 20,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
   },
   illustrationContainer: {
     width: '100%',
