@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { X, Camera, CheckCircle, RotateCcw } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { X, Camera, CheckCircle, RotateCcw, Image as ImageIcon } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -30,6 +31,48 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
 
+  const pickFromLibrary = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (!permissionResult.granted) {
+        Alert.alert("Permission Required", "Please allow access to your photo library to select images.");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 5], // 4:5 aspect ratio
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const photoUri = result.assets[0].uri;
+        
+        if (!isMuseumMode) {
+          // Single photo mode - directly import
+          onPhotoTaken(photoUri);
+          return;
+        }
+        
+        // Museum mode - two photo process
+        if (currentStep === 'artwork') {
+          setArtworkPhoto(photoUri);
+          setCurrentStep('label');
+        } else if (currentStep === 'label') {
+          // Directly import both photos without review
+          if (artworkPhoto && onTwoPhotosTaken) {
+            onTwoPhotosTaken(artworkPhoto, photoUri);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error picking from library:', error);
+      Alert.alert('Error', 'Failed to pick photo from library. Please try again.');
+    }
+  };
+
   const takePicture = async () => {
     if (isCapturing || !cameraRef.current) return;
 
@@ -48,22 +91,25 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
       
       console.log('Photo captured successfully:', photo.uri);
 
-      // Crop to 1:1 aspect ratio and resize to 1024x1024 for all photos
+      // Crop to 4:5 aspect ratio and resize to 1024x1280 for all photos
+      const targetWidth = photo.width;
+      const targetHeight = (photo.width * 5) / 4; // 4:5 ratio
+      
       const croppedPhoto = await ImageManipulator.manipulateAsync(
         photo.uri,
         [
           {
             crop: {
               originX: 0,
-              originY: (photo.height - photo.width) / 2,
-              width: photo.width,
-              height: photo.width, // Make it square (1:1)
+              originY: Math.max(0, (photo.height - targetHeight) / 2),
+              width: targetWidth,
+              height: Math.min(photo.height, targetHeight), // 4:5 ratio
             },
           },
           {
             resize: {
               width: 1024,
-              height: 1024,
+              height: 1280, // 4:5 ratio
             },
           },
         ],
@@ -116,14 +162,14 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
   
   const getInstructionText = () => {
     if (!isMuseumMode) {
-      return 'Position the monument or artwork in the square frame.';
+      return 'Position the monument or artwork in the frame.';
     }
     
     switch (currentStep) {
       case 'artwork':
-        return 'First, take a square photo of the artwork itself. Make sure the entire piece is visible and well-lit.';
+        return 'First, take a photo of the artwork itself. Make sure the entire piece is visible and well-lit.';
       case 'label':
-        return 'Now, take a square photo of the artwork\'s information label or placard. This helps with identification.';
+        return 'Now, take a photo of the artwork\'s information label or placard. This helps with identification.';
       default:
         return '';
     }
@@ -194,9 +240,9 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
           </TouchableOpacity>
         </View>
         
-        {/* Square overlay for 1:1 ratio guidance */}
+        {/* Rectangle overlay for 4:5 ratio guidance */}
         <View style={styles.cameraOverlay}>
-          <View style={styles.squareFrame} />
+          <View style={styles.rectangleFrame} />
         </View>
         
         {/* Bottom Overlay with Controls */}
@@ -234,6 +280,15 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
                 <View style={styles.captureIndicator} />
               )}
             </View>
+          </TouchableOpacity>
+          
+          {/* Upload from Library Button */}
+          <TouchableOpacity
+            style={styles.libraryButton}
+            onPress={pickFromLibrary}
+            disabled={isCapturing}
+          >
+            <ImageIcon size={24} color="#ffffff" />
           </TouchableOpacity>
         </View>
       </CameraView>
@@ -294,9 +349,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 5,
   },
-  squareFrame: {
+  rectangleFrame: {
     width: screenWidth - 80,
-    height: screenWidth - 80,
+    height: ((screenWidth - 80) * 5) / 4, // 4:5 aspect ratio
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: 10,
@@ -527,5 +582,21 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     width: 40,
+  },
+  libraryButton: {
+    position: 'absolute',
+    bottom: 50,
+    right: 40,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
 });
