@@ -71,6 +71,7 @@ export default function ScanResultScreen() {
   const [isDiscovering, setIsDiscovering] = useState<boolean>(false);
   const [isInitialAnalysis, setIsInitialAnalysis] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'takeaways' | 'summary'>('takeaways');
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState<boolean>(false);
   const progressAnimation = useRef(new Animated.Value(0)).current;
   const initialProgressAnimation = useRef(new Animated.Value(0)).current;
   const slideAnimation = useRef(new Animated.Value(0)).current;
@@ -904,23 +905,26 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                   )}
                 </TouchableOpacity>
               </View>
-              <FormattedText style={styles.descriptionText}>{monument.detailedDescription.inDepthContext}</FormattedText>
+              <FormattedText style={styles.descriptionText}>
+                {isHistoryExpanded 
+                  ? monument.detailedDescription.inDepthContext 
+                  : monument.detailedDescription.inDepthContext.split(' ').slice(0, 100).join(' ') + (monument.detailedDescription.inDepthContext.split(' ').length > 100 ? '...' : '')}
+              </FormattedText>
+              {monument.detailedDescription.inDepthContext.split(' ').length > 100 && (
+                <TouchableOpacity 
+                  style={styles.moreButton}
+                  onPress={() => setIsHistoryExpanded(!isHistoryExpanded)}
+                >
+                  <Text style={styles.moreButtonText}>
+                    {isHistoryExpanded ? 'Show Less' : 'More'}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         )}
 
-        {/* Curiosity - Only show when recognized */}
-        {monument.isRecognized && monument.detailedDescription && monument.detailedDescription.curiosities && monument.detailedDescription.curiosities !== 'No widely known curiosities are associated with these monuments and art.' && (
-          <View style={styles.section}>
-            <View style={styles.contentCard}>
-              <View style={styles.cardHeader}>
-                <Sparkles size={20} color={Colors.accent.secondary} />
-                <Text style={styles.sectionTitle}>Curiosity</Text>
-              </View>
-              <FormattedText style={styles.descriptionText}>{monument.detailedDescription.curiosities}</FormattedText>
-            </View>
-          </View>
-        )}
+
 
 
 
@@ -949,54 +953,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           </View>
         )}
 
-        {/* Discover History Section */}
-        <View style={styles.section}>
-          <View style={styles.discoveryCard}>
-            <Text style={styles.discoveryTitle}>Discover Historical Context</Text>
-            <Text style={styles.discoverySubtext}>
-              Explore related monuments, historical events, and cultural connections in this area.
-            </Text>
-            
-            <TouchableOpacity
-              style={[
-                styles.discoveryButton,
-                isDiscovering && styles.discoveryButtonActive
-              ]}
-              onPress={handleDiscoverHistory}
-              disabled={isDiscovering}
-            >
-              <View style={styles.discoveryButtonContainer}>
-                {/* Progress bar background */}
-                <Animated.View 
-                  style={[
-                    styles.discoveryProgressBar,
-                    {
-                      width: progressAnimation.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0%', '100%'],
-                      }),
-                    }
-                  ]}
-                />
-                
-                {/* Button content */}
-                <View style={styles.discoveryButtonContent}>
-                  {isDiscovering ? (
-                    <>
-                      <ActivityIndicator size="small" color="#ffffff" />
-                      <Text style={[styles.discoveryButtonText, styles.discoveryButtonTextActive]}>Discovering...</Text>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={20} color={Colors.accent.secondary} />
-                      <Text style={styles.discoveryButtonText}>Start Scanning</Text>
-                    </>
-                  )}
-                </View>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
+
       </ScrollView>
     </View>
   );
@@ -1655,6 +1612,24 @@ const styles = StyleSheet.create({
     }),
     lineHeight: 22,
     color: '#64748b',
+  },
+  moreButton: {
+    marginTop: 12,
+    alignSelf: 'flex-start',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: Colors.accent.secondary,
+    borderRadius: 8,
+  },
+  moreButtonText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: '500',
+    color: '#ffffff',
   },
 
 });
