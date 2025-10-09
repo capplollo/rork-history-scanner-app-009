@@ -486,11 +486,9 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   photoImage: {
-    position: 'absolute' as const,
-    top: 0,
-    left: 0,
     width: '100%',
-    height: '100%',
+    aspectRatio: 2 / 3,
+    resizeMode: 'cover',
   },
   photoGradient: {
     position: 'absolute',
