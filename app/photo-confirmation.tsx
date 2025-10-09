@@ -170,31 +170,6 @@ export default function PhotoConfirmationScreen() {
         style={styles.backgroundGradient}
       />
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-        {/* Header */}
-        <View style={styles.headerSection}>
-          <View style={styles.topRow}>
-            <View style={styles.locationTextContainer}>
-              <Text style={styles.locationText}></Text>
-            </View>
-            <View style={styles.logoContainer}>
-              <Image 
-                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
-                style={styles.logoImage}
-                resizeMode="contain"
-              />
-            </View>
-          </View>
-          <View style={styles.headerContent}>
-            <View style={styles.textContainer}>
-              <Text style={styles.mainTitle}>Snap into Heritage</Text>
-              <Text style={styles.headerSubtitle}>
-                Discover the living stories of art and monuments
-              </Text>
-            </View>
-          </View>
-          <View style={styles.headerDivider} />
-        </View>
-
         {/* Photo with overlay */}
         <View style={styles.photoSection}>
           <View style={styles.photoCard}>
@@ -276,69 +251,6 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-  },
-  headerSection: {
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 12,
-    position: 'relative',
-  },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-    zIndex: 2,
-  },
-  locationTextContainer: {
-    flex: 1,
-    marginRight: 12,
-  },
-  locationText: {
-    fontSize: 10,
-    fontFamily: 'Lora_400Regular',
-    fontWeight: '400',
-    color: '#173248',
-    lineHeight: 12,
-  },
-  logoContainer: {
-    flexShrink: 0,
-  },
-  logoImage: {
-    width: 39,
-    height: 39,
-  },
-  headerContent: {
-    marginBottom: 8,
-    zIndex: 2,
-  },
-  textContainer: {
-    width: '100%',
-  },
-  mainTitle: {
-    fontSize: 20,
-    fontFamily: 'Lora_400Regular',
-    fontWeight: '700',
-    color: '#173248',
-    marginBottom: 8,
-    lineHeight: 22,
-  },
-  headerSubtitle: {
-    fontSize: 11,
-    fontFamily: 'Lora_400Regular',
-    fontStyle: 'italic',
-    fontWeight: '400',
-    color: '#173248',
-    lineHeight: 14,
-    textAlign: 'left',
-  },
-  headerDivider: {
-    height: 1,
-    backgroundColor: '#173248',
-    opacity: 0.2,
-    width: '100%',
-    alignSelf: 'center',
-    zIndex: 2,
   },
   photoSection: {
     paddingHorizontal: 20,
