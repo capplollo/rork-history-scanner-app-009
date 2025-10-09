@@ -899,19 +899,19 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               end={{ x: 0, y: 1 }}
               style={styles.headerGradient}
             />
+            <View style={styles.logoContainer}>
+              <Image 
+                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
+            </View>
             <View style={styles.headerContent}>
               <View style={styles.textContainer}>
                 <Text style={styles.mainTitle}>Snap into Heritage</Text>
                 <Text style={styles.headerSubtitle}>
                   Discover the living stories of art and monuments
                 </Text>
-              </View>
-              <View style={styles.logoContainer}>
-                <Image 
-                  source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
-                  style={styles.logoImage}
-                  resizeMode="contain"
-                />
               </View>
             </View>
             <View style={styles.headerDivider} />
@@ -1987,9 +1987,6 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     marginBottom: 8,
   },
   textContainer: {
@@ -2005,7 +2002,8 @@ const styles = StyleSheet.create({
     marginTop: 44,
   },
   logoContainer: {
-    marginTop: 0,
+    alignItems: 'center',
+    marginBottom: 16,
     zIndex: 2,
   },
   logoImage: {
