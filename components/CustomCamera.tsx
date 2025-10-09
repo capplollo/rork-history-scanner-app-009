@@ -11,7 +11,7 @@ import {
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
-import { X, Camera, CheckCircle, RotateCcw, Image as ImageIcon } from 'lucide-react-native';
+import { X, Camera, CheckCircle, Image as ImageIcon } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -231,12 +231,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
             <X size={24} color="#ffffff" />
           </TouchableOpacity>
           <Text style={styles.title}>{getStepTitle()}</Text>
-          <TouchableOpacity 
-            style={styles.flipButton} 
-            onPress={() => setFacing(current => (current === 'back' ? 'front' : 'back'))}
-          >
-            <RotateCcw size={24} color="#ffffff" />
-          </TouchableOpacity>
+          <View style={styles.placeholder} />
         </View>
         
         {/* Instructions above crop area */}
@@ -512,7 +507,7 @@ const styles = StyleSheet.create({
   stepIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 5,
+    marginBottom: 10,
   },
   stepDot: {
     width: 32,
