@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
   },
   photoImage: {
     width: '100%',
-    aspectRatio: 2 / 3,
+    aspectRatio: 3 / 4,
     resizeMode: 'cover',
   },
   photoGradient: {
