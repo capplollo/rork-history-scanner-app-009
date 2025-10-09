@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   photoCard: {
-    width: '100%',
+    width: '85%',
     aspectRatio: 2/3,
     borderRadius: 16,
     overflow: 'hidden',
@@ -362,6 +362,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 8,
+    alignSelf: 'center',
   },
   photoImage: {
     width: '100%',
