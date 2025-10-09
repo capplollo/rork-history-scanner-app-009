@@ -141,9 +141,17 @@ export default function ScannerScreen() {
     }
   }, [reanalyzeImage, showContext]);
 
-  // Request location permission on mount
+  // Request location permission and get location on mount
   useEffect(() => {
-    requestLocationPermission();
+    const initLocation = async () => {
+      await requestLocationPermission();
+      // Automatically get location on mount for header display
+      const { status } = await Location.getForegroundPermissionsAsync();
+      if (status === Location.PermissionStatus.GRANTED) {
+        getCurrentLocation();
+      }
+    };
+    initLocation();
   }, []);
 
   // Get location when GPS is enabled
