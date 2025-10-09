@@ -899,12 +899,19 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               end={{ x: 0, y: 1 }}
               style={styles.headerGradient}
             />
-            <View style={[styles.logoContainer, { top: insets.top + 20 }]}>
-              <Image 
-                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
-                style={styles.logoImage}
-                resizeMode="contain"
-              />
+            <View style={[styles.topRow, { top: insets.top + 20 }]}>
+              <View style={styles.locationTextContainer}>
+                <Text style={styles.locationText}>
+                  {locationAddress || 'Location not available'}
+                </Text>
+              </View>
+              <View style={styles.logoContainer}>
+                <Image 
+                  source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
+                  style={styles.logoImage}
+                  resizeMode="contain"
+                />
+              </View>
             </View>
             <View style={styles.headerContent}>
               <View style={styles.textContainer}>
@@ -2002,11 +2009,28 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: 8,
   },
-  logoContainer: {
+  topRow: {
     position: 'absolute',
-    top: 20,
+    left: 20,
     right: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     zIndex: 2,
+  },
+  locationTextContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
+  locationText: {
+    fontSize: 10,
+    fontFamily: "Lora_400Regular",
+    fontWeight: "400",
+    color: '#173248',
+    lineHeight: 12,
+  },
+  logoContainer: {
+    flexShrink: 0,
   },
   logoImage: {
     width: 39,
