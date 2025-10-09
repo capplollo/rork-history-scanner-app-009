@@ -1315,7 +1315,7 @@ const styles = StyleSheet.create({
     color: '#173248',
     lineHeight: 14,
     textAlign: 'left',
-    marginTop: 0,
+    marginTop: 2,
     marginBottom: 16,
   },
   headerStats: {
@@ -2017,14 +2017,15 @@ const styles = StyleSheet.create({
     color: '#173248',
     marginBottom: 8,
     lineHeight: 22,
+    marginTop: 6,
   },
   logoContainer: {
-    marginTop: 8,
+    marginTop: -4,
     zIndex: 2,
   },
   logoImage: {
-    width: 60,
-    height: 60,
+    width: 39,
+    height: 39,
   },
   headerGradient: {
     position: 'absolute',
