@@ -161,15 +161,13 @@ export default function PhotoConfirmationScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.backgroundGradient}>
-        <LinearGradient
-          colors={['rgba(118, 104, 96, 0.36)', 'rgba(225, 222, 220, 0.36)']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          style={styles.headerGradient}
-        />
-      </View>
-      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <LinearGradient
+        colors={['rgba(118, 104, 96, 0.36)', 'rgba(225, 222, 220, 0.36)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.backgroundGradient}
+      />
+      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
         {/* Header */}
         <View style={styles.headerSection}>
           <View style={styles.topRow}>
@@ -273,19 +271,12 @@ const styles = StyleSheet.create({
     height: 200,
     zIndex: 0,
   },
-  headerGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
   safeArea: {
     flex: 1,
   },
   headerSection: {
     paddingHorizontal: 20,
-    paddingTop: 0,
+    paddingTop: 60,
     paddingBottom: 12,
     position: 'relative',
   },
