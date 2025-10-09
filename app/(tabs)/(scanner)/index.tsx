@@ -26,7 +26,6 @@ import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { mockMonuments } from "@/data/mockMonuments";
 import Colors from "@/constants/colors";
 import CustomCamera from "@/components/CustomCamera";
-import Logo from "@/components/Logo";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -907,11 +906,13 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               </Text>
               <View style={styles.headerDivider} />
             </View>
-            <TouchableOpacity style={styles.cameraIconButton}>
-              <View style={styles.cameraIconFrame}>
-                <CameraIcon size={32} color={Colors.accent.secondary} strokeWidth={1.5} />
-              </View>
-            </TouchableOpacity>
+            <View style={styles.logoContainer}>
+              <Image 
+                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/iqvqvvvvvvvvvvvvvvvvv' }}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
+            </View>
           </View>
         )}
 
@@ -2017,18 +2018,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     lineHeight: 22,
   },
-  cameraIconButton: {
+  logoContainer: {
     marginTop: 8,
     zIndex: 2,
   },
-  cameraIconFrame: {
+  logoImage: {
     width: 60,
     height: 60,
-    borderWidth: 2,
-    borderColor: Colors.accent.secondary,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   headerGradient: {
     position: 'absolute',
