@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   },
   headerSection: {
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 0,
     paddingBottom: 12,
     position: 'relative',
   },
