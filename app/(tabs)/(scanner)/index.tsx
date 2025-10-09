@@ -908,7 +908,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             </View>
             <View style={styles.logoContainer}>
               <Image 
-                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/iqvqvvvvvvvvvvvvvvvvv' }}
+                source={{ uri: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=200&h=200&fit=crop' }}
                 style={styles.logoImage}
                 resizeMode="contain"
               />
