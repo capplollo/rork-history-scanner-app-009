@@ -21,7 +21,6 @@ import * as ImageManipulator from "expo-image-manipulator";
 
 import { mockMonuments } from "@/data/mockMonuments";
 import FormattedText from "@/components/FormattedText";
-import Logo from "@/components/Logo";
 import Colors from "@/constants/colors";
 
 // Define basic types for the simplified version
