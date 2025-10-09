@@ -291,9 +291,11 @@ export default function PhotoConfirmationScreen() {
         {/* Header */}
         <View style={styles.headerSection}>
           <View style={styles.topRow}>
-            <View style={styles.locationTextContainer}>
-              <Text style={styles.locationText}></Text>
-            </View>
+            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+              <View style={styles.backButtonCircle}>
+                <ArrowLeft size={20} color="#ffffff" />
+              </View>
+            </TouchableOpacity>
             <View style={styles.logoContainer}>
               <Image 
                 source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
@@ -418,16 +420,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 2,
   },
-  locationTextContainer: {
-    flex: 1,
-    marginRight: 12,
+  backButton: {
+    flexShrink: 0,
   },
-  locationText: {
-    fontSize: 10,
-    fontFamily: 'Lora_400Regular',
-    fontWeight: '400',
-    color: '#173248',
-    lineHeight: 12,
+  backButtonCircle: {
+    width: 39,
+    height: 39,
+    borderRadius: 20,
+    backgroundColor: '#766860',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logoContainer: {
     flexShrink: 0,
