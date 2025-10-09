@@ -225,34 +225,12 @@ export default function PhotoConfirmationScreen() {
         ]
       };
       
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      // Use generateText from @rork/toolkit-sdk instead of direct fetch
+      const { generateText } = await import('@rork/toolkit-sdk');
       
-      const aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-        signal: controller.signal
+      const cleanedResponse = await generateText({
+        messages: requestBody.messages as any
       });
-      
-      clearTimeout(timeoutId);
-      
-      if (!aiResponse.ok) {
-        throw new Error(`AI API error: ${aiResponse.status}`);
-      }
-      
-      const aiResult = await aiResponse.json();
-      
-      if (!aiResult.completion) {
-        throw new Error('AI service returned incomplete response');
-      }
-      
-      let cleanedResponse = aiResult.completion
-        .replace(/```json\s*/g, '')
-        .replace(/```\s*/g, '')
-        .trim();
       
       let analysisResult;
       try {
