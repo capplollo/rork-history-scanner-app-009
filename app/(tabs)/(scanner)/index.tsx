@@ -1999,7 +1999,7 @@ const styles = StyleSheet.create({
     color: '#173248',
     marginBottom: 8,
     lineHeight: 22,
-    marginTop: 6,
+    marginTop: 24,
   },
   logoContainer: {
     marginTop: -4,
@@ -2021,12 +2021,12 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#173248',
     opacity: 0.2,
-    marginTop: 8,
+    marginTop: 4,
   },
   cardsSection: {
     paddingHorizontal: 20,
     gap: 16,
-    marginTop: -8,
+    marginTop: 16,
   },
   modeCard: {
     width: '100%',
