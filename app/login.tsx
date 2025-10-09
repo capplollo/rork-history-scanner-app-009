@@ -167,6 +167,8 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     fontFamily: 'Times New Roman',
+    flexWrap: 'nowrap',
+    width: '100%',
   },
   form: {
     marginBottom: 30,
