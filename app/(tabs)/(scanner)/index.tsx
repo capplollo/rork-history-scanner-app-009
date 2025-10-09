@@ -2029,7 +2029,7 @@ const styles = StyleSheet.create({
   },
   modeCard: {
     width: '100%',
-    height: screenWidth * 0.85,
+    aspectRatio: 1,
     borderRadius: 24,
     overflow: 'hidden',
     backgroundColor: Colors.surface,
@@ -2042,6 +2042,7 @@ const styles = StyleSheet.create({
   cardImage: {
     width: '100%',
     height: '100%',
+    resizeMode: 'cover',
   },
   cardOverlay: {
     position: 'absolute',
