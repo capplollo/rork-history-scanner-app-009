@@ -2005,7 +2005,9 @@ const styles = StyleSheet.create({
   logoContainer: {
     position: 'absolute',
     top: 20,
-    right: 20,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
     zIndex: 2,
   },
   logoImage: {
