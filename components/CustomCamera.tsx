@@ -92,7 +92,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
       console.log('Photo captured successfully:', photo.uri);
 
       const targetWidth = photo.width;
-      const targetHeight = (photo.width * 2) / 3;
+      const targetHeight = (photo.width * 3) / 2;
       
       const croppedPhoto = await ImageManipulator.manipulateAsync(
         photo.uri,
@@ -107,8 +107,8 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
           },
           {
             resize: {
-              width: 1200,
-              height: 800,
+              width: 800,
+              height: 1200,
             },
           },
         ],
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
   },
   rectangleFrame: {
     width: screenWidth - 80,
-    height: ((screenWidth - 80) * 2) / 3,
+    height: ((screenWidth - 80) * 3) / 2,
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: 10,
