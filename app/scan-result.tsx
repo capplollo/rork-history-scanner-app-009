@@ -493,46 +493,46 @@ export default function ScanResultScreen() {
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Monument Image Card */}
+        {/* Monument Image Card with Overlay Info */}
         {monument.scannedImage && (
           <View style={styles.photoSection}>
             <View style={styles.photoCard}>
               <Image source={{ uri: monument.scannedImage }} style={styles.photoImage} />
+              <LinearGradient
+                colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.5)', 'rgba(0, 0, 0, 0.85)']}
+                locations={[0, 0.5, 1]}
+                style={styles.photoGradient}
+              >
+                <View style={styles.recognitionBadgeInCard}>
+                  {monument.isRecognized ? (
+                    <>
+                      <CheckCircle size={12} color="#4CAF50" />
+                      <Text style={styles.recognitionTextInCard}>Recognized</Text>
+                      <Text style={styles.confidenceTextInCard}>{monument.confidence}%</Text>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle size={12} color="#FF9800" />
+                      <Text style={styles.notRecognizedTextInCard}>Not Recognized</Text>
+                    </>
+                  )}
+                </View>
+                <Text style={styles.monumentName}>{monument.name}</Text>
+                
+                <View style={styles.detailsRow}>
+                  <View style={styles.detailItem}>
+                    <MapPin size={12} color="#ffffff" />
+                    <Text style={styles.detailText}>{monument.location}</Text>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <Calendar size={12} color="#ffffff" />
+                    <Text style={styles.detailText}>{monument.period}</Text>
+                  </View>
+                </View>
+              </LinearGradient>
             </View>
           </View>
         )}
-
-        {/* Monument Info Card */}
-        <View style={styles.section}>
-          <View style={styles.infoCard}>
-            <View style={styles.recognitionBadgeInCard}>
-              {monument.isRecognized ? (
-                <>
-                  <CheckCircle size={12} color="#4CAF50" />
-                  <Text style={styles.recognitionTextInCard}>Recognized</Text>
-                  <Text style={styles.confidenceTextInCard}>{monument.confidence}%</Text>
-                </>
-              ) : (
-                <>
-                  <AlertCircle size={12} color="#FF9800" />
-                  <Text style={styles.notRecognizedTextInCard}>Not Recognized</Text>
-                </>
-              )}
-            </View>
-            <Text style={styles.monumentName}>{monument.name}</Text>
-            
-            <View style={styles.detailsRow}>
-              <View style={styles.detailItem}>
-                <MapPin size={12} color={Colors.accent.secondary} />
-                <Text style={styles.detailText}>{monument.location}</Text>
-              </View>
-              <View style={styles.detailItem}>
-                <Calendar size={12} color={Colors.accent.secondary} />
-                <Text style={styles.detailText}>{monument.period}</Text>
-              </View>
-            </View>
-          </View>
-        </View>
 
         {/* Not Recognized Section - Enhanced feedback and options */}
         {!monument.isRecognized && (
@@ -730,7 +730,7 @@ const styles = StyleSheet.create({
 
   photoSection: {
     paddingHorizontal: 20,
-    marginTop: 16,
+    marginTop: 8,
   },
   photoCard: {
     width: '100%',
@@ -909,21 +909,11 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingHorizontal: 20,
   },
-  infoCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 6,
-  },
   monumentName: {
     fontSize: 18,
     fontFamily: "Lora_400Regular",
     fontWeight: "500",
-    color: "#2C3E50",
+    color: "#ffffff",
     marginBottom: 12,
   },
   detailsRow: {
@@ -937,7 +927,7 @@ const styles = StyleSheet.create({
   detailText: {
     fontSize: 10.5,
     fontFamily: "Lora_400Regular",
-    color: '#64748b',
+    color: '#ffffff',
   },
   contentCard: {
     backgroundColor: Colors.surface,
@@ -1268,7 +1258,7 @@ const styles = StyleSheet.create({
   recognitionBadgeInCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: 'rgba(255,255,255,0.2)',
     paddingHorizontal: 9,
     paddingVertical: 4.5,
     borderRadius: 15,
@@ -1285,7 +1275,7 @@ const styles = StyleSheet.create({
   confidenceTextInCard: {
     fontSize: 9,
     fontFamily: "Lora_400Regular",
-    color: '#64748b',
+    color: '#ffffff',
   },
   notRecognizedTextInCard: {
     fontSize: 9,
