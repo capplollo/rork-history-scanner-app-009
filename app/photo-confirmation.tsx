@@ -161,20 +161,21 @@ export default function PhotoConfirmationScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.backgroundGradient}>
+        <LinearGradient
+          colors={['rgba(118, 104, 96, 0.36)', 'rgba(225, 222, 220, 0.36)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={styles.headerGradient}
+        />
+      </View>
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         {/* Header */}
         <View style={styles.headerSection}>
-          <LinearGradient
-            colors={['rgba(118, 104, 96, 0.36)', 'rgba(225, 222, 220, 0.36)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.headerGradient}
-          />
           <View style={styles.topRow}>
-            <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-              <ArrowLeft size={20} color="#173248" />
-              <Text style={styles.backText}>Back</Text>
-            </TouchableOpacity>
+            <View style={styles.locationTextContainer}>
+              <Text style={styles.locationText}></Text>
+            </View>
             <View style={styles.logoContainer}>
               <Image 
                 source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
@@ -264,14 +265,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  safeArea: {
-    flex: 1,
-  },
-  headerSection: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 12,
-    position: 'relative',
+  backgroundGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 200,
+    zIndex: 0,
   },
   headerGradient: {
     position: 'absolute',
@@ -279,7 +279,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 0,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  headerSection: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 12,
+    position: 'relative',
   },
   topRow: {
     flexDirection: 'row',
@@ -288,20 +296,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     zIndex: 2,
   },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(104, 89, 81, 0.2)',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
+  locationTextContainer: {
+    flex: 1,
+    marginRight: 12,
   },
-  backText: {
-    fontSize: 14,
+  locationText: {
+    fontSize: 10,
     fontFamily: 'Lora_400Regular',
-    fontWeight: '500',
+    fontWeight: '400',
     color: '#173248',
+    lineHeight: 12,
   },
   logoContainer: {
     flexShrink: 0,
