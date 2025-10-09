@@ -251,7 +251,7 @@ export default function PhotoConfirmationScreen() {
               ]}
               {...panResponder.panHandlers}
             >
-              <ChevronRight size={28} color="#ffffff" />
+              <ChevronRight size={18} color="#ffffff" />
             </Animated.View>
           </View>
         </View>
@@ -427,8 +427,8 @@ const styles = StyleSheet.create({
   },
   slideButtonContainer: {
     position: 'relative',
-    height: 60,
-    borderRadius: 30,
+    height: 36,
+    borderRadius: 18,
     overflow: 'hidden',
   },
   slideButtonTrack: {
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: '#766860',
-    borderRadius: 30,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -451,11 +451,11 @@ const styles = StyleSheet.create({
   },
   slideButtonThumb: {
     position: 'absolute',
-    left: 5,
-    top: 5,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    left: 3,
+    top: 3,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
