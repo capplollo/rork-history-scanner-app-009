@@ -20,7 +20,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as Location from "expo-location";
 import { Camera as CameraIcon, Image as ImageIcon, X, Sparkles, ChevronDown, ChevronUp, Info, Zap, Camera, MapPin } from "lucide-react-native";
-
+import { generateText } from "@rork/toolkit-sdk";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { mockMonuments } from "@/data/mockMonuments";
@@ -636,52 +636,21 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         hasImages: requestBody.messages[0].content.filter(c => c.type === 'image').length
       });
       
-      let aiResponse;
+      let cleanedResponse;
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000);
+        console.log('Calling generateText with messages...');
         
-        aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody),
-          signal: controller.signal
+        // Use generateText from @rork/toolkit-sdk
+        cleanedResponse = await generateText({
+          messages: requestBody.messages as any
         });
         
-        clearTimeout(timeoutId);
+        console.log('AI response received successfully');
       } catch (networkError) {
-        console.error('Network error during fetch:', networkError);
-        if (networkError instanceof Error && networkError.name === 'AbortError') {
-          throw new Error('Request timeout - please check your internet connection and try again');
-        }
-        throw new Error(`Network error: ${networkError instanceof Error ? networkError.message : 'Unknown network error'}`);
-      }
-      
-      console.log('AI API response status:', aiResponse.status);
-      
-      if (!aiResponse.ok) {
-        let errorText = 'Unknown error';
-        let errorDetails = '';
-        
-        try {
-          const responseText = await aiResponse.text();
-          errorText = responseText || `HTTP ${aiResponse.status}`;
-          errorDetails = responseText;
-          console.log('AI API error response body:', responseText);
-        } catch (e) {
-          console.error('Failed to read error response:', e);
-          errorText = `HTTP ${aiResponse.status} ${aiResponse.statusText}`;
-        }
-        
-        console.error('AI API error status:', aiResponse.status);
-        console.error('AI API error status text:', aiResponse.statusText);
-        console.error('AI API error response body:', errorDetails);
-        console.error('Request details - Prompt length:', promptText.length, 'Base64 length:', base64.length);
+        console.error('Network error during AI request:', networkError);
         
         // Check if it's a size-related error
-        if (aiResponse.status === 413 || aiResponse.status === 500) {
+        if (networkError instanceof Error && networkError.message.includes('413')) {
           console.log('Likely image size issue, suggesting compression');
           Alert.alert(
             'Image Too Large', 
@@ -693,15 +662,10 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         
         // Always provide a fallback response for other errors
         console.log('AI service error, using fallback response');
-        console.error('Full error details:', {
-          status: aiResponse.status,
-          statusText: aiResponse.statusText,
-          errorText,
-          errorDetails
-        });
+        console.error('Full error details:', networkError);
         
         // Show the actual error to user for debugging
-        const errorMessage = `AI service error (${aiResponse.status}): ${errorText.substring(0, 200)}${errorText.length > 200 ? '...' : ''}`;
+        const errorMessage = `Analysis error: ${networkError instanceof Error ? networkError.message : 'Unknown error'}`;
         console.error('Showing error alert:', errorMessage);
         
         Alert.alert(
@@ -759,29 +723,9 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         return;
       }
       
-      let aiResult;
-      try {
-        aiResult = await aiResponse.json();
-      } catch (jsonError) {
-        console.error('Failed to parse AI response as JSON:', jsonError);
-        console.error('Raw response that failed to parse:', aiResult);
-        throw new Error(`AI service returned invalid response format: ${jsonError instanceof Error ? jsonError.message : 'Unknown JSON error'}`);
-      }
-      
-      console.log('Raw AI response:', aiResult.completion);
-      
-      if (!aiResult || !aiResult.completion) {
-        console.error('AI response missing completion field. Full response:', aiResult);
-        console.error('Response keys:', aiResult ? Object.keys(aiResult) : 'aiResult is null/undefined');
-        throw new Error(`AI service returned incomplete response. Expected 'completion' field but got: ${aiResult ? Object.keys(aiResult).join(', ') : 'null/undefined'}`);
-      }
-      
       setAnalysisStatus("Processing AI response...");
       
-      // Clean and parse the AI response
-      let cleanedResponse = aiResult.completion;
-      
-      console.log('Raw AI response:', aiResult.completion);
+      console.log('Raw AI response:', cleanedResponse);
       
       // Remove markdown code blocks and clean up
       cleanedResponse = cleanedResponse
