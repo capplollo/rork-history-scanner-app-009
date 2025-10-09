@@ -279,15 +279,18 @@ const styles = StyleSheet.create({
   },
   headerSection: {
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 8,
     paddingBottom: 12,
     position: 'relative',
   },
   topRow: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    top: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
     zIndex: 2,
   },
   locationTextContainer: {
@@ -310,6 +313,7 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     marginBottom: 8,
+    marginTop: 48,
     zIndex: 2,
   },
   textContainer: {
