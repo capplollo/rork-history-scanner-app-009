@@ -1994,7 +1994,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flex: 1,
-    paddingRight: 20,
+    paddingRight: 0,
   },
   mainTitle: {
     fontSize: 20,
@@ -2003,10 +2003,10 @@ const styles = StyleSheet.create({
     color: '#173248',
     marginBottom: 8,
     lineHeight: 22,
-    marginTop: 24,
+    marginTop: 44,
   },
   logoContainer: {
-    marginTop: 20,
+    marginTop: 0,
     zIndex: 2,
   },
   logoImage: {
