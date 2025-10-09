@@ -899,7 +899,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               end={{ x: 0, y: 1 }}
               style={styles.headerGradient}
             />
-            <View style={styles.logoContainer}>
+            <View style={[styles.logoContainer, { top: insets.top + 20 }]}>
               <Image 
                 source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
                 style={styles.logoImage}
