@@ -114,15 +114,13 @@ export default function PhotoConfirmationScreen() {
         setIsSliding(true);
       },
       onPanResponderMove: (_, gestureState) => {
-        const buttonHeight = Dimensions.get('window').height * 0.2;
-        const maxSlide = screenWidth - 40 - buttonHeight;
+        const maxSlide = screenWidth - 140;
         const newValue = Math.max(0, Math.min(gestureState.dx, maxSlide));
         slideAnim.setValue(newValue);
       },
       onPanResponderRelease: (_, gestureState) => {
-        const buttonHeight = Dimensions.get('window').height * 0.2;
-        const maxSlide = screenWidth - 40 - buttonHeight;
-        const threshold = maxSlide * 0.75;
+        const maxSlide = screenWidth - 140;
+        const threshold = maxSlide * 0.7;
 
         if (gestureState.dx >= threshold) {
           Animated.timing(slideAnim, {
@@ -253,7 +251,7 @@ export default function PhotoConfirmationScreen() {
               ]}
               {...panResponder.panHandlers}
             >
-              <ChevronRight size={Dimensions.get('window').height * 0.08} color="#766860" />
+              <ChevronRight size={18} color="#ffffff" />
             </Animated.View>
           </View>
         </View>
@@ -429,8 +427,8 @@ const styles = StyleSheet.create({
   },
   slideButtonContainer: {
     position: 'relative',
-    height: Dimensions.get('window').height * 0.2,
-    borderRadius: Dimensions.get('window').height * 0.1,
+    height: 36,
+    borderRadius: 18,
     overflow: 'hidden',
   },
   slideButtonTrack: {
@@ -440,12 +438,12 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: '#766860',
-    borderRadius: Dimensions.get('window').height * 0.1,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
   slideButtonText: {
-    fontSize: 24,
+    fontSize: 13.5,
     fontFamily: 'Lora_400Regular',
     fontWeight: '600',
     color: '#ffffff',
@@ -453,11 +451,11 @@ const styles = StyleSheet.create({
   },
   slideButtonThumb: {
     position: 'absolute',
-    left: 4,
-    top: 4,
-    width: Dimensions.get('window').height * 0.2 - 8,
-    height: Dimensions.get('window').height * 0.2 - 8,
-    borderRadius: (Dimensions.get('window').height * 0.2 - 8) / 2,
+    left: 3,
+    top: 3,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
