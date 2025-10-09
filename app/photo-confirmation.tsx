@@ -10,7 +10,10 @@ import {
   Animated,
   PanResponder,
   Platform,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams, Stack } from 'expo-router';
@@ -25,6 +28,7 @@ export default function PhotoConfirmationScreen() {
   const [isLocationRelevant, setIsLocationRelevant] = useState(true);
   const [contextText, setContextText] = useState('');
   const [locationAddress, setLocationAddress] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   
   const slideAnim = useRef(new Animated.Value(0)).current;
   const [isSliding, setIsSliding] = useState(false);
@@ -142,17 +146,131 @@ export default function PhotoConfirmationScreen() {
     })
   ).current;
 
-  const handleStartAnalyzing = () => {
-    router.replace({
-      pathname: '/(tabs)/(scanner)' as any,
-      params: {
-        photoUri: photoUri as string,
-        isLocationRelevant: isLocationRelevant.toString(),
-        contextText: contextText,
-        scanMode: scanMode as string,
-        startAnalysis: 'true',
-      },
-    });
+  const handleStartAnalyzing = async () => {
+    setIsAnalyzing(true);
+    
+    try {
+      const compressedImage = await ImageManipulator.manipulateAsync(
+        photoUri as string,
+        [{ resize: { width: 1024 } }],
+        {
+          compress: 0.7,
+          format: ImageManipulator.SaveFormat.JPEG,
+          base64: true
+        }
+      );
+      
+      if (!compressedImage.base64) {
+        throw new Error('Failed to compress image');
+      }
+      
+      const base64 = compressedImage.base64;
+      
+      let promptText = '';
+      
+      if (scanMode === 'museum') {
+        promptText = `Analyze this image and identify any artworks or cultural artifacts, including paintings, sculptures, or historical objects.`;
+      } else {
+        promptText = `Analyze this image and identify any monuments, statues, architectural landmarks, or public artworks.`;
+      }
+      
+      if (isLocationRelevant && locationAddress) {
+        promptText += `\n\nUser's location: ${locationAddress}`;
+      }
+      
+      if (contextText.trim()) {
+        promptText += `\n\nUser context: ${contextText}`;
+      }
+      
+      promptText += `\n\nBE EXTREMELY CONSERVATIVE with identification. Only identify if 95% or more confident.\n\nRespond in this exact JSON format:
+{
+"artworkName": "Name or 'Unknown Monuments and Art'",
+"confidence": 85,
+"location": "Actual location",
+"period": "Year(s) or century format or 'Unknown'",
+"isRecognized": true/false,
+"detailedDescription": {
+  "keyTakeaways": [
+    "First key takeaway",
+    "Second key takeaway", 
+    "Third key takeaway",
+    "Fourth key takeaway"
+  ],
+  "inDepthContext": "3 paragraphs of detailed context",
+  "curiosities": "ONE interesting fact"
+}
+}`;
+      
+      const requestBody = {
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: promptText },
+              { type: 'image', image: base64 }
+            ]
+          }
+        ]
+      };
+      
+      const aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+      
+      if (!aiResponse.ok) {
+        throw new Error(`AI API error: ${aiResponse.status}`);
+      }
+      
+      const aiResult = await aiResponse.json();
+      
+      if (!aiResult.completion) {
+        throw new Error('AI service returned incomplete response');
+      }
+      
+      let cleanedResponse = aiResult.completion
+        .replace(/```json\s*/g, '')
+        .replace(/```\s*/g, '')
+        .trim();
+      
+      let analysisResult;
+      try {
+        analysisResult = JSON.parse(cleanedResponse);
+      } catch (parseError) {
+        const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          let jsonString = jsonMatch[0]
+            .replace(/"([^"]*?)\n([^"]*?)"/g, (_match: string, p1: string, p2: string) => `"${p1}\\n${p2}"`)
+            .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+            .trim();
+          analysisResult = JSON.parse(jsonString);
+        } else {
+          throw new Error('Could not parse AI response');
+        }
+      }
+      
+      router.replace({
+        pathname: "/scan-result" as any,
+        params: {
+          artworkName: analysisResult.artworkName,
+          confidence: analysisResult.confidence.toString(),
+          location: analysisResult.location,
+          period: analysisResult.period,
+          isRecognized: analysisResult.isRecognized.toString(),
+          keyTakeaways: JSON.stringify(analysisResult.detailedDescription.keyTakeaways),
+          inDepthContext: analysisResult.detailedDescription.inDepthContext,
+          curiosities: analysisResult.detailedDescription.curiosities,
+          scannedImage: photoUri as string,
+        },
+      });
+    } catch (error) {
+      console.error('Analysis error:', error);
+      setIsAnalyzing(false);
+      Alert.alert('Analysis Failed', 'Could not analyze the image. Please try again.');
+    }
   };
 
   const handleBack = () => {
@@ -238,22 +356,29 @@ export default function PhotoConfirmationScreen() {
 
         {/* Start Analyzing Button */}
         <View style={styles.buttonSection}>
-          <View style={styles.slideButtonContainer}>
-            <View style={styles.slideButtonTrack}>
-              <Text style={styles.slideButtonText}>Start Analyzing</Text>
+          {isAnalyzing ? (
+            <View style={styles.analyzingContainer}>
+              <ActivityIndicator size="large" color="#766860" />
+              <Text style={styles.analyzingText}>Analyzing...</Text>
             </View>
-            <Animated.View
-              style={[
-                styles.slideButtonThumb,
-                {
-                  transform: [{ translateX: slideAnim }],
-                },
-              ]}
-              {...panResponder.panHandlers}
-            >
-              <ChevronRight size={22} color="#ffffff" />
-            </Animated.View>
-          </View>
+          ) : (
+            <View style={styles.slideButtonContainer}>
+              <View style={styles.slideButtonTrack}>
+                <Text style={styles.slideButtonText}>Start Analyzing</Text>
+              </View>
+              <Animated.View
+                style={[
+                  styles.slideButtonThumb,
+                  {
+                    transform: [{ translateX: slideAnim }],
+                  },
+                ]}
+                {...panResponder.panHandlers}
+              >
+                <ChevronRight size={22} color="#ffffff" />
+              </Animated.View>
+            </View>
+          )}
         </View>
       </SafeAreaView>
     </View>
@@ -464,5 +589,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
+  },
+  analyzingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    gap: 12,
+  },
+  analyzingText: {
+    fontSize: 16,
+    fontFamily: 'Lora_400Regular',
+    fontWeight: '600',
+    color: '#766860',
+    letterSpacing: 0.5,
   },
 });
