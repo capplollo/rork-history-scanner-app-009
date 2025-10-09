@@ -1988,6 +1988,7 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     marginBottom: 8,
+    marginTop: 48,
   },
   textContainer: {
     width: '100%',
