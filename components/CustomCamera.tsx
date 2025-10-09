@@ -352,8 +352,8 @@ const styles = StyleSheet.create({
     zIndex: 5,
   },
   rectangleFrame: {
-    width: (screenWidth - 80) * 0.67 * 1.6,
-    height: (screenWidth - 80) * 1.6,
+    width: (screenWidth - 80) * 0.67 * 1.6 * 0.85,
+    height: (screenWidth - 80) * 1.6 * 0.85,
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: 10,
