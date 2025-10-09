@@ -316,18 +316,26 @@ export default function ScannerScreen() {
   };
 
   const handleCustomCameraPhoto = (uri: string) => {
-    setSelectedImage(uri);
-    setPhotoSource('camera');
-    setIsGpsEnabled(true); // Default on for camera photos
     setShowCustomCamera(false);
+    router.push({
+      pathname: '/photo-confirmation' as any,
+      params: {
+        photoUri: uri,
+        scanMode: scanMode,
+      },
+    });
   };
   
   const handleTwoPhotosTaken = (artworkUri: string, labelUri: string) => {
-    setSelectedImage(artworkUri);
-    setLabelImage(labelUri);
-    setPhotoSource('camera');
-    setIsGpsEnabled(true); // Default on for camera photos
     setShowCustomCamera(false);
+    router.push({
+      pathname: '/photo-confirmation' as any,
+      params: {
+        photoUri: artworkUri,
+        labelUri: labelUri,
+        scanMode: scanMode,
+      },
+    });
   };
 
   const handleCustomCameraClose = () => {
