@@ -166,7 +166,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
     
     switch (currentStep) {
       case 'artwork':
-        return 'First, take a photo of the artwork itself. Make sure the entire piece is visible and well-lit.';
+        return 'First, take a photo of the artwork itself.';
       case 'label':
         return 'Now, take a photo of the artwork\'s information label or placard. This helps with identification.';
       default:
@@ -512,7 +512,7 @@ const styles = StyleSheet.create({
   stepIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   stepDot: {
     width: 32,
