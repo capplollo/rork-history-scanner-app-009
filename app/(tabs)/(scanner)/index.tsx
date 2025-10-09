@@ -2025,7 +2025,8 @@ const styles = StyleSheet.create({
   },
   cardsSection: {
     paddingHorizontal: 20,
-    gap: 24,
+    gap: 16,
+    marginTop: -8,
   },
   modeCard: {
     width: '100%',
