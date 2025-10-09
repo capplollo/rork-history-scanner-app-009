@@ -70,8 +70,17 @@ export default function PhotoConfirmationScreen() {
     try {
       if (Platform.OS === 'web') {
         const response = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+          { 
+            method: 'GET',
+            signal: AbortSignal.timeout(10000)
+          }
         );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
         
         const district = data.locality || data.principalSubdivision || '';
@@ -106,6 +115,9 @@ export default function PhotoConfirmationScreen() {
       }
     } catch (error) {
       console.error('Error getting address:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', error.message);
+      }
       setLocationAddress('Location detected');
     }
   };
@@ -213,13 +225,19 @@ export default function PhotoConfirmationScreen() {
         ]
       };
       
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
+      
       const aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (!aiResponse.ok) {
         throw new Error(`AI API error: ${aiResponse.status}`);
@@ -269,7 +287,19 @@ export default function PhotoConfirmationScreen() {
     } catch (error) {
       console.error('Analysis error:', error);
       setIsAnalyzing(false);
-      Alert.alert('Analysis Failed', 'Could not analyze the image. Please try again.');
+      
+      let errorMessage = 'Could not analyze the image. Please try again.';
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          errorMessage = 'Request timeout. Please check your internet connection and try again.';
+        } else if (error.message.includes('Network')) {
+          errorMessage = 'Network error. Please check your internet connection.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      Alert.alert('Analysis Failed', errorMessage);
     }
   };
 

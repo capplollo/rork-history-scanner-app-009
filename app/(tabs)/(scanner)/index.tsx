@@ -232,8 +232,17 @@ export default function ScannerScreen() {
       if (Platform.OS === 'web') {
         // Use a reverse geocoding service for web
         const response = await fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+          { 
+            method: 'GET',
+            signal: AbortSignal.timeout(10000)
+          }
         );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
         
         // Extract district, city, and country in proper format
@@ -284,6 +293,9 @@ export default function ScannerScreen() {
       }
     } catch (error) {
       console.error('Error getting address:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', error.message);
+      }
       setLocationAddress('Location detected');
     }
   };
@@ -626,15 +638,24 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
       
       let aiResponse;
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
+        
         aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(requestBody)
+          body: JSON.stringify(requestBody),
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
       } catch (networkError) {
         console.error('Network error during fetch:', networkError);
+        if (networkError instanceof Error && networkError.name === 'AbortError') {
+          throw new Error('Request timeout - please check your internet connection and try again');
+        }
         throw new Error(`Network error: ${networkError instanceof Error ? networkError.message : 'Unknown network error'}`);
       }
       
