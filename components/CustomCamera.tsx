@@ -228,7 +228,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
         {/* Header Overlay */}
         <View style={styles.headerOverlay}>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <X size={24} color="#ffffff" />
+            <X size={18} color="#ffffff" />
           </TouchableOpacity>
           <Text style={styles.title}>{getStepTitle()}</Text>
           <View style={styles.placeholder} />
@@ -316,9 +316,9 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   closeButton: {
-    padding: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 20,
+    padding: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+    borderRadius: 16,
   },
   title: {
     fontSize: 14.4,
@@ -347,11 +347,13 @@ const styles = StyleSheet.create({
     zIndex: 5,
   },
   rectangleFrame: {
-    width: (screenWidth - 80) * 0.67 * 1.6 * 0.85,
-    height: (screenWidth - 80) * 1.6 * 0.85,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
-    borderRadius: 10,
+    width: screenWidth,
+    height: (screenWidth * 3) / 2,
+    borderTopWidth: 2,
+    borderBottomWidth: 2,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
+    borderColor: 'rgba(255, 255, 255, 0.9)',
     backgroundColor: 'transparent',
   },
   instructionsContainer: {
@@ -372,7 +374,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     textAlign: 'center',
     lineHeight: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 8,
