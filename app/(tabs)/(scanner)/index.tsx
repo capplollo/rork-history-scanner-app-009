@@ -928,19 +928,10 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               }}
             >
               <Image 
-                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/jvjvctukol4nt8adpt330' }}
+                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/c5elatphjoswzd5gucgy6' }}
                 style={styles.cardImage}
                 resizeMode="cover"
               />
-              <View style={styles.cardOverlay}>
-                <View style={styles.scanFrame}>
-                  <View style={[styles.scanCorner, styles.scanCornerTL]} />
-                  <View style={[styles.scanCorner, styles.scanCornerTR]} />
-                  <View style={[styles.scanCorner, styles.scanCornerBL]} />
-                  <View style={[styles.scanCorner, styles.scanCornerBR]} />
-                </View>
-                <Text style={styles.cardLabel}>Outdoor</Text>
-              </View>
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -951,19 +942,10 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               }}
             >
               <Image 
-                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/6istmr6mh56zb726qphxo' }}
+                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/ymtvqze8va54lbqo29dny' }}
                 style={styles.cardImage}
                 resizeMode="cover"
               />
-              <View style={styles.cardOverlay}>
-                <View style={styles.scanFrame}>
-                  <View style={[styles.scanCorner, styles.scanCornerTL]} />
-                  <View style={[styles.scanCorner, styles.scanCornerTR]} />
-                  <View style={[styles.scanCorner, styles.scanCornerBL]} />
-                  <View style={[styles.scanCorner, styles.scanCornerBR]} />
-                </View>
-                <Text style={styles.cardLabel}>Museum</Text>
-              </View>
             </TouchableOpacity>
           </View>
         ) : (
