@@ -16,7 +16,7 @@ export default function TabLayout() {
           marginHorizontal: 30,
           marginBottom: Platform.OS === "ios" ? 34 : 20,
           paddingBottom: 0,
-          height: 70,
+          height: 60,
           position: "absolute",
           shadowColor: "#000",
           shadowOffset: { width: 0, height: -2 },
