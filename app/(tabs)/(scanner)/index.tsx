@@ -1993,8 +1993,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   textContainer: {
-    flex: 1,
-    paddingRight: 0,
+    width: '100%',
   },
   mainTitle: {
     fontSize: 20,
