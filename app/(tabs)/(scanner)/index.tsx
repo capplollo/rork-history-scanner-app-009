@@ -47,6 +47,7 @@ export default function ScannerScreen() {
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
   const [locationPermission, setLocationPermission] = useState<Location.PermissionStatus | null>(null);
   const [locationAddress, setLocationAddress] = useState<string | null>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   const [showCustomCamera, setShowCustomCamera] = useState(false);
   const progressAnimation = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
@@ -148,8 +149,9 @@ export default function ScannerScreen() {
       // Automatically get location on mount for header display
       const { status } = await Location.getForegroundPermissionsAsync();
       if (status === Location.PermissionStatus.GRANTED) {
-        getCurrentLocation();
+        await getCurrentLocation();
       }
+      setIsLoadingLocation(false);
     };
     initLocation();
   }, []);
@@ -910,7 +912,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             <View style={[styles.topRow, { top: insets.top + 20 }]}>
               <View style={styles.locationTextContainer}>
                 <Text style={styles.locationText}>
-                  {locationAddress || 'Location not available'}
+                  {isLoadingLocation ? 'Getting location...' : (locationAddress || 'Location not available')}
                 </Text>
               </View>
               <View style={styles.logoContainer}>
