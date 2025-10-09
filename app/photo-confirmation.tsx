@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   photoCard: {
-    width: '85%',
+    width: '95%',
     aspectRatio: 2/3,
     borderRadius: 16,
     overflow: 'hidden',
@@ -379,31 +379,31 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   locationToggleText: {
-    fontSize: 16,
+    fontSize: 12,
     fontFamily: 'Lora_400Regular',
     fontWeight: '500',
     color: '#ffffff',
     flex: 1,
   },
   toggle: {
-    width: 52,
-    height: 30,
-    borderRadius: 15,
+    width: 26,
+    height: 15,
+    borderRadius: 7.5,
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    padding: 3,
+    padding: 1.5,
     justifyContent: 'center',
   },
   toggleActive: {
     backgroundColor: '#ffffff',
   },
   toggleThumb: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     backgroundColor: '#685951',
   },
   toggleThumbActive: {
-    transform: [{ translateX: 22 }],
+    transform: [{ translateX: 11 }],
     backgroundColor: '#685951',
   },
   divider: {
@@ -412,10 +412,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   contextInput: {
-    fontSize: 14,
+    fontSize: 10.5,
     fontFamily: 'Lora_400Regular',
     color: '#ffffff',
-    minHeight: 40,
+    minHeight: 30,
   },
   buttonSection: {
     paddingHorizontal: 20,
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   slideButtonText: {
-    fontSize: 18,
+    fontSize: 13.5,
     fontFamily: 'Lora_400Regular',
     fontWeight: '600',
     color: '#ffffff',
