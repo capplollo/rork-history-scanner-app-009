@@ -183,13 +183,11 @@ export default function PhotoConfirmationScreen() {
               />
             </View>
           </View>
-          <View style={styles.headerContent}>
-            <View style={styles.textContainer}>
-              <Text style={styles.mainTitle}>Snap into Heritage</Text>
-              <Text style={styles.headerSubtitle}>
-                Discover the living stories of art and monuments
-              </Text>
-            </View>
+          <View style={styles.textContainer}>
+            <Text style={styles.mainTitle}>Snap into Heritage</Text>
+            <Text style={styles.headerSubtitle}>
+              Discover the living stories of art and monuments
+            </Text>
           </View>
           <View style={styles.headerDivider} />
         </View>
@@ -269,7 +267,7 @@ const styles = StyleSheet.create({
   },
   headerSection: {
     paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingTop: 20,
     paddingBottom: 12,
     position: 'relative',
   },
@@ -310,10 +308,7 @@ const styles = StyleSheet.create({
     width: 39,
     height: 39,
   },
-  headerContent: {
-    marginBottom: 8,
-    zIndex: 2,
-  },
+
   textContainer: {
     width: '100%',
   },
