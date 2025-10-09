@@ -1999,11 +1999,12 @@ const styles = StyleSheet.create({
     color: '#173248',
     marginBottom: 8,
     lineHeight: 22,
-    marginTop: 44,
+    marginTop: 8,
   },
   logoContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
+    position: 'absolute',
+    top: 8,
+    right: 20,
     zIndex: 2,
   },
   logoImage: {
