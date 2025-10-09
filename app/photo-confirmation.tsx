@@ -593,7 +593,7 @@ const styles = StyleSheet.create({
   analyzingContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 20,
+    paddingVertical: 5,
     gap: 12,
   },
   analyzingText: {
