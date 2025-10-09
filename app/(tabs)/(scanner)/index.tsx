@@ -2036,8 +2036,8 @@ const styles = StyleSheet.create({
   cardImage: {
     width: '100%',
     height: undefined,
-    aspectRatio: 1,
-    resizeMode: 'contain',
+    aspectRatio: 1.5,
+    resizeMode: 'cover',
   },
   cardOverlay: {
     position: 'absolute',
