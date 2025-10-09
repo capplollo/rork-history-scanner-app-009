@@ -358,7 +358,7 @@ export default function PhotoConfirmationScreen() {
         <View style={styles.buttonSection}>
           {isAnalyzing ? (
             <View style={styles.analyzingContainer}>
-              <ActivityIndicator size="large" color="#766860" />
+              <ActivityIndicator size={32} color="#766860" />
               <Text style={styles.analyzingText}>Analyzing...</Text>
             </View>
           ) : (
@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   analyzingText: {
-    fontSize: 16,
+    fontSize: 12.8,
     fontFamily: 'Lora_400Regular',
     fontWeight: '600',
     color: '#766860',
