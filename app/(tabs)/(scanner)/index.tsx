@@ -900,19 +900,21 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               style={styles.headerGradient}
             />
             <View style={styles.headerContent}>
-              <Text style={styles.mainTitle}>Snap into Heritage</Text>
-              <Text style={styles.headerSubtitle}>
-                Discover the living stories of art and monuments
-              </Text>
-              <View style={styles.headerDivider} />
+              <View style={styles.textContainer}>
+                <Text style={styles.mainTitle}>Snap into Heritage</Text>
+                <Text style={styles.headerSubtitle}>
+                  Discover the living stories of art and monuments
+                </Text>
+              </View>
+              <View style={styles.logoContainer}>
+                <Image 
+                  source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
+                  style={styles.logoImage}
+                  resizeMode="contain"
+                />
+              </View>
             </View>
-            <View style={styles.logoContainer}>
-              <Image 
-                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
-                style={styles.logoImage}
-                resizeMode="contain"
-              />
-            </View>
+            <View style={styles.headerDivider} />
           </View>
         )}
 
@@ -1298,7 +1300,6 @@ const styles = StyleSheet.create({
     lineHeight: 14,
     textAlign: 'left',
     marginTop: 2,
-    marginBottom: 16,
   },
   headerStats: {
     flexDirection: "row",
@@ -1983,12 +1984,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     position: 'relative',
   },
   headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  textContainer: {
     flex: 1,
     paddingRight: 20,
   },
@@ -2002,7 +2006,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   logoContainer: {
-    marginTop: -4,
+    marginTop: 20,
     zIndex: 2,
   },
   logoImage: {
@@ -2021,7 +2025,8 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#173248',
     opacity: 0.2,
-    marginTop: 4,
+    width: '100%',
+    alignSelf: 'center',
   },
   cardsSection: {
     paddingHorizontal: 20,
