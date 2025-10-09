@@ -2003,7 +2003,7 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     position: 'absolute',
-    top: 8,
+    top: 20,
     right: 20,
     zIndex: 2,
   },
