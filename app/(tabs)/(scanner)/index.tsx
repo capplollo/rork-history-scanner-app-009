@@ -15,6 +15,7 @@ import {
   Modal,
   Animated,
 } from "react-native";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as Location from "expo-location";
@@ -30,6 +31,7 @@ import Logo from "@/components/Logo";
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 export default function ScannerScreen() {
+  const insets = useSafeAreaInsets();
   const { reanalyzeImage, showContext } = useLocalSearchParams();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -891,7 +893,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header Section */}
         {!selectedImage && (
-          <View style={styles.headerSection}>
+          <View style={[styles.headerSection, { paddingTop: insets.top + 8 }]}>
             <LinearGradient
               colors={['rgba(118, 104, 96, 0.36)', 'rgba(225, 222, 220, 0.36)']}
               start={{ x: 0, y: 0 }}
