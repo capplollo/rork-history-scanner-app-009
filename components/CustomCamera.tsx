@@ -43,7 +43,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [4, 5], // 4:5 aspect ratio
+        aspect: [3, 2],
         quality: 0.8,
       });
 
@@ -91,9 +91,8 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
       
       console.log('Photo captured successfully:', photo.uri);
 
-      // Crop to 4:5 aspect ratio and resize to 1024x1280 for all photos
       const targetWidth = photo.width;
-      const targetHeight = (photo.width * 5) / 4; // 4:5 ratio
+      const targetHeight = (photo.width * 2) / 3;
       
       const croppedPhoto = await ImageManipulator.manipulateAsync(
         photo.uri,
@@ -103,13 +102,13 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
               originX: 0,
               originY: Math.max(0, (photo.height - targetHeight) / 2),
               width: targetWidth,
-              height: Math.min(photo.height, targetHeight), // 4:5 ratio
+              height: Math.min(photo.height, targetHeight),
             },
           },
           {
             resize: {
-              width: 1024,
-              height: 1280, // 4:5 ratio
+              width: 1200,
+              height: 800,
             },
           },
         ],
@@ -240,7 +239,14 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
           </TouchableOpacity>
         </View>
         
-        {/* Rectangle overlay for 4:5 ratio guidance */}
+        {/* Instructions above crop area */}
+        <View style={styles.instructionsContainer}>
+          <Text style={styles.instructionTextTop}>
+            {getInstructionText()}
+          </Text>
+        </View>
+        
+        {/* Rectangle overlay for 3:2 ratio guidance (1200x800) */}
         <View style={styles.cameraOverlay}>
           <View style={styles.rectangleFrame} />
         </View>
@@ -262,10 +268,6 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
               </View>
             </View>
           )}
-          
-          <Text style={styles.instructionText}>
-            {getInstructionText()}
-          </Text>
           
           {/* Classic Circle Capture Button */}
           <TouchableOpacity
@@ -351,11 +353,35 @@ const styles = StyleSheet.create({
   },
   rectangleFrame: {
     width: screenWidth - 80,
-    height: ((screenWidth - 80) * 5) / 4, // 4:5 aspect ratio
+    height: ((screenWidth - 80) * 2) / 3,
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: 10,
     backgroundColor: 'transparent',
+  },
+  instructionsContainer: {
+    position: 'absolute',
+    top: 120,
+    left: 20,
+    right: 20,
+    alignItems: 'center',
+    zIndex: 15,
+  },
+  instructionTextTop: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: '#ffffff',
+    textAlign: 'center',
+    lineHeight: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    maxWidth: screenWidth - 40,
   },
   bottomOverlay: {
     position: 'absolute',
