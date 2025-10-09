@@ -293,7 +293,7 @@ export default function PhotoConfirmationScreen() {
           <View style={styles.topRow}>
             <TouchableOpacity onPress={handleBack} style={styles.backButton}>
               <View style={styles.backButtonCircle}>
-                <ArrowLeft size={20} color="#ffffff" />
+                <ArrowLeft size={10} color="#ffffff" />
               </View>
             </TouchableOpacity>
             <View style={styles.logoContainer}>
@@ -324,7 +324,8 @@ export default function PhotoConfirmationScreen() {
               resizeMode="cover"
             />
             <LinearGradient
-              colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.8)']}
+              colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.5)', 'rgba(0, 0, 0, 0.85)']}
+              locations={[0, 0.5, 1]}
               style={styles.photoGradient}
             >
               {/* Location toggle */}
@@ -424,9 +425,9 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   backButtonCircle: {
-    width: 39,
-    height: 39,
-    borderRadius: 20,
+    width: 19.5,
+    height: 19.5,
+    borderRadius: 10,
     backgroundColor: '#766860',
     justifyContent: 'center',
     alignItems: 'center',
