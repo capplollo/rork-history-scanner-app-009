@@ -76,6 +76,13 @@ function RootLayoutNav() {
           headerShown: false 
         }} 
       />
+      <Stack.Screen 
+        name="photo-confirmation" 
+        options={{ 
+          headerShown: false,
+          animation: 'slide_from_right'
+        }} 
+      />
     </Stack>
   );
 }

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, Stack } from 'expo-router';
 import { ArrowLeft, ChevronRight } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import * as Location from 'expo-location';
@@ -160,14 +160,16 @@ export default function PhotoConfirmationScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <View style={styles.container}>
       <LinearGradient
         colors={['rgba(118, 104, 96, 0.36)', 'rgba(225, 222, 220, 0.36)']}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={styles.backgroundGradient}
       />
-      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
         {/* Header */}
         <View style={styles.headerSection}>
           <View style={styles.topRow}>
@@ -255,6 +257,7 @@ export default function PhotoConfirmationScreen() {
         </View>
       </SafeAreaView>
     </View>
+    </>
   );
 }
 
