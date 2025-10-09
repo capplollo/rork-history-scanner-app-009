@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   },
   instructionsContainer: {
     position: 'absolute',
-    top: 110,
+    top: 105,
     left: 0,
     right: 0,
     alignItems: 'center',
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
   stepIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: -10,
+    marginBottom: -5,
   },
   stepDot: {
     width: 32,
