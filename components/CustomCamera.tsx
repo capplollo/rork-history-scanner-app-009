@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
   stepIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: -10,
+    marginBottom: -15,
   },
   stepDot: {
     width: 32,
