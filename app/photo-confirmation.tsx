@@ -169,7 +169,7 @@ export default function PhotoConfirmationScreen() {
           style={styles.headerGradient}
         />
       </View>
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
         {/* Header */}
         <View style={styles.headerSection}>
           <View style={styles.topRow}>
