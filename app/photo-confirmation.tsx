@@ -454,6 +454,7 @@ const styles = StyleSheet.create({
     color: '#173248',
     marginBottom: 8,
     lineHeight: 22,
+    marginTop: 8,
   },
   headerSubtitle: {
     fontSize: 11,
@@ -463,6 +464,7 @@ const styles = StyleSheet.create({
     color: '#173248',
     lineHeight: 14,
     textAlign: 'left',
+    marginTop: 2,
   },
   headerDivider: {
     height: 1,
