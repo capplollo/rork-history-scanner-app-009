@@ -114,13 +114,13 @@ export default function PhotoConfirmationScreen() {
         setIsSliding(true);
       },
       onPanResponderMove: (_, gestureState) => {
-        const maxSlide = screenWidth - 140;
+        const maxSlide = screenWidth - 100;
         const newValue = Math.max(0, Math.min(gestureState.dx, maxSlide));
         slideAnim.setValue(newValue);
       },
       onPanResponderRelease: (_, gestureState) => {
-        const maxSlide = screenWidth - 140;
-        const threshold = maxSlide * 0.7;
+        const maxSlide = screenWidth - 100;
+        const threshold = maxSlide * 0.75;
 
         if (gestureState.dx >= threshold) {
           Animated.timing(slideAnim, {
@@ -251,7 +251,7 @@ export default function PhotoConfirmationScreen() {
               ]}
               {...panResponder.panHandlers}
             >
-              <ChevronRight size={18} color="#ffffff" />
+              <ChevronRight size={22} color="#ffffff" />
             </Animated.View>
           </View>
         </View>
@@ -427,8 +427,8 @@ const styles = StyleSheet.create({
   },
   slideButtonContainer: {
     position: 'relative',
-    height: 36,
-    borderRadius: 18,
+    height: 43,
+    borderRadius: 22,
     overflow: 'hidden',
   },
   slideButtonTrack: {
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: '#766860',
-    borderRadius: 18,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -453,9 +453,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 3,
     top: 3,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 37,
+    height: 37,
+    borderRadius: 19,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
