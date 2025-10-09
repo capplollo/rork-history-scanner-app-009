@@ -507,9 +507,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#ef4444',
   },
   stepIndicator: {
+    position: 'absolute',
+    top: -60,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: -15,
+    justifyContent: 'center',
   },
   stepDot: {
     width: 32,
