@@ -6,16 +6,14 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  SafeAreaView,
   Alert,
   ActivityIndicator,
   Platform,
   Animated,
-  PanResponder,
-  Dimensions,
 } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router, useNavigation } from "expo-router";
-import { MapPin, Calendar, Share2, CheckCircle, AlertCircle, RefreshCw, ArrowLeft, Sparkles, Clock, Volume2, VolumeX, Pause, Play } from "lucide-react-native";
+import { MapPin, Calendar, CheckCircle, AlertCircle, ArrowLeft, Sparkles, Clock, Volume2, Pause } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImageManipulator from "expo-image-manipulator";
 
@@ -64,15 +62,10 @@ export default function ScanResultScreen() {
     curiosities
   } = useLocalSearchParams();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isReanalyzing, setIsReanalyzing] = useState<boolean>(false);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentAudio, setCurrentAudio] = useState<any>(null);
-  const [isDiscovering, setIsDiscovering] = useState<boolean>(false);
-  const [isInitialAnalysis, setIsInitialAnalysis] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'takeaways' | 'summary'>('takeaways');
   const [isHistoryExpanded, setIsHistoryExpanded] = useState<boolean>(false);
-  const progressAnimation = useRef(new Animated.Value(0)).current;
-  const initialProgressAnimation = useRef(new Animated.Value(0)).current;
   const slideAnimation = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
 
@@ -113,25 +106,7 @@ export default function ScanResultScreen() {
     };
   }, [navigation]);
 
-  // Start initial scanning animation when coming from analysis
-  useEffect(() => {
-    if (artworkName && typeof artworkName === 'string') {
-      // This means we're coming from a fresh analysis, show scanning animation
-      setIsInitialAnalysis(true);
-      initialProgressAnimation.setValue(0);
-      
-      // Start the scanning line animation
-      Animated.timing(initialProgressAnimation, {
-        toValue: 1,
-        duration: 3000, // 3 seconds for initial analysis visualization
-        useNativeDriver: false,
-      }).start(() => {
-        setIsInitialAnalysis(false);
-      });
-    } else {
-      setIsInitialAnalysis(false);
-    }
-  }, [artworkName]);
+
 
   // Load monument data on component mount
   useEffect(() => {
@@ -272,194 +247,7 @@ export default function ScanResultScreen() {
     loadMonumentData();
   }, [monumentId, scanData, resultId, historyItemId, monumentName, location, period, scannedImage, regenerate, artworkName, confidence, isRecognized, keyTakeaways, inDepthContext, curiosities]);
 
-  const handleReanalyze = async () => {
-    if (!monument?.scannedImage) {
-      Alert.alert('Error', 'No image available for reanalysis.');
-      return;
-    }
 
-    setIsReanalyzing(true);
-    
-    try {
-      // Show a prompt to add context for better results
-      Alert.alert(
-        'Reanalyze with Context',
-        'Adding context information like location, name, or museum can significantly improve identification accuracy. Would you like to add context or proceed with reanalysis?',
-        [
-          {
-            text: 'Add Context',
-            onPress: () => {
-              setIsReanalyzing(false);
-              // Go back to previous scanner page
-              router.back();
-            }
-          },
-          {
-            text: 'Reanalyze Now',
-            onPress: async () => {
-              await performReanalysis();
-            }
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => setIsReanalyzing(false)
-          }
-        ]
-      );
-    } catch (error) {
-      console.error('Error during reanalysis setup:', error);
-      setIsReanalyzing(false);
-      Alert.alert('Error', 'Failed to start reanalysis. Please try again.');
-    }
-  };
-
-  const performReanalysis = async () => {
-    if (!monument?.scannedImage) return;
-
-    try {
-      // Compress image for reanalysis
-      const compressedImage = await ImageManipulator.manipulateAsync(
-        monument.scannedImage,
-        [{ resize: { width: 1024 } }],
-        {
-          compress: 0.7,
-          format: ImageManipulator.SaveFormat.JPEG,
-          base64: true
-        }
-      );
-      
-      if (!compressedImage.base64) {
-        throw new Error('Failed to compress image for reanalysis');
-      }
-
-      // Build reanalysis prompt using the same conservative approach as scanner
-      // Default to city mode prompt (most common case for reanalysis)
-      const promptText = `Analyze this image and identify any monuments, statues, architectural landmarks, or public artworks. Include painted or sculpted depictions of landmarks (identify the artwork itself, not the building it represents).
-
-BE EXTREMELY CONSERVATIVE with identification. Many monuments, churches, and buildings share similar styles, layouts, or decorative elements. Only identify a specific site if you are 95% or more confident it is that exact location.
-
-For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
-- Churches, cathedrals, and chapels with nearly identical façades
-- War memorials, equestrian statues, and commemorative monuments with common designs
-- Triumphal arches, obelisks, towers, or bridges that resemble others from the same era
-- Buildings in neoclassical, Gothic, or baroque styles that repeat common features
-- Street art and murals in styles that appear across multiple cities
-
-When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis than incorrect identification. If confidence is below 95%, mark as not recognized and provide general analysis instead.
-
-Provide ALL information in ONE response. Only mark isRecognized as true if confidence is 95% or higher. Always provide the ACTUAL location, not user's location unless they match. If not 95% confident, provide general analysis of what you see without claiming specific identification.
-
-Respond in this exact JSON format (ensure all strings are properly escaped and no control characters are included):
-{
-"artworkName": "Name or 'Unknown Monuments and Art'",
-"confidence": 85,
-"location": "Actual location",
-"period": "Year(s) or century format (e.g., '1503', '15th century', '1800s', '12th-13th century') or 'Unknown'",
-"isRecognized": true/false,
-"detailedDescription": {
-"keyTakeaways": [
-  "First key takeaway bullet point - must be specific and informative",
-  "Second key takeaway bullet point - must be specific and informative", 
-  "Third key takeaway bullet point - must be specific and informative",
-  "Fourth key takeaway bullet point - must be specific and informative"
-],
-"inDepthContext": "Task: Write exactly 3 condensed paragraphs (together totaling around 400–450 words) about [TOPIC]. Separate paragraphs with double line breaks only. Use bold highlights for key terms. The narrative must be tailored to the specific monument or artwork, not generic.\n\nStyle & Priorities:\nAlways start in medias res with a striking anecdote or vivid story.\nThe text must feel like a flowing story, not an essay. Be vivid, engaging, and specific — avoid generalizations.\nSlightly prioritize human stories (rulers, artists, workers, visitors, conquerors) while still delivering historical and artistic context.\nBlend historical detail, description, and anecdotes into a smooth narrative.\nYou may be creative with the structure of paragraphs depending on the topic, but follow the outline below as a strong guideline.\n\nParagraph Guidelines:\nFirst paragraph (origins): Open with the striking story, then explain the monument/artwork's historical origins, creation context, patrons/architects, and broader political or cultural significance, with specific dates.\nSecond paragraph (visuals): Continue the story, blending vivid visual description into the narrative itself (not as a detached catalog) and as if the reader is walking through the monument/artwork. Describe it step by step (top to bottom, left to right, or foreground to background), naturally including materials, techniques, style, dimensions, and unique features.\nThird paragraph (impact): Carry the story forward into cultural impact and significance over time — myths, shifting meanings, and notable events or anecdotes tied to it. Keep prioritizing human experiences and end with a strong, memorable closing that feels like the resolution of a story.",
-"curiosities": "ONE interesting anecdote, lesser-known fact, or unusual story. If none are known, write 'No widely known curiosities are associated with these monuments and art.'"
-}
-}
-
-CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bullet point should be a complete, informative sentence about the monument/artwork. The curiosities field should contain only ONE curiosity, not multiple. Ensure all text is properly escaped for JSON.`;
-
-      const requestBody = {
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: promptText },
-              { type: 'image', image: compressedImage.base64 }
-            ]
-          }
-        ]
-      };
-
-      const aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
-      });
-
-      if (!aiResponse.ok) {
-        throw new Error(`AI API error: ${aiResponse.status}`);
-      }
-
-      const aiResult = await aiResponse.json();
-      
-      if (!aiResult.completion) {
-        throw new Error('AI service returned incomplete response');
-      }
-
-      // Parse the AI response
-      let cleanedResponse = aiResult.completion
-        .replace(/```json\s*/g, '')
-        .replace(/```\s*/g, '')
-        .trim();
-
-      let analysisResult;
-      try {
-        analysisResult = JSON.parse(cleanedResponse);
-      } catch (parseError) {
-        // Try to extract JSON from response
-        const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          let jsonString = jsonMatch[0]
-            .replace(/"([^"]*?)\n([^"]*?)"/g, (_match: string, p1: string, p2: string) => `"${p1}\\n${p2}"`)
-            .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-            .trim();
-          analysisResult = JSON.parse(jsonString);
-        } else {
-          throw new Error('Could not parse AI response');
-        }
-      }
-
-      // Update monument data with new analysis
-      const updatedMonument: MonumentData = {
-        ...monument,
-        name: analysisResult.artworkName,
-        location: analysisResult.location,
-        period: analysisResult.period,
-        confidence: analysisResult.confidence,
-        isRecognized: analysisResult.isRecognized,
-        detailedDescription: {
-          keyTakeaways: analysisResult.detailedDescription.keyTakeaways,
-          inDepthContext: analysisResult.detailedDescription.inDepthContext,
-          curiosities: analysisResult.detailedDescription.curiosities
-        }
-      };
-
-      setMonument(updatedMonument);
-      setIsReanalyzing(false);
-      
-      Alert.alert(
-        'Reanalysis Complete', 
-        `The analysis has been updated. ${analysisResult.isRecognized ? 'Monument identified' : 'Monument not specifically identified'} with ${analysisResult.confidence}% confidence.`
-      );
-      
-    } catch (error) {
-      console.error('Error during reanalysis:', error);
-      setIsReanalyzing(false);
-      Alert.alert(
-        'Reanalysis Failed', 
-        'Could not reanalyze the image. Please try again or add context information for better results.'
-      );
-    }
-  };
-
-  const handleShare = () => {
-    Alert.alert('Share', 'Share functionality will be implemented when backend is ready.');
-  };
 
   const handlePlayTTS = async (text: string) => {
     if (isPlaying) {
@@ -651,41 +439,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
     }
   };
 
-  const handleDiscoverHistory = () => {
-    if (isDiscovering) return;
-    
-    setIsDiscovering(true);
-    
-    // Reset animation
-    progressAnimation.setValue(0);
-    
-    // Start progressive animation from left to right
-    Animated.timing(progressAnimation, {
-      toValue: 1,
-      duration: 2500, // 2.5 seconds for recognition simulation
-      useNativeDriver: false,
-    }).start(() => {
-      // Animation complete - redirect to history or show results
-      setIsDiscovering(false);
-      Alert.alert(
-        'Discovery Complete!',
-        'Historical context and related monuments have been discovered.',
-        [
-          {
-            text: 'View History',
-            onPress: () => {
-              // Navigate to history or show discovered content
-              console.log('Navigate to discovered history');
-            }
-          },
-          {
-            text: 'OK',
-            style: 'default'
-          }
-        ]
-      );
-    });
-  };
+
 
   if (isLoading) {
     return (
@@ -713,29 +467,51 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Monument Image - Full Background with Header Overlay */}
-        {monument.scannedImage && (
-          <View style={styles.imageSection}>
-            <Image source={{ uri: monument.scannedImage }} style={styles.monumentImage} />
-            
-
-            
-            {/* Header overlay on top of image */}
-            <View style={styles.headerOverlay}>
-              <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                <ArrowLeft size={24} color="#FFFFFF" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-                <Share2 size={20} color="#FFFFFF" />
-              </TouchableOpacity>
+      <LinearGradient
+        colors={['rgba(118, 104, 96, 0.36)', 'rgba(225, 222, 220, 0.36)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.backgroundGradient}
+      />
+      <SafeAreaView style={styles.safeArea}>
+        {/* Header */}
+        <View style={styles.headerSection}>
+          <View style={styles.topRow}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButtonHeader}>
+              <View style={styles.backButtonCircle}>
+                <ArrowLeft size={10} color="#ffffff" />
+              </View>
+            </TouchableOpacity>
+            <View style={styles.logoContainer}>
+              <Image 
+                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
             </View>
-            
-            <LinearGradient
-              colors={['transparent', 'rgba(0,0,0,0.6)']}
-              style={styles.imageOverlay}
-            >
-              <View style={styles.imageInfo}>
+          </View>
+          <View style={styles.headerContent}>
+            <View style={styles.textContainer}>
+              <Text style={styles.mainTitle}>Snap into Heritage</Text>
+              <Text style={styles.headerSubtitle}>
+                Discover the living stories of art and monuments
+              </Text>
+            </View>
+          </View>
+          <View style={styles.headerDivider} />
+        </View>
+
+        <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Monument Image Card */}
+        {monument.scannedImage && (
+          <View style={styles.photoSection}>
+            <View style={styles.photoCard}>
+              <Image source={{ uri: monument.scannedImage }} style={styles.photoImage} />
+              <LinearGradient
+                colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.5)', 'rgba(0, 0, 0, 0.85)']}
+                locations={[0, 0.5, 1]}
+                style={styles.photoGradient}
+              >
                 <View style={styles.recognitionBadge}>
                   {monument.isRecognized ? (
                     <>
@@ -750,14 +526,14 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                     </>
                   )}
                 </View>
-              </View>
-            </LinearGradient>
+              </LinearGradient>
+            </View>
           </View>
         )}
 
-        {/* Monument Info */}
+        {/* Monument Info Card */}
         <View style={styles.section}>
-          <View style={styles.monumentCard}>
+          <View style={styles.infoCard}>
             <Text style={styles.monumentName}>{monument.name}</Text>
             
             <View style={styles.detailsRow}>
@@ -954,6 +730,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
 
 
       </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
@@ -962,6 +739,114 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  backgroundGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 200,
+    zIndex: 0,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  headerSection: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
+    position: 'relative',
+  },
+  topRow: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    top: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  backButtonHeader: {
+    flexShrink: 0,
+  },
+  backButtonCircle: {
+    width: 19.5,
+    height: 19.5,
+    borderRadius: 10,
+    backgroundColor: '#766860',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoContainer: {
+    flexShrink: 0,
+  },
+  logoImage: {
+    width: 39,
+    height: 39,
+  },
+  headerContent: {
+    marginBottom: 8,
+    marginTop: 48,
+    zIndex: 2,
+  },
+  textContainer: {
+    width: '100%',
+  },
+  mainTitle: {
+    fontSize: 20,
+    fontFamily: 'Lora_400Regular',
+    fontWeight: '700',
+    color: '#173248',
+    marginBottom: 8,
+    lineHeight: 22,
+    marginTop: 8,
+  },
+  headerSubtitle: {
+    fontSize: 11,
+    fontFamily: 'Lora_400Regular',
+    fontStyle: 'italic',
+    fontWeight: '400',
+    color: '#173248',
+    lineHeight: 14,
+    textAlign: 'left',
+    marginTop: 2,
+  },
+  headerDivider: {
+    height: 1,
+    backgroundColor: '#173248',
+    opacity: 0.2,
+    width: '100%',
+    alignSelf: 'center',
+    zIndex: 2,
+  },
+  photoSection: {
+    paddingHorizontal: 20,
+    marginTop: 16,
+  },
+  photoCard: {
+    width: '100%',
+    aspectRatio: 4 / 5,
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  photoImage: {
+    width: '100%',
+    height: '100%',
+  },
+  photoGradient: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    justifyContent: 'flex-end',
   },
   loadingContainer: {
     flex: 1,
@@ -1004,50 +889,7 @@ const styles = StyleSheet.create({
     fontFamily: "Lora_400Regular",
     fontWeight: '500',
   },
-  headerOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 10,
-    zIndex: 10,
-  },
-  backButton: {
-    padding: 8,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 20,
-  },
-  shareButton: {
-    padding: 8,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 20,
-  },
-  imageSection: {
-    position: 'relative',
-    height: 400,
-  },
-  monumentImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  imageOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '100%',
-    justifyContent: 'flex-end',
-    padding: 24,
-  },
-  imageInfo: {
-    alignItems: 'flex-end',
-  },
+
   recognitionBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1056,6 +898,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     gap: 6,
+    alignSelf: 'flex-start',
   },
   recognitionText: {
     fontSize: 12,
@@ -1079,10 +922,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 24,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 6,
     borderLeftWidth: 4,
     borderLeftColor: '#f59e0b',
   },
@@ -1156,17 +999,17 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: 16,
-    paddingHorizontal: 14,
+    paddingHorizontal: 20,
   },
-  monumentCard: {
+  infoCard: {
     backgroundColor: Colors.surface,
     borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 6,
   },
   monumentName: {
     fontSize: 24,
@@ -1193,10 +1036,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 6,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -1343,10 +1186,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 6,
     marginBottom: 24,
   },
   feedbackQuestion: {
