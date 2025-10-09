@@ -136,7 +136,7 @@ export default function PhotoConfirmationScreen() {
       },
       onPanResponderRelease: (_, gestureState) => {
         const maxSlide = screenWidth - 100;
-        const threshold = maxSlide * 0.75;
+        const threshold = maxSlide * 0.6;
 
         if (gestureState.dx >= threshold) {
           Animated.timing(slideAnim, {
