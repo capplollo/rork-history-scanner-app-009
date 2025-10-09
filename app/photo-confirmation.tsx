@@ -475,7 +475,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   photoCard: {
-    width: '95%',
+    width: '85.5%',
     aspectRatio: 2/3,
     borderRadius: 16,
     overflow: 'hidden',
