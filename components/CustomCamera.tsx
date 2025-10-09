@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   title: {
-    fontSize: 18,
+    fontSize: 14.4,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -352,8 +352,8 @@ const styles = StyleSheet.create({
     zIndex: 5,
   },
   rectangleFrame: {
-    width: (screenWidth - 80) * 0.67,
-    height: screenWidth - 80,
+    width: (screenWidth - 80) * 0.67 * 1.6,
+    height: (screenWidth - 80) * 1.6,
     borderWidth: 2,
     borderColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: 10,
@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
     zIndex: 15,
   },
   instructionTextTop: {
-    fontSize: 14,
+    fontSize: 11.2,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     }),
     color: '#ffffff',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 16,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: 12.8,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   permissionText: {
-    fontSize: 16,
+    fontSize: 12.8,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   permissionButtonText: {
-    fontSize: 16,
+    fontSize: 12.8,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
   },
 
   placeholderText: {
-    fontSize: 18,
+    fontSize: 14.4,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   instructionText: {
-    fontSize: 14,
+    fontSize: 11.2,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -463,7 +463,7 @@ const styles = StyleSheet.create({
     }),
     color: '#ffffff',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 16,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   stepNumber: {
-    fontSize: 14,
+    fontSize: 11.2,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   photoReviewTitle: {
-    fontSize: 16,
+    fontSize: 12.8,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   retakeButtonText: {
-    fontSize: 12,
+    fontSize: 9.6,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
