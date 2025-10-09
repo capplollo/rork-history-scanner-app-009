@@ -10,8 +10,8 @@ export default function Logo({ size = 191, style }: LogoProps) {
   return (
     <View style={[styles.container, style]}>
       <Image
-        source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/n9mfvcxgslodjkfj80j9x' }}
-        style={[styles.logo, { width: size, height: size * 0.33 }]}
+        source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q2vrur5wrhwyf2vbtsen2' }}
+        style={[styles.logo, { width: size, height: size }]}
         resizeMode="contain"
       />
     </View>
