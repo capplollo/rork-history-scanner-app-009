@@ -64,7 +64,7 @@ export default function ScanResultScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentAudio, setCurrentAudio] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'takeaways' | 'summary'>('takeaways');
+  const [activeTab, setActiveTab] = useState<'takeaways'>('takeaways');
   const [isHistoryExpanded, setIsHistoryExpanded] = useState<boolean>(false);
   const slideAnimation = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
@@ -490,15 +490,6 @@ export default function ScanResultScreen() {
               />
             </View>
           </View>
-          <View style={styles.headerContent}>
-            <View style={styles.textContainer}>
-              <Text style={styles.mainTitle}>Snap into Heritage</Text>
-              <Text style={styles.headerSubtitle}>
-                Discover the living stories of art and monuments
-              </Text>
-            </View>
-          </View>
-          <View style={styles.headerDivider} />
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -507,26 +498,6 @@ export default function ScanResultScreen() {
           <View style={styles.photoSection}>
             <View style={styles.photoCard}>
               <Image source={{ uri: monument.scannedImage }} style={styles.photoImage} />
-              <LinearGradient
-                colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.5)', 'rgba(0, 0, 0, 0.85)']}
-                locations={[0, 0.5, 1]}
-                style={styles.photoGradient}
-              >
-                <View style={styles.recognitionBadge}>
-                  {monument.isRecognized ? (
-                    <>
-                      <CheckCircle size={16} color="#4CAF50" />
-                      <Text style={styles.recognitionText}>Recognized</Text>
-                      <Text style={styles.confidenceText}>{monument.confidence}%</Text>
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle size={16} color="#FF9800" />
-                      <Text style={styles.notRecognizedText}>Not Recognized</Text>
-                    </>
-                  )}
-                </View>
-              </LinearGradient>
             </View>
           </View>
         )}
@@ -534,15 +505,29 @@ export default function ScanResultScreen() {
         {/* Monument Info Card */}
         <View style={styles.section}>
           <View style={styles.infoCard}>
+            <View style={styles.recognitionBadgeInCard}>
+              {monument.isRecognized ? (
+                <>
+                  <CheckCircle size={12} color="#4CAF50" />
+                  <Text style={styles.recognitionTextInCard}>Recognized</Text>
+                  <Text style={styles.confidenceTextInCard}>{monument.confidence}%</Text>
+                </>
+              ) : (
+                <>
+                  <AlertCircle size={12} color="#FF9800" />
+                  <Text style={styles.notRecognizedTextInCard}>Not Recognized</Text>
+                </>
+              )}
+            </View>
             <Text style={styles.monumentName}>{monument.name}</Text>
             
             <View style={styles.detailsRow}>
               <View style={styles.detailItem}>
-                <MapPin size={16} color={Colors.accent.secondary} />
+                <MapPin size={12} color={Colors.accent.secondary} />
                 <Text style={styles.detailText}>{monument.location}</Text>
               </View>
               <View style={styles.detailItem}>
-                <Calendar size={16} color={Colors.accent.secondary} />
+                <Calendar size={12} color={Colors.accent.secondary} />
                 <Text style={styles.detailText}>{monument.period}</Text>
               </View>
             </View>
@@ -554,7 +539,7 @@ export default function ScanResultScreen() {
           <View style={styles.section}>
             <View style={styles.notRecognizedCard}>
               <View style={styles.notRecognizedHeader}>
-                <AlertCircle size={24} color="#f59e0b" />
+                <AlertCircle size={18} color="#f59e0b" />
                 <Text style={styles.notRecognizedTitle}>Monument Not Recognized</Text>
               </View>
               
@@ -588,7 +573,7 @@ export default function ScanResultScreen() {
                 }}
               >
                 <View style={styles.buttonContent}>
-                  <Sparkles size={20} color="#ffffff" />
+                  <Sparkles size={15} color="#ffffff" />
                   <Text style={styles.addContextButtonText}>Add Context & Try Again</Text>
                 </View>
               </TouchableOpacity>
@@ -598,66 +583,23 @@ export default function ScanResultScreen() {
 
 
 
-        {/* Key Takeaways / Short Summary - Only show when recognized */}
+        {/* Key Takeaways - Only show when recognized */}
         {monument.isRecognized && monument.detailedDescription && monument.detailedDescription.keyTakeaways && (
           <View style={styles.section}>
             <View style={styles.contentCard}>
               <View style={styles.cardHeader}>
-                <Sparkles size={20} color={Colors.accent.secondary} />
-                <Text style={styles.sectionTitle}>
-                  {activeTab === 'takeaways' ? 'Key Takeaways' : 'Short Summary'}
-                </Text>
+                <Sparkles size={15} color={Colors.accent.secondary} />
+                <Text style={styles.sectionTitle}>Key Takeaways</Text>
               </View>
               
-              {/* Tab Switcher */}
-              <View style={styles.tabSwitcher}>
-                <TouchableOpacity
-                  style={[styles.tab, activeTab === 'takeaways' && styles.activeTab]}
-                  onPress={() => {
-                    setActiveTab('takeaways');
-                    Animated.spring(slideAnimation, {
-                      toValue: 0,
-                      useNativeDriver: true,
-                    }).start();
-                  }}
-                >
-                  <Text style={[styles.tabText, activeTab === 'takeaways' && styles.activeTabText]}>
-                    Key Takeaways
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.tab, activeTab === 'summary' && styles.activeTab]}
-                  onPress={() => {
-                    setActiveTab('summary');
-                    Animated.spring(slideAnimation, {
-                      toValue: 1,
-                      useNativeDriver: true,
-                    }).start();
-                  }}
-                >
-                  <Text style={[styles.tabText, activeTab === 'summary' && styles.activeTabText]}>
-                    Short Summary
-                  </Text>
-                </TouchableOpacity>
+              <View style={styles.factsContainer}>
+                {monument.detailedDescription.keyTakeaways.map((takeaway, index) => (
+                  <View key={index} style={styles.factItem}>
+                    <View style={styles.factDot} />
+                    <Text style={styles.factText}>{takeaway}</Text>
+                  </View>
+                ))}
               </View>
-              
-              {/* Content */}
-              {activeTab === 'takeaways' ? (
-                <View style={styles.factsContainer}>
-                  {monument.detailedDescription.keyTakeaways.map((takeaway, index) => (
-                    <View key={index} style={styles.factItem}>
-                      <View style={styles.factDot} />
-                      <Text style={styles.factText}>{takeaway}</Text>
-                    </View>
-                  ))}
-                </View>
-              ) : (
-                <View style={styles.summaryContainer}>
-                  <Text style={styles.summaryText}>
-                    {monument.detailedDescription.keyTakeaways.slice(0, 2).join(' ')}
-                  </Text>
-                </View>
-              )}
             </View>
           </View>
         )}
@@ -667,16 +609,16 @@ export default function ScanResultScreen() {
           <View style={styles.section}>
             <View style={styles.contentCard}>
               <View style={styles.cardHeader}>
-                <Clock size={20} color={Colors.accent.secondary} />
+                <Clock size={15} color={Colors.accent.secondary} />
                 <Text style={styles.sectionTitle}>Immersive History</Text>
                 <TouchableOpacity
                   style={styles.ttsButton}
                   onPress={() => handlePlayTTS(monument.detailedDescription!.inDepthContext)}
                 >
                   {isPlaying ? (
-                    <Pause size={18} color={Colors.accent.secondary} />
+                    <Pause size={13.5} color={Colors.accent.secondary} />
                   ) : (
-                    <Volume2 size={18} color={Colors.accent.secondary} />
+                    <Volume2 size={13.5} color={Colors.accent.secondary} />
                   )}
                 </TouchableOpacity>
               </View>
@@ -720,7 +662,7 @@ export default function ScanResultScreen() {
                 }}
               >
                 <View style={styles.buttonContent}>
-                  <Sparkles size={18} color="#ffffff" />
+                  <Sparkles size={13.5} color="#ffffff" />
                   <Text style={styles.backToScannerButtonText}>Add Context & Reanalyze</Text>
                 </View>
               </TouchableOpacity>
@@ -754,7 +696,7 @@ const styles = StyleSheet.create({
   headerSection: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 12,
+    paddingBottom: 16,
     position: 'relative',
   },
   topRow: {
@@ -785,41 +727,7 @@ const styles = StyleSheet.create({
     width: 39,
     height: 39,
   },
-  headerContent: {
-    marginBottom: 8,
-    marginTop: 48,
-    zIndex: 2,
-  },
-  textContainer: {
-    width: '100%',
-  },
-  mainTitle: {
-    fontSize: 20,
-    fontFamily: 'Lora_400Regular',
-    fontWeight: '700',
-    color: '#173248',
-    marginBottom: 8,
-    lineHeight: 22,
-    marginTop: 8,
-  },
-  headerSubtitle: {
-    fontSize: 11,
-    fontFamily: 'Lora_400Regular',
-    fontStyle: 'italic',
-    fontWeight: '400',
-    color: '#173248',
-    lineHeight: 14,
-    textAlign: 'left',
-    marginTop: 2,
-  },
-  headerDivider: {
-    height: 1,
-    backgroundColor: '#173248',
-    opacity: 0.2,
-    width: '100%',
-    alignSelf: 'center',
-    zIndex: 2,
-  },
+
   photoSection: {
     paddingHorizontal: 20,
     marginTop: 16,
@@ -936,15 +844,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   notRecognizedTitle: {
-    fontSize: 18,
+    fontSize: 13.5,
     fontFamily: "Lora_400Regular",
     fontWeight: '600',
     color: '#2C3E50',
   },
   notRecognizedDescription: {
-    fontSize: 15,
+    fontSize: 11.25,
     fontFamily: "Lora_400Regular",
-    lineHeight: 22,
+    lineHeight: 16.5,
     color: '#64748b',
     marginBottom: 20,
   },
@@ -952,7 +860,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   helpTitle: {
-    fontSize: 16,
+    fontSize: 12,
     fontFamily: "Lora_400Regular",
     fontWeight: '500',
     color: '#2C3E50',
@@ -975,9 +883,9 @@ const styles = StyleSheet.create({
   },
   helpText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 10.5,
     fontFamily: "Lora_400Regular",
-    lineHeight: 20,
+    lineHeight: 15,
     color: '#64748b',
   },
   addContextButton: {
@@ -992,7 +900,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   addContextButtonText: {
-    fontSize: 16,
+    fontSize: 12,
     fontFamily: "Lora_400Regular",
     fontWeight: '500',
     color: '#ffffff',
@@ -1012,11 +920,11 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   monumentName: {
-    fontSize: 24,
+    fontSize: 18,
     fontFamily: "Lora_400Regular",
     fontWeight: "500",
     color: "#2C3E50",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   detailsRow: {
     gap: 12,
@@ -1027,7 +935,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   detailText: {
-    fontSize: 14,
+    fontSize: 10.5,
     fontFamily: "Lora_400Regular",
     color: '#64748b',
   },
@@ -1048,7 +956,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 13.5,
     fontFamily: "Lora_400Regular",
     fontWeight: "500",
     color: "#2C3E50",
@@ -1071,9 +979,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   descriptionText: {
-    fontSize: 15,
+    fontSize: 11.25,
     fontFamily: "Lora_400Regular",
-    lineHeight: 22,
+    lineHeight: 16.5,
     color: '#64748b',
   },
   factsContainer: {
@@ -1093,9 +1001,9 @@ const styles = StyleSheet.create({
   },
   factText: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 11.25,
     fontFamily: "Lora_400Regular",
-    lineHeight: 22,
+    lineHeight: 16.5,
     color: '#64748b',
   },
   reanalyzeButton: {
@@ -1193,7 +1101,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   feedbackQuestion: {
-    fontSize: 18,
+    fontSize: 13.5,
     fontFamily: "Lora_400Regular",
     fontWeight: '500',
     color: '#2C3E50',
@@ -1201,11 +1109,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   feedbackSubtext: {
-    fontSize: 14,
+    fontSize: 10.5,
     fontFamily: "Lora_400Regular",
     color: '#64748b',
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 15,
     marginBottom: 20,
   },
   backToScannerButton: {
@@ -1221,7 +1129,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   backToScannerButtonText: {
-    fontSize: 16,
+    fontSize: 12,
     fontFamily: "Lora_400Regular",
     fontWeight: '500',
     color: '#ffffff',
@@ -1352,10 +1260,38 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   moreButtonText: {
-    fontSize: 14,
+    fontSize: 10.5,
     fontFamily: "Lora_400Regular",
     fontWeight: '500',
     color: '#ffffff',
+  },
+  recognitionBadgeInCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
+    borderRadius: 15,
+    gap: 4.5,
+    alignSelf: 'flex-start',
+    marginBottom: 12,
+  },
+  recognitionTextInCard: {
+    fontSize: 9,
+    fontFamily: "Lora_400Regular",
+    fontWeight: '500',
+    color: '#4CAF50',
+  },
+  confidenceTextInCard: {
+    fontSize: 9,
+    fontFamily: "Lora_400Regular",
+    color: '#64748b',
+  },
+  notRecognizedTextInCard: {
+    fontSize: 9,
+    fontFamily: "Lora_400Regular",
+    fontWeight: '500',
+    color: '#FF9800',
   },
 
 });
