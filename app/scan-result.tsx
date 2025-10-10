@@ -839,7 +839,7 @@ const styles = StyleSheet.create({
     color: '#FF9800',
   },
   notRecognizedCard: {
-    backgroundColor: 'rgba(254, 254, 254, 0.85)',
+    backgroundColor: 'rgba(254, 254, 254, 0.65)',
     borderRadius: 20,
     padding: 24,
     shadowColor: '#000',
@@ -946,7 +946,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   contentCard: {
-    backgroundColor: 'rgba(254, 254, 254, 0.85)',
+    backgroundColor: 'rgba(254, 254, 254, 0.65)',
     borderRadius: 20,
     padding: 24,
     shadowColor: '#000',
@@ -1098,7 +1098,7 @@ const styles = StyleSheet.create({
     color: '#dc2626',
   },
   feedbackCard: {
-    backgroundColor: 'rgba(254, 254, 254, 0.85)',
+    backgroundColor: 'rgba(254, 254, 254, 0.65)',
     borderRadius: 20,
     padding: 24,
     shadowColor: '#000',
