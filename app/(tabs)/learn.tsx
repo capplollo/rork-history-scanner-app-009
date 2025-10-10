@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   },
   categoryCard: {
     width: "48%",
-    height: 130,
+    aspectRatio: 3 / 4,
     borderRadius: 14,
     overflow: "hidden",
     shadowColor: '#000',
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   },
   articleImage: {
     width: 100,
-    height: 100,
+    aspectRatio: 3 / 4,
   },
   articleContent: {
     flex: 1,

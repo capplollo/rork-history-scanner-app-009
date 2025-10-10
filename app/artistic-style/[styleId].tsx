@@ -127,7 +127,8 @@ const styles = StyleSheet.create({
     color: "#64748b",
   },
   imageContainer: {
-    height: 300,
+    width: "100%",
+    aspectRatio: 3 / 4,
     position: "relative",
   },
   heroImage: {
