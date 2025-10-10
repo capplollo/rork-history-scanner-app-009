@@ -564,7 +564,7 @@ Return ALL information in the following EXACT JSON format (ensure valid JSON, pr
 
 {
   "name": "Name or 'Unknown'",
-  "location": "City, Country or Location, Region or 'Unknown'",
+  "origin": "Culture/Region, Country or Period, Location or 'Unknown'",
   "period": "Year(s) or century (e.g., '1503', '15th century', '1800s', '12th–13th century') or 'Unknown'",
   "isRecognized": true/false,
   "detailedDescription": {
@@ -574,14 +574,14 @@ Return ALL information in the following EXACT JSON format (ensure valid JSON, pr
       "Third key takeaway — specific and informative or 'Unknown'",
       "Fourth key takeaway — specific and informative or 'Unknown'"
     ],
-    "inDepthContext": "Task: Provide exactly 3 condensed paragraphs totaling around 400–450 words about the specific monument (if recognized). Begin in medias res with a vivid anecdote or striking event.\\n\\nParagraph 1 (origins): Blend a striking story with the historical origins, context of creation, architect/patron, and political/cultural background with specific dates.\\n\\nParagraph 2 (visuals): Continue narratively as if the reader is examining the monument, describing step by step its architectural style, materials, dimensions, and distinctive features. Integrate description into the story naturally.\\n\\nParagraph 3 (impact): Explain its cultural significance and historical importance through its use, symbolic meanings, notable historical events, and modern relevance. Conclude with a powerful closing anecdote that resolves the story.\\n\\nEmphasize human stories slightly more than historical facts, but keep both strongly integrated. Avoid detached cataloging or generic comments. If not recognized, return 'Unknown'."
+    "inDepthContext": "Task: Provide exactly 3 condensed paragraphs totaling around 400–450 words about the specific museum object (if recognized). Begin in medias res with a vivid anecdote or striking event.\\n\\nParagraph 1 (origins): Blend a striking story with the historical origins, context of creation, culture/artist or patron, and political/cultural background with specific dates.\\n\\nParagraph 2 (visuals): Continue narratively as if the reader is examining the object, describing step by step its style, materials, dimensions, and distinctive features. Integrate description into the story naturally.\\n\\nParagraph 3 (impact): Explain its cultural significance and historical importance through its use, symbolic meanings, notable historical events, and modern relevance. Conclude with a powerful closing anecdote that resolves the story.\\n\\nEmphasize human stories slightly more than historical facts, but keep both strongly integrated. Avoid detached cataloging or generic comments. If not recognized, return 'Unknown'."
   },
-  "curiosities": "One striking anecdote, unusual fact, or rarely known detail about this monument. If none verified or not recognized, write 'Unknown'."
+  "curiosities": "One striking anecdote, unusual fact, or rarely known detail about this object. If none verified or not recognized, write 'Unknown'."
 }
 
 Critical requirements:
-- If not recognized: ALL fields (name, location, period, keyTakeaways, inDepthContext, curiosities) should return 'Unknown'.
-- location must always be in 'City, Country' or 'Location, Region' format or 'Unknown'.
+- If not recognized: ALL fields (name, origin, period, keyTakeaways, inDepthContext, curiosities) should return 'Unknown'.
+- origin must always be in 'Culture/Region, Country' or 'Period, Location' format or 'Unknown'.
 - isRecognized must be true only if confidence ≥95%.
 - keyTakeaways must contain exactly 4 bullet points.
 - Output must always be valid JSON.
