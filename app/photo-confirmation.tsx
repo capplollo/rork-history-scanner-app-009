@@ -28,6 +28,7 @@ export default function PhotoConfirmationScreen() {
   const [isLocationRelevant, setIsLocationRelevant] = useState(photoSource !== 'gallery');
   const [contextText, setContextText] = useState('');
   const [locationAddress, setLocationAddress] = useState<string | null>(null);
+  const [locationCoords, setLocationCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   
   const slideAnim = useRef(new Animated.Value(0)).current;
@@ -67,6 +68,7 @@ export default function PhotoConfirmationScreen() {
   };
 
   const getAddressFromCoordinates = async (latitude: number, longitude: number) => {
+    setLocationCoords({ latitude, longitude });
     try {
       if (Platform.OS === 'web') {
         const response = await fetch(
@@ -355,6 +357,8 @@ Critical requirements:
           inDepthContext: analysisResult.detailedDescription.inDepthContext,
           curiosities: analysisResult.curiosities,
           scannedImage: photoUri as string,
+          userLocation: isLocationRelevant && locationAddress ? locationAddress : undefined,
+          userLocationCoords: isLocationRelevant && locationCoords ? JSON.stringify(locationCoords) : undefined,
         },
       });
     } catch (error) {
