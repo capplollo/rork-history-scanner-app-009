@@ -256,10 +256,9 @@ const styles = StyleSheet.create({
   headerSection: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 32,
+    paddingBottom: 12,
     position: 'relative',
     zIndex: 10,
-    minHeight: 75,
   },
   topRow: {
     position: 'absolute',
