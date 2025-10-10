@@ -180,12 +180,6 @@ export default function PhotoConfirmationScreen() {
       
       let promptText = '';
       
-      if (scanMode === 'museum') {
-        promptText = `Analyze this image and identify any artworks or cultural artifacts, including paintings, sculptures, or historical objects.`;
-      } else {
-        promptText = `Analyze this image and identify any monuments, statues, architectural landmarks, or public artworks.`;
-      }
-      
       if (isLocationRelevant && locationAddress) {
         promptText += `\n\nUser's location: ${locationAddress}`;
       }
@@ -194,24 +188,105 @@ export default function PhotoConfirmationScreen() {
         promptText += `\n\nUser context: ${contextText}`;
       }
       
-      promptText += `\n\nBE EXTREMELY CONSERVATIVE with identification. Only identify if 95% or more confident.\n\nRespond in this exact JSON format:
+      if (scanMode === 'museum') {
+        promptText = `Analyze the label photo or other context information first, then analyze the artwork image. Identify any artworks or cultural artifacts, including paintings, sculptures, or historical objects. Include paintings that depict buildings/landmarks (identify the painting, not the depicted structure).
+
+From the label/context, extract title, artist/culture, date, medium, museum/collection, gallery/room, or inventory number. Use this as the starting point for recognition. Only confirm recognition if the label/context details and the artwork image visually align (composition, materials, aspect ratio, inscriptions, distinctive features). Minor OCR errors are acceptable, but if label/context and visuals conflict, mark as not recognized.
+
+BE EXTREMELY CONSERVATIVE with identification. Many artworks have close copies, replicas, workshop variants, or period copies. Only identify a specific artwork if you are 95% or more confident it is that exact piece.
+
+For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
+- Workshop copies, replicas, or casts that look nearly identical
+- Religious icons, altarpieces, and portraits with repeated styles or subjects
+- Busts and sculptures of emperors, philosophers, or deities with recurring typologies
+- Decorative arts in series or sets; "school of" / "circle of" attributions
+
+When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis than incorrect identification.
+
+Analyze the provided museum object and its label to identify the artifact. You will receive two images: the museum object itself and its accompanying label/information card.
+
+Rules for identification:
+1. Be EXTREMELY CONSERVATIVE. Only provide a specific identification if you are at least 95% confident. If confidence is lower, mark as NOT RECOGNIZED and provide only general analysis.
+2. Use both the object image and label information to make your identification. The label may contain crucial details about the object's origin, date, culture, or significance.
+3. For recognition, always provide the ACTUAL city and country of the object separately.
+
+Output format:
+Return ALL information in the following EXACT JSON format (ensure valid JSON, proper escaping, no control characters):
+
 {
-"artworkName": "Name or 'Unknown Monuments and Art'",
-"confidence": 85,
-"location": "Actual location",
-"period": "Year(s) or century format or 'Unknown'",
-"isRecognized": true/false,
-"detailedDescription": {
-  "keyTakeaways": [
-    "First key takeaway",
-    "Second key takeaway", 
-    "Third key takeaway",
-    "Fourth key takeaway"
-  ],
-  "inDepthContext": "3 paragraphs of detailed context",
-  "curiosities": "ONE interesting fact"
+  "name": "Name or 'Unknown'",
+  "city": "City or 'Unknown'",
+  "country": "Country or 'Unknown'",
+  "period": "Year(s) or century (e.g., '1503', '15th century', '1800s', '12th–13th century') or 'Unknown'",
+  "isRecognized": true/false,
+  "detailedDescription": {
+    "keyTakeaways": [
+      "First key takeaway — specific and informative or 'Unknown'",
+      "Second key takeaway — specific and informative or 'Unknown'",
+      "Third key takeaway — specific and informative or 'Unknown'",
+      "Fourth key takeaway — specific and informative or 'Unknown'"
+    ],
+    "inDepthContext": "Task: Provide exactly 3 condensed paragraphs totaling around 400–450 words about the specific museum object (if recognized). Begin in medias res with a vivid anecdote or striking event.Paragraph 1 (origins): Blend a striking story with the historical origins, context of creation, culture/artist or patron, and political/cultural background with specific dates.Paragraph 2 (visuals): Continue narratively as if the reader is examining the object, describing step by step its style, materials, dimensions, and distinctive features. Integrate description into the story naturally.Paragraph 3 (impact): Explain its cultural significance and historical importance through its use, symbolic meanings, notable historical events, and modern relevance. Conclude with a powerful closing anecdote that resolves the story.Emphasize human stories slightly more than historical facts, but keep both strongly integrated. Avoid detached cataloging or generic comments. If not recognized, return 'Unknown'."
+  },
+  "curiosities": "One striking anecdote, unusual fact, or rarely known detail about this object. If none verified or not recognized, write 'Unknown'."
 }
-}`;
+
+Critical requirements:
+- If not recognized: ALL fields (name, city, country, period, keyTakeaways, inDepthContext, curiosities) should return 'Unknown'.
+- city and country must be separate fields or 'Unknown'.
+- isRecognized must be true only if confidence ≥95%.
+- keyTakeaways must contain exactly 4 bullet points.
+- Output must always be valid JSON.
+- Provide actual historical context, not filler text.`;
+      } else {
+        promptText = `Analyze this image and identify any monuments, statues, architectural landmarks, or public artworks. Include painted or sculpted depictions of landmarks.
+
+BE EXTREMELY CONSERVATIVE with identification. Many monuments, churches, and buildings share similar styles, layouts, or decorative programs. Only identify a specific site if you are 95% or more confident it is that exact location.
+
+For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
+- Churches, cathedrals, and chapels with near-identical façades
+- War memorials, equestrian statues, and commemorative monuments with common designs
+- Triumphal arches, obelisks, towers, or bridges that resemble others from the same era
+- Buildings in neoclassical, Gothic, or baroque styles that repeat common features
+- Street art and murals in styles that appear across multiple cities
+
+When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis than incorrect identification.
+
+Analyze the provided monument or landmark to identify it. 
+
+Rules for identification:
+1. Be EXTREMELY CONSERVATIVE. Only provide a specific identification if you are at least 95% confident. If confidence is lower, mark as NOT RECOGNIZED and provide only general analysis.
+2. For recognition, always provide the ACTUAL city and country of the monument separately.
+
+Output format:
+Return ALL information in the following EXACT JSON format (ensure valid JSON, proper escaping, no control characters):
+
+{
+  "name": "Name or 'Unknown'",
+  "city": "City or 'Unknown'",
+  "country": "Country or 'Unknown'",
+  "period": "Year(s) or century (e.g., '1503', '15th century', '1800s', '12th–13th century') or 'Unknown'",
+  "isRecognized": true/false,
+  "detailedDescription": {
+    "keyTakeaways": [
+      "First key takeaway — specific and informative or 'Unknown'",
+      "Second key takeaway — specific and informative or 'Unknown'",
+      "Third key takeaway — specific and informative or 'Unknown'",
+      "Fourth key takeaway — specific and informative or 'Unknown'"
+    ],
+    "inDepthContext": "Task: Provide exactly 3 condensed paragraphs totaling around 400–450 words about the specific monument (if recognized). Begin in medias res with a vivid anecdote or striking event.Paragraph 1 (origins): Blend a striking story with the historical origins, context of creation, architect/patron, and political/cultural background with specific dates.Paragraph 2 (visuals): Continue narratively as if the reader is examining the monument, describing step by step its style, materials, dimensions, and distinctive features. Integrate description into the story naturally.Paragraph 3 (impact): Explain its cultural significance and historical importance through its use, symbolic meanings, notable historical events, and modern relevance. Conclude with a powerful closing anecdote that resolves the story.Emphasize human stories slightly more than historical facts, but keep both strongly integrated. Avoid detached cataloging or generic comments. If not recognized, return 'Unknown'."
+  },
+  "curiosities": "One striking anecdote, unusual fact, or rarely known detail about this monument. If none verified or not recognized, write 'Unknown'."
+}
+
+Critical requirements:
+- If not recognized: ALL fields (name, city, country, period, keyTakeaways, inDepthContext, curiosities) should return 'Unknown'.
+- city and country must be separate fields or 'Unknown'.
+- isRecognized must be true only if confidence ≥95%.
+- keyTakeaways must contain exactly 4 bullet points.
+- Output must always be valid JSON.
+- Provide actual historical context, not filler text.`;
+      }
       
       const requestBody = {
         messages: [
@@ -251,14 +326,14 @@ export default function PhotoConfirmationScreen() {
       router.replace({
         pathname: "/scan-result" as any,
         params: {
-          artworkName: analysisResult.artworkName,
-          confidence: analysisResult.confidence.toString(),
-          location: analysisResult.location,
+          artworkName: analysisResult.name,
+          city: analysisResult.city,
+          country: analysisResult.country,
           period: analysisResult.period,
           isRecognized: analysisResult.isRecognized.toString(),
           keyTakeaways: JSON.stringify(analysisResult.detailedDescription.keyTakeaways),
           inDepthContext: analysisResult.detailedDescription.inDepthContext,
-          curiosities: analysisResult.detailedDescription.curiosities,
+          curiosities: analysisResult.curiosities,
           scannedImage: photoUri as string,
         },
       });

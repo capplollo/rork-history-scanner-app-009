@@ -55,6 +55,8 @@ export default function ScanResultScreen() {
     scannedImage, 
     regenerate,
     artworkName,
+    city,
+    country,
     confidence,
     isRecognized,
     keyTakeaways,
@@ -132,11 +134,21 @@ export default function ScanResultScreen() {
           const confidenceNum = confidence ? parseInt(confidence as string, 10) : 75;
           const isRecognizedBool = isRecognized === 'true';
           
+          const cityStr = (city as string) || 'Unknown';
+          const countryStr = (country as string) || 'Unknown';
+          const locationStr = cityStr !== 'Unknown' && countryStr !== 'Unknown' 
+            ? `${cityStr}, ${countryStr}` 
+            : cityStr !== 'Unknown' 
+              ? cityStr 
+              : countryStr !== 'Unknown' 
+                ? countryStr 
+                : 'Unknown Location';
+          
           loadedMonument = {
             id: resultId as string || 'ai-analysis',
             name: artworkName as string,
-            location: (location as string) || 'Unknown Location',
-            country: '',
+            location: locationStr,
+            country: countryStr,
             period: (period as string) || 'Unknown Period',
             description: parsedKeyTakeaways.length > 0 ? parsedKeyTakeaways.join(' ') : 'AI analysis completed.',
             significance: (inDepthContext as string) || 'This monument holds historical and cultural significance.',
@@ -245,7 +257,7 @@ export default function ScanResultScreen() {
     };
     
     loadMonumentData();
-  }, [monumentId, scanData, resultId, historyItemId, monumentName, location, period, scannedImage, regenerate, artworkName, confidence, isRecognized, keyTakeaways, inDepthContext, curiosities]);
+  }, [monumentId, scanData, resultId, historyItemId, monumentName, location, period, scannedImage, regenerate, artworkName, city, country, confidence, isRecognized, keyTakeaways, inDepthContext, curiosities]);
 
 
 
