@@ -272,33 +272,32 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 24,
     position: 'relative',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.06)',
   },
   statsSection: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingHorizontal: 24,
-    paddingVertical: 24,
+    paddingVertical: 20,
+    marginBottom: 8,
   },
   statItem: {
     alignItems: 'center',
     flex: 1,
   },
   statNumber: {
-    fontSize: 20,
+    fontSize: 24,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: Colors.text.primary,
-    marginBottom: 2,
+    color: Colors.berkeleyBlue,
+    marginBottom: 4,
   },
   statLabel: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -332,9 +331,9 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.platinum,
+    backgroundColor: 'rgba(254, 254, 254, 0.65)',
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.08)',
+    borderColor: 'rgba(104, 89, 81, 0.08)',
   },
   profileInfo: {
     flex: 1,
@@ -348,7 +347,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: Colors.text.primary,
+    color: Colors.berkeleyBlue,
   },
   userEmail: {
     fontSize: 14,
@@ -396,14 +395,14 @@ const styles = StyleSheet.create({
   },
   monumentCard: {
     width: "48.5%",
-    height: 230,
-    borderRadius: 14,
+    aspectRatio: 4 / 5,
+    borderRadius: 20,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 12,
     marginBottom: 12,
   },
   monumentImage: {
@@ -417,14 +416,14 @@ const styles = StyleSheet.create({
     right: 0,
     height: "100%",
     justifyContent: "flex-end",
-    padding: 12,
+    padding: 16,
   },
 
   monumentInfo: {
     gap: 3,
   },
   monumentName: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -432,8 +431,8 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "600",
     color: "#ffffff",
-    marginBottom: 2,
-    lineHeight: 20,
+    marginBottom: 4,
+    lineHeight: 18,
   },
   monumentDetails: {
     flexDirection: 'row',
@@ -442,7 +441,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   monumentLocation: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -451,7 +450,7 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.9)",
   },
   monumentPeriod: {
-    fontSize: 11,
+    fontSize: 9,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -459,7 +458,7 @@ const styles = StyleSheet.create({
     }),
     fontStyle: "italic",
     color: "rgba(255,255,255,0.8)",
-    marginBottom: 4,
+    marginTop: 2,
   },
 
 
@@ -472,24 +471,26 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: Colors.platinum,
+    backgroundColor: 'rgba(254, 254, 254, 0.65)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(104, 89, 81, 0.08)',
   },
   emptyStateTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: Colors.text.primary,
+    color: Colors.berkeleyBlue,
     marginBottom: 12,
   },
   emptyStateText: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -497,7 +498,7 @@ const styles = StyleSheet.create({
     }),
     color: Colors.text.muted,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
     marginBottom: 30,
   },
   startButton: {
@@ -506,23 +507,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 14,
+    paddingVertical: 16,
     paddingHorizontal: 24,
     gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowColor: Colors.accent.secondary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
   },
   startButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "600",
+    fontWeight: "500",
     color: "#ffffff",
   },
   modalContainer: {
@@ -592,18 +593,20 @@ const styles = StyleSheet.create({
   },
   sortSection: {
     paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingBottom: 16,
   },
   sortToggleContainer: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
+    backgroundColor: 'rgba(254, 254, 254, 0.65)',
     borderRadius: 16,
     padding: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 12,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(104, 89, 81, 0.08)',
   },
   sortButton: {
     flex: 1,
