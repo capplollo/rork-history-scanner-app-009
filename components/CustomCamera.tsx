@@ -43,7 +43,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [4, 5],
+        aspect: [3, 4],
         quality: 0.8,
       });
 
@@ -92,7 +92,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
       console.log('Photo captured successfully:', photo.uri);
 
       const targetWidth = photo.width;
-      const targetHeight = (photo.width * 5) / 4;
+      const targetHeight = (photo.width * 4) / 3;
       
       const croppedPhoto = await ImageManipulator.manipulateAsync(
         photo.uri,
@@ -107,7 +107,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
           },
           {
             resize: {
-              width: 960,
+              width: 900,
               height: 1200,
             },
           },
@@ -241,7 +241,7 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
           </Text>
         </View>
         
-        {/* Rectangle overlay for 3:2 ratio guidance (1200x800) */}
+        {/* Rectangle overlay for 3:4 ratio guidance */}
         <View style={styles.cameraOverlay}>
           <View style={styles.rectangleFrame} />
         </View>
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
   },
   rectangleFrame: {
     width: screenWidth,
-    height: (screenWidth * 5) / 4,
+    height: (screenWidth * 4) / 3,
     borderTopWidth: 2,
     borderBottomWidth: 2,
     borderLeftWidth: 0,
