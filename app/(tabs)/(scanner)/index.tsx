@@ -552,12 +552,12 @@ For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPEC
 
 When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis than incorrect identification.
 
-Analyze the provided monument, landmark, or architectural structure to identify it. You will receive an image of the structure.
+Analyze the provided museum object and its label to identify the artifact. You will receive two images: the museum object itself and its accompanying label/information card.
 
 Rules for identification:
 1. Be EXTREMELY CONSERVATIVE. Only provide a specific identification if you are at least 95% confident. If confidence is lower, mark as NOT RECOGNIZED and provide only general analysis.
-2. Analyze the architectural features, style, location context, and any visible inscriptions or distinctive elements.
-3. For recognition, always provide the ACTUAL location of the monument in the following format: 'City, Country' or 'Location, Region'. If not recognized, return the value 'Unknown'.
+2. Use both the object image and label information to make your identification. The label may contain crucial details about the object's origin, date, culture, or significance.
+3. For recognition, always provide the ACTUAL origin/culture of the object in the following format: 'Culture/Region, Country' or 'Period, Location'. If not recognized, return the value 'Unknown'.
 
 Output format:
 Return ALL information in the following EXACT JSON format (ensure valid JSON, proper escaping, no control characters):
