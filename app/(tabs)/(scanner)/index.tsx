@@ -490,32 +490,75 @@ export default function ScannerScreen() {
       let promptText = '';
       
       if (scanMode === 'museum') {
-        promptText = `Analyze the label photo or other context information first, then analyze the artwork image. Identify any artworks or cultural artifacts, including paintings, sculptures, or historical objects. Include paintings that depict buildings/landmarks (identify the painting, not the depicted structure).
+        promptText = `Analyze the provided museum object and its label to identify the artifact. You will receive two images: the museum object itself and its accompanying label/information card.
 
-From the label/context, extract title, artist/culture, date, medium, museum/collection, gallery/room, or inventory number. Use this as the starting point for recognition. Only confirm recognition if the label/context details and the artwork image visually align (composition, materials, aspect ratio, inscriptions, distinctive features). Minor OCR errors are acceptable, but if label/context and visuals conflict, mark as not recognized.
+Rules for identification:
+1. Be EXTREMELY CONSERVATIVE. Only provide a specific identification if you are at least 95% confident. If confidence is lower, mark as NOT RECOGNIZED and provide only general analysis.
+2. Use both the object image and label information to make your identification. The label may contain crucial details about the object's origin, date, culture, or significance.
+3. For recognition, always provide the ACTUAL origin/culture of the object in the following format: 'Culture/Region, Country' or 'Period, Location'. If not recognized, return the value 'Unknown'.
 
-BE EXTREMELY CONSERVATIVE with identification. Many artworks have close copies, replicas, workshop variants, or period copies. Only identify a specific artwork if you are 95% or more confident it is that exact piece.
+Output format:
+Return ALL information in the following EXACT JSON format (ensure valid JSON, proper escaping, no control characters):
 
-For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
-- Workshop copies, replicas, or casts that look nearly identical
-- Religious icons, altarpieces, and portraits with repeated styles or subjects
-- Busts and sculptures of emperors, philosophers, or deities with recurring typologies
-- Decorative arts in series or sets; "school of" / "circle of" attributions
+{
+  "name": "Name or 'Unknown'",
+  "origin": "Culture/Region, Country or Period, Location or 'Unknown'",
+  "period": "Year(s) or century (e.g., '1503', '15th century', '1800s', '12th–13th century') or 'Unknown'",
+  "isRecognized": true/false,
+  "detailedDescription": {
+    "keyTakeaways": [
+      "First key takeaway — specific and informative or 'Unknown'",
+      "Second key takeaway — specific and informative or 'Unknown'",
+      "Third key takeaway — specific and informative or 'Unknown'",
+      "Fourth key takeaway — specific and informative or 'Unknown'"
+    ],
+    "inDepthContext": "Task: Provide exactly 3 condensed paragraphs totaling around 400–450 words about the specific museum object (if recognized). Begin in medias res with a vivid anecdote or striking event.\\n\\nParagraph 1 (origins): Blend a striking story with the historical origins, context of creation, culture/artist or patron, and political/cultural background with specific dates.\\n\\nParagraph 2 (visuals): Continue narratively as if the reader is examining the object, describing step by step its style, materials, dimensions, and distinctive features. Integrate description into the story naturally.\\n\\nParagraph 3 (impact): Explain its cultural significance and historical importance through its use, symbolic meanings, notable historical events, and modern relevance. Conclude with a powerful closing anecdote that resolves the story.\\n\\nEmphasize human stories slightly more than historical facts, but keep both strongly integrated. Avoid detached cataloging or generic comments. If not recognized, return 'Unknown'."
+  },
+  "curiosities": "One striking anecdote, unusual fact, or rarely known detail about this object. If none verified or not recognized, write 'Unknown'."
+}
 
-When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis than incorrect identification.`;
+Critical requirements:
+- If not recognized: ALL fields (name, origin, period, keyTakeaways, inDepthContext, curiosities) should return 'Unknown'.
+- origin must always be in 'Culture/Region, Country' or 'Period, Location' format or 'Unknown'.
+- isRecognized must be true only if confidence ≥95%.
+- keyTakeaways must contain exactly 4 bullet points.
+- Output must always be valid JSON.
+- Provide actual historical context, not filler text.`;
       } else {
-        promptText = `Analyze this image and identify any monuments, statues, architectural landmarks, or public artworks. Include painted or sculpted depictions of landmarks.
+        promptText = `Analyze the provided monument, landmark, or architectural structure to identify it. You will receive an image of the structure.
 
-BE EXTREMELY CONSERVATIVE with identification. Many monuments, churches, and buildings share similar styles, layouts, or decorative programs. Only identify a specific site if you are 95% or more confident it is that exact location.
+Rules for identification:
+1. Be EXTREMELY CONSERVATIVE. Only provide a specific identification if you are at least 95% confident. If confidence is lower, mark as NOT RECOGNIZED and provide only general analysis.
+2. Analyze the architectural features, style, location context, and any visible inscriptions or distinctive elements.
+3. For recognition, always provide the ACTUAL location of the monument in the following format: 'City, Country' or 'Location, Region'. If not recognized, return the value 'Unknown'.
 
-For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
-- Churches, cathedrals, and chapels with near-identical façades
-- War memorials, equestrian statues, and commemorative monuments with common designs
-- Triumphal arches, obelisks, towers, or bridges that resemble others from the same era
-- Buildings in neoclassical, Gothic, or baroque styles that repeat common features
-- Street art and murals in styles that appear across multiple cities
+Output format:
+Return ALL information in the following EXACT JSON format (ensure valid JSON, proper escaping, no control characters):
 
-When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis than incorrect identification.`;
+{
+  "name": "Name or 'Unknown'",
+  "location": "City, Country or Location, Region or 'Unknown'",
+  "period": "Year(s) or century (e.g., '1503', '15th century', '1800s', '12th–13th century') or 'Unknown'",
+  "isRecognized": true/false,
+  "detailedDescription": {
+    "keyTakeaways": [
+      "First key takeaway — specific and informative or 'Unknown'",
+      "Second key takeaway — specific and informative or 'Unknown'",
+      "Third key takeaway — specific and informative or 'Unknown'",
+      "Fourth key takeaway — specific and informative or 'Unknown'"
+    ],
+    "inDepthContext": "Task: Provide exactly 3 condensed paragraphs totaling around 400–450 words about the specific monument (if recognized). Begin in medias res with a vivid anecdote or striking event.\\n\\nParagraph 1 (origins): Blend a striking story with the historical origins, context of creation, architect/patron, and political/cultural background with specific dates.\\n\\nParagraph 2 (visuals): Continue narratively as if the reader is examining the monument, describing step by step its architectural style, materials, dimensions, and distinctive features. Integrate description into the story naturally.\\n\\nParagraph 3 (impact): Explain its cultural significance and historical importance through its use, symbolic meanings, notable historical events, and modern relevance. Conclude with a powerful closing anecdote that resolves the story.\\n\\nEmphasize human stories slightly more than historical facts, but keep both strongly integrated. Avoid detached cataloging or generic comments. If not recognized, return 'Unknown'."
+  },
+  "curiosities": "One striking anecdote, unusual fact, or rarely known detail about this monument. If none verified or not recognized, write 'Unknown'."
+}
+
+Critical requirements:
+- If not recognized: ALL fields (name, location, period, keyTakeaways, inDepthContext, curiosities) should return 'Unknown'.
+- location must always be in 'City, Country' or 'Location, Region' format or 'Unknown'.
+- isRecognized must be true only if confidence ≥95%.
+- keyTakeaways must contain exactly 4 bullet points.
+- Output must always be valid JSON.
+- Provide actual historical context, not filler text.`;
       }
       
       // Add location context if GPS is enabled and location is available
