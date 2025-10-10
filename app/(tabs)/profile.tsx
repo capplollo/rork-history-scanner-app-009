@@ -10,22 +10,16 @@ import {
   Alert,
   Platform,
   Modal,
-  Share,
 } from "react-native";
 import { 
-  User, 
   MapPin, 
   Settings,
   LogOut,
   ChevronRight,
   Camera,
-  Clock,
   X,
   History,
-  Share2,
-  Calendar,
-  Globe,
-  Heart
+  Scan
 } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
@@ -34,7 +28,6 @@ import Colors from "@/constants/colors";
 
 export default function ProfileScreen() {
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [sortMode, setSortMode] = useState<'date' | 'country' | 'favourites'>('date');
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -57,17 +50,6 @@ export default function ProfileScreen() {
     );
   };
 
-  const handleShare = async (monument: any) => {
-    try {
-      await Share.share({
-        message: `Check out this amazing discovery: ${monument.name} in ${monument.location}! 🏛️`,
-        url: monument.image,
-      });
-    } catch (error) {
-      console.log('Error sharing:', error);
-    }
-  };
-
   const menuItems = [
     { icon: LogOut, label: "Sign Out", action: handleSignOut },
   ];
@@ -76,9 +58,9 @@ export default function ProfileScreen() {
   const scanHistory = [
     {
       id: "1",
-      name: "Colosseum",
-      location: "Rome, Italy",
-      period: "72-80 AD",
+      name: "Pantheon",
+      location: "Rome",
+      period: "133 A.C.",
       image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400",
       scannedAt: "2 days ago",
       confidence: 95,
@@ -86,98 +68,83 @@ export default function ProfileScreen() {
     },
     {
       id: "2",
-      name: "Eiffel Tower",
-      location: "Paris, France",
-      period: "1887-1889",
-      image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=400",
+      name: "Pantheon",
+      location: "Rome",
+      period: "133 A.C.",
+      image: "https://images.unsplash.com/photo-1555992336-fb0d29498b13?w=400",
       scannedAt: "1 week ago",
       confidence: 98,
       description: "An iron lattice tower that became the symbol of Paris and French ingenuity."
     },
     {
       id: "3",
-      name: "Taj Mahal",
-      location: "Agra, India",
-      period: "1632-1653",
-      image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400",
+      name: "Eiffel Tower",
+      location: "Paris",
+      period: "1887-1889",
+      image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=400",
       scannedAt: "2 weeks ago",
       confidence: 92,
       description: "A white marble mausoleum, considered the jewel of Muslim art in India."
+    },
+    {
+      id: "4",
+      name: "Milan Cathedral",
+      location: "Milan",
+      period: "1386-1965",
+      image: "https://images.unsplash.com/photo-1513581166391-887a96ddeafd?w=400",
+      scannedAt: "3 weeks ago",
+      confidence: 90,
+      description: "Gothic cathedral church of Milan."
     },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Profile Info directly on background */}
-        <View style={styles.profileSection}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <User size={32} color={Colors.accent.secondary} />
-            </View>
-          </View>
-          
-          <View style={styles.profileInfo}>
-            <Text style={styles.userName}>Demo User</Text>
-            <Text style={styles.userEmail}>demo@example.com</Text>
-          </View>
-          
+        {/* Header with icons */}
+        <View style={styles.headerIcons}>
           <TouchableOpacity 
-            style={styles.settingsButton}
+            style={styles.iconButton}
             onPress={() => setShowSettings(true)}
           >
-            <Settings size={20} color={Colors.accent.secondary} />
+            <Settings size={24} color={Colors.accent.secondary} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.iconButton}
+            onPress={() => router.push('/(tabs)/(scanner)')}
+          >
+            <Scan size={24} color={Colors.accent.secondary} />
           </TouchableOpacity>
         </View>
 
-        {/* Stats Counters */}
-        <View style={styles.statsSection}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>12</Text>
-            <Text style={styles.statLabel}>Monuments</Text>
+        {/* Profile Picture and Name */}
+        <View style={styles.profileSection}>
+          <View style={styles.avatarContainer}>
+            <Image 
+              source={{ uri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200" }}
+              style={styles.avatarImage}
+            />
           </View>
-          <View style={styles.statDivider} />
+          <Text style={styles.userName}>Lorenzo Cappelletti</Text>
+        </View>
+
+        {/* Stats Bar */}
+        <View style={styles.statsBar}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>5</Text>
             <Text style={styles.statLabel}>Countries</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
             <Text style={styles.statNumber}>3</Text>
-            <Text style={styles.statLabel}>Level</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Discoveries</Text>
+            <Text style={styles.statNumber}>47</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statLabel}>Countries</Text>
+            <Text style={styles.statNumber}>3</Text>
           </View>
         </View>
 
-
-
-        {/* Sort Menu */}
-        <View style={styles.sortSection}>
-          <View style={styles.sortToggleContainer}>
-            <TouchableOpacity 
-              style={[styles.sortButton, sortMode === 'date' && styles.sortButtonActive]}
-              onPress={() => setSortMode('date')}
-            >
-              <Calendar size={16} color={sortMode === 'date' ? '#ffffff' : Colors.text.secondary} />
-              <Text style={[styles.sortButtonText, sortMode === 'date' && styles.sortButtonTextActive]}>Date</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.sortButton, sortMode === 'country' && styles.sortButtonActive]}
-              onPress={() => setSortMode('country')}
-            >
-              <Globe size={16} color={sortMode === 'country' ? '#ffffff' : Colors.text.secondary} />
-              <Text style={[styles.sortButtonText, sortMode === 'country' && styles.sortButtonTextActive]}>Country</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.sortButton, sortMode === 'favourites' && styles.sortButtonActive]}
-              onPress={() => setSortMode('favourites')}
-            >
-              <Heart size={16} color={sortMode === 'favourites' ? '#ffffff' : Colors.text.secondary} />
-              <Text style={[styles.sortButtonText, sortMode === 'favourites' && styles.sortButtonTextActive]}>Favourites</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* History Cards directly on background */}
+        {/* Monument Grid */}
         <View style={styles.section}>
           
           {scanHistory.length > 0 ? (
@@ -263,29 +230,38 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-
+  headerIcons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  iconButton: {
+    padding: 8,
+  },
   profileSection: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    paddingHorizontal: 24,
-    paddingTop: 24,
+    paddingTop: 16,
     paddingBottom: 24,
-    position: 'relative',
   },
-  statsSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingHorizontal: 24,
-    paddingVertical: 20,
-    marginBottom: 8,
+  avatarContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    overflow: 'hidden',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  statItem: {
-    alignItems: 'center',
-    flex: 1,
+  avatarImage: {
+    width: '100%',
+    height: '100%',
   },
-  statNumber: {
+  userName: {
     fontSize: 24,
     fontFamily: Platform.select({
       ios: "Times New Roman",
@@ -294,73 +270,48 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "600",
     color: Colors.berkeleyBlue,
-    marginBottom: 4,
+  },
+  statsBar: {
+    flexDirection: 'row',
+    backgroundColor: Colors.berkeleyBlue,
+    marginHorizontal: 24,
+    marginBottom: 24,
+    borderRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
   },
   statLabel: {
-    fontSize: 12,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: Colors.text.muted,
-    textAlign: 'center',
-  },
-  statDivider: {
-    width: 1,
-    height: 32,
-    backgroundColor: 'rgba(0,0,0,0.08)',
-    marginHorizontal: 8,
-  },
-  settingsButton: {
-    position: 'absolute',
-    top: 24,
-    right: 24,
-    padding: 8,
-  },
-  avatarContainer: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(254, 254, 254, 0.65)',
-    borderWidth: 1,
-    borderColor: 'rgba(104, 89, 81, 0.08)',
-  },
-  profileInfo: {
-    flex: 1,
-    gap: 4,
-  },
-  userName: {
-    fontSize: 18,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "600",
-    color: Colors.berkeleyBlue,
-  },
-  userEmail: {
     fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: Colors.text.muted,
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  statNumber: {
+    fontSize: 32,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "700",
+    color: '#ffffff',
   },
   section: {
     marginTop: 0,
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -391,18 +342,18 @@ const styles = StyleSheet.create({
   historyGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    gap: 12,
   },
   monumentCard: {
-    width: "48.5%",
+    width: "48%",
     aspectRatio: 3 / 4,
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 12,
+    shadowRadius: 8,
+    elevation: 8,
     marginBottom: 12,
   },
   monumentImage: {
@@ -591,48 +542,5 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: 'rgba(0,0,0,0.06)',
   },
-  sortSection: {
-    paddingHorizontal: 24,
-    paddingBottom: 16,
-  },
-  sortToggleContainer: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(254, 254, 254, 0.65)',
-    borderRadius: 16,
-    padding: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(104, 89, 81, 0.08)',
-  },
-  sortButton: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 6,
-  },
-  sortButtonActive: {
-    backgroundColor: Colors.accent.secondary,
-  },
-  sortButtonText: {
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-    color: Colors.text.secondary,
-  },
-  sortButtonTextActive: {
-    color: '#ffffff',
-    fontWeight: "600",
-  },
+
 });
