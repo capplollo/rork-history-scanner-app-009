@@ -785,6 +785,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
       } catch (parseError) {
         console.error('Failed to parse AI response as JSON:', parseError);
         
+        let jsonString = '';
         try {
           // Extract JSON object from the response
           const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
@@ -792,26 +793,35 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
             throw new Error('No JSON object found in response');
           }
           
-          let jsonString = jsonMatch[0];
+          jsonString = jsonMatch[0];
           
-          // Fix common JSON issues
+          // Fix common JSON issues - more comprehensive approach
           jsonString = jsonString
-            // Fix unescaped newlines in strings
-            .replace(/"([^"]*?)\n([^"]*?)"/g, (_match: string, p1: string, p2: string) => `"${p1}\\n${p2}"`)
-            // Fix unescaped tabs
-            .replace(/"([^"]*?)\t([^"]*?)"/g, (_match: string, p1: string, p2: string) => `"${p1}\\t${p2}"`)
-            // Fix unescaped carriage returns
-            .replace(/"([^"]*?)\r([^"]*?)"/g, (_match: string, p1: string, p2: string) => `"${p1}\\r${p2}"`)
-            // Remove any control characters that might break JSON
+            // Remove any control characters first (including problematic backslashes)
             .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-            // Fix any remaining markdown
+            // Fix unescaped backslashes (must be done before other escaping)
+            .replace(/\\(?!["\\nrtbf/u])/g, '\\\\')
+            // Fix unescaped quotes within strings (but not the string delimiters)
+            .replace(/([^\\])"([^":,\]\}\n]*?)"([^:,\[\{])/g, '$1\\"$2\\"$3')
+            // Fix unescaped newlines in strings
+            .replace(/([":])([^"]*?)\n([^"]*?)(")/g, '$1$2\\n$3$4')
+            // Fix unescaped tabs
+            .replace(/([":])([^"]*?)\t([^"]*?)(")/g, '$1$2\\t$3$4')
+            // Fix unescaped carriage returns
+            .replace(/([":])([^"]*?)\r([^"]*?)(")/g, '$1$2\\r$3$4')
+            // Remove markdown bold formatting
             .replace(/\*\*([^*]+)\*\*/g, '$1')
+            // Remove markdown italic formatting
+            .replace(/\*([^*]+)\*/g, '$1')
             .trim();
           
           console.log('Attempting to parse cleaned JSON:', jsonString.substring(0, 200) + '...');
           analysisResult = JSON.parse(jsonString);
         } catch (secondParseError) {
           console.error('Second JSON parse attempt also failed:', secondParseError);
+          if (jsonString) {
+            console.error('Problematic JSON string:', jsonString.substring(0, 500));
+          }
           
           // Create a fallback response if JSON parsing completely fails
           console.log('Creating fallback response due to JSON parsing failure');
