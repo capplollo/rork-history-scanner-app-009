@@ -797,22 +797,18 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           
           // Fix common JSON issues - more comprehensive approach
           jsonString = jsonString
-            // Remove any control characters first (including problematic backslashes)
+            // Remove any control characters first
             .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-            // Fix unescaped backslashes (must be done before other escaping)
-            .replace(/\\(?!["\\nrtbf/u])/g, '\\\\')
-            // Fix unescaped quotes within strings (but not the string delimiters)
-            .replace(/([^\\])"([^":,\]\}\n]*?)"([^:,\[\{])/g, '$1\\"$2\\"$3')
-            // Fix unescaped newlines in strings
-            .replace(/([":])([^"]*?)\n([^"]*?)(")/g, '$1$2\\n$3$4')
-            // Fix unescaped tabs
-            .replace(/([":])([^"]*?)\t([^"]*?)(")/g, '$1$2\\t$3$4')
-            // Fix unescaped carriage returns
-            .replace(/([":])([^"]*?)\r([^"]*?)(")/g, '$1$2\\r$3$4')
-            // Remove markdown bold formatting
+            // Remove markdown bold formatting first
             .replace(/\*\*([^*]+)\*\*/g, '$1')
             // Remove markdown italic formatting
             .replace(/\*([^*]+)\*/g, '$1')
+            // Fix literal newlines, tabs, and carriage returns in string values
+            .replace(/([":])\s*([^"]*?)\n/g, (match, prefix, content) => {
+              return prefix + content.replace(/\n/g, '\\n');
+            })
+            .replace(/\t/g, ' ')
+            .replace(/\r/g, '')
             .trim();
           
           console.log('Attempting to parse cleaned JSON:', jsonString.substring(0, 200) + '...');
