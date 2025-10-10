@@ -11,6 +11,7 @@ import {
   Platform,
   Modal,
 } from "react-native";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { 
   MapPin, 
   Settings,
@@ -28,6 +29,7 @@ import { router } from "expo-router";
 import Colors from "@/constants/colors";
 
 export default function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const [showSettings, setShowSettings] = useState<boolean>(false);
 
   const handleSignOut = async () => {
@@ -109,8 +111,8 @@ export default function ProfileScreen() {
       />
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
-        <View style={styles.headerSection}>
-          <View style={styles.topRow}>
+        <View style={[styles.headerSection, { paddingTop: insets.top + 8 }]}>
+          <View style={[styles.topRow, { top: insets.top + 20 }]}>
             <TouchableOpacity onPress={() => setShowSettings(true)} style={styles.backButtonHeader}>
               <View style={styles.backButtonCircle}>
                 <Settings size={10} color="#ffffff" />
@@ -255,7 +257,6 @@ const styles = StyleSheet.create({
   },
   headerSection: {
     paddingHorizontal: 20,
-    paddingTop: 8,
     paddingBottom: 12,
     position: 'relative',
     zIndex: 10,
@@ -264,7 +265,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 20,
     right: 20,
-    top: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
