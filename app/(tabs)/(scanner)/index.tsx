@@ -824,18 +824,24 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           
           // Fix common JSON issues - more comprehensive approach
           jsonString = jsonString
-            // Remove any control characters first
+            // Remove any control characters first (including problematic backslashes)
             .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-            // Remove markdown bold formatting first
+            // Fix double backslashes that might cause issues
+            .replace(/\\\\/g, '\\')
+            // Remove markdown bold formatting
             .replace(/\*\*([^*]+)\*\*/g, '$1')
-            // Remove markdown italic formatting
+            // Remove markdown italic formatting  
             .replace(/\*([^*]+)\*/g, '$1')
-            // Fix literal newlines, tabs, and carriage returns in string values
-            .replace(/([":])\s*([^"]*?)\n/g, (match, prefix, content) => {
-              return prefix + content.replace(/\n/g, '\\n');
+            // Replace literal newlines in strings with escaped newlines
+            .replace(/"([^"]*?)\n([^"]*?)"/g, (match, before, after) => {
+              return `"${before}\\n${after}"`;
             })
+            // Replace tabs with spaces
             .replace(/\t/g, ' ')
+            // Remove carriage returns
             .replace(/\r/g, '')
+            // Fix any remaining unescaped quotes within strings
+            .replace(/([^\\])"([^":,\}\]]*?)"([^:,\}\]])/g, '$1\\"$2\\"$3')
             .trim();
           
           console.log('Attempting to parse cleaned JSON:', jsonString.substring(0, 200) + '...');
