@@ -437,7 +437,7 @@ Critical requirements:
             >
               {/* Location toggle */}
               <View style={styles.locationToggleContainer}>
-                <Text style={[styles.locationToggleText, isLocationRelevant && styles.locationToggleTextActive]}>
+                <Text style={styles.locationToggleText}>
                   Is your current location relevant?
                 </Text>
                 <TouchableOpacity 
@@ -621,12 +621,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'Lora_400Regular',
     fontWeight: '500',
-    color: 'rgba(255, 255, 255, 0.7)',
-    flex: 1,
-  },
-  locationToggleTextActive: {
     color: '#ffffff',
-    fontWeight: '600',
+    flex: 1,
   },
   toggle: {
     width: 26,
