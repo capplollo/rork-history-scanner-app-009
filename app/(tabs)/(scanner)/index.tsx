@@ -803,7 +803,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
         .replace(/```\s*/g, '')
         .trim();
       
-      console.log('Cleaned content that will be parsed:', cleanedResponse);
+      console.log('Cleaned content that will be parsed:', cleanedResponse.substring(0, 300) + '...');
       
       let analysisResult;
       try {
@@ -824,24 +824,25 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           
           // Fix common JSON issues - more comprehensive approach
           jsonString = jsonString
-            // Remove any control characters first (including problematic backslashes)
+            // Remove any control characters (but preserve valid escape sequences)
             .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-            // Fix double backslashes that might cause issues
-            .replace(/\\\\/g, '\\')
             // Remove markdown bold formatting
             .replace(/\*\*([^*]+)\*\*/g, '$1')
             // Remove markdown italic formatting  
             .replace(/\*([^*]+)\*/g, '$1')
-            // Replace literal newlines in strings with escaped newlines
-            .replace(/"([^"]*?)\n([^"]*?)"/g, (match, before, after) => {
-              return `"${before}\\n${after}"`;
-            })
             // Replace tabs with spaces
             .replace(/\t/g, ' ')
             // Remove carriage returns
             .replace(/\r/g, '')
-            // Fix any remaining unescaped quotes within strings
-            .replace(/([^\\])"([^":,\}\]]*?)"([^:,\}\]])/g, '$1\\"$2\\"$3')
+            // Fix literal newlines within JSON strings by replacing them with \\n
+            .split('\n').map((line, idx, arr) => {
+              // If this line is inside a string value (contains opening quote but not closing)
+              const inString = (line.match(/"/g) || []).length % 2 !== 0;
+              if (inString && idx < arr.length - 1) {
+                return line + '\\n';
+              }
+              return line;
+            }).join('')
             .trim();
           
           console.log('Attempting to parse cleaned JSON:', jsonString.substring(0, 200) + '...');
