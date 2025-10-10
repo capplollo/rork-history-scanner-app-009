@@ -24,8 +24,8 @@ import * as Location from 'expo-location';
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function PhotoConfirmationScreen() {
-  const { photoUri, scanMode } = useLocalSearchParams();
-  const [isLocationRelevant, setIsLocationRelevant] = useState(true);
+  const { photoUri, scanMode, photoSource } = useLocalSearchParams();
+  const [isLocationRelevant, setIsLocationRelevant] = useState(photoSource !== 'gallery');
   const [contextText, setContextText] = useState('');
   const [locationAddress, setLocationAddress] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);

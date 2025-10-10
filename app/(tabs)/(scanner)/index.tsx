@@ -316,9 +316,15 @@ export default function ScannerScreen() {
     });
 
     if (!result.canceled && result.assets[0]) {
-      setSelectedImage(result.assets[0].uri);
-      setPhotoSource('gallery');
-      setIsGpsEnabled(false); // Default off for gallery photos
+      const uri = result.assets[0].uri;
+      router.push({
+        pathname: '/photo-confirmation' as any,
+        params: {
+          photoUri: uri,
+          scanMode: scanMode,
+          photoSource: 'gallery',
+        },
+      });
     }
   };
 
@@ -334,6 +340,7 @@ export default function ScannerScreen() {
       params: {
         photoUri: uri,
         scanMode: scanMode,
+        photoSource: 'camera',
       },
     });
   };
@@ -346,6 +353,7 @@ export default function ScannerScreen() {
         photoUri: artworkUri,
         labelUri: labelUri,
         scanMode: scanMode,
+        photoSource: 'camera',
       },
     });
   };
