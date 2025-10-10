@@ -490,7 +490,21 @@ export default function ScannerScreen() {
       let promptText = '';
       
       if (scanMode === 'museum') {
-        promptText = `Analyze the provided museum object and its label to identify the artifact. You will receive two images: the museum object itself and its accompanying label/information card.
+        promptText = `Analyze the label photo or other context information first, then analyze the artwork image. Identify any artworks or cultural artifacts, including paintings, sculptures, or historical objects. Include paintings that depict buildings/landmarks (identify the painting, not the depicted structure).
+
+From the label/context, extract title, artist/culture, date, medium, museum/collection, gallery/room, or inventory number. Use this as the starting point for recognition. Only confirm recognition if the label/context details and the artwork image visually align (composition, materials, aspect ratio, inscriptions, distinctive features). Minor OCR errors are acceptable, but if label/context and visuals conflict, mark as not recognized.
+
+BE EXTREMELY CONSERVATIVE with identification. Many artworks have close copies, replicas, workshop variants, or period copies. Only identify a specific artwork if you are 95% or more confident it is that exact piece.
+
+For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
+- Workshop copies, replicas, or casts that look nearly identical
+- Religious icons, altarpieces, and portraits with repeated styles or subjects
+- Busts and sculptures of emperors, philosophers, or deities with recurring typologies
+- Decorative arts in series or sets; "school of" / "circle of" attributions
+
+When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis than incorrect identification.
+
+Analyze the provided museum object and its label to identify the artifact. You will receive two images: the museum object itself and its accompanying label/information card.
 
 Rules for identification:
 1. Be EXTREMELY CONSERVATIVE. Only provide a specific identification if you are at least 95% confident. If confidence is lower, mark as NOT RECOGNIZED and provide only general analysis.
@@ -525,7 +539,20 @@ Critical requirements:
 - Output must always be valid JSON.
 - Provide actual historical context, not filler text.`;
       } else {
-        promptText = `Analyze the provided monument, landmark, or architectural structure to identify it. You will receive an image of the structure.
+        promptText = `Analyze this image and identify any monuments, statues, architectural landmarks, or public artworks. Include painted or sculpted depictions of landmarks.
+
+BE EXTREMELY CONSERVATIVE with identification. Many monuments, churches, and buildings share similar styles, layouts, or decorative programs. Only identify a specific site if you are 95% or more confident it is that exact location.
+
+For recognition (isRecognized: true), confidence must be 95% or higher. Be ESPECIALLY conservative with:
+- Churches, cathedrals, and chapels with near-identical façades
+- War memorials, equestrian statues, and commemorative monuments with common designs
+- Triumphal arches, obelisks, towers, or bridges that resemble others from the same era
+- Buildings in neoclassical, Gothic, or baroque styles that repeat common features
+- Street art and murals in styles that appear across multiple cities
+
+When in doubt, mark as NOT RECOGNIZED. It is better to provide general analysis than incorrect identification.
+
+Analyze the provided monument, landmark, or architectural structure to identify it. You will receive an image of the structure.
 
 Rules for identification:
 1. Be EXTREMELY CONSERVATIVE. Only provide a specific identification if you are at least 95% confident. If confidence is lower, mark as NOT RECOGNIZED and provide only general analysis.
