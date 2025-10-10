@@ -755,8 +755,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 16,
     elevation: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   photoImage: {
     width: '100%',
@@ -969,7 +967,7 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     fontFamily: "Lora_400Regular",
     fontWeight: "500",
-    color: "#2C3E50",
+    color: Colors.berkeleyBlue,
     flex: 1,
   },
   ttsButton: {
