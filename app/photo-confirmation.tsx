@@ -447,6 +447,11 @@ Critical requirements:
                   <View style={[styles.toggleThumb, isLocationRelevant && styles.toggleThumbActive]} />
                 </TouchableOpacity>
               </View>
+              {isLocationRelevant && locationAddress && (
+                <Text style={styles.locationAddressText}>
+                  {locationAddress}
+                </Text>
+              )}
 
               {/* Divider */}
               <View style={styles.divider} />
@@ -623,6 +628,15 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#ffffff',
     flex: 1,
+  },
+  locationAddressText: {
+    fontSize: 11,
+    fontFamily: 'Lora_400Regular',
+    fontWeight: '400',
+    fontStyle: 'italic' as const,
+    color: 'rgba(255, 255, 255, 0.85)',
+    marginTop: 8,
+    marginBottom: 8,
   },
   toggle: {
     width: 26,
