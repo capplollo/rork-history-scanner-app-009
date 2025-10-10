@@ -19,8 +19,7 @@ import {
   Camera,
   X,
   History,
-  Scan,
-  ArrowLeft
+  Scan
 } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
@@ -100,33 +99,23 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={['rgba(118, 104, 96, 0.36)', 'rgba(225, 222, 220, 0.36)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={styles.backgroundGradient}
-      />
-      <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
-        <View style={styles.headerSection}>
-          <View style={styles.topRow}>
-            <TouchableOpacity onPress={() => setShowSettings(true)} style={styles.backButtonHeader}>
-              <View style={styles.backButtonCircle}>
-                <Settings size={10} color="#ffffff" />
-              </View>
-            </TouchableOpacity>
-            <View style={styles.logoContainer}>
-              <Image 
-                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
-                style={styles.logoImage}
-                resizeMode="contain"
-              />
-            </View>
-          </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header with icons */}
+        <View style={styles.headerIcons}>
+          <TouchableOpacity 
+            style={styles.iconButton}
+            onPress={() => setShowSettings(true)}
+          >
+            <Settings size={24} color={Colors.accent.secondary} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.iconButton}
+            onPress={() => router.push('/(tabs)/(scanner)')}
+          >
+            <Scan size={24} color={Colors.accent.secondary} />
+          </TouchableOpacity>
         </View>
-
-        <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* Profile Picture and Name */}
         <View style={styles.profileSection}>
@@ -195,8 +184,7 @@ export default function ProfileScreen() {
             </View>
           )}
         </View>
-        </ScrollView>
-      </SafeAreaView>
+      </ScrollView>
       <View style={styles.bottomSpacer} />
 
       {/* Settings Modal */}
@@ -233,7 +221,7 @@ export default function ProfileScreen() {
           </ScrollView>
         </SafeAreaView>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -242,51 +230,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  backgroundGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 250,
-    zIndex: 0,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  headerSection: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 24,
-    position: 'relative',
-    zIndex: 10,
-  },
-  topRow: {
-    position: 'absolute',
-    left: 20,
-    right: 20,
-    top: 20,
+  headerIcons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    zIndex: 2,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
-  backButtonHeader: {
-    flexShrink: 0,
-  },
-  backButtonCircle: {
-    width: 19.5,
-    height: 19.5,
-    borderRadius: 10,
-    backgroundColor: '#766860',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoContainer: {
-    flexShrink: 0,
-  },
-  logoImage: {
-    width: 39,
-    height: 39,
+  iconButton: {
+    padding: 8,
   },
   profileSection: {
     alignItems: 'center',
@@ -294,9 +246,9 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   avatarContainer: {
-    width: 102,
-    height: 102,
-    borderRadius: 51,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     overflow: 'hidden',
     marginBottom: 16,
     shadowColor: '#000',
@@ -310,23 +262,23 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   userName: {
-    fontSize: 19.2,
+    fontSize: 24,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "600",
-    color: '#173248',
+    color: Colors.berkeleyBlue,
   },
   statsBar: {
     flexDirection: 'row',
-    backgroundColor: '#FEFEFE',
+    backgroundColor: Colors.berkeleyBlue,
     marginHorizontal: 24,
     marginBottom: 24,
     borderRadius: 20,
-    paddingVertical: 17,
-    paddingHorizontal: 13.6,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -338,24 +290,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statLabel: {
-    fontSize: 11.9,
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: '#685951',
-    marginBottom: 6.8,
+    color: '#ffffff',
+    marginBottom: 8,
   },
   statNumber: {
-    fontSize: 27.2,
+    fontSize: 32,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "700",
-    color: '#685951',
+    color: '#ffffff',
   },
   section: {
     marginTop: 0,
