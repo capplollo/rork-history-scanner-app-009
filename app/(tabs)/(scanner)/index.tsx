@@ -824,25 +824,19 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
           
           // Fix common JSON issues - more comprehensive approach
           jsonString = jsonString
-            // Remove any control characters (but preserve valid escape sequences)
-            .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-            // Remove markdown bold formatting
+            // First, remove markdown formatting
             .replace(/\*\*([^*]+)\*\*/g, '$1')
-            // Remove markdown italic formatting  
             .replace(/\*([^*]+)\*/g, '$1')
+            // Replace literal newlines in strings with escaped newlines
+            .replace(/"([^"]*?)\n([^"]*?)"/g, (_match: string, p1: string, p2: string) => `"${p1}\\n${p2}"`)
+            // Remove control characters except newlines and tabs
+            .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
             // Replace tabs with spaces
             .replace(/\t/g, ' ')
             // Remove carriage returns
             .replace(/\r/g, '')
-            // Fix literal newlines within JSON strings by replacing them with \\n
-            .split('\n').map((line, idx, arr) => {
-              // If this line is inside a string value (contains opening quote but not closing)
-              const inString = (line.match(/"/g) || []).length % 2 !== 0;
-              if (inString && idx < arr.length - 1) {
-                return line + '\\n';
-              }
-              return line;
-            }).join('')
+            // Remove any remaining literal newlines that aren't part of JSON structure
+            .replace(/\n(?=\s*[^":,\}\{\[\]])/g, ' ')
             .trim();
           
           console.log('Attempting to parse cleaned JSON:', jsonString.substring(0, 200) + '...');

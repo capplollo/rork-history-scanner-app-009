@@ -309,17 +309,37 @@ Critical requirements:
       
       let analysisResult;
       try {
+        // First attempt: parse as-is
         analysisResult = JSON.parse(cleanedResponse);
       } catch (parseError) {
+        console.error('First parse failed, attempting cleanup:', parseError);
+        
+        // Second attempt: extract and clean JSON
         const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           let jsonString = jsonMatch[0]
+            // Remove markdown formatting
+            .replace(/\*\*([^*]+)\*\*/g, '$1')
+            .replace(/\*([^*]+)\*/g, '$1')
+            // Fix newlines within string values
             .replace(/"([^"]*?)\n([^"]*?)"/g, (_match: string, p1: string, p2: string) => `"${p1}\\n${p2}"`)
+            // Remove control characters
             .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+            // Replace tabs with spaces
+            .replace(/\t/g, ' ')
+            // Remove carriage returns
+            .replace(/\r/g, '')
             .trim();
-          analysisResult = JSON.parse(jsonString);
+          
+          try {
+            analysisResult = JSON.parse(jsonString);
+          } catch (secondError) {
+            console.error('Second parse failed:', secondError);
+            console.error('Problematic JSON:', jsonString.substring(0, 500));
+            throw new Error('Could not parse AI response after cleanup');
+          }
         } else {
-          throw new Error('Could not parse AI response');
+          throw new Error('No JSON object found in AI response');
         }
       }
       
