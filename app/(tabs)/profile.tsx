@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   historyGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    justifyContent: "space-between",
   },
   monumentCard: {
     width: "48%",
