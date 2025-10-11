@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     gap: 7.2,
   },
   userName: {
-    fontSize: 13.2,
+    fontSize: 15.18,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statLabel: {
-    fontSize: 6.6,
+    fontSize: 7.59,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     marginTop: 1.2,
   },
   statNumber: {
-    fontSize: 12,
+    fontSize: 13.8,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
