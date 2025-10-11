@@ -358,7 +358,8 @@ const styles = StyleSheet.create({
     paddingTop: 48,
     paddingBottom: 14.4,
     alignItems: 'center',
-    gap: 20,
+    justifyContent: 'center',
+    gap: 28,
   },
   avatarContainer: {
     width: 72,
@@ -394,7 +395,7 @@ const styles = StyleSheet.create({
   },
   statsBar: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(209, 204, 199, 0.8)',
+    backgroundColor: 'rgba(118, 104, 96, 0.33)',
     borderRadius: 14.4,
     paddingVertical: 7.2,
     paddingHorizontal: 12,
