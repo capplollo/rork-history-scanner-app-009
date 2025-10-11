@@ -21,7 +21,9 @@ import {
   X,
   History,
   Scan,
-  ArrowLeft
+  ArrowLeft,
+  Grid,
+  Folder
 } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
@@ -31,6 +33,7 @@ import Colors from "@/constants/colors";
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [activeView, setActiveView] = useState<'all' | 'collections'>('all');
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -156,6 +159,24 @@ export default function ProfileScreen() {
             <Text style={styles.statNumber}>3</Text>
           </View>
         </View>
+
+          {/* View Toggle Buttons */}
+          <View style={styles.toggleContainer}>
+            <TouchableOpacity 
+              style={[styles.toggleButton, activeView === 'all' && styles.toggleButtonActive]}
+              onPress={() => setActiveView('all')}
+            >
+              <Grid size={14} color={activeView === 'all' ? '#ffffff' : Colors.berkeleyBlue} />
+              <Text style={[styles.toggleButtonText, activeView === 'all' && styles.toggleButtonTextActive]}>All</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.toggleButton, activeView === 'collections' && styles.toggleButtonActive]}
+              onPress={() => setActiveView('collections')}
+            >
+              <Folder size={14} color={activeView === 'collections' ? '#ffffff' : Colors.berkeleyBlue} />
+              <Text style={[styles.toggleButtonText, activeView === 'collections' && styles.toggleButtonTextActive]}>Collections</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Monument Grid */}
           <View style={styles.section}>
@@ -580,6 +601,39 @@ const styles = StyleSheet.create({
 
   bottomSpacer: {
     height: 100,
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 24,
+    marginBottom: 20,
+    gap: 12,
+  },
+  toggleButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: 'rgba(29, 53, 87, 0.08)',
+    gap: 6,
+  },
+  toggleButtonActive: {
+    backgroundColor: Colors.berkeleyBlue,
+  },
+  toggleButtonText: {
+    fontSize: 13,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: Colors.berkeleyBlue,
+  },
+  toggleButtonTextActive: {
+    color: '#ffffff',
   },
   subtleLinesContainer: {
     alignItems: 'center',
