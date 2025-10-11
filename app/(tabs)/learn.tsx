@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BookOpen, Clock, Globe, Award } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import Colors from "@/constants/colors";
 
@@ -79,19 +80,37 @@ export default function LearnScreen() {
   
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1d3557" translucent />
+      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} translucent />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={[styles.titleSection, { paddingTop: insets.top + 20 }]}>
-          <Text style={styles.headerTitle}>Explore History</Text>
-          <Text style={styles.headerSubtitle}>
-            Discover the stories behind the world's greatest monuments and art
-          </Text>
-          
-          <View style={styles.searchContainer}>
-            <View style={styles.searchBar}>
-              <Text style={styles.searchPlaceholder}>What would you like to learn?</Text>
+        {/* Header Section */}
+        <View style={[styles.headerSection, { paddingTop: insets.top + 8 }]}>
+          <LinearGradient
+            colors={['rgba(118, 104, 96, 0.36)', 'rgba(225, 222, 220, 0.36)']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={styles.headerGradient}
+          />
+          <View style={[styles.topRow, { top: insets.top + 20 }]}>
+            <View style={styles.locationTextContainer}>
+              <Text style={styles.locationText}>Explore & Learn</Text>
+            </View>
+            <View style={styles.logoContainer}>
+              <Image 
+                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
             </View>
           </View>
+          <View style={styles.headerContent}>
+            <View style={styles.textContainer}>
+              <Text style={styles.mainTitle}>Learn with Hereditas</Text>
+              <Text style={styles.headerSubtitle}>
+                Discover the living stories of art and monuments
+              </Text>
+            </View>
+          </View>
+          <View style={styles.headerDivider} />
         </View>
 
         <View style={styles.section}>
@@ -173,58 +192,79 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
 
-  titleSection: {
-    paddingHorizontal: 14,
-    paddingBottom: 20,
-    alignItems: 'center',
-    gap: 20,
+  headerSection: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
+    position: 'relative',
   },
-  headerTitle: {
-    fontSize: 28,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "600",
-    color: Colors.text.primary,
-    marginBottom: 12,
-    textAlign: 'center',
+  headerContent: {
+    marginBottom: 8,
+    marginTop: 48,
   },
-  headerSubtitle: {
-    fontSize: 16,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: Colors.text.muted,
-    lineHeight: 24,
-    textAlign: 'center',
-    maxWidth: 300,
+  textContainer: {
+    width: '100%',
   },
-  searchContainer: {
+  mainTitle: {
+    fontSize: 20,
+    fontFamily: "Lora_400Regular",
+    fontWeight: "700",
+    color: '#173248',
+    marginBottom: 8,
+    lineHeight: 22,
     marginTop: 8,
   },
-  searchBar: {
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
+  headerSubtitle: {
+    fontSize: 11,
+    fontFamily: "Lora_400Regular",
+    fontStyle: 'italic',
+    fontWeight: "400",
+    color: '#173248',
+    lineHeight: 14,
+    textAlign: 'left',
+    marginTop: 2,
   },
-  searchPlaceholder: {
-    fontSize: 15,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: Colors.text.muted,
+  topRow: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  locationTextContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
+  locationText: {
+    fontSize: 10,
+    fontFamily: "Lora_400Regular",
+    fontWeight: "400",
+    color: '#173248',
+    lineHeight: 12,
+  },
+  logoContainer: {
+    flexShrink: 0,
+  },
+  logoImage: {
+    width: 39,
+    height: 39,
+  },
+  headerGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
+  },
+  headerDivider: {
+    height: 1,
+    backgroundColor: '#173248',
+    opacity: 0.2,
+    width: '100%',
+    alignSelf: 'center',
   },
   section: {
     marginTop: 24,
