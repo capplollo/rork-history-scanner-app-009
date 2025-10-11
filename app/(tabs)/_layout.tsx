@@ -12,11 +12,11 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: "#173248",
           borderTopWidth: 0,
-          borderRadius: 35,
+          borderRadius: 30,
           marginHorizontal: 30,
           marginBottom: Platform.OS === "ios" ? 34 : 20,
           paddingBottom: 0,
-          height: 60,
+          height: 51,
           position: "absolute",
           shadowColor: "#000",
           shadowOffset: { width: 0, height: -2 },
@@ -28,7 +28,7 @@ export default function TabLayout() {
           display: "none",
         },
         tabBarItemStyle: {
-          paddingVertical: 10,
+          paddingVertical: 8.5,
         },
         headerShown: false,
       }}
@@ -37,21 +37,21 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color }) => <User size={32} color={color} />,
+          tabBarIcon: ({ color }) => <User size={27} color={color} />,
         }}
       />
       <Tabs.Screen
         name="(scanner)"
         options={{
           title: "Discover",
-          tabBarIcon: ({ color }) => <Camera size={36} color={color} />,
+          tabBarIcon: ({ color }) => <Camera size={31} color={color} />,
         }}
       />
       <Tabs.Screen
         name="learn"
         options={{
           title: "Learn",
-          tabBarIcon: ({ color }) => <BookOpen size={32} color={color} />,
+          tabBarIcon: ({ color }) => <BookOpen size={27} color={color} />,
         }}
       />
     </Tabs>
