@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   userName: {
-    fontSize: 19.2,
+    fontSize: 15.36,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -344,6 +344,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: Colors.berkeleyBlue,
     marginHorizontal: 24,
+    marginTop: -12,
     marginBottom: 24,
     borderRadius: 20,
     paddingVertical: 10,
