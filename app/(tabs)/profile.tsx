@@ -187,19 +187,15 @@ export default function ProfileScreen() {
               />
             </View>
             <View style={styles.profileInfoContainer}>
-              <Text style={styles.userName}>Lorenzo Cappelletti</Text>
+              <Text style={styles.userName}>Lorenzo Cappe</Text>
               <View style={styles.statsBar}>
                 <View style={styles.statItem}>
-                  <Text style={styles.statNumber}>3</Text>
                   <Text style={styles.statLabel}>Countries</Text>
+                  <Text style={styles.statNumber}>3</Text>
                 </View>
                 <View style={styles.statItem}>
-                  <Text style={styles.statNumber}>47</Text>
                   <Text style={styles.statLabel}>Discoveries</Text>
-                </View>
-                <View style={styles.statItem}>
-                  <Text style={styles.statNumber}>3</Text>
-                  <Text style={styles.statLabel}>Countries</Text>
+                  <Text style={styles.statNumber}>47</Text>
                 </View>
               </View>
             </View>
@@ -362,12 +358,12 @@ const styles = StyleSheet.create({
     paddingTop: 30,
     paddingBottom: 24,
     alignItems: 'center',
-    gap: 16,
+    gap: 20,
   },
   avatarContainer: {
-    width: 87,
-    height: 87,
-    borderRadius: 43.5,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
@@ -384,50 +380,47 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   userName: {
-    fontSize: 15.36,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "600",
-    color: Colors.berkeleyBlue,
-  },
-  statsBar: {
-    flexDirection: 'row',
-    backgroundColor: Colors.berkeleyBlue,
-    borderRadius: 16,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statLabel: {
-    fontSize: 9,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: '#ffffff',
-    marginTop: 2,
-  },
-  statNumber: {
-    fontSize: 16,
+    fontSize: 22,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "700",
-    color: '#ffffff',
+    color: Colors.berkeleyBlue,
+    marginBottom: 4,
+  },
+  statsBar: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(209, 204, 199, 0.8)',
+    borderRadius: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignSelf: 'flex-start',
+    gap: 24,
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statLabel: {
+    fontSize: 11,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: Colors.berkeleyBlue,
+    marginTop: 2,
+  },
+  statNumber: {
+    fontSize: 20,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "700",
+    color: Colors.berkeleyBlue,
   },
   section: {
     marginTop: 0,
