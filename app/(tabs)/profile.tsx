@@ -418,8 +418,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   monumentCard: {
-    width: "48%",
-    aspectRatio: 2 / 3,
+    width: "47%",
+    aspectRatio: 2.5 / 3.5,
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
@@ -427,7 +427,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 8,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   monumentImage: {
     width: "100%",
