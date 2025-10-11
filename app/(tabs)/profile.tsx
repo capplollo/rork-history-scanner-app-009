@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
   profileSection: {
     flexDirection: 'row',
     paddingHorizontal: 14.4,
-    paddingTop: 18,
+    paddingTop: 48,
     paddingBottom: 14.4,
     alignItems: 'center',
     gap: 12,
