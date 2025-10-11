@@ -133,7 +133,7 @@ export default function ProfileScreen() {
 
         <ScrollView showsVerticalScrollIndicator={false}>
 
-          {/* Profile Picture and Name */}
+          {/* Profile Section - Horizontal Layout */}
           <View style={styles.profileSection}>
             <View style={styles.avatarContainer}>
               <Image 
@@ -141,24 +141,24 @@ export default function ProfileScreen() {
                 style={styles.avatarImage}
               />
             </View>
-            <Text style={styles.userName}>Lorenzo Cappelletti</Text>
+            <View style={styles.profileInfoContainer}>
+              <Text style={styles.userName}>Lorenzo Cappelletti</Text>
+              <View style={styles.statsBar}>
+                <View style={styles.statItem}>
+                  <Text style={styles.statNumber}>3</Text>
+                  <Text style={styles.statLabel}>Countries</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statNumber}>47</Text>
+                  <Text style={styles.statLabel}>Discoveries</Text>
+                </View>
+                <View style={styles.statItem}>
+                  <Text style={styles.statNumber}>3</Text>
+                  <Text style={styles.statLabel}>Countries</Text>
+                </View>
+              </View>
+            </View>
           </View>
-
-          {/* Stats Bar */}
-          <View style={styles.statsBar}>
-          <View style={styles.statItem}>
-            <Text style={styles.statLabel}>Countries</Text>
-            <Text style={styles.statNumber}>3</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statLabel}>Discoveries</Text>
-            <Text style={styles.statNumber}>47</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statLabel}>Countries</Text>
-            <Text style={styles.statNumber}>3</Text>
-          </View>
-        </View>
 
           {/* View Toggle Buttons */}
           <View style={styles.toggleContainer}>
@@ -310,16 +310,18 @@ const styles = StyleSheet.create({
     height: 39,
   },
   profileSection: {
-    alignItems: 'center',
-    paddingTop: 46,
+    flexDirection: 'row',
+    paddingHorizontal: 24,
+    paddingTop: 30,
     paddingBottom: 24,
+    alignItems: 'center',
+    gap: 16,
   },
   avatarContainer: {
     width: 87,
     height: 87,
     borderRadius: 43.5,
     overflow: 'hidden',
-    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
@@ -329,6 +331,10 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: '100%',
     height: '100%',
+  },
+  profileInfoContainer: {
+    flex: 1,
+    gap: 12,
   },
   userName: {
     fontSize: 15.36,
@@ -343,10 +349,7 @@ const styles = StyleSheet.create({
   statsBar: {
     flexDirection: 'row',
     backgroundColor: Colors.berkeleyBlue,
-    marginHorizontal: 24,
-    marginTop: -12,
-    marginBottom: 24,
-    borderRadius: 20,
+    borderRadius: 16,
     paddingVertical: 10,
     paddingHorizontal: 8,
     shadowColor: '#000',
@@ -360,14 +363,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statLabel: {
-    fontSize: 10.5,
+    fontSize: 9,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     color: '#ffffff',
-    marginBottom: 4,
+    marginTop: 2,
   },
   statNumber: {
     fontSize: 16,
