@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     paddingBottom: 14.4,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 28,
+    gap: 16,
   },
   avatarContainer: {
     width: 72,
@@ -398,14 +398,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(118, 104, 96, 0.33)',
     borderRadius: 14.4,
     paddingVertical: 7.2,
-    paddingHorizontal: 12,
-    gap: 14.4,
+    paddingHorizontal: 16,
+    gap: 18,
   },
   statItem: {
     alignItems: 'center',
   },
   statLabel: {
-    fontSize: 7.59,
+    fontSize: 13.8,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
