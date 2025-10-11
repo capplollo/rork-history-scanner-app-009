@@ -10,7 +10,6 @@ import {
   Alert,
   Platform,
   Modal,
-  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { 
@@ -21,6 +20,8 @@ import {
   Camera,
   X,
   History,
+  Scan,
+  ArrowLeft,
   Grid,
   Folder
 } from "lucide-react-native";
@@ -31,19 +32,8 @@ import Colors from "@/constants/colors";
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [activeView, setActiveView] = useState<'all' | 'collections'>('all');
-
-  const getNumColumns = () => {
-    const effectiveWidth = width - 32;
-    if (effectiveWidth < 400) return 1;
-    if (effectiveWidth < 700) return 2;
-    return 4;
-  };
-
-  const numColumns = getNumColumns();
-  const cardWidth = ((width - 32 - (14 * (numColumns - 1))) / numColumns);
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -194,13 +184,7 @@ export default function ProfileScreen() {
           {scanHistory.length > 0 ? (
             <View style={styles.historyGrid}>
               {scanHistory.map((monument) => (
-                <TouchableOpacity 
-                  key={monument.id} 
-                  style={[
-                    styles.monumentCard,
-                    { width: cardWidth }
-                  ]}
-                >
+                <TouchableOpacity key={monument.id} style={styles.monumentCard}>
                   <Image source={{ uri: monument.image }} style={styles.monumentImage} />
                   <LinearGradient
                     colors={["transparent", "rgba(0,0,0,0.7)"]}
@@ -434,6 +418,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   monumentCard: {
+    width: "47%",
     aspectRatio: 2.4 / 3.4,
     borderRadius: 16,
     overflow: "hidden",
