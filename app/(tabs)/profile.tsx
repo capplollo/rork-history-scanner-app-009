@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   historyGridCompact: {
-    gap: 6,
+    gap: 8,
   },
   monumentCard: {
     width: "47%",
@@ -532,10 +532,10 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   monumentCardCompact: {
-    width: "23%",
+    width: "23.5%",
     aspectRatio: 0.75,
     borderRadius: 8,
-    marginBottom: 6,
+    marginBottom: 8,
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
