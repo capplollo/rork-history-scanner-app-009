@@ -362,9 +362,9 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   avatarContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 64.8,
+    height: 64.8,
+    borderRadius: 32.4,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2.4 },
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   userName: {
-    fontSize: 16.698,
+    fontSize: 15.028,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: 'rgba(118, 104, 96, 0.23)',
     borderRadius: 20,
-    paddingVertical: 5.832,
+    paddingVertical: 4.5,
     paddingHorizontal: 19.36,
     gap: 18,
   },
