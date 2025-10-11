@@ -180,12 +180,6 @@ export default function ProfileScreen() {
 
           {/* Profile Section - Horizontal Layout */}
           <View style={styles.profileSection}>
-            <View style={styles.avatarContainer}>
-              <Image 
-                source={{ uri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200" }}
-                style={styles.avatarImage}
-              />
-            </View>
             <View style={styles.profileInfoContainer}>
               <Text style={styles.userName}>Lorenzo Cappe</Text>
               <View style={styles.statsBar}>
@@ -198,6 +192,12 @@ export default function ProfileScreen() {
                   <Text style={styles.statNumber}>47</Text>
                 </View>
               </View>
+            </View>
+            <View style={styles.avatarContainer}>
+              <Image 
+                source={{ uri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200" }}
+                style={styles.avatarImage}
+              />
             </View>
           </View>
 
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     paddingBottom: 14.4,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 16,
+    gap: 20,
   },
   avatarContainer: {
     width: 72,
@@ -396,9 +396,9 @@ const styles = StyleSheet.create({
   statsBar: {
     flexDirection: 'row',
     backgroundColor: 'rgba(118, 104, 96, 0.23)',
-    borderRadius: 14.4,
-    paddingVertical: 6.48,
-    paddingHorizontal: 17.6,
+    borderRadius: 20,
+    paddingVertical: 5.832,
+    paddingHorizontal: 19.36,
     gap: 18,
   },
   statItem: {
