@@ -180,6 +180,12 @@ export default function ProfileScreen() {
 
           {/* Profile Section - Horizontal Layout */}
           <View style={styles.profileSection}>
+            <View style={styles.avatarContainer}>
+              <Image 
+                source={{ uri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200" }}
+                style={styles.avatarImage}
+              />
+            </View>
             <View style={styles.profileInfoContainer}>
               <Text style={styles.userName}>Lorenzo Cappe</Text>
               <View style={styles.statsBar}>
@@ -192,12 +198,6 @@ export default function ProfileScreen() {
                   <Text style={styles.statNumber}>47</Text>
                 </View>
               </View>
-            </View>
-            <View style={styles.avatarContainer}>
-              <Image 
-                source={{ uri: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200" }}
-                style={styles.avatarImage}
-              />
             </View>
           </View>
 
