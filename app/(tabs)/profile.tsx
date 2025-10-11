@@ -201,6 +201,9 @@ export default function ProfileScreen() {
             </View>
           </View>
 
+          {/* Subtle Line */}
+          <View style={styles.profileDivider} />
+
           {/* View Toggle Buttons */}
           <View style={styles.toggleContainer}>
             <TouchableOpacity 
@@ -355,7 +358,7 @@ const styles = StyleSheet.create({
   profileSection: {
     flexDirection: 'row',
     paddingHorizontal: 20,
-    paddingTop: 48,
+    paddingTop: 68,
     paddingBottom: 14.4,
     alignItems: 'center',
     justifyContent: 'center',
@@ -700,6 +703,12 @@ const styles = StyleSheet.create({
     width: 320,
     height: 1,
     backgroundColor: 'rgba(0,0,0,0.06)',
+  },
+  profileDivider: {
+    height: 1,
+    backgroundColor: 'rgba(29, 53, 87, 0.08)',
+    marginHorizontal: 40,
+    marginBottom: 20,
   },
 
 });
