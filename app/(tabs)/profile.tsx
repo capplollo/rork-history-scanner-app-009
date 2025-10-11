@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
   },
   statsBar: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(118, 104, 96, 0.33)',
+    backgroundColor: 'rgba(118, 104, 96, 0.23)',
     borderRadius: 14.4,
     paddingVertical: 7.2,
     paddingHorizontal: 16,
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statLabel: {
-    fontSize: 13.8,
+    fontSize: 12.42,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
     marginTop: 1.2,
   },
   statNumber: {
-    fontSize: 13.8,
+    fontSize: 12.42,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
