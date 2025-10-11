@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     paddingTop: 48,
     paddingBottom: 14.4,
     alignItems: 'center',
-    gap: 12,
+    gap: 20,
   },
   avatarContainer: {
     width: 72,
@@ -378,6 +378,7 @@ const styles = StyleSheet.create({
   profileInfoContainer: {
     flex: 1,
     gap: 7.2,
+    alignItems: 'center',
   },
   userName: {
     fontSize: 15.18,
@@ -389,6 +390,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: Colors.berkeleyBlue,
     marginBottom: 2.4,
+    textAlign: 'center',
   },
   statsBar: {
     flexDirection: 'row',
@@ -396,7 +398,6 @@ const styles = StyleSheet.create({
     borderRadius: 14.4,
     paddingVertical: 7.2,
     paddingHorizontal: 12,
-    alignSelf: 'flex-start',
     gap: 14.4,
   },
   statItem: {
