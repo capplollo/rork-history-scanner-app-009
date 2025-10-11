@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: 'rgba(118, 104, 96, 0.23)',
     borderRadius: 20,
-    paddingVertical: 4.5,
+    paddingVertical: 4.275,
     paddingHorizontal: 19.36,
     gap: 18,
   },
