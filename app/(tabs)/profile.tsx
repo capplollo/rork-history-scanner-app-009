@@ -115,21 +115,21 @@ export default function ProfileScreen() {
       name: "Favorites",
       icon: Heart,
       count: 12,
-      color: "#FF6B6B",
+      color: Colors.berkeleyBlue,
     },
     {
       id: "2",
       name: "Must Visit",
       icon: Star,
       count: 8,
-      color: "#FFD93D",
+      color: Colors.berkeleyBlue,
     },
     {
       id: "3",
       name: "Saved",
       icon: Bookmark,
       count: 23,
-      color: "#6BCB77",
+      color: Colors.berkeleyBlue,
     },
   ];
 
@@ -303,8 +303,8 @@ export default function ProfileScreen() {
               <View style={styles.collectionsGrid}>
                 {collections.map((collection) => (
                   <TouchableOpacity key={collection.id} style={styles.collectionCard}>
-                    <View style={[styles.collectionIconContainer, { backgroundColor: `${collection.color}15` }]}>
-                      <collection.icon size={28} color={collection.color} strokeWidth={1.8} />
+                    <View style={styles.collectionIconContainer}>
+                      <collection.icon size={24} color={collection.color} strokeWidth={1.5} />
                     </View>
                     <Text style={styles.collectionName}>{collection.name}</Text>
                     <Text style={styles.collectionCount}>{collection.count} items</Text>
@@ -312,7 +312,7 @@ export default function ProfileScreen() {
                 ))}
                 <TouchableOpacity style={[styles.collectionCard, styles.addCollectionCard]}>
                   <View style={styles.addIconContainer}>
-                    <Plus size={28} color={Colors.berkeleyBlue} strokeWidth={1.8} />
+                    <Plus size={24} color='rgba(29, 53, 87, 0.4)' strokeWidth={1.5} />
                   </View>
                   <Text style={styles.addCollectionText}>New Collection</Text>
                 </TouchableOpacity>
@@ -772,43 +772,44 @@ const styles = StyleSheet.create({
   },
   collectionCard: {
     width: '47%',
-    backgroundColor: '#ffffff',
-    borderRadius: 20,
-    padding: 20,
+    backgroundColor: 'rgba(29, 53, 87, 0.04)',
+    borderRadius: 16,
+    padding: 18,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: 'rgba(29, 53, 87, 0.06)',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
+    borderWidth: 0.5,
+    borderColor: 'rgba(29, 53, 87, 0.08)',
   },
   addCollectionCard: {
     backgroundColor: 'rgba(29, 53, 87, 0.02)',
     borderStyle: 'dashed',
-    borderWidth: 1.5,
-    borderColor: 'rgba(29, 53, 87, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(29, 53, 87, 0.12)',
   },
   collectionIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
+    backgroundColor: 'rgba(29, 53, 87, 0.06)',
   },
   addIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'rgba(29, 53, 87, 0.06)',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(29, 53, 87, 0.05)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   collectionName: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -816,28 +817,28 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "600",
     color: Colors.berkeleyBlue,
-    marginBottom: 4,
+    marginBottom: 3,
     textAlign: 'center',
   },
   collectionCount: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: Colors.text.muted,
+    color: 'rgba(29, 53, 87, 0.5)',
     textAlign: 'center',
   },
   addCollectionText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: Colors.berkeleyBlue,
+    color: 'rgba(29, 53, 87, 0.6)',
     textAlign: 'center',
   },
   gridMultiplierButton: {
