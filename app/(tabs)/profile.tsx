@@ -252,7 +252,14 @@ export default function ProfileScreen() {
           {activeView === 'all' ? (
             <View style={styles.section} {...panResponder.panHandlers}>
               {scanHistory.length > 0 ? (
-                <View style={[styles.historyGrid, gridColumns === 4 && styles.historyGridCompact]}>
+                <>
+                  <TouchableOpacity 
+                    style={styles.gridMultiplierButton}
+                    onPress={() => setGridColumns(gridColumns === 2 ? 4 : 2)}
+                  >
+                    <Text style={styles.gridMultiplierText}>x{gridColumns}</Text>
+                  </TouchableOpacity>
+                  <View style={[styles.historyGrid, gridColumns === 4 && styles.historyGridCompact]}>
                   {scanHistory.map((monument) => (
                     <TouchableOpacity key={monument.id} style={[styles.monumentCard, gridColumns === 4 && styles.monumentCardCompact]}>
                       <Image source={{ uri: monument.image }} style={styles.monumentImage} />
@@ -273,7 +280,8 @@ export default function ProfileScreen() {
                       )}
                     </TouchableOpacity>
                   ))}
-                </View>
+                  </View>
+                </>
               ) : (
                 <View style={styles.emptyState}>
                   <View style={styles.emptyIconContainer}>
@@ -831,5 +839,25 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: Colors.berkeleyBlue,
     textAlign: 'center',
+  },
+  gridMultiplierButton: {
+    position: 'absolute',
+    top: -40,
+    right: 8,
+    backgroundColor: 'rgba(29, 53, 87, 0.08)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    zIndex: 10,
+  },
+  gridMultiplierText: {
+    fontSize: 11,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "600",
+    color: Colors.berkeleyBlue,
   },
 });
