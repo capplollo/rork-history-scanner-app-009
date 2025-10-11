@@ -25,7 +25,11 @@ import {
   Scan,
   ArrowLeft,
   Grid,
-  Folder
+  Folder,
+  Heart,
+  Star,
+  Bookmark,
+  Plus
 } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
@@ -105,7 +109,30 @@ export default function ProfileScreen() {
     { icon: LogOut, label: "Sign Out", action: handleSignOut },
   ];
 
-  // Mock scan history data - replace with real data
+  const collections = [
+    {
+      id: "1",
+      name: "Favorites",
+      icon: Heart,
+      count: 12,
+      color: "#FF6B6B",
+    },
+    {
+      id: "2",
+      name: "Must Visit",
+      icon: Star,
+      count: 8,
+      color: "#FFD93D",
+    },
+    {
+      id: "3",
+      name: "Saved",
+      icon: Bookmark,
+      count: 23,
+      color: "#6BCB77",
+    },
+  ];
+
   const scanHistory = [
     {
       id: "1",
@@ -222,48 +249,68 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Monument Grid */}
-          <View style={styles.section} {...panResponder.panHandlers}>
-          
-          {scanHistory.length > 0 ? (
-            <View style={[styles.historyGrid, gridColumns === 4 && styles.historyGridCompact]}>
-              {scanHistory.map((monument) => (
-                <TouchableOpacity key={monument.id} style={[styles.monumentCard, gridColumns === 4 && styles.monumentCardCompact]}>
-                  <Image source={{ uri: monument.image }} style={styles.monumentImage} />
-                  {gridColumns === 2 && (
-                    <LinearGradient
-                      colors={["transparent", "rgba(0,0,0,0.7)"]}
-                      style={styles.monumentOverlay}
-                    >
-                      <View style={styles.monumentInfo}>
-                        <Text style={styles.monumentName}>{monument.name}</Text>
-                        <View style={styles.monumentDetails}>
-                          <MapPin size={10} color="rgba(255,255,255,0.8)" />
-                          <Text style={styles.monumentLocation}>{monument.location}</Text>
-                        </View>
-                        <Text style={styles.monumentPeriod}>{monument.period}</Text>
-                      </View>
-                    </LinearGradient>
-                  )}
-                </TouchableOpacity>
-              ))}
+          {activeView === 'all' ? (
+            <View style={styles.section} {...panResponder.panHandlers}>
+              {scanHistory.length > 0 ? (
+                <View style={[styles.historyGrid, gridColumns === 4 && styles.historyGridCompact]}>
+                  {scanHistory.map((monument) => (
+                    <TouchableOpacity key={monument.id} style={[styles.monumentCard, gridColumns === 4 && styles.monumentCardCompact]}>
+                      <Image source={{ uri: monument.image }} style={styles.monumentImage} />
+                      {gridColumns === 2 && (
+                        <LinearGradient
+                          colors={["transparent", "rgba(0,0,0,0.7)"]}
+                          style={styles.monumentOverlay}
+                        >
+                          <View style={styles.monumentInfo}>
+                            <Text style={styles.monumentName}>{monument.name}</Text>
+                            <View style={styles.monumentDetails}>
+                              <MapPin size={10} color="rgba(255,255,255,0.8)" />
+                              <Text style={styles.monumentLocation}>{monument.location}</Text>
+                            </View>
+                            <Text style={styles.monumentPeriod}>{monument.period}</Text>
+                          </View>
+                        </LinearGradient>
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              ) : (
+                <View style={styles.emptyState}>
+                  <View style={styles.emptyIconContainer}>
+                    <History size={40} color={Colors.cinereous} />
+                  </View>
+                  <Text style={styles.emptyStateTitle}>No Discoveries Yet</Text>
+                  <Text style={styles.emptyStateText}>
+                    Start scanning monuments and art to build your collection
+                  </Text>
+                  <TouchableOpacity style={styles.startButton} onPress={() => router.push('/(tabs)/(scanner)')}>  
+                    <Camera size={16} color="#ffffff" />
+                    <Text style={styles.startButtonText}>Start Scanning</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           ) : (
-            <View style={styles.emptyState}>
-              <View style={styles.emptyIconContainer}>
-                <History size={40} color={Colors.cinereous} />
+            <View style={styles.section}>
+              <View style={styles.collectionsGrid}>
+                {collections.map((collection) => (
+                  <TouchableOpacity key={collection.id} style={styles.collectionCard}>
+                    <View style={[styles.collectionIconContainer, { backgroundColor: `${collection.color}15` }]}>
+                      <collection.icon size={28} color={collection.color} strokeWidth={1.8} />
+                    </View>
+                    <Text style={styles.collectionName}>{collection.name}</Text>
+                    <Text style={styles.collectionCount}>{collection.count} items</Text>
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity style={[styles.collectionCard, styles.addCollectionCard]}>
+                  <View style={styles.addIconContainer}>
+                    <Plus size={28} color={Colors.berkeleyBlue} strokeWidth={1.8} />
+                  </View>
+                  <Text style={styles.addCollectionText}>New Collection</Text>
+                </TouchableOpacity>
               </View>
-              <Text style={styles.emptyStateTitle}>No Discoveries Yet</Text>
-              <Text style={styles.emptyStateText}>
-                Start scanning monuments and art to build your collection
-              </Text>
-              <TouchableOpacity style={styles.startButton} onPress={() => router.push('/(tabs)/(scanner)')}>  
-                <Camera size={16} color="#ffffff" />
-                <Text style={styles.startButtonText}>Start Scanning</Text>
-              </TouchableOpacity>
             </View>
           )}
-          </View>
         </ScrollView>
         <View style={styles.bottomSpacer} />
       </SafeAreaView>
@@ -710,5 +757,79 @@ const styles = StyleSheet.create({
     marginHorizontal: 40,
     marginBottom: 20,
   },
-
+  collectionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+  },
+  collectionCard: {
+    width: '47%',
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(29, 53, 87, 0.06)',
+  },
+  addCollectionCard: {
+    backgroundColor: 'rgba(29, 53, 87, 0.02)',
+    borderStyle: 'dashed',
+    borderWidth: 1.5,
+    borderColor: 'rgba(29, 53, 87, 0.15)',
+  },
+  collectionIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  addIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(29, 53, 87, 0.06)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  collectionName: {
+    fontSize: 15,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "600",
+    color: Colors.berkeleyBlue,
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  collectionCount: {
+    fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: Colors.text.muted,
+    textAlign: 'center',
+  },
+  addCollectionText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: Colors.berkeleyBlue,
+    textAlign: 'center',
+  },
 });
