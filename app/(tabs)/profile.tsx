@@ -311,13 +311,13 @@ const styles = StyleSheet.create({
   },
   profileSection: {
     alignItems: 'center',
-    paddingTop: 16,
+    paddingTop: 46,
     paddingBottom: 24,
   },
   avatarContainer: {
-    width: 102,
-    height: 102,
-    borderRadius: 51,
+    width: 87,
+    height: 87,
+    borderRadius: 43.5,
     overflow: 'hidden',
     marginBottom: 16,
     shadowColor: '#000',
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statLabel: {
-    fontSize: 7,
+    fontSize: 10.5,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
