@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,6 +10,8 @@ import {
   Alert,
   Platform,
   Modal,
+  PanResponder,
+  GestureResponderEvent,
 } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { 
@@ -34,6 +36,49 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [activeView, setActiveView] = useState<'all' | 'collections'>('all');
+  const [gridColumns, setGridColumns] = useState<2 | 4>(2);
+  const initialDistance = useRef<number>(0);
+
+  const getDistance = (touches: any[]) => {
+    if (touches.length < 2) return 0;
+    const [touch1, touch2] = touches;
+    const dx = touch1.pageX - touch2.pageX;
+    const dy = touch1.pageY - touch2.pageY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (evt: GestureResponderEvent) => {
+        return evt.nativeEvent.touches.length === 2;
+      },
+      onPanResponderGrant: (evt: GestureResponderEvent) => {
+        if (evt.nativeEvent.touches.length === 2) {
+          initialDistance.current = getDistance(evt.nativeEvent.touches);
+        }
+      },
+      onPanResponderMove: (evt: GestureResponderEvent) => {
+        if (evt.nativeEvent.touches.length === 2) {
+          const currentDistance = getDistance(evt.nativeEvent.touches);
+          const distanceChange = currentDistance - initialDistance.current;
+          
+          if (Math.abs(distanceChange) > 50) {
+            if (distanceChange < 0 && gridColumns === 2) {
+              setGridColumns(4);
+              initialDistance.current = currentDistance;
+            } else if (distanceChange > 0 && gridColumns === 4) {
+              setGridColumns(2);
+              initialDistance.current = currentDistance;
+            }
+          }
+        }
+      },
+      onPanResponderRelease: () => {
+        initialDistance.current = 0;
+      },
+    })
+  ).current;
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -179,26 +224,28 @@ export default function ProfileScreen() {
           </View>
 
           {/* Monument Grid */}
-          <View style={styles.section}>
+          <View style={styles.section} {...panResponder.panHandlers}>
           
           {scanHistory.length > 0 ? (
-            <View style={styles.historyGrid}>
+            <View style={[styles.historyGrid, gridColumns === 4 && styles.historyGridCompact]}>
               {scanHistory.map((monument) => (
-                <TouchableOpacity key={monument.id} style={styles.monumentCard}>
+                <TouchableOpacity key={monument.id} style={[styles.monumentCard, gridColumns === 4 && styles.monumentCardCompact]}>
                   <Image source={{ uri: monument.image }} style={styles.monumentImage} />
-                  <LinearGradient
-                    colors={["transparent", "rgba(0,0,0,0.7)"]}
-                    style={styles.monumentOverlay}
-                  >
-                    <View style={styles.monumentInfo}>
-                      <Text style={styles.monumentName}>{monument.name}</Text>
-                      <View style={styles.monumentDetails}>
-                        <MapPin size={10} color="rgba(255,255,255,0.8)" />
-                        <Text style={styles.monumentLocation}>{monument.location}</Text>
+                  {gridColumns === 2 && (
+                    <LinearGradient
+                      colors={["transparent", "rgba(0,0,0,0.7)"]}
+                      style={styles.monumentOverlay}
+                    >
+                      <View style={styles.monumentInfo}>
+                        <Text style={styles.monumentName}>{monument.name}</Text>
+                        <View style={styles.monumentDetails}>
+                          <MapPin size={10} color="rgba(255,255,255,0.8)" />
+                          <Text style={styles.monumentLocation}>{monument.location}</Text>
+                        </View>
+                        <Text style={styles.monumentPeriod}>{monument.period}</Text>
                       </View>
-                      <Text style={styles.monumentPeriod}>{monument.period}</Text>
-                    </View>
-                  </LinearGradient>
+                    </LinearGradient>
+                  )}
                 </TouchableOpacity>
               ))}
             </View>
@@ -417,6 +464,9 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-between",
   },
+  historyGridCompact: {
+    gap: 6,
+  },
   monumentCard: {
     width: "47%",
     aspectRatio: 2.4 / 3.4,
@@ -428,6 +478,14 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
     marginBottom: 14,
+  },
+  monumentCardCompact: {
+    width: "23%",
+    aspectRatio: 1,
+    borderRadius: 8,
+    marginBottom: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   monumentImage: {
     width: "100%",
