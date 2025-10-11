@@ -397,8 +397,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: 'rgba(118, 104, 96, 0.23)',
     borderRadius: 14.4,
-    paddingVertical: 7.2,
-    paddingHorizontal: 16,
+    paddingVertical: 6.48,
+    paddingHorizontal: 17.6,
     gap: 18,
   },
   statItem: {
