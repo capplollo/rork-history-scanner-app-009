@@ -672,11 +672,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 12,
-    backgroundColor: 'rgba(29, 53, 87, 0.08)',
+    backgroundColor: 'rgba(29, 53, 87, 0.04)',
     gap: 6,
   },
   toggleButtonActive: {
-    backgroundColor: Colors.berkeleyBlue,
+    backgroundColor: 'rgba(29, 53, 87, 0.12)',
   },
   toggleButtonText: {
     fontSize: 13,
@@ -685,11 +685,12 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "500",
-    color: Colors.berkeleyBlue,
+    fontWeight: "400",
+    color: 'rgba(29, 53, 87, 0.6)',
   },
   toggleButtonTextActive: {
-    color: '#ffffff',
+    color: Colors.berkeleyBlue,
+    fontWeight: "500",
   },
   subtleLinesContainer: {
     alignItems: 'center',
