@@ -950,7 +950,7 @@ const styles = StyleSheet.create({
   toggleContainer: {
     flexDirection: 'row',
     marginHorizontal: 24,
-    marginBottom: 20,
+    marginVertical: 8,
     gap: 12,
     justifyContent: 'center',
   },
