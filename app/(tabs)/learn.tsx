@@ -20,7 +20,7 @@ const articles = [
     id: "1",
     title: "The Mystery of Stonehenge",
     excerpt: "Unraveling the secrets of Britain's most enigmatic monument",
-    image: "https://images.unsplash.com/photo-1599582909646-9e9e1ee7dd0f?w=400&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1567696153798-96f0f7d3e8b3?w=400&h=300&fit=crop",
     readTime: "5 min",
   },
   {
@@ -34,7 +34,7 @@ const articles = [
     id: "3",
     title: "Gothic Cathedrals of Europe",
     excerpt: "The architectural wonders of medieval Christianity",
-    image: "https://images.unsplash.com/photo-1520637836862-4d197d17c90a?w=400&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1549144511-f099e773c147?w=400&h=300&fit=crop",
     readTime: "6 min",
   },
 ];
@@ -74,7 +74,7 @@ const featuredArticles = [
     id: "1",
     title: "The Mystery of Stonehenge",
     excerpt: "Unraveling the secrets of Britain's most enigmatic monument",
-    image: "https://images.unsplash.com/photo-1599582909646-9e9e1ee7dd0f?w=800&h=600&fit=crop",
+    image: "https://images.unsplash.com/photo-1567696153798-96f0f7d3e8b3?w=800&h=600&fit=crop",
     readTime: "5 min",
   },
   {
