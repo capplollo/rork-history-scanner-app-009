@@ -396,28 +396,21 @@ const styles = StyleSheet.create({
   },
   articleCard: {
     flexDirection: "row",
-    backgroundColor: Colors.surface,
     marginBottom: 12,
-    borderRadius: 14,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
     height: 67,
   },
   articleImage: {
-    width: 50,
+    width: 80,
     height: 67,
+    borderRadius: 8,
   },
   articleContent: {
     flex: 1,
-    padding: 16,
-    justifyContent: "space-between",
+    paddingLeft: 12,
+    justifyContent: "center",
   },
   articleTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -425,23 +418,23 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "500",
     color: Colors.text.primary,
-    marginBottom: 6,
+    marginBottom: 4,
   },
   articleExcerpt: {
-    fontSize: 13,
+    fontSize: 11,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     color: Colors.text.muted,
-    lineHeight: 18,
+    lineHeight: 14,
+    marginBottom: 4,
   },
   articleFooter: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    marginTop: 8,
+    gap: 4,
   },
   readTime: {
     fontSize: 12,
