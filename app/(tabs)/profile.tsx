@@ -523,7 +523,8 @@ export default function ProfileScreen() {
             </View>
           ) : (
             <View style={styles.section}>
-              <View style={styles.collectionsGrid}>
+              <View style={styles.collectionsContainer}>
+                <View style={styles.collectionsGrid}>
                 {collections.map((collection) => (
                   <TouchableOpacity key={collection.id} style={styles.collectionCard}>
                     <View style={styles.collectionIconContainer}>
@@ -539,6 +540,7 @@ export default function ProfileScreen() {
                   </View>
                   <Text style={styles.addCollectionText}>New Collection</Text>
                 </TouchableOpacity>
+                </View>
               </View>
             </View>
           )}
@@ -991,6 +993,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(29, 53, 87, 0.08)',
     marginHorizontal: 40,
     marginBottom: 8,
+  },
+  collectionsContainer: {
+    backgroundColor: 'rgba(118, 104, 96, 0.08)',
+    borderRadius: 12,
+    padding: 12,
   },
   collectionsGrid: {
     flexDirection: 'row',
