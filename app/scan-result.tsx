@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router, useNavigation } from "expo-router";
-import { MapPin, Calendar, CheckCircle, AlertCircle, ArrowLeft, Sparkles, Clock, Volume2, Pause } from "lucide-react-native";
+import { MapPin, Calendar, CheckCircle, AlertCircle, ArrowLeft, Sparkles, Clock, Volume2, Pause, Bookmark } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImageManipulator from "expo-image-manipulator";
 
@@ -501,6 +501,14 @@ export default function ScanResultScreen() {
                 resizeMode="contain"
               />
             </View>
+            <TouchableOpacity 
+              style={styles.saveButton}
+              onPress={() => {
+                Alert.alert('Saved', 'Monument saved to your collection');
+              }}
+            >
+              <Bookmark size={16} color="#ffffff" />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -739,6 +747,19 @@ const styles = StyleSheet.create({
   logoImage: {
     width: 39,
     height: 39,
+  },
+  saveButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.accent.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
   },
 
   photoSection: {
