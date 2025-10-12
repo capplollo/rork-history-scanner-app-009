@@ -499,6 +499,7 @@ export default function ScanResultScreen() {
                 source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
                 style={styles.logoImage}
                 resizeMode="contain"
+                onError={(error) => console.log('Logo image failed to load:', error.nativeEvent.error)}
               />
             </View>
           </View>

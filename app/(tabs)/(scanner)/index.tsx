@@ -978,6 +978,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                   source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
                   style={styles.logoImage}
                   resizeMode="contain"
+                  onError={(error) => console.log('Logo image failed to load:', error.nativeEvent.error)}
                 />
               </View>
             </View>
@@ -1008,6 +1009,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/tiwctzxnx0y4jd5ts4uee' }}
                 style={styles.cardImage}
                 resizeMode="cover"
+                onError={(error) => console.log('City card image failed to load:', error.nativeEvent.error)}
               />
             </TouchableOpacity>
 
@@ -1022,6 +1024,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
                 source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/frbnrec4q1to59gze5bax' }}
                 style={styles.cardImage}
                 resizeMode="cover"
+                onError={(error) => console.log('Museum card image failed to load:', error.nativeEvent.error)}
               />
             </TouchableOpacity>
           </View>
