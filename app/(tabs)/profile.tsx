@@ -988,7 +988,7 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: 'rgba(29, 53, 87, 0.08)',
     marginHorizontal: 40,
-    marginBottom: 20,
+    marginBottom: 8,
   },
   collectionsGrid: {
     flexDirection: 'row',
