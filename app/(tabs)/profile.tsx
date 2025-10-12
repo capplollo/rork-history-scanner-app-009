@@ -532,8 +532,8 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   monumentCardCompact: {
-    width: "23.5%",
-    height: 130,
+    width: 80,
+    height: 113,
     borderRadius: 8,
     marginBottom: 8,
     shadowOpacity: 0.1,
