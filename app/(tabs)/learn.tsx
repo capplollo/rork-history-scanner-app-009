@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BookOpen, Clock } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import * as Location from "expo-location";
 
 import Colors from "@/constants/colors";
 
@@ -95,6 +96,106 @@ const featuredArticles = [
 
 export default function LearnScreen() {
   const insets = useSafeAreaInsets();
+  const [locationAddress, setLocationAddress] = useState<string | null>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(true);
+
+  useEffect(() => {
+    const initLocation = async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === Location.PermissionStatus.GRANTED) {
+        await getCurrentLocation();
+      }
+      setIsLoadingLocation(false);
+    };
+    initLocation();
+  }, []);
+
+  const getCurrentLocation = async () => {
+    try {
+      if (Platform.OS === 'web') {
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              await getAddressFromCoordinates(position.coords.latitude, position.coords.longitude);
+            },
+            (error) => {
+              console.error('Web geolocation error:', error);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+          );
+        }
+      } else {
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        await getAddressFromCoordinates(location.coords.latitude, location.coords.longitude);
+      }
+    } catch (error) {
+      console.error('Error getting location:', error);
+    }
+  };
+
+  const getAddressFromCoordinates = async (latitude: number, longitude: number) => {
+    try {
+      if (Platform.OS === 'web') {
+        const response = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+          { 
+            method: 'GET',
+            signal: AbortSignal.timeout(10000)
+          }
+        );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        const district = data.locality || data.principalSubdivision || '';
+        const city = data.city || '';
+        const country = data.countryName || '';
+        
+        let addressString = '';
+        const parts = [];
+        if (district) parts.push(district);
+        if (city && city !== district) parts.push(city);
+        if (country) parts.push(country);
+        
+        addressString = parts.join(', ');
+        
+        setLocationAddress(addressString || 'Location detected');
+      } else {
+        const addresses = await Location.reverseGeocodeAsync({
+          latitude,
+          longitude,
+        });
+        
+        if (addresses && addresses.length > 0) {
+          const address = addresses[0];
+          
+          const district = address.district || address.subregion || '';
+          const city = address.city || address.region || '';
+          const country = address.country || '';
+          
+          let addressString = '';
+          const parts = [];
+          if (district) parts.push(district);
+          if (city && city !== district) parts.push(city);
+          if (country) parts.push(country);
+          
+          addressString = parts.join(', ');
+          
+          setLocationAddress(addressString || 'Location detected');
+        } else {
+          setLocationAddress('Location detected');
+        }
+      }
+    } catch (error) {
+      console.error('Error getting address:', error);
+      setLocationAddress('Location detected');
+    }
+  };
   
   return (
     <View style={styles.container}>
@@ -109,6 +210,11 @@ export default function LearnScreen() {
             style={styles.headerGradient}
           />
           <View style={[styles.topRow, { top: insets.top + 20 }]}>
+            <View style={styles.locationTextContainer}>
+              <Text style={styles.locationText}>
+                {isLoadingLocation ? 'Getting location...' : (locationAddress || 'Location not available')}
+              </Text>
+            </View>
             <View style={styles.logoContainer}>
               <Image 
                 source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
@@ -233,9 +339,20 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
     zIndex: 2,
+  },
+  locationTextContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
+  locationText: {
+    fontSize: 10,
+    fontFamily: "Lora_400Regular",
+    fontWeight: "400",
+    color: '#173248',
+    lineHeight: 12,
   },
   logoContainer: {
     flexShrink: 0,
