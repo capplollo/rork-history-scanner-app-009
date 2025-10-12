@@ -12,6 +12,7 @@ import {
   Modal,
   PanResponder,
   GestureResponderEvent,
+  Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { 
@@ -532,8 +533,8 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   monumentCardCompact: {
-    width: 80,
-    height: 113,
+    width: (Dimensions.get('window').width - 32 - 24) / 4,
+    height: ((Dimensions.get('window').width - 32 - 24) / 4) * (3.4 / 2.4),
     borderRadius: 8,
     marginBottom: 8,
     shadowOpacity: 0.1,
