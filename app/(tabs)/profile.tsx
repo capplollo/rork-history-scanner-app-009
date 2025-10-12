@@ -461,15 +461,15 @@ export default function ProfileScreen() {
               style={[styles.toggleButton, activeView === 'all' && styles.toggleButtonActive]}
               onPress={() => setActiveView('all')}
             >
-              <Grid size={14} color={activeView === 'all' ? '#ffffff' : Colors.berkeleyBlue} />
-              <Text style={[styles.toggleButtonText, activeView === 'all' && styles.toggleButtonTextActive]}>All</Text>
+              <Grid size={16} color={activeView === 'all' ? Colors.berkeleyBlue : 'rgba(29, 53, 87, 0.4)'} />
+              <Text style={styles.toggleCount}>x4</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.toggleButton, activeView === 'collections' && styles.toggleButtonActive]}
               onPress={() => setActiveView('collections')}
             >
-              <Folder size={14} color={activeView === 'collections' ? '#ffffff' : Colors.berkeleyBlue} />
-              <Text style={[styles.toggleButtonText, activeView === 'collections' && styles.toggleButtonTextActive]}>Collections</Text>
+              <Folder size={16} color={activeView === 'collections' ? Colors.berkeleyBlue : 'rgba(29, 53, 87, 0.4)'} />
+              <Text style={styles.toggleCount}>x2</Text>
             </TouchableOpacity>
           </View>
 
@@ -954,34 +954,30 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     marginBottom: 20,
     gap: 12,
+    justifyContent: 'flex-end',
   },
   toggleButton: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    backgroundColor: 'rgba(29, 53, 87, 0.04)',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: 'transparent',
     gap: 6,
   },
   toggleButtonActive: {
-    backgroundColor: 'rgba(29, 53, 87, 0.12)',
+    backgroundColor: 'transparent',
   },
-  toggleButtonText: {
-    fontSize: 13,
+  toggleCount: {
+    fontSize: 11,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontWeight: "400",
-    color: 'rgba(29, 53, 87, 0.6)',
-  },
-  toggleButtonTextActive: {
+    fontWeight: "600",
     color: Colors.berkeleyBlue,
-    fontWeight: "500",
   },
   subtleLinesContainer: {
     alignItems: 'center',
