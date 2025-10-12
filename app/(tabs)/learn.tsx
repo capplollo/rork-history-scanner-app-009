@@ -405,10 +405,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 4,
+    height: 67,
   },
   articleImage: {
-    width: 100,
-    aspectRatio: 3 / 4,
+    width: 50,
+    height: 67,
   },
   articleContent: {
     flex: 1,
