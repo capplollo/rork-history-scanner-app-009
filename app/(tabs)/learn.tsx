@@ -159,31 +159,26 @@ export default function LearnScreen() {
             <Text style={styles.sectionTitle}>Courses</Text>
           </View>
           
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.coursesContainer}
-          >
-            {courses.map((course) => (
-              <TouchableOpacity key={course.id} style={styles.courseCard}>
-                <Image source={{ uri: course.image }} style={styles.courseImage} />
+          {courses.map((course) => (
+            <TouchableOpacity key={course.id} style={styles.courseCard}>
+              <Image source={{ uri: course.image }} style={styles.courseImage} />
+              <LinearGradient
+                colors={['transparent', 'rgba(0,0,0,0.7)']}
+                style={styles.courseGradient}
+              >
                 <View style={styles.courseContent}>
                   <Text style={styles.courseTitle}>{course.title}</Text>
                   <Text style={styles.courseDescription}>{course.description}</Text>
                   <View style={styles.courseFooter}>
                     <View style={styles.courseStats}>
-                      <BookOpen size={14} color="#64748b" />
+                      <BookOpen size={14} color="#ffffff" />
                       <Text style={styles.courseStatsText}>{course.lessons} lessons</Text>
-                    </View>
-                    <View style={styles.courseStats}>
-                      <Clock size={14} color="#64748b" />
-                      <Text style={styles.courseStatsText}>{course.duration}</Text>
                     </View>
                   </View>
                 </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+              </LinearGradient>
+            </TouchableOpacity>
+          ))}
         </View>
 
         <View style={styles.section}>
@@ -325,15 +320,11 @@ const styles = StyleSheet.create({
     color: Colors.accent.secondary,
     fontWeight: "400",
   },
-  coursesContainer: {
-    paddingRight: 14,
-    gap: 12,
-  },
   courseCard: {
-    width: 280,
-    backgroundColor: Colors.surface,
+    height: 150,
     borderRadius: 14,
     overflow: "hidden",
+    marginBottom: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -342,7 +333,16 @@ const styles = StyleSheet.create({
   },
   courseImage: {
     width: "100%",
-    height: 160,
+    height: "100%",
+    position: "absolute",
+  },
+  courseGradient: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "100%",
+    justifyContent: "flex-end",
   },
   courseContent: {
     padding: 16,
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: Colors.text.primary,
+    color: "#ffffff",
     marginBottom: 8,
   },
   courseDescription: {
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: Colors.text.muted,
+    color: "#ffffff",
     lineHeight: 18,
     marginBottom: 12,
   },
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
       android: "serif",
       default: "Times New Roman"
     }),
-    color: Colors.text.muted,
+    color: "#ffffff",
   },
   articleCard: {
     flexDirection: "row",
