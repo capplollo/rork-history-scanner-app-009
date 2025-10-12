@@ -20,7 +20,7 @@ const articles = [
     id: "1",
     title: "The Mystery of Stonehenge",
     excerpt: "Unraveling the secrets of Britain's most enigmatic monument",
-    image: "https://images.unsplash.com/photo-1567696153798-96f0f7d3e8b3?w=400&h=300&fit=crop",
+    image: "https://images.unsplash.com/photo-1599833975787-5d9f0e5d5c8e?w=400&h=300&fit=crop",
     readTime: "5 min",
   },
   {
@@ -144,9 +144,9 @@ export default function LearnScreen() {
               <Image source={{ uri: article.image }} style={styles.articleImage} />
               <View style={styles.articleContent}>
                 <Text style={styles.articleTitle}>{article.title}</Text>
-                <Text style={styles.articleExcerpt}>{article.excerpt}</Text>
+                <Text style={styles.articleExcerpt} numberOfLines={1} ellipsizeMode="tail">{article.excerpt}</Text>
                 <View style={styles.articleFooter}>
-                  <Clock size={14} color="#64748b" />
+                  <Clock size={12} color="#64748b" />
                   <Text style={styles.readTime}>{article.readTime} read</Text>
                 </View>
               </View>
@@ -390,11 +390,11 @@ const styles = StyleSheet.create({
   articleCard: {
     flexDirection: "row",
     marginBottom: 12,
-    height: 67,
+    height: 55,
   },
   articleImage: {
-    width: 80,
-    height: 67,
+    width: 70,
+    height: 55,
     borderRadius: 8,
   },
   articleContent: {
@@ -414,15 +414,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   articleExcerpt: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     color: Colors.text.muted,
-    lineHeight: 14,
+    lineHeight: 13,
     marginBottom: 4,
+    numberOfLines: 1,
   },
   articleFooter: {
     flexDirection: "row",
@@ -430,7 +431,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   readTime: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
