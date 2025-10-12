@@ -1005,7 +1005,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               }}
             >
               <Image 
-                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/7r61vxbs7ig86jwunb1yp' }}
+                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/c5elatphjoswzd5gucgy6' }}
                 style={styles.cardImage}
                 resizeMode="cover"
               />
@@ -1019,7 +1019,7 @@ CRITICAL: The keyTakeaways array MUST contain exactly 4 bullet points. Each bull
               }}
             >
               <Image 
-                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/lnyfwv3h23cnbe2cfq4xz' }}
+                source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/ymtvqze8va54lbqo29dny' }}
                 style={styles.cardImage}
                 resizeMode="cover"
               />
