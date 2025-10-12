@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 250,
+    bottom: 0,
     zIndex: 0,
   },
   safeArea: {
