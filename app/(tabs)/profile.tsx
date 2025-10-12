@@ -41,7 +41,7 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [activeView, setActiveView] = useState<'all' | 'collections'>('all');
-  const [gridColumns, setGridColumns] = useState<2 | 4>(2);
+  const [gridColumns, setGridColumns] = useState<2 | 4>(4);
   const initialDistance = useRef<number>(0);
 
   const getDistance = (touches: any[]) => {
@@ -518,7 +518,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   historyGridCompact: {
-    gap: 8,
+    justifyContent: 'flex-start',
   },
   monumentCard: {
     width: "47%",
@@ -533,8 +533,8 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   monumentCardCompact: {
-    width: (Dimensions.get('window').width - 32 - 24) / 4,
-    height: ((Dimensions.get('window').width - 32 - 24) / 4) * (3.4 / 2.4),
+    width: '23%',
+    aspectRatio: 2.4 / 3.4,
     borderRadius: 8,
     marginBottom: 8,
     shadowOpacity: 0.1,
