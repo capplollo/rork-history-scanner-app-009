@@ -2132,7 +2132,7 @@ const styles = StyleSheet.create({
   cardImage: {
     width: '100%',
     height: undefined,
-    aspectRatio: 1.777,
+    aspectRatio: 1.5,
     resizeMode: 'cover',
   },
   cardOverlay: {
