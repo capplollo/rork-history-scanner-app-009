@@ -703,7 +703,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     fontWeight: "700",
-    color: Colors.berkeleyBlue,
+    color: '#766860',
   },
   statDivider: {
     width: 1,
