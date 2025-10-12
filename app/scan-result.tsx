@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router, useNavigation } from "expo-router";
-import { MapPin, Calendar, CheckCircle, AlertCircle, ArrowLeft, Sparkles, Clock, Volume2, Pause } from "lucide-react-native";
+import { MapPin, Calendar, CheckCircle, AlertCircle, ArrowLeft, Sparkles, Clock, Volume2, Pause, Bookmark } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImageManipulator from "expo-image-manipulator";
 
@@ -510,6 +510,14 @@ export default function ScanResultScreen() {
           <View style={styles.photoSection}>
             <View style={styles.photoCard}>
               <Image source={{ uri: monument.scannedImage }} style={styles.photoImage} />
+              <TouchableOpacity 
+                style={styles.saveButton}
+                onPress={() => {
+                  Alert.alert('Saved', 'Monument saved to your collection');
+                }}
+              >
+                <Bookmark size={18} color="#ffffff" fill="#ffffff" />
+              </TouchableOpacity>
               <LinearGradient
                 colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.5)', 'rgba(0, 0, 0, 0.85)']}
                 locations={[0, 0.5, 1]}
@@ -1309,6 +1317,23 @@ const styles = StyleSheet.create({
     fontFamily: "Lora_400Regular",
     fontWeight: '500',
     color: '#FF9800',
+  },
+  saveButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(118, 104, 96, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
 
 });
