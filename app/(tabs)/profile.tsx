@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 4,
-    marginBottom: 26,
+    marginBottom: 12,
   },
   avatarImage: {
     width: '100%',
@@ -672,7 +672,7 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "700",
     color: Colors.berkeleyBlue,
-    marginBottom: 20,
+    marginBottom: 10,
     textAlign: 'center',
   },
   statsBar: {
@@ -686,7 +686,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14.4,
   },
   statLabel: {
-    fontSize: 10.92,
+    fontSize: 12.01,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -696,7 +696,7 @@ const styles = StyleSheet.create({
     marginBottom: 2.4,
   },
   statNumber: {
-    fontSize: 16.8,
+    fontSize: 15.12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
