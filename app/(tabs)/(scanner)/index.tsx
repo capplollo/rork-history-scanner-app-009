@@ -2053,7 +2053,7 @@ const styles = StyleSheet.create({
     transform: [{ translateX: 16 }],
   },
   bottomSpacer: {
-    height: 120,
+    height: 0,
   },
   headerSection: {
     paddingHorizontal: 20,

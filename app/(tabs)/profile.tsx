@@ -947,7 +947,7 @@ const styles = StyleSheet.create({
   },
 
   bottomSpacer: {
-    height: 120,
+    height: 0,
   },
   toggleContainer: {
     flexDirection: 'row',
