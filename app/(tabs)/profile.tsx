@@ -1070,12 +1070,11 @@ const styles = StyleSheet.create({
   },
   gridMultiplierButton: {
     position: 'absolute',
-    top: -40,
+    top: -35.2,
     right: 8,
-    backgroundColor: 'rgba(29, 53, 87, 0.08)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
     zIndex: 10,
   },
   gridMultiplierText: {
