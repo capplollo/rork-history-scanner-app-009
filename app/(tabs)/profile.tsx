@@ -642,8 +642,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   monumentCard: {
-    width: "47%",
-    aspectRatio: 2.4 / 3.4,
+    width: (Dimensions.get('window').width - 32 - 14) / 2,
+    height: ((Dimensions.get('window').width - 32 - 14) / 2) * (3.4 / 2.4),
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
@@ -654,8 +654,8 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   monumentCardCompact: {
-    width: '22.5%',
-    aspectRatio: 2.4 / 3.4,
+    width: (Dimensions.get('window').width - 32 - 24) / 4,
+    height: ((Dimensions.get('window').width - 32 - 24) / 4) * (3.4 / 2.4),
     borderRadius: 8,
     marginBottom: 8,
     shadowOpacity: 0.1,
