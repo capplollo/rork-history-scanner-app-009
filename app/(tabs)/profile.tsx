@@ -384,7 +384,6 @@ export default function ProfileScreen() {
                   {scanHistory.map((monument) => (
                     <TouchableOpacity key={monument.id} style={[styles.monumentCard, gridColumns === 4 && styles.monumentCardCompact]}>
                       <Image source={{ uri: monument.image }} style={styles.monumentImage} />
-                      <View style={styles.brightnessOverlay} />
                       {gridColumns === 2 && (
                         <LinearGradient
                           colors={["transparent", "rgba(0,0,0,0.7)"]}
@@ -665,14 +664,6 @@ const styles = StyleSheet.create({
   monumentImage: {
     width: "100%",
     height: "100%",
-  },
-  brightnessOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
   },
   monumentOverlay: {
     position: "absolute",
