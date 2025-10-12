@@ -952,7 +952,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 24,
     marginBottom: 20,
     gap: 12,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
   },
   toggleButton: {
     alignItems: 'center',
