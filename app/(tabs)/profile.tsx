@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
   },
   monumentCardCompact: {
     width: "23.5%",
-    aspectRatio: 2.4 / 3.4,
+    height: 130,
     borderRadius: 8,
     marginBottom: 8,
     shadowOpacity: 0.1,
