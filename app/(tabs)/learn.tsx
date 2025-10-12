@@ -109,9 +109,6 @@ export default function LearnScreen() {
             style={styles.headerGradient}
           />
           <View style={[styles.topRow, { top: insets.top + 20 }]}>
-            <View style={styles.locationTextContainer}>
-              <Text style={styles.locationText}>Explore & Learn</Text>
-            </View>
             <View style={styles.logoContainer}>
               <Image 
                 source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/q49mrslt036oct5mux1y0' }}
@@ -123,9 +120,6 @@ export default function LearnScreen() {
           <View style={styles.headerContent}>
             <View style={styles.textContainer}>
               <Text style={styles.mainTitle}>Learn with Hereditas</Text>
-              <Text style={styles.headerSubtitle}>
-                Discover the living stories of art and monuments
-              </Text>
             </View>
           </View>
           <View style={styles.headerDivider} />
@@ -234,35 +228,14 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: 8,
   },
-  headerSubtitle: {
-    fontSize: 11,
-    fontFamily: "Lora_400Regular",
-    fontStyle: 'italic',
-    fontWeight: "400",
-    color: '#173248',
-    lineHeight: 14,
-    textAlign: 'left',
-    marginTop: 2,
-  },
   topRow: {
     position: 'absolute',
     left: 20,
     right: 20,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     zIndex: 2,
-  },
-  locationTextContainer: {
-    flex: 1,
-    marginRight: 12,
-  },
-  locationText: {
-    fontSize: 10,
-    fontFamily: "Lora_400Regular",
-    fontWeight: "400",
-    color: '#173248',
-    lineHeight: 12,
   },
   logoContainer: {
     flexShrink: 0,
