@@ -423,7 +423,7 @@ export default function ProfileScreen() {
 
         <ScrollView showsVerticalScrollIndicator={false}>
 
-          {/* Profile Section - Horizontal Layout */}
+          {/* Profile Section - Vertical Layout */}
           <View style={styles.profileSection}>
             <View style={styles.avatarContainer}>
               <Image 
@@ -432,15 +432,21 @@ export default function ProfileScreen() {
               />
             </View>
             <View style={styles.profileInfoContainer}>
-              <Text style={styles.userName}>Lorenzo Cappe</Text>
+              <Text style={styles.userName}>Lorenzo Cappelletti</Text>
               <View style={styles.statsBar}>
                 <View style={styles.statItem}>
                   <Text style={styles.statLabel}>Countries</Text>
                   <Text style={styles.statNumber}>3</Text>
                 </View>
+                <View style={styles.statDivider} />
                 <View style={styles.statItem}>
                   <Text style={styles.statLabel}>Discoveries</Text>
                   <Text style={styles.statNumber}>47</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <Text style={styles.statLabel}>Countries</Text>
+                  <Text style={styles.statNumber}>3</Text>
                 </View>
               </View>
             </View>
@@ -630,35 +636,35 @@ const styles = StyleSheet.create({
     height: 39,
   },
   profileSection: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     paddingHorizontal: 20,
     paddingTop: 68,
     paddingBottom: 14.4,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 22,
   },
   avatarContainer: {
-    width: 64.8,
-    height: 64.8,
-    borderRadius: 32.4,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2.4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4.8,
-    elevation: 4.8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    marginBottom: 16,
   },
   avatarImage: {
     width: '100%',
     height: '100%',
   },
   profileInfoContainer: {
-    gap: 7.2,
     alignItems: 'center',
+    width: '100%',
   },
   userName: {
-    fontSize: 15.028,
+    fontSize: 24,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -666,32 +672,31 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "700",
     color: Colors.berkeleyBlue,
-    marginBottom: 2.4,
+    marginBottom: 20,
     textAlign: 'center',
   },
   statsBar: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(118, 104, 96, 0.23)',
-    borderRadius: 20,
-    paddingVertical: 4.275,
-    paddingHorizontal: 19.36,
-    gap: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 0,
   },
   statItem: {
     alignItems: 'center',
+    paddingHorizontal: 24,
   },
   statLabel: {
-    fontSize: 12.42,
+    fontSize: 14,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    color: Colors.berkeleyBlue,
-    marginTop: 1.2,
+    color: 'rgba(29, 53, 87, 0.6)',
+    marginBottom: 4,
   },
   statNumber: {
-    fontSize: 13.662,
+    fontSize: 28,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -699,6 +704,11 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "700",
     color: Colors.berkeleyBlue,
+  },
+  statDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: 'rgba(29, 53, 87, 0.15)',
   },
   section: {
     marginTop: 0,
