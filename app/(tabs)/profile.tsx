@@ -137,9 +137,9 @@ export default function ProfileScreen() {
   const scanHistory = [
     {
       id: "1",
-      name: "Pantheon",
+      name: "Colosseum",
       location: "Rome",
-      period: "133 A.C.",
+      period: "70-80 A.D.",
       image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400",
       scannedAt: "2 days ago",
       confidence: 95,
@@ -147,20 +147,20 @@ export default function ProfileScreen() {
     },
     {
       id: "2",
-      name: "Pantheon",
-      location: "Rome",
-      period: "133 A.C.",
-      image: "https://images.unsplash.com/photo-1555992336-fb0d29498b13?w=400",
+      name: "Eiffel Tower",
+      location: "Paris",
+      period: "1887-1889",
+      image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=400",
       scannedAt: "1 week ago",
       confidence: 98,
       description: "An iron lattice tower that became the symbol of Paris and French ingenuity."
     },
     {
       id: "3",
-      name: "Eiffel Tower",
-      location: "Paris",
-      period: "1887-1889",
-      image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=400",
+      name: "Taj Mahal",
+      location: "Agra",
+      period: "1632-1653",
+      image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=400",
       scannedAt: "2 weeks ago",
       confidence: 92,
       description: "A white marble mausoleum, considered the jewel of Muslim art in India."
@@ -174,6 +174,126 @@ export default function ProfileScreen() {
       scannedAt: "3 weeks ago",
       confidence: 90,
       description: "Gothic cathedral church of Milan."
+    },
+    {
+      id: "5",
+      name: "Big Ben",
+      location: "London",
+      period: "1859",
+      image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400",
+      scannedAt: "1 month ago",
+      confidence: 96,
+      description: "The iconic clock tower of the Palace of Westminster."
+    },
+    {
+      id: "6",
+      name: "Sagrada Familia",
+      location: "Barcelona",
+      period: "1882-present",
+      image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?w=400",
+      scannedAt: "1 month ago",
+      confidence: 94,
+      description: "Gaudí's masterpiece, a basilica still under construction."
+    },
+    {
+      id: "7",
+      name: "Statue of Liberty",
+      location: "New York",
+      period: "1886",
+      image: "https://images.unsplash.com/photo-1569098644584-210bcd375b59?w=400",
+      scannedAt: "2 months ago",
+      confidence: 97,
+      description: "A gift from France, symbol of freedom and democracy."
+    },
+    {
+      id: "8",
+      name: "Parthenon",
+      location: "Athens",
+      period: "447-432 B.C.",
+      image: "https://images.unsplash.com/photo-1555993539-1732b0258235?w=400",
+      scannedAt: "2 months ago",
+      confidence: 93,
+      description: "Ancient Greek temple dedicated to the goddess Athena."
+    },
+    {
+      id: "9",
+      name: "Notre-Dame",
+      location: "Paris",
+      period: "1163-1345",
+      image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400",
+      scannedAt: "3 months ago",
+      confidence: 91,
+      description: "Medieval Catholic cathedral, a masterpiece of French Gothic architecture."
+    },
+    {
+      id: "10",
+      name: "Sydney Opera House",
+      location: "Sydney",
+      period: "1973",
+      image: "https://images.unsplash.com/photo-1523059623039-a9ed027e7fad?w=400",
+      scannedAt: "3 months ago",
+      confidence: 99,
+      description: "Iconic performing arts centre with distinctive sail-like design."
+    },
+    {
+      id: "11",
+      name: "Petra Treasury",
+      location: "Petra",
+      period: "1st century A.D.",
+      image: "https://images.unsplash.com/photo-1578070181910-f1e514afdd08?w=400",
+      scannedAt: "4 months ago",
+      confidence: 88,
+      description: "Ancient city carved into rose-red cliffs."
+    },
+    {
+      id: "12",
+      name: "Neuschwanstein",
+      location: "Bavaria",
+      period: "1869-1886",
+      image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=400",
+      scannedAt: "4 months ago",
+      confidence: 95,
+      description: "Romanesque Revival palace that inspired Disney's castle."
+    },
+    {
+      id: "13",
+      name: "Machu Picchu",
+      location: "Peru",
+      period: "1450",
+      image: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=400",
+      scannedAt: "5 months ago",
+      confidence: 89,
+      description: "Incan citadel set high in the Andes Mountains."
+    },
+    {
+      id: "14",
+      name: "St. Basil's Cathedral",
+      location: "Moscow",
+      period: "1555-1561",
+      image: "https://images.unsplash.com/photo-1513326738677-b964603b136d?w=400",
+      scannedAt: "5 months ago",
+      confidence: 92,
+      description: "Colorful onion domes in the heart of Red Square."
+    },
+    {
+      id: "15",
+      name: "Golden Gate Bridge",
+      location: "San Francisco",
+      period: "1937",
+      image: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=400",
+      scannedAt: "6 months ago",
+      confidence: 97,
+      description: "Iconic suspension bridge spanning the Golden Gate strait."
+    },
+    {
+      id: "16",
+      name: "Arc de Triomphe",
+      location: "Paris",
+      period: "1806-1836",
+      image: "https://images.unsplash.com/photo-1549144511-f099e773c147?w=400",
+      scannedAt: "6 months ago",
+      confidence: 94,
+      description: "Monumental arch honoring those who fought for France."
     },
   ];
 
