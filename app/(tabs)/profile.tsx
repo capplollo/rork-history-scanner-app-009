@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
     paddingBottom: 14.4,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: 22,
   },
   avatarContainer: {
     width: 64.8,
