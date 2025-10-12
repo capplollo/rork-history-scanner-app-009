@@ -239,24 +239,29 @@ export default function LearnScreen() {
             </TouchableOpacity>
           </View>
           
-          {articles.map((article) => (
-            <TouchableOpacity key={article.id} style={styles.articleCard}>
-              <Image source={{ uri: article.image }} style={styles.articleImage} />
-              <View style={styles.articleContent}>
-                <Text style={styles.articleTitle}>{article.title}</Text>
-                <Text style={styles.articleExcerpt} numberOfLines={1} ellipsizeMode="tail">{article.excerpt}</Text>
-                <View style={styles.articleFooter}>
-                  <Clock size={12} color="#64748b" />
-                  <Text style={styles.readTime}>{article.readTime} read</Text>
+          <View style={styles.articlesContainer}>
+            {articles.map((article) => (
+              <TouchableOpacity key={article.id} style={styles.articleCard}>
+                <Image source={{ uri: article.image }} style={styles.articleImage} />
+                <View style={styles.articleContent}>
+                  <Text style={styles.articleTitle}>{article.title}</Text>
+                  <Text style={styles.articleExcerpt} numberOfLines={1} ellipsizeMode="tail">{article.excerpt}</Text>
+                  <View style={styles.articleFooter}>
+                    <Clock size={12} color="#64748b" />
+                    <Text style={styles.readTime}>{article.readTime} read</Text>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Courses</Text>
+            <TouchableOpacity>
+              <Text style={styles.seeAllText}>View all</Text>
+            </TouchableOpacity>
           </View>
           
           {courses.map((course) => (
@@ -286,19 +291,21 @@ export default function LearnScreen() {
             <Text style={styles.sectionTitle}>Featured Articles</Text>
           </View>
           
-          {featuredArticles.map((article) => (
-            <TouchableOpacity key={article.id} style={styles.articleCard}>
-              <Image source={{ uri: article.image }} style={styles.articleImage} />
-              <View style={styles.articleContent}>
-                <Text style={styles.articleTitle}>{article.title}</Text>
-                <Text style={styles.articleExcerpt} numberOfLines={1} ellipsizeMode="tail">{article.excerpt}</Text>
-                <View style={styles.articleFooter}>
-                  <Clock size={12} color="#64748b" />
-                  <Text style={styles.readTime}>{article.readTime} read</Text>
+          <View style={styles.articlesContainer}>
+            {featuredArticles.map((article) => (
+              <TouchableOpacity key={article.id} style={styles.articleCard}>
+                <Image source={{ uri: article.image }} style={styles.articleImage} />
+                <View style={styles.articleContent}>
+                  <Text style={styles.articleTitle}>{article.title}</Text>
+                  <Text style={styles.articleExcerpt} numberOfLines={1} ellipsizeMode="tail">{article.excerpt}</Text>
+                  <View style={styles.articleFooter}>
+                    <Clock size={12} color="#64748b" />
+                    <Text style={styles.readTime}>{article.readTime} read</Text>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
       </ScrollView>
       <View style={styles.bottomSpacer} />
@@ -387,7 +394,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -397,7 +404,7 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
   },
   seeAllText: {
-    fontSize: 14,
+    fontSize: 11,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -405,6 +412,11 @@ const styles = StyleSheet.create({
     }),
     color: Colors.accent.secondary,
     fontWeight: "400",
+  },
+  articlesContainer: {
+    backgroundColor: 'rgba(118, 104, 96, 0.08)',
+    borderRadius: 12,
+    padding: 12,
   },
   courseCard: {
     height: 150,
@@ -475,7 +487,7 @@ const styles = StyleSheet.create({
   },
   articleCard: {
     flexDirection: "row",
-    marginBottom: 12,
+    marginBottom: 10,
     height: 55,
   },
   articleImage: {
