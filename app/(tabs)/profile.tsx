@@ -527,12 +527,19 @@ export default function ProfileScreen() {
             <View style={styles.section}>
               <View style={styles.collectionsGrid}>
                 {collections.map((collection) => (
-                  <TouchableOpacity key={collection.id}>
-                    <collection.icon size={20} color={collection.color} strokeWidth={1.5} />
+                  <TouchableOpacity key={collection.id} style={styles.collectionCard}>
+                    <View style={styles.collectionIconContainer}>
+                      <collection.icon size={24} color={collection.color} strokeWidth={1.5} />
+                    </View>
+                    <Text style={styles.collectionName}>{collection.name}</Text>
+                    <Text style={styles.collectionCount}>{collection.count} items</Text>
                   </TouchableOpacity>
                 ))}
-                <TouchableOpacity>
-                  <Plus size={20} color='rgba(29, 53, 87, 0.4)' strokeWidth={1.5} />
+                <TouchableOpacity style={[styles.collectionCard, styles.addCollectionCard]}>
+                  <View style={styles.addIconContainer}>
+                    <Plus size={24} color='rgba(29, 53, 87, 0.4)' strokeWidth={1.5} />
+                  </View>
+                  <Text style={styles.addCollectionText}>New Collection</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -994,7 +1001,78 @@ const styles = StyleSheet.create({
   collectionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 16,
+  },
+  collectionCard: {
+    width: '47%',
+    backgroundColor: 'rgba(29, 53, 87, 0.04)',
+    borderRadius: 16,
+    padding: 18,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
+    borderWidth: 0.5,
+    borderColor: 'rgba(29, 53, 87, 0.08)',
+  },
+  addCollectionCard: {
+    backgroundColor: 'rgba(29, 53, 87, 0.02)',
+    borderStyle: 'dashed',
+    borderWidth: 1,
+    borderColor: 'rgba(29, 53, 87, 0.12)',
+  },
+  collectionIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    backgroundColor: 'rgba(29, 53, 87, 0.06)',
+  },
+  addIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: 'rgba(29, 53, 87, 0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  collectionName: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "600",
+    color: Colors.berkeleyBlue,
+    marginBottom: 3,
+    textAlign: 'center',
+  },
+  collectionCount: {
+    fontSize: 11,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: 'rgba(29, 53, 87, 0.5)',
+    textAlign: 'center',
+  },
+  addCollectionText: {
+    fontSize: 13,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: 'rgba(29, 53, 87, 0.6)',
+    textAlign: 'center',
   },
   gridMultiplierButton: {
     position: 'absolute',
