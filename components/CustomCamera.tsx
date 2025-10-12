@@ -13,8 +13,93 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { X, Camera, CheckCircle, Image as ImageIcon } from 'lucide-react-native';
 import Colors from '@/constants/colors';
+import * as FileSystem from 'expo-file-system';
 
 const { width: screenWidth } = Dimensions.get('window');
+
+const applyBrightnessContrast = async (uri: string): Promise<string> => {
+  try {
+    if (Platform.OS === 'web') {
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      const img = new window.Image();
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = `data:image/jpeg;base64,${base64}`;
+      });
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) throw new Error('Could not get canvas context');
+      
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      const brightnessFactor = 0.8;
+      const contrastFactor = 0.8;
+      const contrastIntercept = 128 * (1 - contrastFactor);
+      
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] = Math.max(0, Math.min(255, data[i] * brightnessFactor * contrastFactor + contrastIntercept));
+        data[i + 1] = Math.max(0, Math.min(255, data[i + 1] * brightnessFactor * contrastFactor + contrastIntercept));
+        data[i + 2] = Math.max(0, Math.min(255, data[i + 2] * brightnessFactor * contrastFactor + contrastIntercept));
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+      
+      const adjustedBase64 = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+      const adjustedUri = `${FileSystem.cacheDirectory}adjusted_${Date.now()}.jpg`;
+      
+      await FileSystem.writeAsStringAsync(adjustedUri, adjustedBase64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      return adjustedUri;
+    } else {
+      const { manipulateAsync, SaveFormat, FlipType } = await import('expo-image-manipulator');
+      
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      const response = await fetch('https://toolkit.rork.com/images/edit/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: 'Reduce brightness by 20% and reduce contrast by 20%. Do not change anything else about the image.',
+          images: [{ type: 'image', image: base64 }]
+        })
+      });
+      
+      if (!response.ok) {
+        console.error('Image edit API failed, returning original');
+        return uri;
+      }
+      
+      const result = await response.json();
+      const editedBase64 = result.image.base64Data;
+      
+      const adjustedUri = `${FileSystem.cacheDirectory}adjusted_${Date.now()}.jpg`;
+      await FileSystem.writeAsStringAsync(adjustedUri, editedBase64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      return adjustedUri;
+    }
+  } catch (error) {
+    console.error('Error applying brightness/contrast:', error);
+    return uri;
+  }
+};
 
 interface CustomCameraProps {
   onClose: () => void;
@@ -48,20 +133,19 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
       });
 
       if (!result.canceled && result.assets[0]) {
-        const photoUri = result.assets[0].uri;
+        let photoUri = result.assets[0].uri;
+        
+        photoUri = await applyBrightnessContrast(photoUri);
         
         if (!isMuseumMode) {
-          // Single photo mode - directly import
           onPhotoTaken(photoUri);
           return;
         }
         
-        // Museum mode - two photo process
         if (currentStep === 'artwork') {
           setArtworkPhoto(photoUri);
           setCurrentStep('label');
         } else if (currentStep === 'label') {
-          // Directly import both photos without review
           if (artworkPhoto && onTwoPhotosTaken) {
             onTwoPhotosTaken(artworkPhoto, photoUri);
           }
@@ -117,8 +201,10 @@ export default function CustomCamera({ onClose, onPhotoTaken, onTwoPhotosTaken, 
           format: ImageManipulator.SaveFormat.JPEG,
         }
       );
+      
+      const finalPhoto = await applyBrightnessContrast(croppedPhoto.uri);
 
-      const photoUri = croppedPhoto.uri;
+      const photoUri = finalPhoto;
       
       if (!isMuseumMode) {
         // Single photo mode - directly import

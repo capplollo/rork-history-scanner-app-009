@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -36,6 +36,91 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import Colors from "@/constants/colors";
+import * as FileSystem from 'expo-file-system';
+
+const applyBrightnessContrastToUrl = async (url: string): Promise<string> => {
+  try {
+    if (Platform.OS === 'web') {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result.split(',')[1]);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      
+      const img = new window.Image();
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = `data:image/jpeg;base64,${base64}`;
+      });
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) return url;
+      
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      const brightnessFactor = 0.8;
+      const contrastFactor = 0.8;
+      const contrastIntercept = 128 * (1 - contrastFactor);
+      
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] = Math.max(0, Math.min(255, data[i] * brightnessFactor * contrastFactor + contrastIntercept));
+        data[i + 1] = Math.max(0, Math.min(255, data[i + 1] * brightnessFactor * contrastFactor + contrastIntercept));
+        data[i + 2] = Math.max(0, Math.min(255, data[i + 2] * brightnessFactor * contrastFactor + contrastIntercept));
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+      return canvas.toDataURL('image/jpeg', 0.9);
+    } else {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          const result = reader.result as string;
+          resolve(result.split(',')[1]);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      
+      const editResponse = await fetch('https://toolkit.rork.com/images/edit/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: 'Reduce brightness by 20% and reduce contrast by 20%. Do not change anything else about the image.',
+          images: [{ type: 'image', image: base64 }]
+        })
+      });
+      
+      if (!editResponse.ok) {
+        return url;
+      }
+      
+      const result = await editResponse.json();
+      return `data:image/jpeg;base64,${result.image.base64Data}`;
+    }
+  } catch (error) {
+    console.error('Error applying brightness/contrast to URL:', error);
+    return url;
+  }
+};
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -43,6 +128,7 @@ export default function ProfileScreen() {
   const [activeView, setActiveView] = useState<'all' | 'collections'>('all');
   const [gridColumns, setGridColumns] = useState<2 | 4>(4);
   const initialDistance = useRef<number>(0);
+  const [adjustedImages, setAdjustedImages] = useState<Record<string, string>>({});
 
   const getDistance = (touches: any[]) => {
     if (touches.length < 2) return 0;
@@ -133,6 +219,17 @@ export default function ProfileScreen() {
       color: Colors.berkeleyBlue,
     },
   ];
+
+  useEffect(() => {
+    const adjustImages = async () => {
+      const adjusted: Record<string, string> = {};
+      for (const monument of scanHistory) {
+        adjusted[monument.id] = await applyBrightnessContrastToUrl(monument.image);
+      }
+      setAdjustedImages(adjusted);
+    };
+    adjustImages();
+  }, []);
 
   const scanHistory = [
     {
@@ -383,7 +480,7 @@ export default function ProfileScreen() {
                   <View style={[styles.historyGrid, gridColumns === 4 && styles.historyGridCompact]}>
                   {scanHistory.map((monument) => (
                     <TouchableOpacity key={monument.id} style={[styles.monumentCard, gridColumns === 4 && styles.monumentCardCompact]}>
-                      <Image source={{ uri: monument.image }} style={styles.monumentImage} />
+                      <Image source={{ uri: adjustedImages[monument.id] || monument.image }} style={styles.monumentImage} />
                       {gridColumns === 2 && (
                         <LinearGradient
                           colors={["transparent", "rgba(0,0,0,0.7)"]}
