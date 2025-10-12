@@ -461,14 +461,14 @@ export default function ProfileScreen() {
               style={[styles.toggleButton, activeView === 'all' && styles.toggleButtonActive]}
               onPress={() => setActiveView('all')}
             >
-              <Grid size={12} color={activeView === 'all' ? '#ffffff' : Colors.berkeleyBlue} />
+              <Grid size={14} color={activeView === 'all' ? '#ffffff' : Colors.berkeleyBlue} />
               <Text style={[styles.toggleButtonText, activeView === 'all' && styles.toggleButtonTextActive]}>All</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.toggleButton, activeView === 'collections' && styles.toggleButtonActive]}
               onPress={() => setActiveView('collections')}
             >
-              <Folder size={12} color={activeView === 'collections' ? '#ffffff' : Colors.berkeleyBlue} />
+              <Folder size={14} color={activeView === 'collections' ? '#ffffff' : Colors.berkeleyBlue} />
               <Text style={[styles.toggleButtonText, activeView === 'collections' && styles.toggleButtonTextActive]}>Collections</Text>
             </TouchableOpacity>
           </View>
@@ -639,22 +639,22 @@ const styles = StyleSheet.create({
   profileSection: {
     flexDirection: 'column',
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 8,
+    paddingTop: 53,
+    paddingBottom: 14.4,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 72.25,
+    height: 72.25,
+    borderRadius: 36.125,
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
-    marginBottom: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    marginBottom: 12,
   },
   avatarImage: {
     width: '100%',
@@ -665,7 +665,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   userName: {
-    fontSize: 14,
+    fontSize: 17.34,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -673,7 +673,7 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "700",
     color: Colors.berkeleyBlue,
-    marginBottom: 6,
+    marginBottom: 10,
     textAlign: 'center',
   },
   statsBar: {
@@ -684,20 +684,20 @@ const styles = StyleSheet.create({
   },
   statItem: {
     alignItems: 'center',
-    paddingHorizontal: 10,
+    paddingHorizontal: 14.4,
   },
   statLabel: {
-    fontSize: 9,
+    fontSize: 12.01,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     color: 'rgba(29, 53, 87, 0.6)',
-    marginBottom: 1,
+    marginBottom: 2.4,
   },
   statNumber: {
-    fontSize: 12,
+    fontSize: 15.12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -708,7 +708,7 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    height: 18,
+    height: 24,
     backgroundColor: 'rgba(29, 53, 87, 0.15)',
   },
   section: {
@@ -952,25 +952,25 @@ const styles = StyleSheet.create({
   toggleContainer: {
     flexDirection: 'row',
     marginHorizontal: 24,
-    marginBottom: 12,
-    gap: 10,
+    marginBottom: 20,
+    gap: 12,
   },
   toggleButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
     backgroundColor: 'rgba(29, 53, 87, 0.04)',
-    gap: 5,
+    gap: 6,
   },
   toggleButtonActive: {
     backgroundColor: 'rgba(29, 53, 87, 0.12)',
   },
   toggleButtonText: {
-    fontSize: 11,
+    fontSize: 13,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -996,7 +996,7 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: 'rgba(29, 53, 87, 0.08)',
     marginHorizontal: 40,
-    marginBottom: 12,
+    marginBottom: 20,
   },
   collectionsGrid: {
     flexDirection: 'row',
