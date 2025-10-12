@@ -462,14 +462,12 @@ export default function ProfileScreen() {
               onPress={() => setActiveView('all')}
             >
               <Grid size={16} color={activeView === 'all' ? Colors.berkeleyBlue : 'rgba(29, 53, 87, 0.4)'} />
-              <Text style={styles.toggleCount}>x4</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.toggleButton, activeView === 'collections' && styles.toggleButtonActive]}
               onPress={() => setActiveView('collections')}
             >
               <Folder size={16} color={activeView === 'collections' ? Colors.berkeleyBlue : 'rgba(29, 53, 87, 0.4)'} />
-              <Text style={styles.toggleCount}>x2</Text>
             </TouchableOpacity>
           </View>
 
@@ -957,14 +955,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   toggleButton: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    width: 32,
+    height: 32,
     borderRadius: 8,
     backgroundColor: 'transparent',
-    gap: 6,
   },
   toggleButtonActive: {
     backgroundColor: 'transparent',
