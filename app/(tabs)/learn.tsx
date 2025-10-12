@@ -10,51 +10,76 @@ import {
   StatusBar,
 } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BookOpen, Clock, Globe, Award } from "lucide-react-native";
+import { BookOpen, Clock } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import Colors from "@/constants/colors";
 
-const learningCategories = [
+const articles = [
+  {
+    id: "1",
+    title: "The Mystery of Stonehenge",
+    excerpt: "Unraveling the secrets of Britain's most enigmatic monument",
+    image: "https://images.unsplash.com/photo-1599582909646-9e9e1ee7dd0f?w=400",
+    readTime: "5 min",
+  },
+  {
+    id: "2",
+    title: "Pyramids: Engineering Marvels",
+    excerpt: "How ancient Egyptians built structures that defy time",
+    image: "https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=400",
+    readTime: "7 min",
+  },
+  {
+    id: "3",
+    title: "Gothic Cathedrals of Europe",
+    excerpt: "The architectural wonders of medieval Christianity",
+    image: "https://images.unsplash.com/photo-1520637836862-4d197d17c90a?w=400",
+    readTime: "6 min",
+  },
+  {
+    id: "4",
+    title: "Roman Aqueducts",
+    excerpt: "Ancient engineering that still inspires modern infrastructure",
+    image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400",
+    readTime: "4 min",
+  },
+  {
+    id: "5",
+    title: "The Colosseum's Hidden History",
+    excerpt: "Beyond the gladiators: untold stories of Rome's amphitheater",
+    image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400",
+    readTime: "8 min",
+  },
+];
+
+const courses = [
   {
     id: "1",
     title: "Ancient Civilizations",
     description: "Explore the wonders of ancient Egypt, Greece, and Rome",
-    icon: Globe,
-    gradient: ["#4f46e5", "#7c3aed"],
     lessons: 12,
     duration: "3 hours",
-    image: "https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=300",
+    image: "https://images.unsplash.com/photo-1539650116574-8efeb43e2750?w=400",
+    progress: 0,
   },
   {
     id: "2",
     title: "Medieval Architecture",
     description: "Discover castles, cathedrals, and fortresses",
-    icon: Award,
-    gradient: ["#059669", "#10b981"],
     lessons: 8,
     duration: "2 hours",
-    image: "https://images.unsplash.com/photo-1520637836862-4d197d17c90a?w=300",
+    image: "https://images.unsplash.com/photo-1520637836862-4d197d17c90a?w=400",
+    progress: 0,
   },
   {
     id: "3",
     title: "Renaissance Art",
     description: "Learn about the masters and their masterpieces",
-    icon: BookOpen,
-    gradient: ["#dc2626", "#f87171"],
     lessons: 10,
     duration: "2.5 hours",
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300",
-  },
-  {
-    id: "4",
-    title: "Modern Monuments",
-    description: "Understanding contemporary historical landmarks",
-    icon: Clock,
-    gradient: ["#f59e0b", "#fbbf24"],
-    lessons: 6,
-    duration: "1.5 hours",
-    image: "https://images.unsplash.com/photo-1549813069-f95e44d7f498?w=300",
+    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400",
+    progress: 0,
   },
 ];
 
@@ -115,39 +140,13 @@ export default function LearnScreen() {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Categories</Text>
+            <Text style={styles.sectionTitle}>Articles</Text>
             <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text>
+              <Text style={styles.seeAllText}>View all</Text>
             </TouchableOpacity>
           </View>
           
-          <View style={styles.categoriesGrid}>
-            {learningCategories.map((category) => {
-              const Icon = category.icon;
-              return (
-                <TouchableOpacity key={category.id} style={styles.categoryCard}>
-                  <Image source={{ uri: category.image }} style={styles.categoryImage} />
-                  <View style={styles.categoryOverlay}>
-                    <View style={styles.categoryContent}>
-                      <Icon size={24} color="#ffffff" />
-                      <Text style={styles.categoryTitle}>{category.title}</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Featured Articles</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text>
-            </TouchableOpacity>
-          </View>
-          
-          {featuredArticles.map((article) => (
+          {articles.map((article) => (
             <TouchableOpacity key={article.id} style={styles.articleCard}>
               <Image source={{ uri: article.image }} style={styles.articleImage} />
               <View style={styles.articleContent}>
@@ -163,22 +162,59 @@ export default function LearnScreen() {
         </View>
 
         <View style={styles.section}>
-          <TouchableOpacity style={styles.quizCard}>
-            <View style={styles.quizGradient}>
-              <View style={styles.quizContent}>
-                <Text style={styles.quizTitle}>Daily Challenge</Text>
-                <Text style={styles.quizDescription}>
-                  Test your knowledge with today's historical quiz
-                </Text>
-                <View style={styles.quizButton}>
-                  <Text style={styles.quizButtonText}>Start Challenge</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Courses</Text>
+          </View>
+          
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.coursesContainer}
+          >
+            {courses.map((course) => (
+              <TouchableOpacity key={course.id} style={styles.courseCard}>
+                <Image source={{ uri: course.image }} style={styles.courseImage} />
+                <View style={styles.courseContent}>
+                  <Text style={styles.courseTitle}>{course.title}</Text>
+                  <Text style={styles.courseDescription}>{course.description}</Text>
+                  <View style={styles.courseFooter}>
+                    <View style={styles.courseStats}>
+                      <BookOpen size={14} color="#64748b" />
+                      <Text style={styles.courseStatsText}>{course.lessons} lessons</Text>
+                    </View>
+                    <View style={styles.courseStats}>
+                      <Clock size={14} color="#64748b" />
+                      <Text style={styles.courseStatsText}>{course.duration}</Text>
+                    </View>
+                  </View>
                 </View>
-              </View>
-              <View style={styles.quizIcon}>
-                <Award size={40} color="rgba(255,255,255,0.3)" />
-              </View>
-            </View>
-          </TouchableOpacity>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Featured Articles</Text>
+          </View>
+          
+          {featuredArticles.map((article) => (
+            <TouchableOpacity key={article.id} style={styles.featuredArticleCard}>
+              <Image source={{ uri: article.image }} style={styles.featuredArticleImage} />
+              <LinearGradient
+                colors={['transparent', 'rgba(0,0,0,0.7)']}
+                style={styles.featuredArticleGradient}
+              >
+                <View style={styles.featuredArticleContent}>
+                  <Text style={styles.featuredArticleTitle}>{article.title}</Text>
+                  <View style={styles.featuredArticleFooter}>
+                    <Clock size={12} color="#ffffff" />
+                    <Text style={styles.featuredReadTime}>{article.readTime} read</Text>
+                  </View>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          ))}
         </View>
       </ScrollView>
       <View style={styles.bottomSpacer} />
@@ -296,50 +332,67 @@ const styles = StyleSheet.create({
     color: Colors.accent.secondary,
     fontWeight: "400",
   },
-  categoriesGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+  coursesContainer: {
+    paddingRight: 14,
     gap: 12,
   },
-  categoryCard: {
-    width: "48%",
-    aspectRatio: 3 / 4,
+  courseCard: {
+    width: 280,
+    backgroundColor: Colors.surface,
     borderRadius: 14,
     overflow: "hidden",
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 4,
-    marginBottom: 12,
   },
-  categoryImage: {
+  courseImage: {
     width: "100%",
-    height: "100%",
+    height: 160,
   },
-  categoryOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: "100%",
-    justifyContent: "flex-end",
+  courseContent: {
     padding: 16,
-    backgroundColor: "rgba(0,0,0,0.4)",
   },
-  categoryContent: {
-    gap: 8,
-  },
-  categoryTitle: {
-    fontSize: 15,
+  courseTitle: {
+    fontSize: 18,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     fontWeight: "500",
-    color: "#ffffff",
+    color: Colors.text.primary,
+    marginBottom: 8,
+  },
+  courseDescription: {
+    fontSize: 13,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: Colors.text.muted,
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+  courseFooter: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  courseStats: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  courseStatsText: {
+    fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: Colors.text.muted,
   },
   articleCard: {
     flexDirection: "row",
@@ -398,20 +451,33 @@ const styles = StyleSheet.create({
     }),
     color: Colors.text.muted,
   },
-  quizCard: {
-    marginBottom: 30,
-  },
-  quizGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 20,
+  featuredArticleCard: {
+    height: 200,
     borderRadius: 14,
-    backgroundColor: Colors.accent.secondary,
+    overflow: "hidden",
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  quizContent: {
-    flex: 1,
+  featuredArticleImage: {
+    width: "100%",
+    height: "100%",
   },
-  quizTitle: {
+  featuredArticleGradient: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "100%",
+    justifyContent: "flex-end",
+  },
+  featuredArticleContent: {
+    padding: 16,
+  },
+  featuredArticleTitle: {
     fontSize: 18,
     fontFamily: Platform.select({
       ios: "Times New Roman",
@@ -422,37 +488,19 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     marginBottom: 8,
   },
-  quizDescription: {
-    fontSize: 14,
+  featuredArticleFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  featuredReadTime: {
+    fontSize: 12,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
-    fontStyle: "italic",
-    color: "rgba(255,255,255,0.9)",
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  quizButton: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    alignSelf: "flex-start",
-  },
-  quizButtonText: {
     color: "#ffffff",
-    fontSize: 14,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-  },
-  quizIcon: {
-    marginLeft: 16,
   },
   bottomSpacer: {
     height: 100,
