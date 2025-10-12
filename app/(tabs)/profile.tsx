@@ -639,6 +639,7 @@ const styles = StyleSheet.create({
   },
   historyGridCompact: {
     justifyContent: 'flex-start',
+    gap: 8,
   },
   monumentCard: {
     width: "47%",
