@@ -774,7 +774,7 @@ const styles = StyleSheet.create({
   },
 
   monumentInfo: {
-    gap: 3,
+    gap: 1.5,
   },
   monumentName: {
     fontSize: 14,
@@ -785,14 +785,14 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "600",
     color: "#ffffff",
-    marginBottom: 4,
-    lineHeight: 18,
+    marginBottom: 2,
+    lineHeight: 15,
   },
   monumentDetails: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    marginBottom: 2,
+    marginBottom: 0.5,
   },
   monumentLocation: {
     fontSize: 10,
@@ -802,6 +802,7 @@ const styles = StyleSheet.create({
       default: "Times New Roman"
     }),
     color: "rgba(255,255,255,0.9)",
+    lineHeight: 11,
   },
   monumentPeriod: {
     fontSize: 9,
@@ -812,7 +813,8 @@ const styles = StyleSheet.create({
     }),
     fontStyle: "italic",
     color: "rgba(255,255,255,0.8)",
-    marginTop: 2,
+    marginTop: 0.5,
+    lineHeight: 10,
   },
 
 
