@@ -483,7 +483,8 @@ export default function ProfileScreen() {
                       <Image source={{ uri: adjustedImages[monument.id] || monument.image }} style={styles.monumentImage} />
                       {gridColumns === 2 && (
                         <LinearGradient
-                          colors={["transparent", "rgba(0,0,0,0.7)"]}
+                          colors={["transparent", "transparent", "rgba(0,0,0,0.5)", "rgba(0,0,0,0.75)"]}
+                          locations={[0, 0.4, 0.75, 1]}
                           style={styles.monumentOverlay}
                         >
                           <View style={styles.monumentInfo}>
