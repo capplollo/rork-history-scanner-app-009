@@ -187,20 +187,16 @@ export default function LearnScreen() {
           </View>
           
           {featuredArticles.map((article) => (
-            <TouchableOpacity key={article.id} style={styles.featuredArticleCard}>
-              <Image source={{ uri: article.image }} style={styles.featuredArticleImage} />
-              <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.7)']}
-                style={styles.featuredArticleGradient}
-              >
-                <View style={styles.featuredArticleContent}>
-                  <Text style={styles.featuredArticleTitle}>{article.title}</Text>
-                  <View style={styles.featuredArticleFooter}>
-                    <Clock size={12} color="#ffffff" />
-                    <Text style={styles.featuredReadTime}>{article.readTime} read</Text>
-                  </View>
+            <TouchableOpacity key={article.id} style={styles.articleCard}>
+              <Image source={{ uri: article.image }} style={styles.articleImage} />
+              <View style={styles.articleContent}>
+                <Text style={styles.articleTitle}>{article.title}</Text>
+                <Text style={styles.articleExcerpt} numberOfLines={1} ellipsizeMode="tail">{article.excerpt}</Text>
+                <View style={styles.articleFooter}>
+                  <Clock size={12} color="#64748b" />
+                  <Text style={styles.readTime}>{article.readTime} read</Text>
                 </View>
-              </LinearGradient>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
@@ -439,57 +435,7 @@ const styles = StyleSheet.create({
     }),
     color: Colors.text.muted,
   },
-  featuredArticleCard: {
-    height: 200,
-    borderRadius: 14,
-    overflow: "hidden",
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  featuredArticleImage: {
-    width: "100%",
-    height: "100%",
-  },
-  featuredArticleGradient: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: "100%",
-    justifyContent: "flex-end",
-  },
-  featuredArticleContent: {
-    padding: 16,
-  },
-  featuredArticleTitle: {
-    fontSize: 18,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    fontWeight: "500",
-    color: "#ffffff",
-    marginBottom: 8,
-  },
-  featuredArticleFooter: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  featuredReadTime: {
-    fontSize: 12,
-    fontFamily: Platform.select({
-      ios: "Times New Roman",
-      android: "serif",
-      default: "Times New Roman"
-    }),
-    color: "#ffffff",
-  },
+
   bottomSpacer: {
     height: 0,
   },
