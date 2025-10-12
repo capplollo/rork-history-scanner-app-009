@@ -951,7 +951,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 24,
     marginBottom: 0,
-    paddingTop: 5.6,
+    paddingTop: 2.8,
     paddingBottom: 5.6,
     gap: 12,
     justifyContent: 'center',
