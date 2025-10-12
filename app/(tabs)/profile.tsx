@@ -638,7 +638,7 @@ const styles = StyleSheet.create({
   profileSection: {
     flexDirection: 'column',
     paddingHorizontal: 20,
-    paddingTop: 68,
+    paddingTop: 53,
     paddingBottom: 14.4,
     alignItems: 'center',
     justifyContent: 'center',
