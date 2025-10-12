@@ -644,9 +644,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarContainer: {
-    width: 85,
-    height: 85,
-    borderRadius: 42.5,
+    width: 72.25,
+    height: 72.25,
+    borderRadius: 36.125,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   userName: {
-    fontSize: 20.4,
+    fontSize: 17.34,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -683,20 +683,20 @@ const styles = StyleSheet.create({
   },
   statItem: {
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 14.4,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: 8.4,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
       default: "Times New Roman"
     }),
     color: 'rgba(29, 53, 87, 0.6)',
-    marginBottom: 4,
+    marginBottom: 2.4,
   },
   statNumber: {
-    fontSize: 28,
+    fontSize: 16.8,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     width: 1,
-    height: 40,
+    height: 24,
     backgroundColor: 'rgba(29, 53, 87, 0.15)',
   },
   section: {
