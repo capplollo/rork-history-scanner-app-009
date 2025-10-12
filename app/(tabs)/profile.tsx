@@ -644,9 +644,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 85,
+    height: 85,
+    borderRadius: 42.5,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   userName: {
-    fontSize: 24,
+    fontSize: 20.4,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
