@@ -445,8 +445,8 @@ export default function ProfileScreen() {
                 </View>
                 <View style={styles.statDivider} />
                 <View style={styles.statItem}>
-                  <Text style={styles.statLabel}>Countries</Text>
-                  <Text style={styles.statNumber}>3</Text>
+                  <Text style={styles.statLabel}>Level</Text>
+                  <Text style={styles.statNumber}>5</Text>
                 </View>
               </View>
             </View>
@@ -686,7 +686,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14.4,
   },
   statLabel: {
-    fontSize: 8.4,
+    fontSize: 10.92,
     fontFamily: Platform.select({
       ios: "Times New Roman",
       android: "serif",
