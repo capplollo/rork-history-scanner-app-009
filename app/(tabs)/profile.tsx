@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 4,
-    marginBottom: 16,
+    marginBottom: 26,
   },
   avatarImage: {
     width: '100%',
