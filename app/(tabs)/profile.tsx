@@ -13,6 +13,7 @@ import {
   PanResponder,
   GestureResponderEvent,
   Dimensions,
+  Pressable,
 } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { 
@@ -30,7 +31,9 @@ import {
   Heart,
   Star,
   Bookmark,
-  Plus
+  Plus,
+  Trash2,
+  FolderPlus
 } from "lucide-react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
@@ -130,6 +133,10 @@ export default function ProfileScreen() {
   const [collectionColumns, setCollectionColumns] = useState<2 | 4>(4);
   const initialDistance = useRef<number>(0);
   const [adjustedImages, setAdjustedImages] = useState<Record<string, string>>({});
+  const [contextMenuVisible, setContextMenuVisible] = useState<boolean>(false);
+  const [selectedMonument, setSelectedMonument] = useState<any>(null);
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
   const getDistance = (touches: any[]) => {
     if (touches.length < 2) return 0;
@@ -398,6 +405,69 @@ export default function ProfileScreen() {
     adjustImages();
   }, [scanHistory]);
 
+  const handleLongPress = (monument: any, collectionId?: string) => {
+    console.log('Long press detected on:', monument.name);
+    setSelectedMonument(monument);
+    setSelectedCollection(collectionId || null);
+    setContextMenuVisible(true);
+  };
+
+  const handleDelete = () => {
+    Alert.alert(
+      'Delete Monument',
+      `Are you sure you want to delete "${selectedMonument?.name}"?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            console.log('Deleting monument:', selectedMonument?.name);
+            setContextMenuVisible(false);
+            setSelectedMonument(null);
+            Alert.alert('Deleted', 'Monument has been removed from your collection');
+          },
+        },
+      ]
+    );
+  };
+
+  const handleMoveToCollection = (collectionId: string) => {
+    const collection = collections.find(c => c.id === collectionId);
+    console.log('Moving monument to collection:', collection?.name);
+    setContextMenuVisible(false);
+    setSelectedMonument(null);
+    Alert.alert('Moved', `Monument moved to "${collection?.name}"`);
+  };
+
+  const handleRemoveFromCollection = () => {
+    const collection = collections.find(c => c.id === selectedCollection);
+    Alert.alert(
+      'Remove from Collection',
+      `Remove "${selectedMonument?.name}" from "${collection?.name}"?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            console.log('Removing from collection:', collection?.name);
+            setContextMenuVisible(false);
+            setSelectedMonument(null);
+            setSelectedCollection(null);
+            Alert.alert('Removed', `Monument removed from "${collection?.name}"`);
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -497,7 +567,12 @@ export default function ProfileScreen() {
                 <>
                   <View style={[styles.historyGrid, gridColumns === 4 && styles.historyGridCompact]}>
                   {scanHistory.map((monument) => (
-                    <TouchableOpacity key={monument.id} style={[styles.monumentCard, gridColumns === 4 && styles.monumentCardCompact]}>
+                    <Pressable 
+                      key={monument.id} 
+                      style={[styles.monumentCard, gridColumns === 4 && styles.monumentCardCompact]}
+                      onLongPress={() => handleLongPress(monument)}
+                      delayLongPress={500}
+                    >
                       <Image source={{ uri: adjustedImages[monument.id] || monument.image }} style={styles.monumentImage} />
                       {gridColumns === 2 && (
                         <LinearGradient
@@ -515,7 +590,7 @@ export default function ProfileScreen() {
                           </View>
                         </LinearGradient>
                       )}
-                    </TouchableOpacity>
+                    </Pressable>
                   ))}
                   </View>
                 </>
@@ -556,7 +631,12 @@ export default function ProfileScreen() {
                       )}
                     </TouchableOpacity>
                     {collection.items.map((monument) => (
-                      <TouchableOpacity key={monument.id} style={[styles.monumentCard, collectionColumns === 4 && styles.monumentCardCompact]}>
+                      <Pressable 
+                        key={monument.id} 
+                        style={[styles.monumentCard, collectionColumns === 4 && styles.monumentCardCompact]}
+                        onLongPress={() => handleLongPress(monument, collection.id)}
+                        delayLongPress={500}
+                      >
                         <Image source={{ uri: adjustedImages[monument.id] || monument.image }} style={styles.monumentImage} />
                         {collectionColumns === 2 && (
                           <LinearGradient
@@ -574,7 +654,7 @@ export default function ProfileScreen() {
                             </View>
                           </LinearGradient>
                         )}
-                      </TouchableOpacity>
+                      </Pressable>
                     ))}
                   </ScrollView>
                 </View>
@@ -628,6 +708,69 @@ export default function ProfileScreen() {
             ))}
           </ScrollView>
         </SafeAreaView>
+      </Modal>
+
+      {/* Context Menu Modal */}
+      <Modal
+        visible={contextMenuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setContextMenuVisible(false)}
+      >
+        <Pressable 
+          style={styles.contextMenuOverlay}
+          onPress={() => setContextMenuVisible(false)}
+        >
+          <View style={styles.contextMenuContainer}>
+            <View style={styles.contextMenuContent}>
+              <View style={styles.contextMenuHeader}>
+                <Text style={styles.contextMenuTitle}>{selectedMonument?.name}</Text>
+                <TouchableOpacity 
+                  onPress={() => setContextMenuVisible(false)}
+                  style={styles.contextMenuClose}
+                >
+                  <X size={20} color={Colors.berkeleyBlue} />
+                </TouchableOpacity>
+              </View>
+
+              {selectedCollection ? (
+                <TouchableOpacity
+                  style={styles.contextMenuItem}
+                  onPress={handleRemoveFromCollection}
+                >
+                  <Trash2 size={20} color="#dc2626" />
+                  <Text style={[styles.contextMenuItemText, styles.contextMenuItemTextDanger]}>Remove from Collection</Text>
+                </TouchableOpacity>
+              ) : (
+                <>
+                  <View style={styles.contextMenuSection}>
+                    <Text style={styles.contextMenuSectionTitle}>Move to Collection</Text>
+                    {collections.map((collection) => (
+                      <TouchableOpacity
+                        key={collection.id}
+                        style={styles.contextMenuItem}
+                        onPress={() => handleMoveToCollection(collection.id)}
+                      >
+                        <collection.icon size={18} color={Colors.berkeleyBlue} strokeWidth={1.5} />
+                        <Text style={styles.contextMenuItemText}>{collection.name}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  <View style={styles.contextMenuDivider} />
+
+                  <TouchableOpacity
+                    style={styles.contextMenuItem}
+                    onPress={handleDelete}
+                  >
+                    <Trash2 size={20} color="#dc2626" />
+                    <Text style={[styles.contextMenuItemText, styles.contextMenuItemTextDanger]}>Delete</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+          </View>
+        </Pressable>
       </Modal>
     </View>
   );
@@ -1153,5 +1296,92 @@ const styles = StyleSheet.create({
     }),
     fontWeight: "600",
     color: Colors.berkeleyBlue,
+  },
+  contextMenuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contextMenuContainer: {
+    width: '85%',
+    maxWidth: 400,
+  },
+  contextMenuContent: {
+    backgroundColor: Colors.surface,
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  contextMenuHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(29, 53, 87, 0.1)',
+  },
+  contextMenuTitle: {
+    fontSize: 16,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "600",
+    color: Colors.berkeleyBlue,
+    flex: 1,
+    marginRight: 12,
+  },
+  contextMenuClose: {
+    padding: 4,
+  },
+  contextMenuSection: {
+    marginBottom: 12,
+  },
+  contextMenuSectionTitle: {
+    fontSize: 12,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    fontWeight: "500",
+    color: 'rgba(29, 53, 87, 0.6)',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  contextMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    gap: 12,
+    backgroundColor: 'transparent',
+  },
+  contextMenuItemText: {
+    fontSize: 14,
+    fontFamily: Platform.select({
+      ios: "Times New Roman",
+      android: "serif",
+      default: "Times New Roman"
+    }),
+    color: Colors.berkeleyBlue,
+    flex: 1,
+  },
+  contextMenuItemTextDanger: {
+    color: '#dc2626',
+  },
+  contextMenuDivider: {
+    height: 1,
+    backgroundColor: 'rgba(29, 53, 87, 0.1)',
+    marginVertical: 12,
   },
 });
