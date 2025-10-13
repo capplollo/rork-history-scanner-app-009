@@ -953,7 +953,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     paddingTop: 2.8,
     paddingBottom: 5.6,
-    gap: 12,
+    gap: 48,
     justifyContent: 'center',
   },
   toggleButton: {
@@ -1071,7 +1071,8 @@ const styles = StyleSheet.create({
   gridMultiplierButton: {
     position: 'absolute',
     top: -32,
-    right: 16,
+    left: '50%',
+    marginLeft: 28,
     justifyContent: 'center',
     alignItems: 'flex-start',
     zIndex: 10,
