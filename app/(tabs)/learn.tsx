@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BookOpen, Clock } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
+import { router } from "expo-router";
 
 import Colors from "@/constants/colors";
 
@@ -265,7 +266,11 @@ export default function LearnScreen() {
           </View>
           
           {courses.map((course) => (
-            <TouchableOpacity key={course.id} style={styles.courseCard}>
+            <TouchableOpacity 
+              key={course.id} 
+              style={styles.courseCard}
+              onPress={() => router.push('/course-detail' as any)}
+            >
               <Image source={{ uri: course.image }} style={styles.courseImage} />
               <LinearGradient
                 colors={['transparent', 'rgba(0,0,0,0.7)']}
