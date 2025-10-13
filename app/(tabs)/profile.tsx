@@ -197,41 +197,6 @@ export default function ProfileScreen() {
     { icon: LogOut, label: "Sign Out", action: handleSignOut },
   ];
 
-  const collections = [
-    {
-      id: "1",
-      name: "Favorites",
-      icon: Heart,
-      count: 12,
-      color: Colors.berkeleyBlue,
-    },
-    {
-      id: "2",
-      name: "Must Visit",
-      icon: Star,
-      count: 8,
-      color: Colors.berkeleyBlue,
-    },
-    {
-      id: "3",
-      name: "Saved",
-      icon: Bookmark,
-      count: 23,
-      color: Colors.berkeleyBlue,
-    },
-  ];
-
-  useEffect(() => {
-    const adjustImages = async () => {
-      const adjusted: Record<string, string> = {};
-      for (const monument of scanHistory) {
-        adjusted[monument.id] = await applyBrightnessContrastToUrl(monument.image);
-      }
-      setAdjustedImages(adjusted);
-    };
-    adjustImages();
-  }, []);
-
   const scanHistory = [
     {
       id: "1",
@@ -395,6 +360,44 @@ export default function ProfileScreen() {
     },
   ];
 
+  const collections = [
+    {
+      id: "1",
+      name: "Favorites",
+      icon: Heart,
+      count: 12,
+      color: Colors.berkeleyBlue,
+      items: scanHistory.slice(0, 5),
+    },
+    {
+      id: "2",
+      name: "Must Visit",
+      icon: Star,
+      count: 8,
+      color: Colors.berkeleyBlue,
+      items: scanHistory.slice(5, 10),
+    },
+    {
+      id: "3",
+      name: "Saved",
+      icon: Bookmark,
+      count: 23,
+      color: Colors.berkeleyBlue,
+      items: scanHistory.slice(10, 15),
+    },
+  ];
+
+  useEffect(() => {
+    const adjustImages = async () => {
+      const adjusted: Record<string, string> = {};
+      for (const monument of scanHistory) {
+        adjusted[monument.id] = await applyBrightnessContrastToUrl(monument.image);
+      }
+      setAdjustedImages(adjusted);
+    };
+    adjustImages();
+  }, [scanHistory]);
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -534,20 +537,49 @@ export default function ProfileScreen() {
             </View>
           ) : (
             <View style={styles.section}>
-              <View style={[styles.collectionsGrid, collectionColumns === 4 && styles.collectionsGridCompact]}>
-                {collections.map((collection) => (
-                  <TouchableOpacity key={collection.id} style={[styles.collectionCard, collectionColumns === 4 && styles.collectionCardCompact]}>
-                    <View style={[styles.collectionIconContainer, collectionColumns === 4 && styles.collectionIconContainerCompact]}>
-                      <collection.icon size={collectionColumns === 4 ? 16 : 24} color={collection.color} strokeWidth={1.5} />
-                    </View>
-                    {collectionColumns === 2 && (
-                      <>
-                        <Text style={styles.collectionName}>{collection.name}</Text>
-                        <Text style={styles.collectionCount}>{collection.count} items</Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
-                ))}
+              {collections.map((collection) => (
+                <View key={collection.id} style={styles.collectionRow}>
+                  <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.collectionScrollContent}
+                  >
+                    <TouchableOpacity style={[styles.collectionCard, collectionColumns === 4 && styles.collectionCardCompact]}>
+                      <View style={[styles.collectionIconContainer, collectionColumns === 4 && styles.collectionIconContainerCompact]}>
+                        <collection.icon size={collectionColumns === 4 ? 16 : 24} color={collection.color} strokeWidth={1.5} />
+                      </View>
+                      {collectionColumns === 2 && (
+                        <>
+                          <Text style={styles.collectionName}>{collection.name}</Text>
+                          <Text style={styles.collectionCount}>{collection.count} items</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                    {collection.items.map((monument) => (
+                      <TouchableOpacity key={monument.id} style={[styles.monumentCard, collectionColumns === 4 && styles.monumentCardCompact]}>
+                        <Image source={{ uri: adjustedImages[monument.id] || monument.image }} style={styles.monumentImage} />
+                        {collectionColumns === 2 && (
+                          <LinearGradient
+                            colors={["transparent", "transparent", "rgba(0,0,0,0.5)", "rgba(0,0,0,0.75)"]}
+                            locations={[0, 0.4, 0.75, 1]}
+                            style={styles.monumentOverlay}
+                          >
+                            <View style={styles.monumentInfo}>
+                              <Text style={styles.monumentName}>{monument.name}</Text>
+                              <View style={styles.monumentDetails}>
+                                <MapPin size={10} color="rgba(255,255,255,0.8)" />
+                                <Text style={styles.monumentLocation}>{monument.location}</Text>
+                              </View>
+                              <Text style={styles.monumentPeriod}>{monument.period}</Text>
+                            </View>
+                          </LinearGradient>
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </View>
+              ))}
+              <View style={styles.collectionRow}>
                 <TouchableOpacity style={[styles.collectionCard, styles.addCollectionCard, collectionColumns === 4 && styles.collectionCardCompact]}>
                   <View style={[styles.addIconContainer, collectionColumns === 4 && styles.collectionIconContainerCompact]}>
                     <Plus size={collectionColumns === 4 ? 16 : 24} color='rgba(29, 53, 87, 0.4)' strokeWidth={1.5} />
@@ -1011,14 +1043,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 40,
     marginBottom: 8,
   },
-  collectionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+  collectionRow: {
+    marginBottom: 14,
   },
-  collectionsGridCompact: {
-    justifyContent: 'flex-start',
-    gap: 8,
+  collectionScrollContent: {
+    paddingRight: 16,
+    gap: 14,
   },
   collectionCard: {
     width: (Dimensions.get('window').width - 32 - 14) / 2,
