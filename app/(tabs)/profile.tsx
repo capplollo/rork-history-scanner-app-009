@@ -463,6 +463,14 @@ export default function ProfileScreen() {
             >
               <Grid size={16} color={activeView === 'all' ? Colors.berkeleyBlue : 'rgba(29, 53, 87, 0.4)'} />
             </TouchableOpacity>
+            {activeView === 'all' && (
+              <TouchableOpacity 
+                style={styles.gridMultiplierButton}
+                onPress={() => setGridColumns(gridColumns === 2 ? 4 : 2)}
+              >
+                <Text style={styles.gridMultiplierText}>x{gridColumns}</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity 
               style={[styles.toggleButton, activeView === 'collections' && styles.toggleButtonActive]}
               onPress={() => setActiveView('collections')}
@@ -475,12 +483,6 @@ export default function ProfileScreen() {
             <View style={styles.section} {...panResponder.panHandlers}>
               {scanHistory.length > 0 ? (
                 <>
-                  <TouchableOpacity 
-                    style={styles.gridMultiplierButton}
-                    onPress={() => setGridColumns(gridColumns === 2 ? 4 : 2)}
-                  >
-                    <Text style={styles.gridMultiplierText}>x{gridColumns}</Text>
-                  </TouchableOpacity>
                   <View style={[styles.historyGrid, gridColumns === 4 && styles.historyGridCompact]}>
                   {scanHistory.map((monument) => (
                     <TouchableOpacity key={monument.id} style={[styles.monumentCard, gridColumns === 4 && styles.monumentCardCompact]}>
@@ -953,9 +955,10 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     paddingTop: 2.8,
     paddingBottom: 5.6,
-    gap: 48,
+    gap: 8,
     justifyContent: 'center',
     position: 'relative',
+    alignItems: 'center',
   },
   toggleButton: {
     alignItems: 'center',
@@ -1070,12 +1073,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   gridMultiplierButton: {
-    position: 'absolute',
-    top: -26,
-    left: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 10,
+    marginLeft: 4,
   },
   gridMultiplierText: {
     fontSize: 11,
