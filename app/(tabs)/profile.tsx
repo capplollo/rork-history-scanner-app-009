@@ -955,7 +955,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     paddingTop: 2.8,
     paddingBottom: 5.6,
-    gap: 8,
+    gap: 32,
     justifyContent: 'center',
     position: 'relative',
     alignItems: 'center',
