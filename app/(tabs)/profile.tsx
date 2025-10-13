@@ -127,6 +127,7 @@ export default function ProfileScreen() {
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [activeView, setActiveView] = useState<'all' | 'collections'>('all');
   const [gridColumns, setGridColumns] = useState<2 | 4>(4);
+  const [collectionColumns, setCollectionColumns] = useState<2 | 4>(4);
   const initialDistance = useRef<number>(0);
   const [adjustedImages, setAdjustedImages] = useState<Record<string, string>>({});
 
@@ -471,6 +472,14 @@ export default function ProfileScreen() {
                 <Text style={styles.gridMultiplierText}>x{gridColumns}</Text>
               </TouchableOpacity>
             )}
+            {activeView === 'collections' && (
+              <TouchableOpacity 
+                style={styles.gridMultiplierButton}
+                onPress={() => setCollectionColumns(collectionColumns === 2 ? 4 : 2)}
+              >
+                <Text style={styles.gridMultiplierText}>x{collectionColumns}</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity 
               style={[styles.toggleButton, activeView === 'collections' && styles.toggleButtonActive]}
               onPress={() => setActiveView('collections')}
@@ -525,21 +534,27 @@ export default function ProfileScreen() {
             </View>
           ) : (
             <View style={styles.section}>
-              <View style={styles.collectionsGrid}>
+              <View style={[styles.collectionsGrid, collectionColumns === 4 && styles.collectionsGridCompact]}>
                 {collections.map((collection) => (
-                  <TouchableOpacity key={collection.id} style={styles.collectionCard}>
-                    <View style={styles.collectionIconContainer}>
-                      <collection.icon size={24} color={collection.color} strokeWidth={1.5} />
+                  <TouchableOpacity key={collection.id} style={[styles.collectionCard, collectionColumns === 4 && styles.collectionCardCompact]}>
+                    <View style={[styles.collectionIconContainer, collectionColumns === 4 && styles.collectionIconContainerCompact]}>
+                      <collection.icon size={collectionColumns === 4 ? 16 : 24} color={collection.color} strokeWidth={1.5} />
                     </View>
-                    <Text style={styles.collectionName}>{collection.name}</Text>
-                    <Text style={styles.collectionCount}>{collection.count} items</Text>
+                    {collectionColumns === 2 && (
+                      <>
+                        <Text style={styles.collectionName}>{collection.name}</Text>
+                        <Text style={styles.collectionCount}>{collection.count} items</Text>
+                      </>
+                    )}
                   </TouchableOpacity>
                 ))}
-                <TouchableOpacity style={[styles.collectionCard, styles.addCollectionCard]}>
-                  <View style={styles.addIconContainer}>
-                    <Plus size={24} color='rgba(29, 53, 87, 0.4)' strokeWidth={1.5} />
+                <TouchableOpacity style={[styles.collectionCard, styles.addCollectionCard, collectionColumns === 4 && styles.collectionCardCompact]}>
+                  <View style={[styles.addIconContainer, collectionColumns === 4 && styles.collectionIconContainerCompact]}>
+                    <Plus size={collectionColumns === 4 ? 16 : 24} color='rgba(29, 53, 87, 0.4)' strokeWidth={1.5} />
                   </View>
-                  <Text style={styles.addCollectionText}>New Collection</Text>
+                  {collectionColumns === 2 && (
+                    <Text style={styles.addCollectionText}>New Collection</Text>
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
@@ -999,14 +1014,20 @@ const styles = StyleSheet.create({
   collectionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 16,
+    justifyContent: 'space-between',
+  },
+  collectionsGridCompact: {
+    justifyContent: 'flex-start',
+    gap: 8,
   },
   collectionCard: {
-    width: '47%',
+    width: (Dimensions.get('window').width - 32 - 14) / 2,
+    height: ((Dimensions.get('window').width - 32 - 14) / 2) * (3.4 / 2.4),
     backgroundColor: 'rgba(29, 53, 87, 0.04)',
     borderRadius: 16,
     padding: 18,
     alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
@@ -1014,6 +1035,16 @@ const styles = StyleSheet.create({
     elevation: 1,
     borderWidth: 0.5,
     borderColor: 'rgba(29, 53, 87, 0.08)',
+    marginBottom: 14,
+  },
+  collectionCardCompact: {
+    width: (Dimensions.get('window').width - 32 - 24) / 4,
+    height: ((Dimensions.get('window').width - 32 - 24) / 4) * (3.4 / 2.4),
+    borderRadius: 8,
+    padding: 8,
+    marginBottom: 8,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   addCollectionCard: {
     backgroundColor: 'rgba(29, 53, 87, 0.02)',
@@ -1029,6 +1060,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
     backgroundColor: 'rgba(29, 53, 87, 0.06)',
+  },
+  collectionIconContainerCompact: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginBottom: 0,
   },
   addIconContainer: {
     width: 56,
