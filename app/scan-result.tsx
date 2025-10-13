@@ -955,7 +955,7 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   contentCard: {
-    backgroundColor: 'rgba(254, 254, 254, 0.65)',
+    backgroundColor: 'rgba(118, 104, 96, 0.08)',
     borderRadius: 20,
     padding: 24,
     shadowColor: '#000',
@@ -1107,7 +1107,7 @@ const styles = StyleSheet.create({
     color: '#dc2626',
   },
   feedbackCard: {
-    backgroundColor: 'rgba(254, 254, 254, 0.65)',
+    backgroundColor: 'rgba(118, 104, 96, 0.08)',
     borderRadius: 20,
     padding: 24,
     shadowColor: '#000',
